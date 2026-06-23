@@ -1,0 +1,25 @@
+{
+  "name": "illuminate/macroable",
+  "description": "The Illuminate Macroable package.",
+  "license": "MIT",
+
+
+
+  "require": {
+    "php": "^8.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Illuminate\\Support\\": ""
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "10.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

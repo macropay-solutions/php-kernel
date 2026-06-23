@@ -1,0 +1,25 @@
+{
+  "name": "illuminate/conditionable",
+  "description": "The Illuminate Conditionable package.",
+  "license": "MIT",
+
+
+
+  "require": {
+    "php": "^8.0.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Illuminate\\Support\\": ""
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "10.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

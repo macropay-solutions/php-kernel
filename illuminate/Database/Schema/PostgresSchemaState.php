@@ -1,0 +1,90 @@
+<?php
+
+namespace Illuminate\Database\Schema;
+
+use Illuminate\Database\Connection;
+
+class PostgresSchemaState extends SchemaState
+{
+    /**
+     * Dump the database's schema into a file.
+     *
+     * @param \Illuminate\Database\Connection $connection
+     * @param string $path
+     * @return void
+     */
+    public function dump(Connection $connection, $path)
+    {
+        $commands = collect([
+            $this->baseDumpCommand() . ' --schema-only > ' . $path,
+        ]);
+
+        if ($this->hasMigrationTable()) {
+            $commands->push($this->baseDumpCommand() . ' -t ' . $this->migrationTable . ' --data-only >> ' . $path);
+        }
+
+        $commands->map(function ($command, $path) {
+            $this->makeProcess($command)->mustRun(
+                $this->output,
+                array_merge($this->baseVariables($this->connection->getConfig()), [
+                    'FRAMEWORK_LOAD_PATH' => $path,
+                ])
+            );
+        });
+    }
+
+    /**
+     * Load the given schema file into the database.
+     *
+     * @param string $path
+     * @return void
+     */
+    public function load($path)
+    {
+        $command = 'pg_restore --no-owner --no-acl --clean --if-exists --host="${:FRAMEWORK_LOAD_HOST}" ' .
+            '--port="${:FRAMEWORK_LOAD_PORT}" --username="${:FRAMEWORK_LOAD_USER}" --dbname="${:FRAMEWORK_LOAD_DATABASE}" ' .
+            '"${:FRAMEWORK_LOAD_PATH}"';
+
+        if (str_ends_with($path, '.sql')) {
+            $command = 'psql --file="${:FRAMEWORK_LOAD_PATH}" --host="${:FRAMEWORK_LOAD_HOST}" ' .
+                '--port="${:FRAMEWORK_LOAD_PORT}" --username="${:FRAMEWORK_LOAD_USER}" ' .
+                '--dbname="${:FRAMEWORK_LOAD_DATABASE}"';
+        }
+
+        $process = $this->makeProcess($command);
+
+        $process->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
+            'FRAMEWORK_LOAD_PATH' => $path,
+        ]));
+    }
+
+    /**
+     * Get the base dump command arguments for PostgreSQL as a string.
+     *
+     * @return string
+     */
+    protected function baseDumpCommand()
+    {
+        return 'pg_dump --no-owner --no-acl --host="${:FRAMEWORK_LOAD_HOST}" --port="${:FRAMEWORK_LOAD_PORT}" ' .
+            '--username="${:FRAMEWORK_LOAD_USER}" --dbname="${:FRAMEWORK_LOAD_DATABASE}"';
+    }
+
+    /**
+     * Get the base variables for a dump / load command.
+     *
+     * @param array $config
+     * @return array
+     */
+    protected function baseVariables(array $config)
+    {
+        $config['host'] ??= '';
+
+        return [
+            'FRAMEWORK_LOAD_HOST' => is_array($config['host']) ? $config['host'][0] : $config['host'],
+            'FRAMEWORK_LOAD_PORT' => $config['port'] ?? '',
+            'FRAMEWORK_LOAD_USER' => $config['username'],
+            'PGPASSWORD' => $config['password'],
+            'FRAMEWORK_LOAD_DATABASE' => $config['database'],
+        ];
+    }
+}

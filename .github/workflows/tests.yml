@@ -1,0 +1,27 @@
+name: tests
+
+on:
+  push:
+    branches: [ "production" ]
+  pull_request:
+    branches: [ "production" ]
+  workflow_dispatch:
+
+jobs:
+  php-kernel-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+
+    - name: Install Dependencies
+      run: composer install --no-cache --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+    - name: Execute tests
+      run: vendor/bin/phpunit

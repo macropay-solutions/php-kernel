@@ -1,0 +1,5 @@
+php:
+  preset: psr12
+  version: 8.2
+js: true
+css: true
