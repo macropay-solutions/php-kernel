@@ -32,8 +32,6 @@ use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
 
-;
-
 trait HasAttributes
 {
     /**
