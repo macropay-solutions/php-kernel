@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Casts\AsEncryptedArrayObject;
 use Illuminate\Database\Eloquent\Casts\AsEncryptedCollection;
 use Illuminate\Database\Eloquent\Casts\AsEnumArrayObject;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\InvalidCastException;
 use Illuminate\Database\Eloquent\JsonEncodingException;
@@ -27,9 +26,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionNamedType;
 use RuntimeException;
 
 trait HasAttributes
@@ -99,13 +95,6 @@ trait HasAttributes
     protected $classCastCache = [];
 
     /**
-     * The attributes that have been cast using "Attribute" return type mutators.
-     *
-     * @var array
-     */
-    protected $attributeCastCache = [];
-
-    /**
      * The built-in, primitive cast types supported by Eloquent.
      *
      * @var string[]
@@ -173,20 +162,6 @@ trait HasAttributes
      * @var array
      */
     protected static $attributeMutatorCache = [];
-
-    /**
-     * The cache of the "Attribute" return type marked mutated, gettable attributes for each class.
-     *
-     * @var array
-     */
-    protected static $getAttributeMutatorCache = [];
-
-    /**
-     * The cache of the "Attribute" return type marked mutated, settable attributes for each class.
-     *
-     * @var array
-     */
-    protected static $setAttributeMutatorCache = [];
 
     /**
      * The cache of the converted cast types.
@@ -472,7 +447,6 @@ trait HasAttributes
             array_key_exists($key, $this->attributes) ||
             array_key_exists($key, $this->casts) ||
             $this->hasGetMutator($key) ||
-            $this->hasAttributeMutator($key) ||
             $this->isClassCastable($key)
         ) {
             return $this->getAttributeValue($key);
@@ -531,13 +505,12 @@ trait HasAttributes
     {
         if (
             true === (\func_get_args()[1] ?? false)
-            && ($this->hasGetMutator($key) || $this->hasAttributeGetMutator($key))
+            && ($this->hasGetMutator($key))
         ) {
             return $this->getAttributes()[$key] ?? null;
         }
 
         $this->mergeAttributesFromClassCasts($key);
-        $this->mergeAttributesFromAttributeCasts($key);
 
         return $this->attributes[$key] ?? null;
     }
@@ -624,32 +597,6 @@ trait HasAttributes
     }
 
     /**
-     * Determine if a "Attribute" return type marked mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasAttributeMutator($key)
-    {
-        if (isset(static::$attributeMutatorCache[static::class][$key])) {
-            return static::$attributeMutatorCache[static::class][$key];
-        }
-
-        if (
-            !(static::$modelShouldUsePhpAttributes ?? true)
-            || !method_exists($this, $method = Str::camel($key))
-        ) {
-            return static::$attributeMutatorCache[static::class][$key] = false;
-        }
-
-        $returnType = (new ReflectionMethod($this, $method))->getReturnType();
-
-        return static::$attributeMutatorCache[static::class][$key] =
-            $returnType instanceof ReflectionNamedType &&
-            $returnType->getName() === Attribute::class;
-    }
-
-    /**
      * Determine if a "Attribute" return type marked get mutator exists for an attribute.
      *
      * @param string $key
@@ -661,13 +608,7 @@ trait HasAttributes
             return static::$getAttributeMutatorCache[static::class][$key];
         }
 
-        if (!$this->hasAttributeMutator($key)) {
-            return static::$getAttributeMutatorCache[static::class][$key] = false;
-        }
-
-        return static::$getAttributeMutatorCache[static::class][$key] = is_callable(
-            $this->{Str::camel($key)}()->get
-        );
+        return static::$getAttributeMutatorCache[static::class][$key] = false;
     }
 
     /**
@@ -683,38 +624,6 @@ trait HasAttributes
     }
 
     /**
-     * Get the value of an "Attribute" return type marked attribute using its mutator.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function mutateAttributeMarkedAttribute($key, $value)
-    {
-        if (array_key_exists($key, $this->attributeCastCache)) {
-            return $this->attributeCastCache[$key];
-        }
-
-        $attribute = $this->{Str::camel($key)}();
-
-        $value = call_user_func(
-            $attribute->get ?: function ($value) {
-                return $value;
-            },
-            $value,
-            $this->attributes
-        );
-
-        if ($attribute->withCaching || (is_object($value) && $attribute->withObjectCaching)) {
-            $this->attributeCastCache[$key] = $value;
-        } else {
-            unset($this->attributeCastCache[$key]);
-        }
-
-        return $value;
-    }
-
-    /**
      * Get the value of an attribute using its mutator for array conversion.
      *
      * @param string $key
@@ -725,15 +634,6 @@ trait HasAttributes
     {
         if ($this->isClassCastable($key)) {
             $value = $this->getClassCastableAttributeValue($key, $value);
-        } elseif (
-            isset(static::$getAttributeMutatorCache[static::class][$key]) &&
-            static::$getAttributeMutatorCache[static::class][$key] === true
-        ) {
-            $value = $this->mutateAttributeMarkedAttribute($key, $value);
-
-            $value = $value instanceof DateTimeInterface
-                ? $this->serializeDate($value)
-                : $value;
         } else {
             $value = $this->mutateAttribute($key, $value);
         }
@@ -994,8 +894,6 @@ trait HasAttributes
         // this model, such as "json_encoding" a listing of data for storage.
         if ($this->hasSetMutator($key)) {
             return $this->setMutatedAttributeValue($key, $value);
-        } elseif ($this->hasAttributeSetMutator($key)) {
-            return $this->setAttributeMarkedMutatedAttributeValue($key, $value);
         } elseif (!is_null($value) && $this->isDateAttribute($key)) {
             // If an attribute is listed as a "date", we'll convert it from a DateTime
             // instance into a form proper for storage on the database tables using
@@ -1051,35 +949,6 @@ trait HasAttributes
     }
 
     /**
-     * Determine if an "Attribute" return type marked set mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasAttributeSetMutator($key)
-    {
-        $class = static::class;
-
-        if (isset(static::$setAttributeMutatorCache[$class][$key])) {
-            return static::$setAttributeMutatorCache[$class][$key];
-        }
-
-        if (
-            !(static::$modelShouldUsePhpAttributes ?? true)
-            || !method_exists($this, $method = Str::camel($key))
-        ) {
-            return static::$setAttributeMutatorCache[$class][$key] = false;
-        }
-
-        $returnType = (new ReflectionMethod($this, $method))->getReturnType();
-
-        return static::$setAttributeMutatorCache[$class][$key] =
-            $returnType instanceof ReflectionNamedType &&
-            $returnType->getName() === Attribute::class &&
-            is_callable($this->{$method}()->set);
-    }
-
-    /**
      * Set the value of an attribute using its mutator.
      *
      * @param string $key
@@ -1089,38 +958,6 @@ trait HasAttributes
     protected function setMutatedAttributeValue($key, $value)
     {
         return $this->resolveSegregatedMutatorClosure($key)->call($this, $value);
-    }
-
-    /**
-     * Set the value of a "Attribute" return type marked attribute using its mutator.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function setAttributeMarkedMutatedAttributeValue($key, $value)
-    {
-        $attribute = $this->{Str::camel($key)}();
-
-        $callback = $attribute->set ?: function ($value) use ($key) {
-            $this->attributes[$key] = $value;
-        };
-
-        $this->attributes = array_merge(
-            $this->attributes,
-            $this->normalizeCastClassResponse(
-                $key,
-                $callback($value, $this->attributes)
-            )
-        );
-
-        if ($attribute->withCaching || (is_object($value) && $attribute->withObjectCaching)) {
-            $this->attributeCastCache[$key] = $value;
-        } else {
-            unset($this->attributeCastCache[$key]);
-        }
-
-        return $this;
     }
 
     /**
@@ -1819,7 +1656,6 @@ trait HasAttributes
     protected function mergeAttributesFromCachedCasts()
     {
         $this->mergeAttributesFromClassCasts();
-        $this->mergeAttributesFromAttributeCasts();
     }
 
     /**
@@ -1843,40 +1679,6 @@ trait HasAttributes
                 $caster instanceof CastsInboundAttributes
                     ? [$key => $value]
                     : $this->normalizeCastClassResponse($key, $caster->set($this, $key, $value, $this->attributes))
-            );
-        }
-    }
-
-    /**
-     * Merge the cast class attributes back into the model.
-     * @param string|array $keys
-     * @return void
-     */
-    protected function mergeAttributesFromAttributeCasts()
-    {
-        $k = \func_get_args()[0] ?? null;
-
-        $attributeCastCache = \is_string($k) || \is_array($k) ?
-            \array_intersect_key($this->attributeCastCache, \array_flip(\array_values((array)$k))) :
-            $this->attributeCastCache;
-
-        foreach ($attributeCastCache as $key => $value) {
-            $attribute = $this->{Str::camel($key)}();
-
-            if ($attribute->get && !$attribute->set) {
-                continue;
-            }
-
-            $callback = $attribute->set ?: function ($value) use ($key) {
-                $this->attributes[$key] = $value;
-            };
-
-            $this->attributes = array_merge(
-                $this->attributes,
-                $this->normalizeCastClassResponse(
-                    $key,
-                    $callback($value, $this->attributes)
-                )
             );
         }
     }
@@ -1933,7 +1735,6 @@ trait HasAttributes
         }
 
         $this->classCastCache = [];
-        $this->attributeCastCache = [];
 
         return $this;
     }
@@ -2280,8 +2081,6 @@ trait HasAttributes
         // retrieval from the model to a form that is more useful for usage.
         if ($this->hasGetMutator($key)) {
             return $this->mutateAttribute($key, $value);
-        } elseif ($this->hasAttributeGetMutator($key)) {
-            return $this->mutateAttributeMarkedAttribute($key, $value);
         }
 
         // If the attribute exists within the cast array, we will convert it to
@@ -2394,14 +2193,7 @@ trait HasAttributes
 
         $class = $instance::class;
 
-        static::$getAttributeMutatorCache[$class] =
-            collect($attributeMutatorMethods = static::getAttributeMarkedMutatorMethods($classOrInstance))
-                ->mapWithKeys(function ($match) {
-                    return [self::getNormalizedMutatorKey($match) => true];
-                })->all();
-
         static::$mutatorCache[$class] = collect(static::getMutatorMethods($class))
-            ->merge($attributeMutatorMethods)
             ->map(function ($match) {
                 return self::getNormalizedMutatorKey($match);
             })
@@ -2420,36 +2212,6 @@ trait HasAttributes
         preg_match_all('/(?<=^|;)get([^;]+?)Attribute(;|$)/', implode(';', get_class_methods($class)), $matches);
 
         return $matches[1];
-    }
-
-    /**
-     * Get all the "Attribute" return typed attribute mutator methods.
-     *
-     * @param mixed $class
-     * @return array
-     */
-    protected static function getAttributeMarkedMutatorMethods($class)
-    {
-        if (!(static::$modelShouldUsePhpAttributes ?? true)) {
-            return [];
-        }
-
-        $instance = is_object($class) ? $class : new $class();
-
-        return collect((new ReflectionClass($instance))->getMethods())->filter(function ($method) use ($instance) {
-            $returnType = $method->getReturnType();
-
-            if (
-                $returnType instanceof ReflectionNamedType &&
-                $returnType->getName() === Attribute::class
-            ) {
-                if (is_callable($method->invoke($instance)->get)) {
-                    return true;
-                }
-            }
-
-            return false;
-        })->map->name->values()->all();
     }
 
     /**

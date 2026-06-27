@@ -1186,7 +1186,6 @@ class Builder implements BuilderContract
 
             if (
                 $this->model->hasSetMutator($column)
-                || $this->model->hasAttributeSetMutator($column)
                 || $this->model->hasCast($column)
             ) {
                 $timestamp = $this->model->newInstance()

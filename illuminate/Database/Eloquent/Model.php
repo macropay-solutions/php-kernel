@@ -185,12 +185,6 @@ abstract class Model implements
 
     /**
      * Override it in your model/baseModel instead of dynamically changing it to false!
-     * @see \Illuminate\Database\Eloquent\Casts\Attribute;
-     */
-    protected static bool $modelShouldUsePhpAttributes = true;
-
-    /**
-     * Override it in your model/baseModel instead of dynamically changing it to false!
      * When overridden with false, the extra traits that you might use must be manually booted and initialized
      *  in the boot method
      * @see static::bootTraits()
@@ -283,10 +277,7 @@ abstract class Model implements
 
         $this->initializeTraits();
 
-        $this->original = (
-            $this->classCastCache !== []
-            || $this->attributeCastCache !== []
-        ) ? $this->getAttributes() : $this->attributes;
+        $this->original = $this->classCastCache !== [] ? $this->getAttributes() : $this->attributes;
 
         if ([] === $attributes) {
             return;
@@ -373,9 +364,6 @@ abstract class Model implements
     protected static function bootTraits()
     {
         if (!(static::$modelShouldAutoDiscoverAndBootTraits ?? true)) {
-            static::bootHasEvents();
-            static::bootHasGlobalScopes();
-
             return;
         }
 
@@ -2526,7 +2514,6 @@ abstract class Model implements
         unset(
             $this->attributes[$offset],
             $this->relations[$offset],
-            $this->attributeCastCache[$offset],
             $this->classCastCache[$offset]
         );
     }
@@ -2658,7 +2645,6 @@ abstract class Model implements
         $this->mergeAttributesFromCachedCasts();
 
         $this->classCastCache = [];
-        $this->attributeCastCache = [];
 
         return array_keys(get_object_vars($this));
     }

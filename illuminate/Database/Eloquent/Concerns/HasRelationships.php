@@ -1304,8 +1304,7 @@ trait HasRelationships
 
         return (self::$segregatedRelationsGlobalMap[static::class][$relation] ??=
             ($this->thisSegregatedRelationDefinitionMap()[$relation] ?? (
-                !$this->hasAttributeMutator($relation)
-                && !(
+                !(
                     \str_ends_with($relation, 'Attribute')
                     && (\str_starts_with($relation, 'set') || !\str_starts_with($relation, 'get'))
                 )
