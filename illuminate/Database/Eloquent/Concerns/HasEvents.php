@@ -2,13 +2,10 @@
 
 namespace Illuminate\Database\Eloquent\Concerns;
 
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Events\NullDispatcher;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
-use ReflectionClass;
 
 trait HasEvents
 {
@@ -29,36 +26,6 @@ trait HasEvents
      * @var array
      */
     protected $observables = [];
-
-    /**
-     * Boot the has event trait for a model.
-     *
-     * @return void
-     */
-    public static function bootHasEvents()
-    {
-        if (
-            (static::$modelShouldUsePhpAttributes ?? true)
-            && !Container::issetBootstrapCacheFileKey(Container::OBSERVERS_PHP)
-        ) {
-            static::observe(static::resolveObserveAttributes());
-        }
-    }
-
-    /**
-     * Resolve the observe class names from the attributes.
-     *
-     * @return array
-     */
-    public static function resolveObserveAttributes()
-    {
-        $reflectionClass = new ReflectionClass(static::class);
-
-        return collect($reflectionClass->getAttributes(ObservedBy::class))
-            ->map(fn($attribute) => $attribute->getArguments())
-            ->flatten()
-            ->all();
-    }
 
     /**
      * Register observers with the model.

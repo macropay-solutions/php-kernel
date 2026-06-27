@@ -185,8 +185,6 @@ abstract class Model implements
 
     /**
      * Override it in your model/baseModel instead of dynamically changing it to false!
-     * @see \Illuminate\Database\Eloquent\Attributes\ObservedBy;
-     * @see \Illuminate\Database\Eloquent\Attributes\ScopedBy;
      * @see \Illuminate\Database\Eloquent\Casts\Attribute;
      */
     protected static bool $modelShouldUsePhpAttributes = true;

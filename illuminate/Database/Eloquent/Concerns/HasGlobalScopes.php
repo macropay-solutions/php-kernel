@@ -3,41 +3,12 @@
 namespace Illuminate\Database\Eloquent\Concerns;
 
 use Closure;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Arr;
 use InvalidArgumentException;
-use ReflectionClass;
 
 trait HasGlobalScopes
 {
-    /**
-     * Boot the has global scopes trait for a model.
-     *
-     * @return void
-     */
-    public static function bootHasGlobalScopes()
-    {
-        if ((static::$modelShouldUsePhpAttributes ?? true)) {
-            static::addGlobalScopes(static::resolveGlobalScopeAttributes());
-        }
-    }
-
-    /**
-     * Resolve the global scope class names from the attributes.
-     *
-     * @return array
-     */
-    public static function resolveGlobalScopeAttributes()
-    {
-        $reflectionClass = new ReflectionClass(static::class);
-
-        return collect($reflectionClass->getAttributes(ScopedBy::class))
-            ->map(fn($attribute) => $attribute->getArguments())
-            ->flatten()
-            ->all();
-    }
-
     /**
      * Register a new global scope on the model.
      *
