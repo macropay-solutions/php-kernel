@@ -2185,33 +2185,10 @@ trait HasAttributes
      */
     public static function cacheMutatedAttributes($classOrInstance)
     {
-        $instance = $classOrInstance;
+        $instance = \is_object($classOrInstance) ? $classOrInstance : new $classOrInstance();
 
-        if (!\is_object($classOrInstance)) {
-            $instance = new $classOrInstance();
-        }
-
-        $class = $instance::class;
-
-        static::$mutatorCache[$class] = collect(static::getMutatorMethods($class))
-            ->map(function ($match) {
-                return self::getNormalizedMutatorKey($match);
-            })
-            ->merge(\array_keys(\array_filter($instance->thisSegregatedAccessorsDefinitionMap())))
-            ->unique()->values()->all();
-    }
-
-    /**
-     * Get all the attribute mutator methods.
-     *
-     * @param mixed $class
-     * @return array
-     */
-    protected static function getMutatorMethods($class)
-    {
-        preg_match_all('/(?<=^|;)get([^;]+?)Attribute(;|$)/', implode(';', get_class_methods($class)), $matches);
-
-        return $matches[1];
+        static::$mutatorCache[$instance::class] =
+            \array_values(\array_filter(\array_keys($instance->thisSegregatedAccessorsDefinitionMap())));
     }
 
     /**
@@ -2298,11 +2275,7 @@ trait HasAttributes
         }
 
         return (self::$segregatedAccessorsGlobalMap[static::class][$key] ??=
-            ($this->thisSegregatedAccessorsDefinitionMap()[$key] ?? (
-                \method_exists($this, $method = 'get' . Str::studly($key) . 'Attribute')
-                    ? static::unbindClosure(fn(...$args): mixed => $this->$method(...$args))
-                    : false
-            ))) ?: null;
+            $this->thisSegregatedAccessorsDefinitionMap()[$key] ?? false) ?: null;
     }
 
     private function resolveSegregatedMutatorClosure(string $key): ?\Closure
@@ -2315,11 +2288,7 @@ trait HasAttributes
         }
 
         return (self::$segregatedMutatorsGlobalMap[static::class][$key] ??=
-            ($this->thisSegregatedMutatorsDefinitionMap()[$key] ?? (
-                \method_exists($this, $method = 'set' . Str::studly($key) . 'Attribute')
-                    ? static::unbindClosure(fn(...$args): mixed => $this->$method(...$args))
-                    : false
-            ))) ?: null;
+            $this->thisSegregatedMutatorsDefinitionMap()[$key] ?? false) ?: null;
     }
 
     private static function getNormalizedMutatorKey(string $key): string
