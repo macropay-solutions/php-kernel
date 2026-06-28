@@ -1,13 +1,13 @@
 <?php
 
-namespace Illuminate\Contracts\Database\Eloquent;
+namespace MacropaySolutions\Kernel\Contracts\Database\Obvious;
 
 interface DeviatesCastableAttributes
 {
     /**
      * Increment the attribute.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $model
      * @param string $key
      * @param mixed $value
      * @param array $attributes
@@ -18,7 +18,7 @@ interface DeviatesCastableAttributes
     /**
      * Decrement the attribute.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $model
      * @param string $key
      * @param mixed $value
      * @param array $attributes

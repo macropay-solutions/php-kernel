@@ -1,6 +1,6 @@
 <?php
 
-namespace Illuminate\Contracts\Database\Eloquent;
+namespace MacropaySolutions\Kernel\Contracts\Database\Obvious;
 
 interface Castable
 {

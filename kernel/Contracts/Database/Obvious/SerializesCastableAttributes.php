@@ -1,15 +1,15 @@
 <?php
 
-namespace Illuminate\Contracts\Database\Eloquent;
+namespace MacropaySolutions\Kernel\Contracts\Database\Obvious;
 
-use Illuminate\Database\Eloquent\Model;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
 
 interface SerializesCastableAttributes
 {
     /**
      * Serialize the attribute when converting the model to an array.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $model
      * @param string $key
      * @param mixed $value
      * @param array $attributes

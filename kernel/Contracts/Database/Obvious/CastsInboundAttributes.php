@@ -1,15 +1,15 @@
 <?php
 
-namespace Illuminate\Contracts\Database\Eloquent;
+namespace MacropaySolutions\Kernel\Contracts\Database\Obvious;
 
-use Illuminate\Database\Eloquent\Model;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
 
 interface CastsInboundAttributes
 {
     /**
      * Transform the attribute to its underlying model values.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $model
      * @param string $key
      * @param mixed $value
      * @param array $attributes

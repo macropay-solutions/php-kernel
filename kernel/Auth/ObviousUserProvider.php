@@ -1,24 +1,24 @@
 <?php
 
-namespace Illuminate\Auth;
+namespace MacropaySolutions\Kernel\Auth;
 
 use Closure;
-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
-use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
-use Illuminate\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Contracts\Auth\Authenticatable as UserContract;
+use MacropaySolutions\Kernel\Contracts\Auth\UserProvider;
+use MacropaySolutions\Kernel\Contracts\Hashing\Hasher as HasherContract;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 
-class EloquentUserProvider implements UserProvider
+class ObviousUserProvider implements UserProvider
 {
     /**
      * The hasher implementation.
      *
-     * @var \Illuminate\Contracts\Hashing\Hasher
+     * @var \MacropaySolutions\Kernel\Contracts\Hashing\Hasher
      */
     protected $hasher;
 
     /**
-     * The Eloquent user model.
+     * The Obvious user model.
      *
      * @var string
      */
@@ -27,14 +27,14 @@ class EloquentUserProvider implements UserProvider
     /**
      * The callback that may modify the user retrieval queries.
      *
-     * @var (\Closure(\Illuminate\Database\Eloquent\Builder):mixed)|null
+     * @var (\Closure(\MacropaySolutions\Kernel\Database\Obvious\Builder):mixed)|null
      */
     protected $queryCallback;
 
     /**
      * Create a new database user provider.
      *
-     * @param \Illuminate\Contracts\Hashing\Hasher $hasher
+     * @param \MacropaySolutions\Kernel\Contracts\Hashing\Hasher $hasher
      * @param string $model
      * @return void
      */
@@ -48,7 +48,7 @@ class EloquentUserProvider implements UserProvider
      * Retrieve a user by their unique identifier.
      *
      * @param mixed $identifier
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable|null
      */
     public function retrieveById($identifier)
     {
@@ -64,7 +64,7 @@ class EloquentUserProvider implements UserProvider
      *
      * @param mixed $identifier
      * @param string $token
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable|null
      */
     public function retrieveByToken($identifier, $token)
     {
@@ -87,7 +87,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable $user
      * @param string $token
      * @return void
      */
@@ -108,7 +108,7 @@ class EloquentUserProvider implements UserProvider
      * Retrieve a user by the given credentials.
      *
      * @param array $credentials
-     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     * @return \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable|null
      */
     public function retrieveByCredentials(array $credentials)
     {
@@ -124,7 +124,7 @@ class EloquentUserProvider implements UserProvider
 
         // First we will add each credential element to the query as a where clause.
         // Then we can execute the query and, if we found a user, return it in a
-        // Eloquent User "model" that will be utilized by the Guard instances.
+        // Obvious User "model" that will be utilized by the Guard instances.
         $query = $this->newModelQuery();
 
         foreach ($credentials as $key => $value) {
@@ -143,7 +143,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Validate a user against the given credentials.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable $user
      * @param array $credentials
      * @return bool
      */
@@ -159,8 +159,8 @@ class EloquentUserProvider implements UserProvider
     /**
      * Get a new query builder for the model instance.
      *
-     * @param \Illuminate\Database\Eloquent\Model|null $model
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param \MacropaySolutions\Kernel\Database\Obvious\Model|null $model
+     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
     protected function newModelQuery($model = null)
     {
@@ -176,7 +176,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Create a new instance of the model.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return \MacropaySolutions\Kernel\Database\Obvious\Model
      */
     public function createModel()
     {
@@ -188,7 +188,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Gets the hasher implementation.
      *
-     * @return \Illuminate\Contracts\Hashing\Hasher
+     * @return \MacropaySolutions\Kernel\Contracts\Hashing\Hasher
      */
     public function getHasher()
     {
@@ -198,7 +198,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Sets the hasher implementation.
      *
-     * @param \Illuminate\Contracts\Hashing\Hasher $hasher
+     * @param \MacropaySolutions\Kernel\Contracts\Hashing\Hasher $hasher
      * @return $this
      */
     public function setHasher(HasherContract $hasher)
@@ -209,7 +209,7 @@ class EloquentUserProvider implements UserProvider
     }
 
     /**
-     * Gets the name of the Eloquent user model.
+     * Gets the name of the Obvious user model.
      *
      * @return string
      */
@@ -219,7 +219,7 @@ class EloquentUserProvider implements UserProvider
     }
 
     /**
-     * Sets the name of the Eloquent user model.
+     * Sets the name of the Obvious user model.
      *
      * @param string $model
      * @return $this
@@ -244,7 +244,7 @@ class EloquentUserProvider implements UserProvider
     /**
      * Sets the callback to modify the query before retrieving users.
      *
-     * @param (\Closure(\Illuminate\Database\Eloquent\Builder):mixed)|null $queryCallback
+     * @param (\Closure(\MacropaySolutions\Kernel\Database\Obvious\Builder):mixed)|null $queryCallback
      * @return $this
      */
     public function withQuery($queryCallback = null)
