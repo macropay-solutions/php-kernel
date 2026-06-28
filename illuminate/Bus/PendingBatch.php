@@ -10,7 +10,6 @@ use Illuminate\Queue\Queue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Conditionable;
-use Laravel\SerializableClosure\SerializableClosure;
 use Throwable;
 
 class PendingBatch
@@ -84,7 +83,7 @@ class PendingBatch
     public function before($callback)
     {
         $this->options['before'][] = $callback instanceof Closure
-            ? new SerializableClosure($callback)
+            ? throw new \RuntimeException('Closure serialization forbidden.')
             : (\is_array($callback) ? Queue::storableCallable($callback) : $callback);
 
         return $this;
@@ -109,7 +108,7 @@ class PendingBatch
     public function progress($callback)
     {
         $this->options['progress'][] = $callback instanceof Closure
-            ? new SerializableClosure($callback)
+            ? throw new \RuntimeException('Closure serialization forbidden.')
             : (\is_array($callback) ? Queue::storableCallable($callback) : $callback);
 
         return $this;
@@ -134,7 +133,7 @@ class PendingBatch
     public function then($callback)
     {
         $this->options['then'][] = $callback instanceof Closure
-            ? new SerializableClosure($callback)
+            ? throw new \RuntimeException('Closure serialization forbidden.')
             : (\is_array($callback) ? Queue::storableCallable($callback) : $callback);
 
         return $this;
@@ -159,7 +158,7 @@ class PendingBatch
     public function catch($callback)
     {
         $this->options['catch'][] = $callback instanceof Closure
-            ? new SerializableClosure($callback)
+            ? throw new \RuntimeException('Closure serialization forbidden.')
             : (\is_array($callback) ? Queue::storableCallable($callback) : $callback);
 
         return $this;
@@ -184,7 +183,7 @@ class PendingBatch
     public function finally($callback)
     {
         $this->options['finally'][] = $callback instanceof Closure
-            ? new SerializableClosure($callback)
+            ? throw new \RuntimeException('Closure serialization forbidden.')
             : (\is_array($callback) ? Queue::storableCallable($callback) : $callback);
 
         return $this;

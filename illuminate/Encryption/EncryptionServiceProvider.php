@@ -4,7 +4,6 @@ namespace Illuminate\Encryption;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Laravel\SerializableClosure\SerializableClosure;
 
 class EncryptionServiceProvider extends ServiceProvider
 {
@@ -16,7 +15,6 @@ class EncryptionServiceProvider extends ServiceProvider
     public function register()
     {
         $this->registerEncrypter();
-        $this->registerSerializableClosureSecurityKey();
     }
 
     /**
@@ -37,22 +35,6 @@ class EncryptionServiceProvider extends ServiceProvider
 
             return new Encrypter($this->parseKey($config), $config['cipher'], $map);
         });
-    }
-
-    /**
-     * Configure Serializable Closure signing for security.
-     *
-     * @return void
-     */
-    protected function registerSerializableClosureSecurityKey()
-    {
-        $config = $this->app->make('config')->get('app');
-
-        if (!class_exists(SerializableClosure::class) || empty($config['key'])) {
-            return;
-        }
-
-        SerializableClosure::setSecretKey($this->parseKey($config));
     }
 
     /**

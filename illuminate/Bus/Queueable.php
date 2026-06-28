@@ -3,9 +3,7 @@
 namespace Illuminate\Bus;
 
 use Closure;
-use Illuminate\Queue\CallQueuedClosure;
 use Illuminate\Support\Arr;
-use RuntimeException;
 
 /**
  * DO NOT ADD PROPERTY HOOKS IN THIS CLASS TO ALLOW OBJECT RECONSTRUCTION AFTER DESERIALIZATION!
@@ -263,13 +261,7 @@ trait Queueable
     protected function serializeJob($job)
     {
         if ($job instanceof Closure) {
-            if (!class_exists(CallQueuedClosure::class)) {
-                throw new RuntimeException(
-                    'To enable support for closure jobs, please install the illuminate/queue package.'
-                );
-            }
-
-            $job = CallQueuedClosure::create($job);
+            throw new \RuntimeException('Closure serialization forbidden.');
         }
 
         return serialize($job);

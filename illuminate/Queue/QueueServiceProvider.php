@@ -18,7 +18,6 @@ use Illuminate\Queue\Failed\FileFailedJobProvider;
 use Illuminate\Queue\Failed\NullFailedJobProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
-use Laravel\SerializableClosure\SerializableClosure;
 
 class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -31,41 +30,11 @@ class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function register()
     {
-        $this->configureSerializableClosureUses();
-
         $this->registerManager();
         $this->registerConnection();
         $this->registerWorker();
         $this->registerListener();
         $this->registerFailedJobServices();
-    }
-
-    /**
-     * Configure serializable closures uses.
-     *
-     * @return void
-     */
-    protected function configureSerializableClosureUses()
-    {
-        if (!\class_exists(SerializableClosure::class)) {
-            return;
-        }
-
-        SerializableClosure::transformUseVariablesUsing(function ($data) {
-            foreach ($data as $key => $value) {
-                $data[$key] = $this->getSerializedPropertyValue($value);
-            }
-
-            return $data;
-        });
-
-        SerializableClosure::resolveUseVariablesUsing(function ($data) {
-            foreach ($data as $key => $value) {
-                $data[$key] = $this->getRestoredPropertyValue($value);
-            }
-
-            return $data;
-        });
     }
 
     /**

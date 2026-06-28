@@ -98,7 +98,6 @@
         "ext-pcntl": "*",
         "ext-posix": "*",
         "ext-redis": "*",
-        "laravel/serializable-closure": "Require if you want to allow serrializable closures (^2.0.11)",
         "league/commonmark": "Required for Markdown mailables (^2.6)",
         "macropay-solutions/php-crufd-wizard": "*",
         "macropay-solutions/php-crufd-wizard-decorator": "*",

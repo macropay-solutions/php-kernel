@@ -4,7 +4,6 @@
   "license": "MIT",
   "require": {
     "php": "^8.1",
-    "laravel/serializable-closure": "^1.2.2",
     "ramsey/uuid": "^4.7",
     "symfony/process": "^6.2"
   },

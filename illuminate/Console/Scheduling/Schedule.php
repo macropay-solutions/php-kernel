@@ -12,7 +12,6 @@ use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\CallQueuedClosure;
 use Illuminate\Support\ProcessUtils;
 use Illuminate\Support\Traits\Macroable;
 use RuntimeException;
@@ -188,13 +187,7 @@ class Schedule
     protected function dispatchToQueue($job, $queue, $connection)
     {
         if ($job instanceof Closure) {
-            if (!class_exists(CallQueuedClosure::class)) {
-                throw new RuntimeException(
-                    'To enable support for closure jobs, please install the illuminate/queue package.'
-                );
-            }
-
-            $job = CallQueuedClosure::create($job);
+            throw new \RuntimeException('Closure serialization forbidden.');
         }
 
         if ($job instanceof ShouldBeUnique) {

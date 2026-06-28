@@ -7,7 +7,6 @@ use Closure;
 use Illuminate\Contracts\Queue\Factory as QueueFactory;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Queue\CallQueuedCallable;
-use Illuminate\Queue\CallQueuedClosure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use JsonSerializable;
@@ -169,7 +168,7 @@ class Batch implements Arrayable, JsonSerializable
         }
 
         $jobs = Collection::wrap($jobs)->map(function ($job) use (&$count) {
-            $job = $job instanceof Closure ? CallQueuedClosure::create($job) : $job;
+            $job = $job instanceof Closure ? throw new \RuntimeException('Closure serialization forbidden.') : $job;
 
             if (\is_array($job) && \array_is_list($job) && \is_string($job[0] ?? null)) {
                 $job = CallQueuedCallable::create($job);
@@ -216,7 +215,7 @@ class Batch implements Arrayable, JsonSerializable
     {
         return collect($chain)->map(function ($job) {
             if ($job instanceof Closure) {
-                $job = CallQueuedClosure::create($job);
+                throw new \RuntimeException('Closure serialization forbidden.');
             }
 
             if (\is_array($job) && \array_is_list($job) && \is_string($job[0] ?? null)) {

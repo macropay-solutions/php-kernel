@@ -103,7 +103,7 @@ abstract class Queue
     protected function createPayload($job, $queue, $data = '')
     {
         if ($job instanceof Closure) {
-            $job = CallQueuedClosure::create($job);
+            throw new \RuntimeException('Closure serialization forbidden.');
         }
 
         if (\is_array($job)) {

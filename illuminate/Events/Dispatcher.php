@@ -98,15 +98,6 @@ class Dispatcher implements DispatcherContract
             return;
         }
 
-        if ($events instanceof QueuedClosure) {
-            collect($this->firstClosureParameterTypes($events->closure))
-                ->each(function ($event) use ($events) {
-                    $this->listen($event, $events->resolve());
-                });
-
-            return;
-        }
-
         if ($events instanceof QueuedCallable) {
             throw new \InvalidArgumentException(
                 'Auto-discovery of event types is not supported for queued array callbacks. ' .
