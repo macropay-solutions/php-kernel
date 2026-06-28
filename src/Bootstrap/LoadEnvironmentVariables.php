@@ -4,7 +4,7 @@ namespace MacropaySolutions\Framework\Bootstrap;
 
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidFileException;
-use Illuminate\Support\Env;
+use MacropaySolutions\Kernel\Support\Env;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class LoadEnvironmentVariables

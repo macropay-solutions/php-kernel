@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\JsonResponse;
+use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Framework\Http\Request;
 use MacropaySolutions\KernelDev\Framework\Testing\Concerns\MakesHttpRequests;

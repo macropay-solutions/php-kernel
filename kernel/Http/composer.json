@@ -1,0 +1,26 @@
+{
+  "description": "The MacropaySolutions Kernel Http package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "ext-filter": "*",
+    "fruitcake/php-cors": "^1.2",
+    "guzzlehttp/uri-template": "^1.0",
+    "symfony/http-foundation": "^6.4",
+    "symfony/http-kernel": "^6.2",
+    "symfony/mime": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Http\\": ""
+    }
+  },
+  "suggest": {
+    "ext-gd": "Required to use MacropaySolutions\\Kernel\\Http\\Testing\\FileFactory::image().",
+    "guzzlehttp/guzzle": "Required to use the HTTP Client (^7.5)."
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

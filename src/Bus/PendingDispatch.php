@@ -2,11 +2,11 @@
 
 namespace MacropaySolutions\Framework\Bus;
 
-use Illuminate\Bus\UniqueLock;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use MacropaySolutions\Kernel\Bus\UniqueLock;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
+use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
+use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 
 class PendingDispatch
 {

@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Framework\Http;
 
-use Illuminate\Http\RedirectResponse;
+use MacropaySolutions\Kernel\Http\RedirectResponse;
 use MacropaySolutions\Framework\Application;
 
 class Redirector
@@ -32,7 +32,7 @@ class Redirector
      * @param int $status
      * @param array $headers
      * @param bool $secure
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \MacropaySolutions\Kernel\Http\RedirectResponse
      */
     public function to($path, $status = 302, $headers = [], $secure = null)
     {
@@ -48,7 +48,7 @@ class Redirector
      * @param array $parameters
      * @param int $status
      * @param array $headers
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \MacropaySolutions\Kernel\Http\RedirectResponse
      */
     public function route($route, $parameters = [], $status = 302, $headers = [])
     {
@@ -63,7 +63,7 @@ class Redirector
      * @param string $path
      * @param int $status
      * @param array $headers
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \MacropaySolutions\Kernel\Http\RedirectResponse
      */
     protected function createRedirect($path, $status, $headers)
     {

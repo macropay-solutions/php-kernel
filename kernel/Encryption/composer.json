@@ -1,0 +1,19 @@
+{
+  "description": "The MacropaySolutions Kernel Encryption package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "ext-hash": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Encryption\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

@@ -3,21 +3,21 @@
 namespace MacropaySolutions\Framework\Exceptions;
 
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Console\View\Components\BulletList;
-use Illuminate\Console\View\Components\Error;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\MultipleRecordsFoundException;
-use Illuminate\Database\RecordsNotFoundException;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use Illuminate\Session\TokenMismatchException;
-use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
+use MacropaySolutions\Kernel\Auth\Access\AuthorizationException;
+use MacropaySolutions\Kernel\Auth\AuthenticationException;
+use MacropaySolutions\Kernel\Console\View\Components\BulletList;
+use MacropaySolutions\Kernel\Console\View\Components\Error;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Contracts\Support\Responsable;
+use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
+use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
+use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
+use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
+use MacropaySolutions\Kernel\Http\JsonResponse;
+use MacropaySolutions\Kernel\Http\Response;
+use MacropaySolutions\Kernel\Session\TokenMismatchException;
+use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Validation\ValidationException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
@@ -116,7 +116,7 @@ class Handler implements ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Throwable $e
      * @return \Symfony\Component\HttpFoundation\Response
      *
@@ -163,9 +163,9 @@ class Handler implements ExceptionHandler
     /**
      * Prepare a JSON response for the given exception.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Throwable $e
-     * @return \Illuminate\Http\JsonResponse
+     * @return \MacropaySolutions\Kernel\Http\JsonResponse
      */
     protected function prepareJsonResponse($request, Throwable $e)
     {
@@ -202,9 +202,9 @@ class Handler implements ExceptionHandler
     /**
      * Prepare a response for the given exception.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Throwable $e
-     * @return \Illuminate\Http\Response
+     * @return \MacropaySolutions\Kernel\Http\Response
      */
     protected function prepareResponse($request, Throwable $e)
     {

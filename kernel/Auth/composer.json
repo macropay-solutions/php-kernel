@@ -1,0 +1,21 @@
+{
+  "description": "The MacropaySolutions Kernel Auth package.",
+  "license": "MIT",
+
+
+
+  "require": {
+    "php": "^8.1",
+    "ext-hash": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Auth\\": ""
+    }
+  },
+
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

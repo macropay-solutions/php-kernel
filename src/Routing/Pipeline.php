@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Framework\Routing;
 
 use Closure as BaseClosure;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Http\Request;
-use Illuminate\Pipeline\Pipeline as BasePipeline;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Http\Request;
+use MacropaySolutions\Kernel\Pipeline\Pipeline as BasePipeline;
 use Throwable;
 
 /**

@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Console\Command;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Validation\Factory;
-use Illuminate\Http\Response;
-use Illuminate\View\ViewServiceProvider;
+use MacropaySolutions\Kernel\Console\Command;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Contracts\Validation\Factory;
+use MacropaySolutions\Kernel\Http\Response;
+use MacropaySolutions\Kernel\View\ViewServiceProvider;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
 use MacropaySolutions\Framework\Http\Request;
@@ -442,7 +442,7 @@ class FullApplicationTest extends TestCase
     public function testApplicationBootsOnlyOnce()
     {
         $app = new Application();
-        $provider = new class ($app) extends \Illuminate\Support\ServiceProvider {
+        $provider = new class ($app) extends \MacropaySolutions\Kernel\Support\ServiceProvider {
             public $bootCount = 0;
 
             public function boot()
@@ -618,7 +618,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function (Illuminate\Http\Request $request) {
+        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
             $data = $this->validate($request, ['name' => 'required']);
 
             return $data;
@@ -638,7 +638,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function (Illuminate\Http\Request $request) {
+        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
             return redirect('home');
         });
 
@@ -653,12 +653,12 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('login', [
             'as' => 'login',
-            function (Illuminate\Http\Request $request) {
+            function (MacropaySolutions\Kernel\Http\Request $request) {
                 return 'login';
             },
         ]);
 
-        $app->router->get('/', function (Illuminate\Http\Request $request) {
+        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
             return redirect()->route('login');
         });
 
@@ -672,10 +672,10 @@ class FullApplicationTest extends TestCase
         $app = new Application();
 
         $app['auth']->viaRequest('api', function ($request) {
-            return new \Illuminate\Auth\GenericUser(['id' => 1234]);
+            return new \MacropaySolutions\Kernel\Auth\GenericUser(['id' => 1234]);
         });
 
-        $app->router->get('/', function (Illuminate\Http\Request $request) {
+        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
             return $request->user()->getAuthIdentifier();
         });
 
@@ -688,9 +688,9 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $filesystem = $app[Illuminate\Contracts\Filesystem\Factory::class];
+        $filesystem = $app[MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class];
 
-        $this->assertInstanceOf(Illuminate\Contracts\Filesystem\Factory::class, $filesystem);
+        $this->assertInstanceOf(MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class, $filesystem);
     }
 
     public function testCanResolveValidationFactoryFromContract()
@@ -788,13 +788,13 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $mock = m::mock(Illuminate\Bus\Dispatcher::class);
+        $mock = m::mock(MacropaySolutions\Kernel\Bus\Dispatcher::class);
 
-        $app->instance(Illuminate\Contracts\Bus\Dispatcher::class, $mock);
+        $app->instance(MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class, $mock);
 
         $this->assertSame(
             $mock,
-            $app->make(Illuminate\Contracts\Bus\Dispatcher::class)
+            $app->make(MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class)
         );
     }
 
@@ -888,14 +888,14 @@ class FrameworkTestService
 {
 }
 
-class FrameworkTestServiceProvider extends Illuminate\Support\ServiceProvider
+class FrameworkTestServiceProvider extends MacropaySolutions\Kernel\Support\ServiceProvider
 {
     public function register()
     {
     }
 }
 
-class FrameworkBootableTestServiceProvider extends Illuminate\Support\ServiceProvider
+class FrameworkBootableTestServiceProvider extends MacropaySolutions\Kernel\Support\ServiceProvider
 {
     public $booted = false;
 
@@ -987,7 +987,7 @@ class FrameworkTestTerminateMiddleware
     }
 }
 
-class ResponsableResponse implements \Illuminate\Contracts\Support\Responsable
+class ResponsableResponse implements \MacropaySolutions\Kernel\Contracts\Support\Responsable
 {
     public function toResponse($request)
     {

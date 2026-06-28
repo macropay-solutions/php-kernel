@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Framework\Auth;
 
-use Illuminate\Contracts\Auth\Access\Gate;
+use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate;
 
 trait Authorizable
 {

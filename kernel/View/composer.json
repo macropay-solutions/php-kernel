@@ -1,0 +1,17 @@
+{
+  "description": "The MacropaySolutions Kernel View package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "ext-tokenizer": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\View\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

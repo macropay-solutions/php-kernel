@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Framework\Http;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Http\JsonResponse;
+use MacropaySolutions\Kernel\Http\Response;
+use MacropaySolutions\Kernel\Support\Str;
+use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -19,7 +19,7 @@ class ResponseFactory
      * @param string $content
      * @param int $status
      * @param array $headers
-     * @return \Illuminate\Http\Response
+     * @return \MacropaySolutions\Kernel\Http\Response
      */
     public function make($content = '', $status = 200, array $headers = [])
     {
@@ -34,7 +34,7 @@ class ResponseFactory
      * @param int $status
      * @param array $headers
      * @param int $options
-     * @return \Illuminate\Http\JsonResponse
+     * @return \MacropaySolutions\Kernel\Http\JsonResponse
      */
     public function json($data = [], $status = 200, array $headers = [], $options = 0)
     {
@@ -50,7 +50,7 @@ class ResponseFactory
      * @param int $status
      * @param array $headers
      * @param int $options
-     * @return \Illuminate\Http\JsonResponse
+     * @return \MacropaySolutions\Kernel\Http\JsonResponse
      */
     public function jsonp($callback, $data = [], $status = 200, array $headers = [], $options = 0)
     {

@@ -4,7 +4,7 @@ namespace MacropaySolutions\Framework\Routing;
 
 use FastRoute\RouteParser;
 use FastRoute\RouteParser\Std;
-use Illuminate\Support\Arr;
+use MacropaySolutions\Kernel\Support\Arr;
 
 class Router
 {

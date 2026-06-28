@@ -1,0 +1,20 @@
+{
+  "description": "The MacropaySolutions Kernel Events package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Events\\": ""
+    },
+    "files": [
+      "functions.php"
+    ]
+  },
+
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

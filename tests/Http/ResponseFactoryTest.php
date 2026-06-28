@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Http\Response;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Framework\Http\ResponseFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;

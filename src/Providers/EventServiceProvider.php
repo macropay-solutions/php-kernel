@@ -2,11 +2,11 @@
 
 namespace MacropaySolutions\Framework\Providers;
 
-use Illuminate\Console\DiscoverEvents;
-use Illuminate\Console\DiscoverEventsAsObservers;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Support\ServiceProvider;
+use MacropaySolutions\Kernel\Console\DiscoverEvents;
+use MacropaySolutions\Kernel\Console\DiscoverEventsAsObservers;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
+use MacropaySolutions\Kernel\Events\Dispatcher;
+use MacropaySolutions\Kernel\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {

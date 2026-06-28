@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Prompts;
 
-use Illuminate\Support\Collection;
+use MacropaySolutions\Kernel\Support\Collection;
 
 class Table extends Prompt
 {

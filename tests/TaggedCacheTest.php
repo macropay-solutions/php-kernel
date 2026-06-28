@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\KernelDev\Tests\Cache;
 
-use Illuminate\Cache\ArrayStore;
-use Illuminate\Cache\NullStore;
-use Illuminate\Cache\TaggedCache;
-use Illuminate\Cache\TagSet;
-use Illuminate\Container\Container;
-use Illuminate\Support\Carbon;
+use MacropaySolutions\Kernel\Cache\ArrayStore;
+use MacropaySolutions\Kernel\Cache\NullStore;
+use MacropaySolutions\Kernel\Cache\TaggedCache;
+use MacropaySolutions\Kernel\Cache\TagSet;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Framework\Application;
 use PHPUnit\Framework\TestCase;
 

@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Str;
+use MacropaySolutions\Kernel\Support\Str;
 
 return [
 

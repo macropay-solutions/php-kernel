@@ -2,15 +2,15 @@
 
 namespace MacropaySolutions\Framework\Console;
 
-use Illuminate\Console\Application as ConsoleApp;
-use Illuminate\Console\Events\CommandFinished;
-use Illuminate\Console\Events\CommandStarting;
-use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Console\Scheduling\ScheduleRunCommand;
-use Illuminate\Contracts\Console\Kernel as KernelContract;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Http\Request;
+use MacropaySolutions\Kernel\Console\Application as ConsoleApp;
+use MacropaySolutions\Kernel\Console\Events\CommandFinished;
+use MacropaySolutions\Kernel\Console\Events\CommandStarting;
+use MacropaySolutions\Kernel\Console\Scheduling\Schedule;
+use MacropaySolutions\Kernel\Console\Scheduling\ScheduleRunCommand;
+use MacropaySolutions\Kernel\Contracts\Console\Kernel as KernelContract;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
+use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Framework\Exceptions\Handler;
 use RuntimeException;
@@ -39,7 +39,7 @@ class Kernel implements KernelContract
     /**
      * The ConsoleApp application instance.
      *
-     * @var \Illuminate\Console\Application
+     * @var \MacropaySolutions\Kernel\Console\Application
      */
     protected $consoleApp;
 
@@ -80,7 +80,7 @@ class Kernel implements KernelContract
     /**
      * Set the console application instance
      */
-    public function setConsoleApp(\Illuminate\Console\Application|null $consoleApp): void
+    public function setConsoleApp(\MacropaySolutions\Kernel\Console\Application|null $consoleApp): void
     {
         $this->consoleApp = $consoleApp;
     }
@@ -88,7 +88,7 @@ class Kernel implements KernelContract
     /**
      * Set the request instance for URL generation.
      *
-     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param \MacropaySolutions\Kernel\Contracts\Foundation\Application $app
      * @return void
      */
     protected function setRequestForConsole(Application $app)
@@ -232,7 +232,7 @@ class Kernel implements KernelContract
     /**
      * Define the application's command schedule.
      *
-     * @param \Illuminate\Console\Scheduling\Schedule $schedule
+     * @param \MacropaySolutions\Kernel\Console\Scheduling\Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
@@ -295,7 +295,7 @@ class Kernel implements KernelContract
     /**
      * Get the console application instance.
      *
-     * @return \Illuminate\Console\Application
+     * @return \MacropaySolutions\Kernel\Console\Application
      */
     protected function getConsoleApp()
     {
@@ -356,7 +356,7 @@ class Kernel implements KernelContract
     /**
      * Get the exception handler from the container.
      *
-     * @return \Illuminate\Contracts\Debug\ExceptionHandler
+     * @return \MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler
      */
     protected function resolveExceptionHandler()
     {

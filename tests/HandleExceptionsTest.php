@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Config\Repository as Config;
-use Illuminate\Container\Container;
-use Illuminate\Log\LogManager;
+use MacropaySolutions\Kernel\Config\Repository as Config;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Log\LogManager;
 use MacropaySolutions\Framework\Concerns\RegistersExceptionHandlers;
 use Mockery as m;
 use Monolog\Handler\NullHandler;

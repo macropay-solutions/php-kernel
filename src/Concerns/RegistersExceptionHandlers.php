@@ -4,8 +4,8 @@ namespace MacropaySolutions\Framework\Concerns;
 
 use ErrorException;
 use Exception;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Log\LogManager;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Log\LogManager;
 use MacropaySolutions\Framework\Exceptions\Handler;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\ErrorHandler\Error\FatalError;
@@ -225,7 +225,7 @@ trait RegistersExceptionHandlers
     /**
      * Get the exception handler from the container.
      *
-     * @return \Illuminate\Contracts\Debug\ExceptionHandler
+     * @return \MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler
      */
     protected function resolveExceptionHandler()
     {

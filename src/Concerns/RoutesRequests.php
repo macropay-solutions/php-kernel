@@ -4,11 +4,11 @@ namespace MacropaySolutions\Framework\Concerns;
 
 use Closure;
 use FastRoute\Dispatcher;
-use Illuminate\Contracts\Support\Responsable;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Arr;
+use MacropaySolutions\Kernel\Contracts\Support\Responsable;
+use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
+use MacropaySolutions\Kernel\Http\Request;
+use MacropaySolutions\Kernel\Http\Response;
+use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
 use MacropaySolutions\Framework\Routing\Closure as RoutingClosure;
 use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
@@ -438,7 +438,7 @@ trait RoutesRequests
      *
      * @param callable $callable
      * @param array $parameters
-     * @return \Illuminate\Http\Response|SymfonyResponse
+     * @return \MacropaySolutions\Kernel\Http\Response|SymfonyResponse
      */
     protected function callControllerCallable(callable $callable, array $parameters = [])
     {
@@ -501,7 +501,7 @@ trait RoutesRequests
      * Prepare the response for sending.
      *
      * @param mixed $response
-     * @return \Illuminate\Http\Response|SymfonyResponse
+     * @return \MacropaySolutions\Kernel\Http\Response|SymfonyResponse
      */
     public function prepareResponse($response)
     {

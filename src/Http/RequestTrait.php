@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Framework\Http;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Str;
 use RuntimeException;
 
 trait RequestTrait

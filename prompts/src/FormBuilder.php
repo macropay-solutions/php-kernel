@@ -3,7 +3,7 @@
 namespace MacropaySolutions\Prompts;
 
 use Closure;
-use Illuminate\Support\Collection;
+use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Prompts\Exceptions\FormRevertedException;
 
 class FormBuilder

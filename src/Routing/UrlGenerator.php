@@ -2,9 +2,9 @@
 
 namespace MacropaySolutions\Framework\Routing;
 
-use Illuminate\Contracts\Routing\UrlRoutable;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
+use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
+use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Framework\Application;
 
 class UrlGenerator

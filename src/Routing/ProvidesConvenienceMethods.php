@@ -3,13 +3,13 @@
 namespace MacropaySolutions\Framework\Routing;
 
 use Closure as BaseClosure;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Validator;
+use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate;
+use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
+use MacropaySolutions\Kernel\Http\JsonResponse;
+use MacropaySolutions\Kernel\Http\Request;
+use MacropaySolutions\Kernel\Support\Str;
+use MacropaySolutions\Kernel\Validation\ValidationException;
+use MacropaySolutions\Kernel\Validation\Validator;
 
 trait ProvidesConvenienceMethods
 {
@@ -52,13 +52,13 @@ trait ProvidesConvenienceMethods
     /**
      * Validate the given request with the given rules.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
      * @return array
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws \MacropaySolutions\Kernel\Validation\ValidationException
      */
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
@@ -74,7 +74,7 @@ trait ProvidesConvenienceMethods
     /**
      * Get the request input based on the given validation rules.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param array $rules
      * @return array
      */
@@ -90,11 +90,11 @@ trait ProvidesConvenienceMethods
     /**
      * Throw the failed validation exception.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Illuminate\Contracts\Validation\Validator $validator
+     * @param \MacropaySolutions\Kernel\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Contracts\Validation\Validator $validator
      * @return void
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws \MacropaySolutions\Kernel\Validation\ValidationException
      */
     protected function throwValidationException(Request $request, $validator)
     {
@@ -107,9 +107,9 @@ trait ProvidesConvenienceMethods
     /**
      * Build a response based on the given errors.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param array $errors
-     * @return \Illuminate\Http\JsonResponse|mixed
+     * @return \MacropaySolutions\Kernel\Http\JsonResponse|mixed
      */
     protected function buildFailedValidationResponse(Request $request, array $errors)
     {
@@ -124,7 +124,7 @@ trait ProvidesConvenienceMethods
     /**
      * Format validation errors.
      *
-     * @param \Illuminate\Validation\Validator $validator
+     * @param \MacropaySolutions\Kernel\Validation\Validator $validator
      * @return array|mixed
      */
     protected function formatValidationErrors(Validator $validator)
@@ -141,9 +141,9 @@ trait ProvidesConvenienceMethods
      *
      * @param mixed $ability
      * @param mixed|array $arguments
-     * @return \Illuminate\Auth\Access\Response
+     * @return \MacropaySolutions\Kernel\Auth\Access\Response
      *
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \MacropaySolutions\Kernel\Auth\Access\AuthorizationException
      */
     public function authorize($ability, $arguments = [])
     {
@@ -155,12 +155,12 @@ trait ProvidesConvenienceMethods
     /**
      * Authorize a given action for a user.
      *
-     * @param \Illuminate\Contracts\Auth\Authenticatable|mixed $user
+     * @param \MacropaySolutions\Kernel\Contracts\Auth\Authenticatable|mixed $user
      * @param mixed $ability
      * @param mixed|array $arguments
-     * @return \Illuminate\Auth\Access\Response
+     * @return \MacropaySolutions\Kernel\Auth\Access\Response
      *
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \MacropaySolutions\Kernel\Auth\Access\AuthorizationException
      */
     public function authorizeForUser($user, $ability, $arguments = [])
     {
@@ -211,7 +211,7 @@ trait ProvidesConvenienceMethods
     /**
      * Get a validation factory instance.
      *
-     * @return \Illuminate\Contracts\Validation\Factory
+     * @return \MacropaySolutions\Kernel\Contracts\Validation\Factory
      */
     protected function getValidationFactory()
     {

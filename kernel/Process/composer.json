@@ -1,0 +1,17 @@
+{
+  "description": "The MacropaySolutions Kernel Process package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "symfony/process": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Process\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

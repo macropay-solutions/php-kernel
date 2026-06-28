@@ -1,0 +1,17 @@
+{
+  "description": "The MacropaySolutions Kernel Pagination package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "ext-filter": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Pagination\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

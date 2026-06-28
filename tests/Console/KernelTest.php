@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Console\Events\CommandFinished;
-use Illuminate\Console\Events\CommandStarting;
-use Illuminate\Contracts\Console\Kernel as ConsoleKernelContract;
-use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
+use MacropaySolutions\Kernel\Console\Events\CommandFinished;
+use MacropaySolutions\Kernel\Console\Events\CommandStarting;
+use MacropaySolutions\Kernel\Contracts\Console\Kernel as ConsoleKernelContract;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Framework\Console\Kernel as ConsoleKernel;
 use MacropaySolutions\Framework\Exceptions\Handler as ExceptionHandler;

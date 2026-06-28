@@ -1,0 +1,16 @@
+{
+  "description": "The MacropaySolutions Kernel Conditionable package.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.0.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MacropaySolutions\\Kernel\\Support\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}

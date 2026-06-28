@@ -3,7 +3,7 @@
 namespace MacropaySolutions\Prompts;
 
 use Closure;
-use Illuminate\Support\Collection;
+use MacropaySolutions\Kernel\Support\Collection;
 
 if (!function_exists('\MacropaySolutions\Prompts\text')) {
     /**

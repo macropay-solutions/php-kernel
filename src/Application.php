@@ -2,34 +2,34 @@
 
 namespace MacropaySolutions\Framework;
 
-use Illuminate\Auth\AuthServiceProvider;
-use Illuminate\Broadcasting\BroadcastServiceProvider;
-use Illuminate\Bus\BusServiceProvider;
-use Illuminate\Cache\CacheServiceProvider;
-use Illuminate\Config\Repository as ConfigRepository;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Foundation\Application as ApplicationContract;
-use Illuminate\Contracts\Foundation\MaintenanceMode as MaintenanceModeContract;
-use Illuminate\Cookie\CookieServiceProvider;
-use Illuminate\Database\DatabaseServiceProvider;
-use Illuminate\Database\MigrationServiceProvider;
-use Illuminate\Encryption\EncryptionServiceProvider;
-use Illuminate\Events\EventServiceProvider;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Filesystem\FilesystemServiceProvider;
-use Illuminate\Hashing\HashServiceProvider;
-use Illuminate\Log\LogManager;
-use Illuminate\Pagination\PaginationServiceProvider;
-use Illuminate\Queue\QueueServiceProvider;
-use Illuminate\Session\SessionServiceProvider;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Composer;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
-use Illuminate\Translation\TranslationServiceProvider;
-use Illuminate\Validation\ValidationServiceProvider;
-use Illuminate\View\ViewServiceProvider;
+use MacropaySolutions\Kernel\Auth\AuthServiceProvider;
+use MacropaySolutions\Kernel\Broadcasting\BroadcastServiceProvider;
+use MacropaySolutions\Kernel\Bus\BusServiceProvider;
+use MacropaySolutions\Kernel\Cache\CacheServiceProvider;
+use MacropaySolutions\Kernel\Config\Repository as ConfigRepository;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
+use MacropaySolutions\Kernel\Contracts\Foundation\Application as ApplicationContract;
+use MacropaySolutions\Kernel\Contracts\Foundation\MaintenanceMode as MaintenanceModeContract;
+use MacropaySolutions\Kernel\Cookie\CookieServiceProvider;
+use MacropaySolutions\Kernel\Database\DatabaseServiceProvider;
+use MacropaySolutions\Kernel\Database\MigrationServiceProvider;
+use MacropaySolutions\Kernel\Encryption\EncryptionServiceProvider;
+use MacropaySolutions\Kernel\Events\EventServiceProvider;
+use MacropaySolutions\Kernel\Filesystem\Filesystem;
+use MacropaySolutions\Kernel\Filesystem\FilesystemServiceProvider;
+use MacropaySolutions\Kernel\Hashing\HashServiceProvider;
+use MacropaySolutions\Kernel\Log\LogManager;
+use MacropaySolutions\Kernel\Pagination\PaginationServiceProvider;
+use MacropaySolutions\Kernel\Queue\QueueServiceProvider;
+use MacropaySolutions\Kernel\Session\SessionServiceProvider;
+use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Composer;
+use MacropaySolutions\Kernel\Support\ServiceProvider;
+use MacropaySolutions\Kernel\Support\Str;
+use MacropaySolutions\Kernel\Translation\TranslationServiceProvider;
+use MacropaySolutions\Kernel\Validation\ValidationServiceProvider;
+use MacropaySolutions\Kernel\View\ViewServiceProvider;
 use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
 use MacropaySolutions\Framework\Routing\Router;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -40,7 +40,7 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 
-use function Illuminate\Filesystem\join_paths;
+use function MacropaySolutions\Kernel\Filesystem\join_paths;
 
 class Application extends Container implements ApplicationContract
 {
@@ -288,7 +288,7 @@ class Application extends Container implements ApplicationContract
     /**
      * Boot the given service provider.
      *
-     * @param \Illuminate\Support\ServiceProvider $provider
+     * @param \MacropaySolutions\Kernel\Support\ServiceProvider $provider
      * @return mixed
      */
     protected function bootProvider(ServiceProvider $provider)
@@ -735,11 +735,11 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Load the Eloquent library for the application.
+     * Load the Obvious library for the application.
      *
      * @return void
      */
-    public function withEloquent()
+    public function withObvious()
     {
         $this->make('db');
     }
@@ -1020,167 +1020,167 @@ class Application extends Container implements ApplicationContract
     {
         $this->abstractAliases = [
             'app' => [
-                \Illuminate\Contracts\Foundation\Application::class,
-                \Illuminate\Container\Container::class,
-                \Illuminate\Contracts\Container\Container::class,
+                \MacropaySolutions\Kernel\Contracts\Foundation\Application::class,
+                \MacropaySolutions\Kernel\Container\Container::class,
+                \MacropaySolutions\Kernel\Contracts\Container\Container::class,
             ],
             'auth' => [
-                \Illuminate\Contracts\Auth\Factory::class,
-                \Illuminate\Auth\AuthManager::class,
+                \MacropaySolutions\Kernel\Contracts\Auth\Factory::class,
+                \MacropaySolutions\Kernel\Auth\AuthManager::class,
             ],
             'auth.driver' => [
-                \Illuminate\Contracts\Auth\Guard::class,
+                \MacropaySolutions\Kernel\Contracts\Auth\Guard::class,
             ],
             'cache' => [
-                \Illuminate\Contracts\Cache\Factory::class,
-                \Illuminate\Cache\CacheManager::class,
+                \MacropaySolutions\Kernel\Contracts\Cache\Factory::class,
+                \MacropaySolutions\Kernel\Cache\CacheManager::class,
             ],
             'cache.store' => [
-                \Illuminate\Contracts\Cache\Repository::class,
+                \MacropaySolutions\Kernel\Contracts\Cache\Repository::class,
             ],
             'config' => [
-                \Illuminate\Contracts\Config\Repository::class,
-                \Illuminate\Config\Repository::class,
+                \MacropaySolutions\Kernel\Contracts\Config\Repository::class,
+                \MacropaySolutions\Kernel\Config\Repository::class,
             ],
             'db' => [
-                \Illuminate\Database\ConnectionResolverInterface::class,
-                \Illuminate\Database\DatabaseManager::class,
+                \MacropaySolutions\Kernel\Database\ConnectionResolverInterface::class,
+                \MacropaySolutions\Kernel\Database\DatabaseManager::class,
             ],
             'encrypter' => [
-                \Illuminate\Contracts\Encryption\Encrypter::class,
-                \Illuminate\Encryption\Encrypter::class,
+                \MacropaySolutions\Kernel\Contracts\Encryption\Encrypter::class,
+                \MacropaySolutions\Kernel\Encryption\Encrypter::class,
             ],
             'events' => [
-                \Illuminate\Contracts\Events\Dispatcher::class,
-                \Illuminate\Events\Dispatcher::class,
+                \MacropaySolutions\Kernel\Contracts\Events\Dispatcher::class,
+                \MacropaySolutions\Kernel\Events\Dispatcher::class,
             ],
             'filesystem' => [
-                \Illuminate\Contracts\Filesystem\Factory::class,
-                \Illuminate\Filesystem\FilesystemManager::class,
+                \MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class,
+                \MacropaySolutions\Kernel\Filesystem\FilesystemManager::class,
             ],
             'filesystem.disk' => [
-                \Illuminate\Contracts\Filesystem\Filesystem::class,
+                \MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem::class,
             ],
             'filesystem.cloud' => [
-                \Illuminate\Contracts\Filesystem\Cloud::class,
+                \MacropaySolutions\Kernel\Contracts\Filesystem\Cloud::class,
             ],
             'hash' => [
-                \Illuminate\Contracts\Hashing\Hasher::class,
-                \Illuminate\Hashing\HashManager::class,
+                \MacropaySolutions\Kernel\Contracts\Hashing\Hasher::class,
+                \MacropaySolutions\Kernel\Hashing\HashManager::class,
             ],
             // quirk: Key is the Interface for 'log'
             \Psr\Log\LoggerInterface::class => [
                 'log',
             ],
             'queue' => [
-                \Illuminate\Contracts\Queue\Factory::class,
-                \Illuminate\Queue\QueueManager::class,
+                \MacropaySolutions\Kernel\Contracts\Queue\Factory::class,
+                \MacropaySolutions\Kernel\Queue\QueueManager::class,
             ],
             'queue.connection' => [
-                \Illuminate\Contracts\Queue\Queue::class,
+                \MacropaySolutions\Kernel\Contracts\Queue\Queue::class,
             ],
             'redis' => [
-                \Illuminate\Contracts\Redis\Factory::class,
-                \Illuminate\Redis\RedisManager::class,
+                \MacropaySolutions\Kernel\Contracts\Redis\Factory::class,
+                \MacropaySolutions\Kernel\Redis\RedisManager::class,
             ],
             'redis.connection' => [
-                \Illuminate\Redis\Connections\Connection::class,
-                \Illuminate\Contracts\Redis\Connection::class,
+                \MacropaySolutions\Kernel\Redis\Connections\Connection::class,
+                \MacropaySolutions\Kernel\Contracts\Redis\Connection::class,
             ],
             // quirk: Key is the Request class
-            \Illuminate\Http\Request::class => [
+            \MacropaySolutions\Kernel\Http\Request::class => [
                 'request',
             ],
             'router' => [
                 \MacropaySolutions\Framework\Routing\Router::class,
             ],
             'translator' => [
-                \Illuminate\Contracts\Translation\Translator::class,
-                \Illuminate\Translation\Translator::class,
+                \MacropaySolutions\Kernel\Contracts\Translation\Translator::class,
+                \MacropaySolutions\Kernel\Translation\Translator::class,
             ],
             'url' => [
                 \MacropaySolutions\Framework\Routing\UrlGenerator::class,
             ],
             'validator' => [
-                \Illuminate\Contracts\Validation\Factory::class,
-                \Illuminate\Validation\Factory::class,
+                \MacropaySolutions\Kernel\Contracts\Validation\Factory::class,
+                \MacropaySolutions\Kernel\Validation\Factory::class,
             ],
             'view' => [
-                \Illuminate\Contracts\View\Factory::class,
-                \Illuminate\View\Factory::class,
+                \MacropaySolutions\Kernel\Contracts\View\Factory::class,
+                \MacropaySolutions\Kernel\View\Factory::class,
             ],
             'session' => [
-                \Illuminate\Session\SessionManager::class,
+                \MacropaySolutions\Kernel\Session\SessionManager::class,
             ],
             'session.store' => [
-                \Illuminate\Session\Store::class,
-                \Illuminate\Contracts\Session\Session::class,
+                \MacropaySolutions\Kernel\Session\Store::class,
+                \MacropaySolutions\Kernel\Contracts\Session\Session::class,
             ],
             'cookie' => [
-                \Illuminate\Cookie\CookieJar::class,
-                \Illuminate\Contracts\Cookie\Factory::class,
-                \Illuminate\Contracts\Cookie\QueueingFactory::class,
+                \MacropaySolutions\Kernel\Cookie\CookieJar::class,
+                \MacropaySolutions\Kernel\Contracts\Cookie\Factory::class,
+                \MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory::class,
             ],
             'files' => [
-                \Illuminate\Filesystem\Filesystem::class,
+                \MacropaySolutions\Kernel\Filesystem\Filesystem::class,
             ],
             'blade.compiler' => [
-                \Illuminate\View\Compilers\BladeCompiler::class,
+                \MacropaySolutions\Kernel\View\Compilers\BladeCompiler::class,
             ],
             'view.engine.resolver' => [
-                \Illuminate\View\Engines\EngineResolver::class,
+                \MacropaySolutions\Kernel\View\Engines\EngineResolver::class,
             ],
         ];
         $this->aliases = [
-            \Illuminate\Contracts\Foundation\Application::class => 'app',
-            \Illuminate\Contracts\Auth\Factory::class => 'auth',
-            \Illuminate\Contracts\Auth\Guard::class => 'auth.driver',
-            \Illuminate\Contracts\Cache\Factory::class => 'cache',
-            \Illuminate\Contracts\Cache\Repository::class => 'cache.store',
-            \Illuminate\Contracts\Config\Repository::class => 'config',
-            \Illuminate\Config\Repository::class => 'config',
-            \Illuminate\Container\Container::class => 'app',
-            \Illuminate\Contracts\Container\Container::class => 'app',
-            \Illuminate\Database\ConnectionResolverInterface::class => 'db',
-            \Illuminate\Database\DatabaseManager::class => 'db',
-            \Illuminate\Contracts\Encryption\Encrypter::class => 'encrypter',
-            \Illuminate\Contracts\Events\Dispatcher::class => 'events',
-            \Illuminate\Contracts\Filesystem\Factory::class => 'filesystem',
-            \Illuminate\Contracts\Filesystem\Filesystem::class => 'filesystem.disk',
-            \Illuminate\Contracts\Filesystem\Cloud::class => 'filesystem.cloud',
-            \Illuminate\Contracts\Hashing\Hasher::class => 'hash',
+            \MacropaySolutions\Kernel\Contracts\Foundation\Application::class => 'app',
+            \MacropaySolutions\Kernel\Contracts\Auth\Factory::class => 'auth',
+            \MacropaySolutions\Kernel\Contracts\Auth\Guard::class => 'auth.driver',
+            \MacropaySolutions\Kernel\Contracts\Cache\Factory::class => 'cache',
+            \MacropaySolutions\Kernel\Contracts\Cache\Repository::class => 'cache.store',
+            \MacropaySolutions\Kernel\Contracts\Config\Repository::class => 'config',
+            \MacropaySolutions\Kernel\Config\Repository::class => 'config',
+            \MacropaySolutions\Kernel\Container\Container::class => 'app',
+            \MacropaySolutions\Kernel\Contracts\Container\Container::class => 'app',
+            \MacropaySolutions\Kernel\Database\ConnectionResolverInterface::class => 'db',
+            \MacropaySolutions\Kernel\Database\DatabaseManager::class => 'db',
+            \MacropaySolutions\Kernel\Contracts\Encryption\Encrypter::class => 'encrypter',
+            \MacropaySolutions\Kernel\Contracts\Events\Dispatcher::class => 'events',
+            \MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class => 'filesystem',
+            \MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem::class => 'filesystem.disk',
+            \MacropaySolutions\Kernel\Contracts\Filesystem\Cloud::class => 'filesystem.cloud',
+            \MacropaySolutions\Kernel\Contracts\Hashing\Hasher::class => 'hash',
             'log' => \Psr\Log\LoggerInterface::class,
-            \Illuminate\Contracts\Queue\Factory::class => 'queue',
-            \Illuminate\Contracts\Queue\Queue::class => 'queue.connection',
-            \Illuminate\Redis\RedisManager::class => 'redis',
-            \Illuminate\Contracts\Redis\Factory::class => 'redis',
-            \Illuminate\Redis\Connections\Connection::class => 'redis.connection',
-            \Illuminate\Contracts\Redis\Connection::class => 'redis.connection',
-            'request' => \Illuminate\Http\Request::class,
+            \MacropaySolutions\Kernel\Contracts\Queue\Factory::class => 'queue',
+            \MacropaySolutions\Kernel\Contracts\Queue\Queue::class => 'queue.connection',
+            \MacropaySolutions\Kernel\Redis\RedisManager::class => 'redis',
+            \MacropaySolutions\Kernel\Contracts\Redis\Factory::class => 'redis',
+            \MacropaySolutions\Kernel\Redis\Connections\Connection::class => 'redis.connection',
+            \MacropaySolutions\Kernel\Contracts\Redis\Connection::class => 'redis.connection',
+            'request' => \MacropaySolutions\Kernel\Http\Request::class,
             \MacropaySolutions\Framework\Routing\Router::class => 'router',
-            \Illuminate\Contracts\Translation\Translator::class => 'translator',
+            \MacropaySolutions\Kernel\Contracts\Translation\Translator::class => 'translator',
             \MacropaySolutions\Framework\Routing\UrlGenerator::class => 'url',
-            \Illuminate\Contracts\Validation\Factory::class => 'validator',
-            \Illuminate\Contracts\View\Factory::class => 'view',
-            \Illuminate\Session\SessionManager::class => 'session',
-            \Illuminate\Session\Store::class => 'session.store',
-            \Illuminate\Contracts\Session\Session::class => 'session.store',
-            \Illuminate\Cookie\CookieJar::class => 'cookie',
-            \Illuminate\Contracts\Cookie\Factory::class => 'cookie',
-            \Illuminate\Contracts\Cookie\QueueingFactory::class => 'cookie',
-            \Illuminate\Auth\AuthManager::class => 'auth',
-            \Illuminate\Cache\CacheManager::class => 'cache',
-            \Illuminate\Encryption\Encrypter::class => 'encrypter',
-            \Illuminate\Events\Dispatcher::class => 'events',
-            \Illuminate\Filesystem\FilesystemManager::class => 'filesystem',
-            \Illuminate\Filesystem\Filesystem::class => 'files',
-            \Illuminate\Hashing\HashManager::class => 'hash',
-            \Illuminate\Queue\QueueManager::class => 'queue',
-            \Illuminate\Translation\Translator::class => 'translator',
-            \Illuminate\Validation\Factory::class => 'validator',
-            \Illuminate\View\Factory::class => 'view',
-            \Illuminate\View\Compilers\BladeCompiler::class => 'blade.compiler',
-            \Illuminate\View\Engines\EngineResolver::class => 'view.engine.resolver',
+            \MacropaySolutions\Kernel\Contracts\Validation\Factory::class => 'validator',
+            \MacropaySolutions\Kernel\Contracts\View\Factory::class => 'view',
+            \MacropaySolutions\Kernel\Session\SessionManager::class => 'session',
+            \MacropaySolutions\Kernel\Session\Store::class => 'session.store',
+            \MacropaySolutions\Kernel\Contracts\Session\Session::class => 'session.store',
+            \MacropaySolutions\Kernel\Cookie\CookieJar::class => 'cookie',
+            \MacropaySolutions\Kernel\Contracts\Cookie\Factory::class => 'cookie',
+            \MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory::class => 'cookie',
+            \MacropaySolutions\Kernel\Auth\AuthManager::class => 'auth',
+            \MacropaySolutions\Kernel\Cache\CacheManager::class => 'cache',
+            \MacropaySolutions\Kernel\Encryption\Encrypter::class => 'encrypter',
+            \MacropaySolutions\Kernel\Events\Dispatcher::class => 'events',
+            \MacropaySolutions\Kernel\Filesystem\FilesystemManager::class => 'filesystem',
+            \MacropaySolutions\Kernel\Filesystem\Filesystem::class => 'files',
+            \MacropaySolutions\Kernel\Hashing\HashManager::class => 'hash',
+            \MacropaySolutions\Kernel\Queue\QueueManager::class => 'queue',
+            \MacropaySolutions\Kernel\Translation\Translator::class => 'translator',
+            \MacropaySolutions\Kernel\Validation\Factory::class => 'validator',
+            \MacropaySolutions\Kernel\View\Factory::class => 'view',
+            \MacropaySolutions\Kernel\View\Compilers\BladeCompiler::class => 'blade.compiler',
+            \MacropaySolutions\Kernel\View\Engines\EngineResolver::class => 'view.engine.resolver',
         ];
     }
 
@@ -1192,51 +1192,51 @@ class Application extends Container implements ApplicationContract
     public $availableBindings = [
         'auth' => 'registerAuthBindings',
         'auth.driver' => 'registerAuthBindings',
-        \Illuminate\Auth\AuthManager::class => 'registerAuthBindings',
-        \Illuminate\Contracts\Auth\Guard::class => 'registerAuthBindings',
-        \Illuminate\Contracts\Auth\Access\Gate::class => 'registerAuthBindings',
-        \Illuminate\Contracts\Broadcasting\Broadcaster::class => 'registerBroadcastingBindings',
-        \Illuminate\Contracts\Broadcasting\Factory::class => 'registerBroadcastingBindings',
-        \Illuminate\Contracts\Bus\Dispatcher::class => 'registerBusBindings',
+        \MacropaySolutions\Kernel\Auth\AuthManager::class => 'registerAuthBindings',
+        \MacropaySolutions\Kernel\Contracts\Auth\Guard::class => 'registerAuthBindings',
+        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerAuthBindings',
+        \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster::class => 'registerBroadcastingBindings',
+        \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class => 'registerBroadcastingBindings',
+        \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class => 'registerBusBindings',
         'cache' => 'registerCacheBindings',
         'cache.store' => 'registerCacheBindings',
-        \Illuminate\Contracts\Cache\Factory::class => 'registerCacheBindings',
-        \Illuminate\Contracts\Cache\Repository::class => 'registerCacheBindings',
+        \MacropaySolutions\Kernel\Contracts\Cache\Factory::class => 'registerCacheBindings',
+        \MacropaySolutions\Kernel\Contracts\Cache\Repository::class => 'registerCacheBindings',
         'composer' => 'registerComposerBindings',
         'config' => 'registerConfigBindings',
         'db' => 'registerDatabaseBindings',
         'filesystem' => 'registerFilesystemBindings',
         'filesystem.cloud' => 'registerFilesystemBindings',
         'filesystem.disk' => 'registerFilesystemBindings',
-        \Illuminate\Contracts\Filesystem\Cloud::class => 'registerFilesystemBindings',
-        \Illuminate\Contracts\Filesystem\Filesystem::class => 'registerFilesystemBindings',
-        \Illuminate\Contracts\Filesystem\Factory::class => 'registerFilesystemBindings',
+        \MacropaySolutions\Kernel\Contracts\Filesystem\Cloud::class => 'registerFilesystemBindings',
+        \MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem::class => 'registerFilesystemBindings',
+        \MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class => 'registerFilesystemBindings',
         'encrypter' => 'registerEncrypterBindings',
-        \Illuminate\Contracts\Encryption\Encrypter::class => 'registerEncrypterBindings',
+        \MacropaySolutions\Kernel\Contracts\Encryption\Encrypter::class => 'registerEncrypterBindings',
         'events' => 'registerEventBindings',
-        \Illuminate\Contracts\Events\Dispatcher::class => 'registerEventBindings',
+        \MacropaySolutions\Kernel\Contracts\Events\Dispatcher::class => 'registerEventBindings',
         'files' => 'registerFilesBindings',
         'hash' => 'registerHashBindings',
-        \Illuminate\Contracts\Hashing\Hasher::class => 'registerHashBindings',
+        \MacropaySolutions\Kernel\Contracts\Hashing\Hasher::class => 'registerHashBindings',
         'log' => 'registerLogBindings',
         \Psr\Log\LoggerInterface::class => 'registerLogBindings',
         'queue' => 'registerQueueBindings',
         'queue.connection' => 'registerQueueBindings',
-        \Illuminate\Contracts\Queue\Factory::class => 'registerQueueBindings',
-        \Illuminate\Contracts\Queue\Queue::class => 'registerQueueBindings',
+        \MacropaySolutions\Kernel\Contracts\Queue\Factory::class => 'registerQueueBindings',
+        \MacropaySolutions\Kernel\Contracts\Queue\Queue::class => 'registerQueueBindings',
         'router' => 'registerRouterBindings',
         \Psr\Http\Message\ServerRequestInterface::class => 'registerPsrRequestBindings',
         \Psr\Http\Message\ResponseInterface::class => 'registerPsrResponseBindings',
         'translator' => 'registerTranslationBindings',
         'url' => 'registerUrlGeneratorBindings',
         'validator' => 'registerValidatorBindings',
-        \Illuminate\Contracts\Validation\Factory::class => 'registerValidatorBindings',
+        \MacropaySolutions\Kernel\Contracts\Validation\Factory::class => 'registerValidatorBindings',
         'view' => 'registerViewBindings',
-        \Illuminate\Contracts\View\Factory::class => 'registerViewBindings',
+        \MacropaySolutions\Kernel\Contracts\View\Factory::class => 'registerViewBindings',
         'view.finder' => 'registerViewBindings',
         'blade.compiler' => 'registerViewBindings',
         'view.engine.resolver' => 'registerViewBindings',
-        \Illuminate\View\Engines\EngineResolver::class => 'registerViewBindings',
+        \MacropaySolutions\Kernel\View\Engines\EngineResolver::class => 'registerViewBindings',
 
         'session' => 'registerSessionBindings',
         'session.store' => 'registerSessionBindings',

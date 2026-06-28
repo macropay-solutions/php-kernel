@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Framework\Http;
 
-use Illuminate\Http\Request as BaseRequest;
+use MacropaySolutions\Kernel\Http\Request as BaseRequest;
 
 class Request extends BaseRequest
 {

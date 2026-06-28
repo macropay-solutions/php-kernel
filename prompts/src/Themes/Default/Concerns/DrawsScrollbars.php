@@ -2,15 +2,15 @@
 
 namespace MacropaySolutions\Prompts\Themes\Default\Concerns;
 
-use Illuminate\Support\Collection;
+use MacropaySolutions\Kernel\Support\Collection;
 
 trait DrawsScrollbars
 {
     /**
      * Render a scrollbar beside the visible items.
      *
-     * @param \Illuminate\Support\Collection<int, string> $visible
-     * @return \Illuminate\Support\Collection<int, string>
+     * @param \MacropaySolutions\Kernel\Support\Collection<int, string> $visible
+     * @return \MacropaySolutions\Kernel\Support\Collection<int, string>
      */
     protected function scrollbar(
         Collection $visible,

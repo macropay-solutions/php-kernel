@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Broadcasting\Factory as BroadcastFactory;
-use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Contracts\Cookie\Factory as CookieFactory;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Support\HtmlString;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Auth\Factory as AuthFactory;
+use MacropaySolutions\Kernel\Contracts\Broadcasting\Factory as BroadcastFactory;
+use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
+use MacropaySolutions\Kernel\Contracts\Cookie\Factory as CookieFactory;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Support\HtmlString;
 use MacropaySolutions\Framework\Bus\PendingDispatch;
 
 if (!function_exists('abort')) {
@@ -50,7 +50,7 @@ if (!function_exists('auth')) {
      * Get the available auth instance.
      *
      * @param string|null $guard
-     * @return \Illuminate\Contracts\Auth\Factory|\Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard
+     * @return \MacropaySolutions\Kernel\Contracts\Auth\Factory|\MacropaySolutions\Kernel\Contracts\Auth\Guard|\MacropaySolutions\Kernel\Contracts\Auth\StatefulGuard
      */
     function auth($guard = null)
     {
@@ -80,7 +80,7 @@ if (!function_exists('broadcast')) {
      * Begin broadcasting an event.
      *
      * @param mixed|null $event
-     * @return \Illuminate\Broadcasting\PendingBroadcast
+     * @return \MacropaySolutions\Kernel\Broadcasting\PendingBroadcast
      */
     function broadcast($event = null)
     {
@@ -112,7 +112,7 @@ if (!function_exists('dispatch')) {
     {
         if (\is_array($job)) {
             return new \MacropaySolutions\Framework\Bus\PendingCallableDispatch(
-                \Illuminate\Queue\CallQueuedCallable::create($job)
+                \MacropaySolutions\Kernel\Queue\CallQueuedCallable::create($job)
             );
         }
 
@@ -221,7 +221,7 @@ if (!function_exists('redirect')) {
      * @param int $status
      * @param array $headers
      * @param bool|null $secure
-     * @return \MacropaySolutions\Framework\Http\Redirector|\Illuminate\Http\RedirectResponse
+     * @return \MacropaySolutions\Framework\Http\Redirector|\MacropaySolutions\Kernel\Http\RedirectResponse
      */
     function redirect($to = null, $status = 302, $headers = [], $secure = null)
     {
@@ -254,7 +254,7 @@ if (!function_exists('request')) {
      *
      * @param array|string|null $key
      * @param mixed $default
-     * @return \Illuminate\Http\Request|string|array
+     * @return \MacropaySolutions\Kernel\Http\Request|string|array
      */
     function request($key = null, $default = null)
     {
@@ -292,7 +292,7 @@ if (!function_exists('response')) {
      * @param string $content
      * @param int $status
      * @param array $headers
-     * @return \Illuminate\Http\Response|\MacropaySolutions\Framework\Http\ResponseFactory
+     * @return \MacropaySolutions\Kernel\Http\Response|\MacropaySolutions\Framework\Http\ResponseFactory
      */
     function response($content = '', $status = 200, array $headers = [])
     {
@@ -341,7 +341,7 @@ if (!function_exists('trans')) {
      * @param string|null $id
      * @param array $replace
      * @param string|null $locale
-     * @return \Illuminate\Contracts\Translation\Translator|string|array|null
+     * @return \MacropaySolutions\Kernel\Contracts\Translation\Translator|string|array|null
      */
     function trans($id = null, $replace = [], $locale = null)
     {
@@ -407,7 +407,7 @@ if (!function_exists('validator')) {
      * @param array $rules
      * @param array $messages
      * @param array $customAttributes
-     * @return \Illuminate\Contracts\Validation\Validator
+     * @return \MacropaySolutions\Kernel\Contracts\Validation\Validator
      */
     function validator(array $data = [], array $rules = [], array $messages = [], array $customAttributes = [])
     {
@@ -428,7 +428,7 @@ if (!function_exists('view')) {
      * @param string $view
      * @param array $data
      * @param array $mergeData
-     * @return \Illuminate\View\View
+     * @return \MacropaySolutions\Kernel\View\View
      */
     function view($view = null, $data = [], $mergeData = [])
     {
@@ -515,7 +515,7 @@ if (!function_exists('di')) {
             return new $classFqn(...$parametersList);
         }
 
-        throw new \Illuminate\Contracts\Container\BindingResolutionException(
+        throw new \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException(
             'di function called before app booted for: ' . $classFqn . ' trace: ' . \json_encode(
                 \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
             )
@@ -531,7 +531,7 @@ if (!function_exists('session')) {
      *
      * @param array|string|null $key
      * @param mixed $default
-     * @return mixed|\Illuminate\Session\Store|\Illuminate\Session\SessionManager
+     * @return mixed|\MacropaySolutions\Kernel\Session\Store|\MacropaySolutions\Kernel\Session\SessionManager
      */
     function session($key = null, $default = null)
     {
@@ -560,7 +560,7 @@ if (!function_exists('cookie')) {
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \Illuminate\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
+     * @return \MacropaySolutions\Kernel\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
      */
     function cookie(
         $name = null,
@@ -587,7 +587,7 @@ if (!function_exists('csrf_field')) {
     /**
      * Generate a CSRF token form field.
      *
-     * @return \Illuminate\Support\HtmlString
+     * @return \MacropaySolutions\Kernel\Support\HtmlString
      */
     function csrf_field()
     {
@@ -616,12 +616,12 @@ if (!function_exists('csrf_token')) {
 }
 
 if (!\function_exists('appDate')) {
-    function appDate(): \Illuminate\Support\DateFactory
+    function appDate(): \MacropaySolutions\Kernel\Support\DateFactory
     {
         if (\app()->bound('date')) {
             return \app('date');
         }
 
-        return \app(\Illuminate\Support\DateFactory::class);
+        return \app(\MacropaySolutions\Kernel\Support\DateFactory::class);
     }
 }
