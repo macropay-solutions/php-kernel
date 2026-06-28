@@ -4,14 +4,14 @@ namespace MacropaySolutions\Kernel\View;
 
 use ArrayAccess;
 use ArrayIterator;
+use IteratorAggregate;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\HtmlString;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use IteratorAggregate;
-use JsonSerializable;
 use Traversable;
 
 class ComponentAttributeBag implements ArrayAccess, IteratorAggregate, JsonSerializable, Htmlable

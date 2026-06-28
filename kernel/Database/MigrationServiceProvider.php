@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Database;
 
-use Composer\InstalledVersions;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Database\Console\Migrations\FreshCommand;

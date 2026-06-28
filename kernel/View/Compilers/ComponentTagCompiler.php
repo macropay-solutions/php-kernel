@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\View\Compilers;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Foundation\Application;
 use MacropaySolutions\Kernel\Contracts\View\Factory;
@@ -10,7 +11,6 @@ use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\View\AnonymousComponent;
 use MacropaySolutions\Kernel\View\DynamicComponent;
 use MacropaySolutions\Kernel\View\ViewFinderInterface;
-use InvalidArgumentException;
 use ReflectionClass;
 
 class ComponentTagCompiler

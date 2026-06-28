@@ -2,11 +2,11 @@
 
 namespace MacropaySolutions\Kernel\Database\Schema\Grammars;
 
+use LogicException;
 use MacropaySolutions\Kernel\Database\Connection;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\Schema\Blueprint;
 use MacropaySolutions\Kernel\Support\Fluent;
-use LogicException;
 
 class PostgresGrammar extends Grammar
 {

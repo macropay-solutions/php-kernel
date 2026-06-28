@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Console\Scheduling;
 
-use MacropaySolutions\Kernel\Support\Carbon;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Support\Carbon;
 
 trait ManagesFrequencies
 {

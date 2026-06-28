@@ -3,8 +3,8 @@
 namespace MacropaySolutions\Kernel\Log;
 
 use Closure;
-use MacropaySolutions\Kernel\Support\Str;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Support\Str;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Handler\FingersCrossedHandler;

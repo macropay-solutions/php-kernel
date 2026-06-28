@@ -2,9 +2,9 @@
 
 namespace MacropaySolutions\Kernel\View\Concerns;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\View\View;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 
 trait ManagesLayouts
 {

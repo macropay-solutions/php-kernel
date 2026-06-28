@@ -3,12 +3,12 @@
 namespace MacropaySolutions\Kernel\Http;
 
 use ArrayObject;
+use InvalidArgumentException;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Contracts\Support\Renderable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
-use JsonSerializable;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 

@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Auth\Passwords;
 
-use MacropaySolutions\Kernel\Contracts\Auth\PasswordBrokerFactory as FactoryContract;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Contracts\Auth\PasswordBrokerFactory as FactoryContract;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Auth\PasswordBroker

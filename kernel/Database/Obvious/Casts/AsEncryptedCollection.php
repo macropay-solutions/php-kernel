@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Casts;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\Castable;
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\CastsAttributes;
 use MacropaySolutions\Kernel\Support\Collection;
-use InvalidArgumentException;
 
 class AsEncryptedCollection implements Castable
 {

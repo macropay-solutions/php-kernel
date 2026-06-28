@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Broadcasting;
 
-use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Framework\Routing\Controller;
+use MacropaySolutions\Kernel\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class BroadcastController extends Controller

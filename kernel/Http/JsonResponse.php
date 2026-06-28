@@ -2,11 +2,11 @@
 
 namespace MacropaySolutions\Kernel\Http;
 
+use InvalidArgumentException;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
-use JsonSerializable;
 use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
 class JsonResponse extends BaseJsonResponse

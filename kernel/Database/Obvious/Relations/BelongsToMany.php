@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Relations;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
@@ -13,7 +14,6 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\InteractsWithDi
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\InteractsWithPivotTable;
 use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 
 class BelongsToMany extends Relation
 {

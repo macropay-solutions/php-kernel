@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\Support;
 
 use BackedEnum;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
-use JsonSerializable;
 
 class Js implements Htmlable
 {

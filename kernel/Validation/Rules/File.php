@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Validation\Rules;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Validation\DataAwareRule;
 use MacropaySolutions\Kernel\Contracts\Validation\Rule;
 use MacropaySolutions\Kernel\Contracts\Validation\ValidatorAwareRule;
@@ -9,7 +10,6 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
 
 class File implements Rule, DataAwareRule, ValidatorAwareRule
 {

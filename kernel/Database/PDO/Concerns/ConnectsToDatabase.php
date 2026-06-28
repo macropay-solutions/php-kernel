@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Database\PDO\Concerns;
 
-use MacropaySolutions\Kernel\Database\PDO\Connection;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Database\PDO\Connection;
 use PDO;
 
 trait ConnectsToDatabase

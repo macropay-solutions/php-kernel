@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Obvious\Scope;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 
 trait HasGlobalScopes
 {

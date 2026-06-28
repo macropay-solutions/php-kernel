@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\View;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
@@ -9,7 +10,6 @@ use MacropaySolutions\Kernel\Contracts\View\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\Kernel\View\Engines\EngineResolver;
-use InvalidArgumentException;
 
 class Factory implements FactoryContract
 {

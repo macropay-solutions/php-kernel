@@ -4,12 +4,12 @@ namespace MacropaySolutions\Kernel\Pagination;
 
 use ArrayAccess;
 use Countable;
+use IteratorAggregate;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Pagination\CursorPaginator as PaginatorContract;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Support\Collection;
-use IteratorAggregate;
-use JsonSerializable;
 
 class CursorPaginator extends AbstractCursorPaginator implements
     Arrayable,

@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
 use BadMethodCallException;
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
 use MacropaySolutions\Kernel\Database\Obvious\RelationNotFoundException;
@@ -13,7 +14,6 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Relation;
 use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 
 trait QueriesRelationships
 {

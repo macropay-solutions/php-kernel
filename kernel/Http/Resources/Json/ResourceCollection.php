@@ -3,11 +3,11 @@
 namespace MacropaySolutions\Kernel\Http\Resources\Json;
 
 use Countable;
+use IteratorAggregate;
 use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Resources\CollectsResources;
 use MacropaySolutions\Kernel\Pagination\AbstractCursorPaginator;
 use MacropaySolutions\Kernel\Pagination\AbstractPaginator;
-use IteratorAggregate;
 
 class ResourceCollection extends JsonResource implements Countable, IteratorAggregate
 {

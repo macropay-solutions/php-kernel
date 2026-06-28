@@ -4,10 +4,10 @@ namespace MacropaySolutions\Kernel\Support;
 
 use ArrayAccess;
 use Closure;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\Tappable;
-use JsonSerializable;
 use Symfony\Component\VarDumper\VarDumper;
 
 class Stringable implements JsonSerializable, ArrayAccess

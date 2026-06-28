@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\View;
 
-use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 
 class ComponentSlot implements Htmlable
 {

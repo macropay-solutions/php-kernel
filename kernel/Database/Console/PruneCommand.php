@@ -2,16 +2,16 @@
 
 namespace MacropaySolutions\Kernel\Database\Console;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
-use MacropaySolutions\Kernel\Database\Obvious\MassPrunable;
-use MacropaySolutions\Kernel\Database\Obvious\Prunable;
-use MacropaySolutions\Kernel\Database\Obvious\SoftDeletes;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningFinished;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningStarting;
 use MacropaySolutions\Kernel\Database\Events\ModelsPruned;
+use MacropaySolutions\Kernel\Database\Obvious\MassPrunable;
+use MacropaySolutions\Kernel\Database\Obvious\Prunable;
+use MacropaySolutions\Kernel\Database\Obvious\SoftDeletes;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 use Symfony\Component\Finder\Finder;
 
 class PruneCommand extends Command

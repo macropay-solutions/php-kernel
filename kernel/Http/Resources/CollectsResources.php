@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\Kernel\Http\Resources;
 
+use LogicException;
 use MacropaySolutions\Kernel\Http\Resources\Json\JsonResource;
 use MacropaySolutions\Kernel\Pagination\AbstractCursorPaginator;
 use MacropaySolutions\Kernel\Pagination\AbstractPaginator;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Str;
-use LogicException;
 use ReflectionClass;
 use Traversable;
 

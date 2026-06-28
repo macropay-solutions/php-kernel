@@ -3,13 +3,13 @@
 namespace MacropaySolutions\Kernel\Database;
 
 use Doctrine\DBAL\Types\Type;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Connectors\ConnectionFactory;
 use MacropaySolutions\Kernel\Database\Events\ConnectionEstablished;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\ConfigurationUrlParser;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
 use PDO;
 use RuntimeException;
 

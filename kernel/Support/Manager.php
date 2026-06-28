@@ -3,8 +3,8 @@
 namespace MacropaySolutions\Kernel\Support;
 
 use Closure;
-use MacropaySolutions\Kernel\Contracts\Container\Container;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Contracts\Container\Container;
 
 abstract class Manager
 {

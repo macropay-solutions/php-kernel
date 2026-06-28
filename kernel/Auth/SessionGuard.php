@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Auth;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Auth\Events\Attempting;
 use MacropaySolutions\Kernel\Auth\Events\Authenticated;
 use MacropaySolutions\Kernel\Auth\Events\CurrentDeviceLogout;
@@ -21,7 +22,6 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Timebox;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;

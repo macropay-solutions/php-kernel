@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Queue;
 
 use DateTimeInterface;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Queue\Job as JobContract;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
-use InvalidArgumentException;
 use Throwable;
 
 /**

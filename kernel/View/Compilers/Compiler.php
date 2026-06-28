@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\View\Compilers;
 
 use ErrorException;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 
 abstract class Compiler
 {

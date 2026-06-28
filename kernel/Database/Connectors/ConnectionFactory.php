@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Database\Connectors;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Database\Connection;
 use MacropaySolutions\Kernel\Database\MySqlConnection;
@@ -9,7 +10,6 @@ use MacropaySolutions\Kernel\Database\PostgresConnection;
 use MacropaySolutions\Kernel\Database\SQLiteConnection;
 use MacropaySolutions\Kernel\Database\SqlServerConnection;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 use PDOException;
 
 class ConnectionFactory

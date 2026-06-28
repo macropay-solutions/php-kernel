@@ -4,11 +4,11 @@ namespace MacropaySolutions\Kernel\Cache;
 
 use Aws\DynamoDb\DynamoDbClient;
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Cache\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Contracts\Cache\Store;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher as DispatcherContract;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Cache\Repository

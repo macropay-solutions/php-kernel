@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\Process;
 
 use Closure;
+use LogicException;
 use MacropaySolutions\Kernel\Process\Exceptions\ProcessTimedOutException;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use LogicException;
 use RuntimeException;
 use Symfony\Component\Process\Exception\ProcessTimedOutException as SymfonyTimeoutException;
 use Symfony\Component\Process\Process;

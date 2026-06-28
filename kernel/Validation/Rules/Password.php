@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Validation\Rules;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Validation\DataAwareRule;
 use MacropaySolutions\Kernel\Contracts\Validation\Rule;
@@ -9,7 +10,6 @@ use MacropaySolutions\Kernel\Contracts\Validation\UncompromisedVerifier;
 use MacropaySolutions\Kernel\Contracts\Validation\ValidatorAwareRule;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use InvalidArgumentException;
 
 class Password implements Rule, DataAwareRule, ValidatorAwareRule
 {

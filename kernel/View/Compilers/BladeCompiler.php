@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\View\Compilers;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Contracts\View\Factory as ViewFactory;
@@ -10,7 +11,6 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use MacropaySolutions\Kernel\View\Component;
-use InvalidArgumentException;
 
 class BladeCompiler extends Compiler implements CompilerInterface
 {

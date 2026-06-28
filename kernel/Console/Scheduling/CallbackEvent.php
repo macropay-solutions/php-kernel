@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Console\Scheduling;
 
-use MacropaySolutions\Kernel\Contracts\Container\Container;
-use MacropaySolutions\Kernel\Support\Reflector;
 use InvalidArgumentException;
 use LogicException;
+use MacropaySolutions\Kernel\Contracts\Container\Container;
+use MacropaySolutions\Kernel\Support\Reflector;
 use RuntimeException;
 use Throwable;
 

@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Notifications;
 
-use MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher;
 
 class AnonymousNotifiable
 {

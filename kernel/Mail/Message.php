@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Mail;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Mail\Attachable;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use InvalidArgumentException;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Part\DataPart;

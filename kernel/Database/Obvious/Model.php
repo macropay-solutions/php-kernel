@@ -3,6 +3,9 @@
 namespace MacropaySolutions\Kernel\Database\Obvious;
 
 use ArrayAccess;
+use JsonException;
+use JsonSerializable;
+use LogicException;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\HasBroadcastChannel;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableCollection;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableEntity;
@@ -22,9 +25,6 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use JsonException;
-use JsonSerializable;
-use LogicException;
 
 /**
  * @property-read ?object a manages attributes only. DO NOT STORE THIS IN EXTERNAL VARIABLES!

@@ -3,13 +3,13 @@
 namespace MacropaySolutions\Kernel\Redis;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Redis\Factory;
 use MacropaySolutions\Kernel\Redis\Connections\Connection;
 use MacropaySolutions\Kernel\Redis\Connectors\PhpRedisConnector;
 use MacropaySolutions\Kernel\Redis\Connectors\PredisConnector;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\ConfigurationUrlParser;
-use InvalidArgumentException;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Redis\Connections\Connection

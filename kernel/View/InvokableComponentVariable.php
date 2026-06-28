@@ -4,9 +4,9 @@ namespace MacropaySolutions\Kernel\View;
 
 use ArrayIterator;
 use Closure;
+use IteratorAggregate;
 use MacropaySolutions\Kernel\Contracts\Support\DeferringDisplayableValue;
 use MacropaySolutions\Kernel\Support\Enumerable;
-use IteratorAggregate;
 use Traversable;
 
 class InvokableComponentVariable implements DeferringDisplayableValue, IteratorAggregate

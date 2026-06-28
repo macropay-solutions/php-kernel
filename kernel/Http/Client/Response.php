@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Http\Client;
 
 use ArrayAccess;
+use LogicException;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use LogicException;
 
 class Response implements ArrayAccess
 {

@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Query\JoinClause;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 
 trait CanBeOneOfMany
 {

@@ -5,13 +5,13 @@ namespace MacropaySolutions\Kernel\Database\Schema\Grammars;
 use BackedEnum;
 use Doctrine\DBAL\Schema\AbstractSchemaManager as SchemaManager;
 use Doctrine\DBAL\Schema\TableDiff;
+use LogicException;
 use MacropaySolutions\Kernel\Contracts\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\Concerns\CompilesJsonPaths;
 use MacropaySolutions\Kernel\Database\Connection;
 use MacropaySolutions\Kernel\Database\Grammar as BaseGrammar;
 use MacropaySolutions\Kernel\Database\Schema\Blueprint;
 use MacropaySolutions\Kernel\Support\Fluent;
-use LogicException;
 use RuntimeException;
 
 abstract class Grammar extends BaseGrammar

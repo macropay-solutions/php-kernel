@@ -2,13 +2,13 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious;
 
+use LogicException;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableCollection;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableEntity;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\InteractsWithDictionary;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
-use LogicException;
 
 /**
  * @template TKey of array-key

@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Support;
 
 use ArrayAccess;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
-use JsonSerializable;
 
 /**
  * @template TKey of array-key

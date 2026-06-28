@@ -4,10 +4,10 @@ namespace MacropaySolutions\Kernel\Support;
 
 use CachingIterator;
 use Countable;
-use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
-use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use IteratorAggregate;
 use JsonSerializable;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use Traversable;
 
 /**

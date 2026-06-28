@@ -4,8 +4,8 @@ namespace MacropaySolutions\Kernel\Support;
 
 use ArgumentCountError;
 use ArrayAccess;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Support\Traits\Macroable;
 
 class Arr
 {

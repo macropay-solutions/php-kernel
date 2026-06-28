@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\View;
 
-use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class FileViewFinder implements ViewFinderInterface
 {

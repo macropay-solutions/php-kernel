@@ -2,11 +2,11 @@
 
 namespace MacropaySolutions\Kernel\Support;
 
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Contracts\Support\MessageBag as MessageBagContract;
 use MacropaySolutions\Kernel\Contracts\Support\MessageProvider;
-use JsonSerializable;
 
 class MessageBag implements Jsonable, JsonSerializable, MessageBagContract, MessageProvider
 {

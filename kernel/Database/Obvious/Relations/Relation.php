@@ -3,11 +3,11 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Relations;
 
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\Builder as BuilderContract;
+use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
-use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;

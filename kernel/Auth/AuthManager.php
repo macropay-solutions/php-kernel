@@ -3,8 +3,8 @@
 namespace MacropaySolutions\Kernel\Auth;
 
 use Closure;
-use MacropaySolutions\Kernel\Contracts\Auth\Factory as FactoryContract;
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Contracts\Auth\Factory as FactoryContract;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Auth\Guard

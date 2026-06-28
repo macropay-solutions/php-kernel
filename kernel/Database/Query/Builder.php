@@ -6,6 +6,8 @@ use BackedEnum;
 use Carbon\CarbonPeriod;
 use Closure;
 use DateTimeInterface;
+use InvalidArgumentException;
+use LogicException;
 use MacropaySolutions\Kernel\Contracts\Database\Query\Builder as BuilderContract;
 use MacropaySolutions\Kernel\Contracts\Database\Query\ConditionExpression;
 use MacropaySolutions\Kernel\Contracts\Database\Query\Expression as ExpressionContract;
@@ -24,8 +26,6 @@ use MacropaySolutions\Kernel\Support\LazyCollection;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
-use LogicException;
 use RuntimeException;
 
 class Builder implements BuilderContract

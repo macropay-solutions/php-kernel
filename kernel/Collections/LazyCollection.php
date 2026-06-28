@@ -6,12 +6,12 @@ use ArrayIterator;
 use Closure;
 use DateTimeInterface;
 use Generator;
+use InvalidArgumentException;
+use IteratorAggregate;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\CanBeEscapedWhenCastToString;
 use MacropaySolutions\Kernel\Support\Traits\EnumeratesValues;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
-use IteratorAggregate;
 use stdClass;
 use Traversable;
 

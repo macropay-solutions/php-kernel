@@ -3,8 +3,8 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Casts;
 
 use ArrayObject as BaseArrayObject;
-use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use JsonSerializable;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 
 /**
  * @template TKey of array-key

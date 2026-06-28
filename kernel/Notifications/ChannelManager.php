@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\Kernel\Notifications;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher as Bus;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher as DispatcherContract;
 use MacropaySolutions\Kernel\Contracts\Notifications\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Support\Manager;
-use InvalidArgumentException;
 
 class ChannelManager extends Manager implements DispatcherContract, FactoryContract
 {

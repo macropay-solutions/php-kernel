@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Filesystem;
 
 use Aws\S3\S3Client;
-use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use League\Flysystem\FilesystemAdapter as FlysystemAdapter;
 use League\Flysystem\FilesystemOperator;
+use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 
 class AwsS3V3Adapter extends FilesystemAdapter
 {

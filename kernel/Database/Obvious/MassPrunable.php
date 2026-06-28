@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious;
 
-use MacropaySolutions\Kernel\Database\Events\ModelsPruned;
 use LogicException;
+use MacropaySolutions\Kernel\Database\Events\ModelsPruned;
 
 trait MassPrunable
 {

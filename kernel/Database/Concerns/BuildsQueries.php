@@ -2,9 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Database\Concerns;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
-use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
+use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
 use MacropaySolutions\Kernel\Pagination\Cursor;
@@ -15,7 +16,6 @@ use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\LazyCollection;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use InvalidArgumentException;
 use RuntimeException;
 
 trait BuildsQueries

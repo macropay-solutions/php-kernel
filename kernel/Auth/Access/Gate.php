@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Auth\Access;
 
 use Closure;
 use Exception;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Auth\Access\Events\GateEvaluated;
 use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate as GateContract;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
@@ -11,7 +12,6 @@ use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionFunction;
 

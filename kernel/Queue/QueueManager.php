@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Queue;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Queue\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Contracts\Queue\Monitor as MonitorContract;
-use InvalidArgumentException;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Queue\Queue

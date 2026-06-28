@@ -2,8 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Http\Resources;
 
-use MacropaySolutions\Kernel\Support\Collection;
 use JsonSerializable;
+use MacropaySolutions\Kernel\Support\Collection;
 
 class MergeValue
 {

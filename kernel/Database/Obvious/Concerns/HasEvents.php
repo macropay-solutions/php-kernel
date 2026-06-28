@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Events\NullDispatcher;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 
 trait HasEvents
 {

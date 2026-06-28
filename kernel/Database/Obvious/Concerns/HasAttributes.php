@@ -7,9 +7,11 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\Castable;
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\CastsInboundAttributes;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Database\LazyLoadingViolationException;
 use MacropaySolutions\Kernel\Database\Obvious\Casts\AsArrayObject;
 use MacropaySolutions\Kernel\Database\Obvious\Casts\AsCollection;
 use MacropaySolutions\Kernel\Database\Obvious\Casts\AsEncryptedArrayObject;
@@ -20,12 +22,10 @@ use MacropaySolutions\Kernel\Database\Obvious\Casts\Json;
 use MacropaySolutions\Kernel\Database\Obvious\InvalidCastException;
 use MacropaySolutions\Kernel\Database\Obvious\JsonEncodingException;
 use MacropaySolutions\Kernel\Database\Obvious\MissingAttributeException;
-use MacropaySolutions\Kernel\Database\LazyLoadingViolationException;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
 use MacropaySolutions\Kernel\Support\Str;
-use InvalidArgumentException;
 use RuntimeException;
 
 trait HasAttributes

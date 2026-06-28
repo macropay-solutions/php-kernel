@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Translation;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Translation\Loader;
 use MacropaySolutions\Kernel\Contracts\Translation\Translator as TranslatorContract;
 use MacropaySolutions\Kernel\Support\Arr;
@@ -10,7 +11,6 @@ use MacropaySolutions\Kernel\Support\NamespacedItemResolver;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
-use InvalidArgumentException;
 
 class Translator extends NamespacedItemResolver implements TranslatorContract
 {

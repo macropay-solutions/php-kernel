@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Container;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Console\DiscoverAutowiring;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
-use InvalidArgumentException;
 use ReflectionFunction;
 use ReflectionMethod;
 

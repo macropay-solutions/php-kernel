@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Mail;
 
 use Closure;
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Mail\Mailable as MailableContract;
 use MacropaySolutions\Kernel\Contracts\Mail\Mailer as MailerContract;
@@ -16,7 +17,6 @@ use MacropaySolutions\Kernel\Mail\Events\MessageSent;
 use MacropaySolutions\Kernel\Mail\Mailables\Address;
 use MacropaySolutions\Kernel\Support\HtmlString;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use InvalidArgumentException;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Email;

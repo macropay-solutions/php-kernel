@@ -3,6 +3,8 @@
 namespace MacropaySolutions\Kernel\Http\Resources\Json;
 
 use ArrayAccess;
+use JsonException;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
@@ -12,8 +14,6 @@ use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Resources\ConditionallyLoadsAttributes;
 use MacropaySolutions\Kernel\Http\Resources\DelegatesToResource;
-use JsonException;
-use JsonSerializable;
 
 class JsonResource implements ArrayAccess, JsonSerializable, Responsable, UrlRoutable
 {

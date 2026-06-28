@@ -4,12 +4,12 @@ namespace MacropaySolutions\Kernel\Bus;
 
 use Carbon\CarbonImmutable;
 use Closure;
+use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Queue\Factory as QueueFactory;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
-use JsonSerializable;
 use Throwable;
 
 class Batch implements Arrayable, JsonSerializable

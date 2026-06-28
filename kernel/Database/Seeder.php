@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\Kernel\Database;
 
+use InvalidArgumentException;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Console\View\Components\TwoColumnDetail;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Database\Console\Seeds\WithoutModelEvents;
 use MacropaySolutions\Kernel\Support\Arr;
-use InvalidArgumentException;
 
 abstract class Seeder
 {

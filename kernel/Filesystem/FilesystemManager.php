@@ -4,8 +4,6 @@ namespace MacropaySolutions\Kernel\Filesystem;
 
 use Aws\S3\S3Client;
 use Closure;
-use MacropaySolutions\Kernel\Contracts\Filesystem\Factory as FactoryContract;
-use MacropaySolutions\Kernel\Support\Arr;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter as S3Adapter;
 use League\Flysystem\AwsS3V3\PortableVisibilityConverter as AwsS3PortableVisibilityConverter;
@@ -20,6 +18,8 @@ use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
 use League\Flysystem\ReadOnly\ReadOnlyFilesystemAdapter;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
+use MacropaySolutions\Kernel\Contracts\Filesystem\Factory as FactoryContract;
+use MacropaySolutions\Kernel\Support\Arr;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem

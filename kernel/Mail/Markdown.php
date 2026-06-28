@@ -2,13 +2,13 @@
 
 namespace MacropaySolutions\Kernel\Mail;
 
-use MacropaySolutions\Kernel\Contracts\View\Factory as ViewFactory;
-use MacropaySolutions\Kernel\Support\HtmlString;
-use MacropaySolutions\Kernel\Support\Str;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\MarkdownConverter;
+use MacropaySolutions\Kernel\Contracts\View\Factory as ViewFactory;
+use MacropaySolutions\Kernel\Support\HtmlString;
+use MacropaySolutions\Kernel\Support\Str;
 use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 
 class Markdown
