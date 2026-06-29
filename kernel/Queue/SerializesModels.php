@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Queue;
 
-use MacropaySolutions\Kernel\Queue\Attributes\WithoutRelations;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -21,10 +20,9 @@ trait SerializesModels
 
         $reflectionClass = new ReflectionClass($this);
 
-        [$class, $properties, $classLevelWithoutRelations] = [
+        [$class, $properties] = [
             static::class,
             $reflectionClass->getProperties(),
-            !empty($reflectionClass->getAttributes(WithoutRelations::class)),
         ];
 
         foreach ($properties as $property) {
@@ -50,11 +48,7 @@ trait SerializesModels
                 $name = "\0*\0{$name}";
             }
 
-            $values[$name] = $this->getSerializedPropertyValue(
-                $value,
-                !$classLevelWithoutRelations &&
-                empty($property->getAttributes(WithoutRelations::class))
-            );
+            $values[$name] = $this->getSerializedPropertyValue($value);
         }
 
         return $values;
