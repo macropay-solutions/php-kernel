@@ -4,8 +4,7 @@ namespace MacropaySolutions\Kernel\Console\View\Components;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-
-use function Termwind\terminal;
+use Symfony\Component\Console\Terminal;
 
 class Task extends Component
 {
@@ -43,7 +42,7 @@ class Task extends Component
                 : '';
 
             $runTimeWidth = mb_strlen($runTime);
-            $width = min(terminal()->width(), 150);
+            $width = min((new Terminal())->getWidth(), 150);
             $dots = max($width - $descriptionWidth - $runTimeWidth - 10, 0);
 
             $this->output->write(str_repeat('<fg=gray>.</>', $dots), false, $verbosity);

@@ -7,9 +7,6 @@ use MacropaySolutions\Kernel\Console\QuestionHelper;
 use ReflectionClass;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 
-use function Termwind\render;
-use function Termwind\renderUsing;
-
 abstract class Component
 {
     /**
@@ -47,9 +44,7 @@ abstract class Component
      */
     protected function renderView($view, $data, $verbosity)
     {
-        renderUsing($this->output);
-
-        render((string)$this->compile($view, $data), $verbosity);
+        $this->output->writeln((string) $this->compile($view, $data), $verbosity);
     }
 
     /**

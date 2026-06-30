@@ -16,8 +16,6 @@ use MacropaySolutions\Kernel\Support\Carbon;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Terminal;
 
-use function Termwind\terminal;
-
 #[AsCommand(name: 'queue:work')]
 class WorkCommand extends Command
 {
@@ -216,7 +214,7 @@ class WorkCommand extends Command
             $this->latestStartedAt = microtime(true);
 
             $dots = max(
-                terminal()->width() - mb_strlen($job->resolveName()) - (
+                (new Terminal())->getWidth() - mb_strlen($job->resolveName()) - (
                 $this->output->isVerbose() ? (mb_strlen($job->getJobId()) + 1) : 0
                 ) - 33,
                 0
@@ -232,7 +230,7 @@ class WorkCommand extends Command
         $runTime = $this->formatRunTime($this->latestStartedAt);
 
         $dots = max(
-            terminal()->width() - mb_strlen($job->resolveName()) - (
+            (new Terminal())->getWidth() - mb_strlen($job->resolveName()) - (
             $this->output->isVerbose() ? (mb_strlen($job->getJobId()) + 1) : 0
             ) - mb_strlen($runTime) - 31,
             0
