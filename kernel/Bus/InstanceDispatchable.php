@@ -6,6 +6,11 @@ use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
 
 trait InstanceDispatchable
 {
+    public static function new(mixed ...$args): static
+    {
+        return new static(...$args);
+    }
+
     /**
      * Dispatch the configured job instance.
      */
