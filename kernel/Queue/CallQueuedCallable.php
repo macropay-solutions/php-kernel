@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Queue;
 
+use MacropaySolutions\Framework\Bus\PendingCallableDispatch;
 use MacropaySolutions\Kernel\Bus\Batchable;
 use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Container\BoundMethod;
@@ -44,6 +45,21 @@ class CallQueuedCallable implements ShouldQueue
     public static function create(array $job): static
     {
         return new static($job);
+    }
+
+    public function dispatch(): PendingCallableDispatch
+    {
+        return new PendingCallableDispatch($this);
+    }
+
+    public function dispatchNow(mixed $handler = null): mixed
+    {
+        return \app(\MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class)->dispatchNow($this, $handler);
+    }
+
+    public function dispatchSync(mixed $handler = null): mixed
+    {
+        return \app(\MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class)->dispatchSync($this, $handler);
     }
 
     /**
