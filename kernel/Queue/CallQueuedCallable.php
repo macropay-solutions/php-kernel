@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Queue;
 
 use MacropaySolutions\Framework\Bus\PendingCallableDispatch;
 use MacropaySolutions\Kernel\Bus\Batchable;
+use MacropaySolutions\Kernel\Bus\InstanceDispatchable;
 use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
@@ -15,6 +16,7 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
  */
 class CallQueuedCallable implements ShouldQueue
 {
+    use InstanceDispatchable;
     use Batchable;
     use InteractsWithQueue;
     use Queueable;
@@ -50,16 +52,6 @@ class CallQueuedCallable implements ShouldQueue
     public function dispatch(): PendingCallableDispatch
     {
         return new PendingCallableDispatch($this);
-    }
-
-    public function dispatchNow(mixed $handler = null): mixed
-    {
-        return \app(\MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class)->dispatchNow($this, $handler);
-    }
-
-    public function dispatchSync(mixed $handler = null): mixed
-    {
-        return \app(\MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class)->dispatchSync($this, $handler);
     }
 
     /**

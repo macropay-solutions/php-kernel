@@ -5,42 +5,34 @@ namespace MacropaySolutions\Kernel\Bus;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 use MacropaySolutions\Kernel\Support\Collection;
-use Throwable;
 
 class ChainedBatch implements ShouldQueue
 {
+    use InstanceDispatchable;
     use Batchable;
     use InteractsWithQueue;
     use Queueable;
 
     /**
      * The collection of batched jobs.
-     *
-     * @var \MacropaySolutions\Kernel\Support\Collection
      */
     public Collection $jobs;
 
     /**
      * The name of the batch.
-     *
-     * @var string
      */
     public string $name;
 
     /**
      * The batch options.
-     *
-     * @var array
      */
     public array $options;
 
     /**
      * Create a new chained batch instance.
-     *
-     * @param \MacropaySolutions\Kernel\Bus\PendingBatch $batch
-     * @return void
      */
     public function __construct(PendingBatch $batch)
     {
@@ -52,9 +44,6 @@ class ChainedBatch implements ShouldQueue
 
     /**
      * Prepare any nested batches within the given collection of jobs.
-     *
-     * @param \MacropaySolutions\Kernel\Support\Collection $jobs
-     * @return \MacropaySolutions\Kernel\Support\Collection
      */
     public static function prepareNestedBatches(Collection $jobs): Collection
     {
@@ -68,8 +57,6 @@ class ChainedBatch implements ShouldQueue
 
     /**
      * Handle the job.
-     *
-     * @return void
      */
     public function handle()
     {
@@ -99,11 +86,7 @@ class ChainedBatch implements ShouldQueue
         }
 
         foreach ($this->chainCatchCallbacks ?? [] as $callback) {
-            $batch->catch(function (Batch $batch, ?Throwable $exception) use ($callback) {
-                if (!$batch->allowsFailures()) {
-                    $callback($exception);
-                }
-            });
+            $batch->catch([self::class, 'handleCatch', ['callback' => $callback]]);
         }
 
         return $batch;
@@ -112,32 +95,79 @@ class ChainedBatch implements ShouldQueue
     /**
      * Move the remainder of the chain to a "finally" batch callback.
      *
-     * @param \MacropaySolutions\Kernel\Bus\PendingBatch $batch
      * @return \MacropaySolutions\Kernel\Bus\PendingBatch
      */
     protected function attachRemainderOfChainToEndOfBatch(PendingBatch $batch)
     {
-        if (!empty($this->chained)) {
-            $next = unserialize(array_shift($this->chained));
+        if ([] !== $this->chained) {
+            $rawNext = \array_shift($this->chained);
 
-            $next->chained = $this->chained;
-
-            $next->onConnection($next->connection ?: $this->chainConnection);
-            $next->onQueue($next->queue ?: $this->chainQueue);
-
-            $next->chainConnection = $this->chainConnection;
-            $next->chainQueue = $this->chainQueue;
-            $next->chainCatchCallbacks = $this->chainCatchCallbacks;
-
-            $batch->finally(function (Batch $batch) use ($next) {
-                if (!$batch->cancelled()) {
-                    Container::getInstance()->make(Dispatcher::class)->dispatch($next);
-                }
-            });
+            // Pass ONLY primitive state to the database. Zero objects enter the payload.
+            $batch->finally([self::class, 'handleFinally', [
+                'rawNext' => $rawNext,
+                'chained' => $this->chained,
+                'chainConnection' => $this->chainConnection,
+                'chainQueue' => $this->chainQueue,
+                'chainCatchCallbacks' => $this->chainCatchCallbacks,
+            ]]);
 
             $this->chained = [];
         }
 
         return $batch;
+    }
+
+    /**
+     * @internal
+     * Internal array callable target for batch catches.
+     */
+    public static function handleCatch(Batch $batch, ?\Throwable $exception, mixed $callback): void
+    {
+        if (!$batch->allowsFailures()) {
+            if (\is_string($callback)) {
+                $callback = \unserialize($callback);
+            }
+
+            // "Shotgun DI" mapping to guarantee 0-reflection cache hits
+            \app()->call($callback, [
+                'e' => $exception,
+                'exception' => $exception,
+                'ex' => $exception,
+                'error' => $exception,
+                \Throwable::class => $exception,
+                \Exception::class => $exception,
+            ]);
+        }
+    }
+
+    /**
+     * @internal
+     * Internal array callable target for batch finally.
+     */
+    public static function handleFinally(
+        Batch $batch,
+        mixed $rawNext,
+        array $chained,
+        ?string $chainConnection,
+        ?string $chainQueue,
+        ?array $chainCatchCallbacks
+    ): void {
+        if (!$batch->cancelled()) {
+            $next = \is_string($rawNext) ? \unserialize($rawNext) : $rawNext;
+
+            if (\is_array($next)) {
+                $next = CallQueuedCallable::create($next);
+            }
+
+            $next->chained = $chained;
+            $next->onConnection($next->connection ?: $chainConnection);
+            $next->onQueue($next->queue ?: $chainQueue);
+
+            $next->chainConnection = $chainConnection;
+            $next->chainQueue = $chainQueue;
+            $next->chainCatchCallbacks = $chainCatchCallbacks;
+
+            Container::getInstance()->make(Dispatcher::class)->dispatch($next);
+        }
     }
 }
