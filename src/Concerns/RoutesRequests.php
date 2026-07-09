@@ -10,7 +10,6 @@ use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
-use MacropaySolutions\Framework\Routing\Closure as RoutingClosure;
 use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
 use MacropaySolutions\Framework\Routing\Pipeline;
 use MacropaySolutions\Framework\Routing\Router;
@@ -337,8 +336,7 @@ trait RoutesRequests
 
         foreach ($action as $value) {
             if ($value instanceof Closure) {
-                $callable = $value->bindTo(new RoutingClosure());
-                break;
+                throw new RuntimeException('Closures are not allowed.');
             }
 
             if (\is_object($value) && \is_callable($value)) {
