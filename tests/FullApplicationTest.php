@@ -560,7 +560,7 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('/', 'FullApplicationTestController@validateRequest');
 
-        $response = $app->handle(Request::create('/', 'GET'));
+        $response = $app->handle(Request::create('/', 'GET', [], [], [], ['HTTP_ACCEPT' => 'application/json']));
 
         $this->assertEquals(422, $response->getStatusCode());
 
