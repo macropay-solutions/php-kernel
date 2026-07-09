@@ -13,9 +13,7 @@ class MakesHttpRequestsTest extends TestCase
     public function testReceiveJson()
     {
         $this->app = new Application();
-        $this->app->router->get('/', function () {
-            return new JsonResponse(['foo' => 'bar', 'hello' => 'world']);
-        });
+        $this->app->router->get('/', 'MakesHttpRequestsTestController@jsonResponse');
 
         $this->handle(Request::create('/', 'GET'));
 
@@ -31,5 +29,13 @@ class MakesHttpRequestsTest extends TestCase
         restore_error_handler();
         restore_exception_handler();
         parent::tearDown();
+    }
+}
+
+class MakesHttpRequestsTestController extends \MacropaySolutions\Framework\Routing\Controller
+{
+    public function jsonResponse()
+    {
+        return new JsonResponse(['foo' => 'bar', 'hello' => 'world']);
     }
 }
