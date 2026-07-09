@@ -68,9 +68,33 @@ class StartSession
      * @param \MacropaySolutions\Kernel\Contracts\Session\Session $session
      * @param \Closure $next
      * @return mixed
+     *
+     * @throws \MacropaySolutions\Kernel\Contracts\Cache\LockTimeoutException
+     * @throws \RuntimeException
      */
     protected function handleRequestWhileBlocking(Request $request, $session, Closure $next)
     {
+        $config = $this->manager->getSessionConfig();
+
+        $lockStore = $config['block_store'] ?? $config['driver'] ?? 'file';
+
+        $cache = $this->cache($lockStore);
+
+        if (!$cache instanceof \MacropaySolutions\Kernel\Contracts\Cache\LockProvider) {
+            throw new \RuntimeException('The configured session block store [' . $lockStore .
+                '] does not support atomic locks.');
+        }
+
+        $lock = $cache->lock('session:' . $session->getId(), $config['block_lock_seconds'] ?? 10)
+            ->betweenBlockedAttemptsSleepFor(50);
+
+        try {
+            $lock->block($config['block_wait_seconds'] ?? 10);
+
+            return $this->handleStatefulRequest($request, $session, $next);
+        } finally {
+            $lock?->release();
+        }
     }
 
     /**
