@@ -826,8 +826,7 @@ class FullApplicationTestController extends \MacropaySolutions\Framework\Routing
 
     public function validateRequest(\MacropaySolutions\Kernel\Http\Request $request)
     {
-        $validator = validator($request->all(), ['name' => 'required']);
-        return $validator->validate();
+        return $this->validate($request, ['name' => 'required']);
     }
 }
 
