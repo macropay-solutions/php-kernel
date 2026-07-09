@@ -35,9 +35,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle($request = Request::create('/', 'GET'));
 
@@ -51,9 +49,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
         $this->assertEquals(200, $response->getStatusCode());
@@ -63,9 +59,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->addRoute(['GET', 'POST'], '/', function () {
-            return response('Hello World');
-        });
+        $app->router->addRoute(['GET', 'POST'], '/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -82,9 +76,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/foo/{bar}/{baz}', function ($bar, $baz) {
-            return response($bar . $baz);
-        });
+        $app->router->get('/foo/{bar}/{baz}', 'FullApplicationTestController@params');
 
         $response = $app->handle($request = Request::create('/foo/1/2', 'GET'));
 
@@ -98,9 +90,7 @@ class FullApplicationTest extends TestCase
     public function testCallbackRouteWithDefaultParameter()
     {
         $app = new Application();
-        $app->router->get('/foo-bar/{baz}', function ($baz = 'default-value') {
-            return response($baz);
-        });
+        $app->router->get('/foo-bar/{baz}', 'FullApplicationTestController@defaultParam');
 
         $response = $app->handle(Request::create('/foo-bar/something', 'GET'));
 
@@ -114,9 +104,7 @@ class FullApplicationTest extends TestCase
 
         $app->middleware(['FrameworkTestMiddleware']);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -130,29 +118,21 @@ class FullApplicationTest extends TestCase
 
         $app->routeMiddleware(['foo' => 'FrameworkTestMiddleware', 'passing' => 'FrameworkTestPlainMiddleware']);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $app->router->get('/foo', [
             'middleware' => 'foo',
-            function () {
-                return response('Hello World');
-            },
+            'uses' => 'FullApplicationTestController@hello',
         ]);
 
         $app->router->get('/bar', [
             'middleware' => ['foo'],
-            function () {
-                return response('Hello World');
-            },
+            'uses' => 'FullApplicationTestController@hello',
         ]);
 
         $app->router->get('/fooBar', [
             'middleware' => 'passing|foo',
-            function () {
-                return response('Hello World');
-            },
+            'uses' => 'FullApplicationTestController@hello',
         ]);
 
         $response = $app->handle(Request::create('/', 'GET'));
@@ -178,9 +158,7 @@ class FullApplicationTest extends TestCase
 
         $app->middleware(['FrameworkTestParameterizedMiddleware:foo,bar']);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -196,9 +174,7 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('/', [
             'middleware' => 'passing|foo:bar,boom',
-            function () {
-                return response('Hello World');
-            },
+            'uses' => 'FullApplicationTestController@hello',
         ]);
 
         $response = $app->handle(Request::create('/', 'GET'));
@@ -214,9 +190,7 @@ class FullApplicationTest extends TestCase
         $app->middleware(['FrameworkTestMiddleware']);
         $app->instance('middleware.disable', true);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -230,9 +204,7 @@ class FullApplicationTest extends TestCase
 
         $app->middleware(['FrameworkTestTerminateMiddleware']);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -247,9 +219,7 @@ class FullApplicationTest extends TestCase
         $app->middleware(['FrameworkTestTerminateMiddleware']);
         $app->instance('middleware.disable', true);
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -263,9 +233,7 @@ class FullApplicationTest extends TestCase
         $app->instance(ExceptionHandler::class, $mock = m::mock('MacropaySolutions\Framework\Exceptions\Handler[report]'));
         $mock->shouldIgnoreMissing();
 
-        $app->router->get('/', function () {
-            return response('Hello World');
-        });
+        $app->router->get('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/foo', 'GET'));
 
@@ -278,9 +246,7 @@ class FullApplicationTest extends TestCase
         $app->instance(ExceptionHandler::class, $mock = m::mock('MacropaySolutions\Framework\Exceptions\Handler[report]'));
         $mock->shouldIgnoreMissing();
 
-        $app->router->post('/', function () {
-            return response('Hello World');
-        });
+        $app->router->post('/', 'FullApplicationTestController@hello');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -291,9 +257,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/foo/{foo}', function () {
-            return new ResponsableResponse();
-        });
+        $app->router->get('/foo/{foo}', 'FullApplicationTestController@responsable');
 
         $request = Request::create('/foo/999', 'GET');
         $response = $app->handle($request);
@@ -308,9 +272,7 @@ class FullApplicationTest extends TestCase
         $app->instance(ExceptionHandler::class, $mock = m::mock('MacropaySolutions\Framework\Exceptions\Handler[report]'));
         $mock->shouldIgnoreMissing();
 
-        $app->router->get('/', function () {
-            throw new \RuntimeException('app exception');
-        });
+        $app->router->get('/', 'FullApplicationTestController@exception');
 
         $response = $app->handle(Request::create('/', 'GET'));
         $this->assertInstanceOf(Response::class, $response);
@@ -323,30 +285,22 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('/foo-bar', [
             'as' => 'foo',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz}/{boom}', [
             'as' => 'bar',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz}[/{boom}]', [
             'as' => 'optional',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz:[0-9]+}[/{boom}]', [
             'as' => 'regex',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $this->assertEquals('https://macropay-solutions.com/something', url('something'));
@@ -372,30 +326,22 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('/foo-bar', [
             'as' => 'foo',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz:[0-9]+}/{boom}', [
             'as' => 'bar',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz:[0-9]+}/{boom:[0-9]+}', [
             'as' => 'baz',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $app->router->get('/foo-bar/{baz:[0-9]{2,5}}', [
             'as' => 'boom',
-            function () {
-                //
-            },
+            'uses' => 'FullApplicationTestController@empty',
         ]);
 
         $this->assertEquals('https://macropay-solutions.com/something', url('something'));
@@ -473,11 +419,7 @@ class FullApplicationTest extends TestCase
             new FastRoute\DataGenerator\GroupCountBased()
         );
 
-        $routes->addRoute('GET', '/', [
-            function () {
-                return response('Hello World');
-            },
-        ]);
+        $routes->addRoute('GET', '/', ['uses' => 'FullApplicationTestController@hello']);
 
         $app = new Application();
 
@@ -499,9 +441,7 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('/', [
             'middleware' => 'foo',
-            function () {
-                return 'Hello World';
-            },
+            'uses' => 'FullApplicationTestController@stringReturn',
         ]);
 
         $response = $app->handle(Request::create('/', 'GET'));
@@ -618,11 +558,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
-            $data = $this->validate($request, ['name' => 'required']);
-
-            return $data;
-        });
+        $app->router->get('/', 'FullApplicationTestController@validateRequest');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -638,9 +574,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
-            return redirect('home');
-        });
+        $app->router->get('/', 'FullApplicationTestController@redirectHome');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -653,14 +587,10 @@ class FullApplicationTest extends TestCase
 
         $app->router->get('login', [
             'as' => 'login',
-            function (MacropaySolutions\Kernel\Http\Request $request) {
-                return 'login';
-            },
+            'uses' => 'FullApplicationTestController@login',
         ]);
 
-        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
-            return redirect()->route('login');
-        });
+        $app->router->get('/', 'FullApplicationTestController@redirectLogin');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -675,9 +605,7 @@ class FullApplicationTest extends TestCase
             return new \MacropaySolutions\Kernel\Auth\GenericUser(['id' => 1234]);
         });
 
-        $app->router->get('/', function (MacropaySolutions\Kernel\Http\Request $request) {
-            return $request->user()->getAuthIdentifier();
-        });
+        $app->router->get('/', 'FullApplicationTestController@authUser');
 
         $response = $app->handle(Request::create('/', 'GET'));
 
@@ -812,11 +740,9 @@ class FullApplicationTest extends TestCase
         $app->rebinding('request', function () use (&$rebound) {
             $rebound = true;
         });
-        
-        $app->middleware([function ($req, $next) {
-            return $next($req->duplicate());
-        }]);
-        
+
+        $app->middleware([FrameworkTestDuplicateMiddleware::class]);
+
         $app->handle(Request::create('/'));
         $this->assertTrue($rebound);
     }
@@ -881,6 +807,35 @@ class FullApplicationTest extends TestCase
         $app->terminate();
 
         $this->assertEquals([1, 2, 3], $result);
+    }
+}
+
+class FullApplicationTestController extends \MacropaySolutions\Framework\Routing\Controller
+{
+    public function hello() { return response('Hello World'); }
+    public function params($bar, $baz) { return response($bar . $baz); }
+    public function defaultParam($baz = 'default-value') { return response($baz); }
+    public function responsable() { return new ResponsableResponse(); }
+    public function exception() { throw new \RuntimeException('app exception'); }
+    public function empty() {}
+    public function stringReturn() { return 'Hello World'; }
+    public function redirectHome() { return redirect('home'); }
+    public function redirectLogin() { return redirect()->route('login'); }
+    public function login() { return 'login'; }
+    public function authUser(\MacropaySolutions\Kernel\Http\Request $request) { return $request->user()->getAuthIdentifier(); }
+
+    public function validateRequest(\MacropaySolutions\Kernel\Http\Request $request)
+    {
+        $validator = validator($request->all(), ['name' => 'required']);
+        return $validator->validate();
+    }
+}
+
+class FrameworkTestDuplicateMiddleware
+{
+    public function handle($request, $next)
+    {
+        return $next($request->duplicate());
     }
 }
 
