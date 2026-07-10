@@ -74,22 +74,20 @@ class StartSession
      */
     protected function handleRequestWhileBlocking(Request $request, $session, Closure $next)
     {
-        $config = $this->manager->getSessionConfig();
-
-        $lockStore = $config['block_store'] ?? $config['driver'] ?? 'file';
+        $lockStore = $this->manager->blockDriver();
 
         $cache = $this->cache($lockStore);
 
-        if (!$cache instanceof \MacropaySolutions\Kernel\Contracts\Cache\LockProvider) {
+        if (!($store = $cache->getStore()) instanceof \MacropaySolutions\Kernel\Contracts\Cache\LockProvider) {
             throw new \RuntimeException('The configured session block store [' . $lockStore .
                 '] does not support atomic locks.');
         }
 
-        $lock = $cache->lock('session:' . $session->getId(), $config['block_lock_seconds'] ?? 10)
+        $lock = $store->lock('session:' . $session->getId(), $this->manager->defaultRouteBlockLockSeconds())
             ->betweenBlockedAttemptsSleepFor(50);
 
         try {
-            $lock->block($config['block_wait_seconds'] ?? 10);
+            $lock->block($this->manager->defaultRouteBlockWaitSeconds());
 
             return $this->handleStatefulRequest($request, $session, $next);
         } finally {
@@ -303,6 +301,8 @@ class StartSession
      */
     protected function cache($driver)
     {
-        return call_user_func($this->cacheFactoryResolver)->driver($driver);
+        return is_callable($this->cacheFactoryResolver) ?
+            ($this->cacheFactoryResolver)()->driver($driver) :
+            \app('cache')->store($driver);
     }
 }
