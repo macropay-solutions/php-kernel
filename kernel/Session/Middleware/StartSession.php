@@ -301,7 +301,7 @@ class StartSession
      */
     protected function cache($driver)
     {
-        return is_callable($this->cacheFactoryResolver) ?
+        return \is_callable($this->cacheFactoryResolver) ?
             ($this->cacheFactoryResolver)()->driver($driver) :
             \app('cache')->store($driver);
     }
