@@ -1240,6 +1240,7 @@ class Application extends Container implements ApplicationContract
 
         'session' => 'registerSessionBindings',
         'session.store' => 'registerSessionBindings',
+        \MacropaySolutions\Kernel\Session\Middleware\StartSession::class => 'registerSessionBindings',
 
         'cookie' => 'registerCookieBindings',
     ];
