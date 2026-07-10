@@ -211,4 +211,18 @@ return [
 
     'partitioned' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Global Session Blocking
+    |--------------------------------------------------------------------------
+    */
+
+    'block' => false,
+
+    'block_store' => \env('SESSION_BLOCK_STORE', 'file'),
+
+    'block_lock_seconds' => 10,
+
+    'block_wait_seconds' => 10,
+
 ];
