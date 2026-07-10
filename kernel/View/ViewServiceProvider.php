@@ -191,14 +191,8 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         return [
             'view',
             'view.finder',
-            FileViewFinder::class,
             'blade.compiler',
-            BladeCompiler::class,
             'view.engine.resolver',
-            EngineResolver::class,
-            \MacropaySolutions\Kernel\View\Factory::class,
-            \MacropaySolutions\Kernel\Contracts\View\Factory::class,
-            \MacropaySolutions\Kernel\View\ViewFinderInterface::class,
         ];
     }
 }

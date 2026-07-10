@@ -35,9 +35,6 @@ class CookieServiceProvider extends ServiceProvider implements DeferrableProvide
     {
         return [
             'cookie',
-            CookieJar::class,
-            \MacropaySolutions\Kernel\Contracts\Cookie\Factory::class,
-            \MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory::class,
         ];
     }
 }

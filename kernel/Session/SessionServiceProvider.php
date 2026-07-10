@@ -64,11 +64,7 @@ class SessionServiceProvider extends ServiceProvider implements DeferrableProvid
         return [
             StartSession::class,
             'session',
-            SessionManager::class,
             'session.store',
-            \MacropaySolutions\Kernel\Contracts\Session\Session::class,
-            \MacropaySolutions\Kernel\Session\Store::class,
-            \MacropaySolutions\Kernel\Session\EncryptedStore::class,
         ];
     }
 }
