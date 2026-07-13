@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Framework\Console;
 
-use Composer\InstalledVersions;
 use MacropaySolutions\Kernel\Auth\Console\ClearResetsCommand;
 use MacropaySolutions\Kernel\Cache\Console\ClearCommand as CacheClearCommand;
 use MacropaySolutions\Kernel\Cache\Console\ForgetCommand as CacheForgetCommand;
@@ -42,6 +41,7 @@ use MacropaySolutions\KernelDev\Database\Console\DumpCommand;
 use MacropaySolutions\KernelDev\Database\Console\Migrations\MigrateMakeCommand;
 use MacropaySolutions\KernelDev\Database\Console\Seeds\SeederMakeCommand;
 use MacropaySolutions\KernelDev\Database\Console\WipeCommand;
+use MacropaySolutions\KernelDev\Foundation\Console\AboutCommand;
 use MacropaySolutions\KernelDev\Queue\Console\BatchesTableCommand;
 use MacropaySolutions\KernelDev\Queue\Console\FailedTableCommand;
 use MacropaySolutions\KernelDev\Queue\Console\TableCommand;
@@ -91,6 +91,7 @@ class ConsoleServiceProvider extends ServiceProvider
      * @var array
      */
     protected $devCommands = [
+        'About' => 'command.about',
         'Wipe' => 'command.wipe',
         'SchemaDump' => 'command.schema.dump',
         'CacheTable' => 'command.cache.table',
@@ -541,6 +542,16 @@ class ConsoleServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.wipe', function ($app): WipeCommand {
             return new WipeCommand();
+        });
+    }
+
+    /**
+     * Register the command.
+     */
+    protected function registerAboutCommand(): void
+    {
+        $this->app->singleton('command.about', function ($app): AboutCommand {
+            return new AboutCommand($app->make('composer'));
         });
     }
 
