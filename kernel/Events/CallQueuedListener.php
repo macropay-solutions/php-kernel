@@ -6,9 +6,11 @@ use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 
-class CallQueuedListener implements ShouldQueue
+class CallQueuedListener implements ShouldQueue, StorableCallable
 {
     use InteractsWithQueue;
     use Queueable;
@@ -114,6 +116,50 @@ class CallQueuedListener implements ShouldQueue
         );
 
         $handler->{$this->method}(...array_values($this->data));
+    }
+
+    /**
+     * The Converter: Passes pure primitive arrays directly.
+     */
+    public function toStorableCallable(): CallQueuedCallable
+    {
+        $payload = [
+            'class' => $this->class,
+            'method' => $this->method,
+            'data' => $this->data,
+        ];
+
+        $callable = CallQueuedCallable::createFrom($this->class, [self::class, 'executeStorable', $payload]);
+        $callable->onFailure([self::class, 'executeFailedStorable', $payload]);
+
+        $callable->connection = $this->connection;
+        $callable->queue = $this->queue;
+        $callable->timeout = $this->timeout;
+        $callable->tries = $this->tries;
+        $callable->maxExceptions = $this->maxExceptions;
+        $callable->backoff = $this->backoff;
+
+        return $callable;
+    }
+
+    public static function executeStorable(
+        string $class,
+        string $method,
+        array $data,
+        Job $job
+    ): void {
+        $wrapper = new self($class, $method, $data);
+
+        if (\method_exists($wrapper, 'setJob')) {
+            $wrapper->setJob($job);
+        }
+
+        \app()->call([$wrapper, 'handle']);
+    }
+
+    public static function executeFailedStorable(string $class, string $method, array $data, \Throwable $e): void
+    {
+        (new self($class, $method, $data))->failed($e);
     }
 
     /**

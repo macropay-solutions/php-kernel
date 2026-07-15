@@ -3,16 +3,19 @@
 namespace MacropaySolutions\Kernel\Notifications;
 
 use MacropaySolutions\Kernel\Bus\Queueable;
+use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeEncrypted;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Database\Obvious\Collection as ObviousCollection;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 use MacropaySolutions\Kernel\Queue\SerializesModels;
 use MacropaySolutions\Kernel\Support\Collection;
 
-class SendQueuedNotifications implements ShouldQueue
+class SendQueuedNotifications implements ShouldQueue, StorableCallable
 {
     use InteractsWithQueue;
     use Queueable;
@@ -21,42 +24,42 @@ class SendQueuedNotifications implements ShouldQueue
     /**
      * The notifiable entities that should receive the notification.
      *
-     * @var \MacropaySolutions\Kernel\Support\Collection
+     * @var \MacropaySolutions\Kernel\Support\Collection|null
      */
     public $notifiables;
 
     /**
      * The notification to be sent.
      *
-     * @var \MacropaySolutions\Kernel\Notifications\Notification
+     * @var \MacropaySolutions\Kernel\Notifications\Notification|null
      */
     public $notification;
 
     /**
      * All the channels to send the notification to.
      *
-     * @var array
+     * @var array|null
      */
     public $channels;
 
     /**
      * The number of times the job may be attempted.
      *
-     * @var int
+     * @var int|null
      */
     public $tries;
 
     /**
      * The number of seconds the job can run before timing out.
      *
-     * @var int
+     * @var int|null
      */
     public $timeout;
 
     /**
      * The maximum number of unhandled exceptions to allow before failing.
      *
-     * @var int
+     * @var int|null
      */
     public $maxExceptions;
 
@@ -80,14 +83,14 @@ class SendQueuedNotifications implements ShouldQueue
         $this->channels = $channels;
         $this->notification = $notification;
         $this->notifiables = $this->wrapNotifiables($notifiables);
-        $this->tries = property_exists($notification, 'tries') ? $notification->tries : null;
-        $this->timeout = property_exists($notification, 'timeout') ? $notification->timeout : null;
-        $this->maxExceptions = property_exists($notification, 'maxExceptions') ? $notification->maxExceptions : null;
+        $this->tries = $notification->tries ?? null;
+        $this->timeout = $notification->timeout ?? null;
+        $this->maxExceptions = $notification->maxExceptions ?? null;
 
         if ($notification instanceof ShouldQueueAfterCommit) {
             $this->afterCommit = true;
         } else {
-            $this->afterCommit = property_exists($notification, 'afterCommit') ? $notification->afterCommit : null;
+            $this->afterCommit = $notification->afterCommit ?? null;
         }
 
         $this->shouldBeEncrypted = $notification instanceof ShouldBeEncrypted;
@@ -103,7 +106,9 @@ class SendQueuedNotifications implements ShouldQueue
     {
         if ($notifiables instanceof Collection) {
             return $notifiables;
-        } elseif ($notifiables instanceof Model) {
+        }
+
+        if ($notifiables instanceof Model) {
             return ObviousCollection::wrap($notifiables);
         }
 
@@ -111,10 +116,139 @@ class SendQueuedNotifications implements ShouldQueue
     }
 
     /**
-     * Send the notifications.
-     *
-     * @param \MacropaySolutions\Kernel\Notifications\ChannelManager $manager
-     * @return void
+     * The Converter: Extracts pure primitive data. Zero objects allowed.
+     */
+    public function toStorableCallable(): CallQueuedCallable
+    {
+        $notifiablesData = [];
+
+        $notifiables = $this->notifiables;
+
+
+        if (!$notifiables instanceof \MacropaySolutions\Kernel\Support\Collection && !\is_array($notifiables)) {
+            $notifiables = [$notifiables];
+        }
+
+        foreach ($notifiables as $notifiable) {
+            if ($notifiable instanceof Model) {
+                $notifiablesData[] = ['type' => 'model', 'class' => \get_class($notifiable), 'id' => $notifiable->getKey()];
+            } elseif ($notifiable instanceof AnonymousNotifiable) {
+                $notifiablesData[] = ['type' => 'anonymous', 'routes' => $notifiable->routes];
+            }
+        }
+
+        $notificationProps = isset($this->notification) ? \get_object_vars($this->notification) : [];
+
+        $payload = [
+            'notifiables' => $notifiablesData,
+            'notificationClass' => isset($this->notification) ? \get_class($this->notification) : '',
+            'notificationProps' => $notificationProps,
+            'channels' => $this->channels,
+        ];
+
+        $callable = CallQueuedCallable::createFrom($this->notification, [self::class, 'executeStorable', $payload]);
+
+        $callable->onFailure([self::class, 'executeFailedStorable', [
+            'notifiables'       => $payload['notifiables'],
+            'notificationClass' => $payload['notificationClass'],
+            'notificationProps' => $payload['notificationProps'],
+            'channels'          => $payload['channels'],
+        ]]);
+
+        $callable->connection = $this->connection;
+        $callable->queue = $this->queue;
+        $callable->delay = $this->delay;
+        $callable->afterCommit = $this->afterCommit;
+        $callable->middleware = $this->middleware;
+        $callable->tries = $this->tries;
+        $callable->timeout = $this->timeout;
+        $callable->maxExceptions = $this->maxExceptions;
+
+        return $callable;
+    }
+
+    /**
+     * The Worker Execution Bridge. Rebuilds state dynamically.
+     */
+    public static function executeStorable(
+        array $notifiables,
+        string $notificationClass,
+        array $notificationProps,
+        ?array $channels,
+        Job $job
+    ): void {
+        $restoredNotifiables = new Collection();
+
+        foreach ($notifiables as $n) {
+            if ($n['type'] === 'model') {
+                $restoredNotifiables->push((new $n['class'])->newQueryForRestoration([$n['id']])->useWritePdo()->firstOrFail());
+
+                continue;
+            }
+
+            if ($n['type'] === 'anonymous') {
+                $anon = new AnonymousNotifiable();
+                $anon->routes = $n['routes'];
+                $restoredNotifiables->push($anon);
+            }
+        }
+
+        $notification = \app($notificationClass);
+
+        foreach ($notificationProps as $key => $value) {
+            $notification->$key = $value;
+        }
+
+        $wrapper = new self($restoredNotifiables, $notification, $channels);
+
+        if (\method_exists($wrapper, 'setJob')) {
+            $wrapper->setJob($job);
+        }
+        
+        // Forward the job instance to the inner notification if it interacts with the queue
+        if (\method_exists($notification, 'setJob')) {
+            $notification->setJob($job);
+        }
+
+        \app()->call([$wrapper, 'handle']);
+    }
+
+    public static function executeFailedStorable(
+        array $notifiables,
+        string $notificationClass,
+        array $notificationProps,
+        ?array $channels,
+        \Throwable $e
+    ): void
+    {
+        $restoredNotifiables = new Collection();
+
+        foreach ($notifiables as $n) {
+            if ($n['type'] === 'model') {
+                $restoredNotifiables->push((new $n['class'])
+                    ->newQueryForRestoration([$n['id']])->useWritePdo()->firstOrFail());
+
+                continue;
+            }
+
+            if ($n['type'] === 'anonymous') {
+                $anon = new AnonymousNotifiable();
+                $anon->routes = $n['routes'];
+                $restoredNotifiables->push($anon);
+            }
+        }
+
+        $notification = \app($notificationClass);
+
+        foreach ($notificationProps as $key => $value) {
+            $notification->$key = $value;
+        }
+
+        (new self($restoredNotifiables, $notification, $channels))->failed($e);
+    }
+
+    /**
+     * Legacy handle method for synchronous dispatches.
      */
     public function handle(ChannelManager $manager)
     {
@@ -123,12 +257,10 @@ class SendQueuedNotifications implements ShouldQueue
 
     /**
      * Get the display name for the queued job.
-     *
-     * @return string
      */
     public function displayName()
     {
-        return get_class($this->notification);
+        return \is_object($this->notification) ? \get_class($this->notification) : static::class;
     }
 
     /**
@@ -139,19 +271,23 @@ class SendQueuedNotifications implements ShouldQueue
      */
     public function failed($e)
     {
-        if (method_exists($this->notification, 'failed')) {
+        if (\is_object($this->notification) && \method_exists($this->notification, 'failed')) {
             $this->notification->failed($e);
         }
     }
 
     /**
      * Get the number of seconds before a released notification will be available.
-     *
-     * @return mixed
      */
     public function backoff()
     {
-        if (!method_exists($this->notification, 'backoff') && !isset($this->notification->backoff)) {
+        if (
+            !\is_object($this->notification)
+            || (
+                !\method_exists($this->notification, 'backoff')
+                && !isset($this->notification->backoff)
+            )
+        ) {
             return;
         }
 
@@ -160,12 +296,10 @@ class SendQueuedNotifications implements ShouldQueue
 
     /**
      * Determine the time at which the job should timeout.
-     *
-     * @return \DateTime|null
      */
     public function retryUntil()
     {
-        if (!method_exists($this->notification, 'retryUntil') && !isset($this->notification->retryUntil)) {
+        if (!\is_object($this->notification) || (!\method_exists($this->notification, 'retryUntil') && !isset($this->notification->retryUntil))) {
             return;
         }
 
@@ -174,12 +308,15 @@ class SendQueuedNotifications implements ShouldQueue
 
     /**
      * Prepare the instance for cloning.
-     *
-     * @return void
      */
     public function __clone()
     {
-        $this->notifiables = clone $this->notifiables;
-        $this->notification = clone $this->notification;
+        if (\is_object($this->notifiables)) {
+            $this->notifiables = clone $this->notifiables;
+        }
+
+        if (\is_object($this->notification)) {
+            $this->notification = clone $this->notification;
+        }
     }
 }

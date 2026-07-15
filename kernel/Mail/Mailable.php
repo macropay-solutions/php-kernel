@@ -21,8 +21,6 @@ use MacropaySolutions\Kernel\Support\Traits\Localizable;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\KernelDev\Testing\Constraints\SeeInOrder;
 use PHPUnit\Framework\Assert as PHPUnit;
-use ReflectionClass;
-use ReflectionProperty;
 use Symfony\Component\Mailer\Header\MetadataHeader;
 use Symfony\Component\Mailer\Header\TagHeader;
 use Symfony\Component\Mime\Address;
@@ -355,13 +353,39 @@ class Mailable implements MailableContract, Renderable
             $data = array_merge($data, call_user_func(static::$viewDataCallback, $this));
         }
 
-        foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            if ($property->isInitialized($this) && $property->getDeclaringClass()->getName() !== self::class) {
-                $data[$property->getName()] = $property->getValue($this);
-            }
+        $data2 = (\Closure::bind(fn($obj) => \get_object_vars($obj), null, null))($this);
+
+
+        // Explicit exclusion of the trait's internal state
+        $internalProps = [
+            'from',
+            'to',
+            'cc',
+            'bcc',
+            'replyTo',
+            'subject',
+            'view',
+            'textView',
+            'viewData',
+            'attachments',
+            'rawAttachments',
+            'callbacks',
+            'connection',
+            'queue',
+            'chainConnection',
+            'chainQueue',
+            'chainCatchCallbacks',
+            'delay',
+            'afterCommit',
+            'middleware',
+            'chained',
+        ];
+
+        foreach ($internalProps as $prop) {
+            unset($data2[$prop]);
         }
 
-        return $data;
+        return \array_merge($data, $data2);
     }
 
     /**

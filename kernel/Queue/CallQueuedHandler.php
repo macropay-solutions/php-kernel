@@ -59,6 +59,21 @@ class CallQueuedHandler
      */
     public function call(Job $job, array $data)
     {
+        $payload = $job->payload();
+        $lockAlreadyReleased = false;
+
+        if (
+            ($payload['uniqueUntilProcessing'] ?? false) === true
+            && '' !== (string)($payload['uniqueJobKey'] ?? '')
+        ) {
+            $this->container->make(CacheFactory::class)
+                ->store($payload['uniqueJobCacheStore'] ?? '')
+                ->lock($payload['uniqueJobKey'])
+                ->forceRelease();
+
+            $lockAlreadyReleased = true;
+        }
+
         try {
             $command = $this->setJobInstanceIfNecessary(
                 $job,
@@ -70,10 +85,10 @@ class CallQueuedHandler
             return;
         }
 
-        $this->dispatchThroughMiddleware($job, $command);
+        $this->dispatchThroughMiddleware($job, $command, $lockAlreadyReleased);
 
         if (!$job->isReleased() && !$command instanceof ShouldBeUniqueUntilProcessing) {
-            $this->ensureUniqueJobLockIsReleased($command);
+            $this->ensureUniqueJobLockIsReleased($command, $job);
         }
 
         if (!$job->hasFailed() && !$job->isReleased()) {
@@ -149,16 +164,15 @@ class CallQueuedHandler
      *
      * @param \MacropaySolutions\Kernel\Contracts\Queue\Job $job
      * @param mixed $command
+     * @param bool $lockAlreadyReleased
      * @return mixed
      * @throws Exception
      */
-    protected function dispatchThroughMiddleware(Job $job, $command)
+    protected function dispatchThroughMiddleware(Job $job, $command, bool $lockReleased = false)
     {
         if ($command instanceof \__PHP_Incomplete_Class) {
             throw new Exception('Job is incomplete class: ' . json_encode($command));
         }
-
-        $lockReleased = false;
 
         return (new Pipeline($this->container))->send($command)
             ->through(
@@ -167,21 +181,22 @@ class CallQueuedHandler
                     $command->middleware ?? []
                 )
             )
-            ->finally(function (mixed $command) use (&$lockReleased): void {
+            ->finally(function (mixed $command) use (&$lockReleased, $job): void {
                 if (
                     !$lockReleased
                     && $command instanceof ShouldBeUniqueUntilProcessing
                     && ($command->job ?? null) instanceof Job
                     && !$command->job->isReleased()
                 ) {
-                    $this->ensureUniqueJobLockIsReleased($command);
+                    $this->ensureUniqueJobLockIsReleased($command, $job);
                 }
             })
             ->then(function (mixed $command) use ($job, &$lockReleased): mixed {
                 if ($command instanceof ShouldBeUniqueUntilProcessing) {
-                    $this->ensureUniqueJobLockIsReleased($command);
-
-                    $lockReleased = true;
+                    if (!$lockReleased) {
+                        $this->ensureUniqueJobLockIsReleased($command, $job);
+                        $lockReleased = true;
+                    }
                 }
 
                 return $this->dispatcher->dispatchNow(
@@ -270,12 +285,30 @@ class CallQueuedHandler
      * Ensure the lock for a unique job is released.
      *
      * @param mixed $command
+     * @param \MacropaySolutions\Kernel\Contracts\Queue\Job|null $job
      * @return void
      */
-    protected function ensureUniqueJobLockIsReleased($command)
+    protected function ensureUniqueJobLockIsReleased($command, ?Job $job = null)
     {
         if ($command instanceof ShouldBeUnique) {
             (new UniqueLock($this->container->make(Cache::class)))->release($command);
+
+            return;
+        }
+
+        if ($job !== null) {
+            $payload = $job->payload();
+
+            if (
+                ($payload['uniqueUntilProcessing'] ?? false) === false
+                && '' !== (string)($payload['uniqueJobKey'] ?? '')
+            ) {
+                $store = $payload['uniqueJobCacheStore'] ?? null;
+                $this->container->make(CacheFactory::class)
+                    ->store($store)
+                    ->lock($payload['uniqueJobKey'])
+                    ->forceRelease();
+            }
         }
     }
 
@@ -300,12 +333,7 @@ class CallQueuedHandler
         $jobPayload = $job->payload();
 
         /** ensureUniqueJobLockIsReleasedViaJobPayload */
-        if (
-            '' !== ($store = $jobPayload['uniqueJobCacheStore'] ?? '')
-            && '' !== ($key = $jobPayload['uniqueJobKey'] ?? '')
-        ) {
-            $this->container->make(CacheFactory::class)->store($store)->lock($key)->forceRelease();
-        }
+        $this->ensureUniqueJobLockIsReleasedViaJobPayload($job);
 
         if ($shouldDelete) {
             /** ensureSuccessfulBatchJobIsRecordedForMissingModel */
@@ -372,7 +400,7 @@ class CallQueuedHandler
         }
 
         if (!$command instanceof ShouldBeUniqueUntilProcessing) {
-            $this->ensureUniqueJobLockIsReleased($command);
+            $this->ensureUniqueJobLockIsReleased($command, $job);
         }
 
         if ($command instanceof \__PHP_Incomplete_Class) {

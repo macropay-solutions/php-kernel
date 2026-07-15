@@ -11,7 +11,6 @@ use MacropaySolutions\Kernel\Support\Collection;
 
 class ChainedBatch implements ShouldQueue
 {
-    use InstanceDispatchable;
     use Batchable;
     use InteractsWithQueue;
     use Queueable;

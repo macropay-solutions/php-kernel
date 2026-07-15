@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Bus;
 
 use Closure;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Support\Arr;
 
 /**
@@ -264,7 +265,26 @@ trait Queueable
             throw new \RuntimeException('Closure serialization forbidden.');
         }
 
-        return serialize($job);
+        if ($job instanceof StorableCallable) {
+            $job = $job->toStorableCallable();
+        }
+
+        if (\is_array($job)) {
+            $job = \MacropaySolutions\Kernel\Queue\CallQueuedCallable::create($job);
+        }
+
+        if (
+            !$job instanceof \MacropaySolutions\Kernel\Queue\CallQueuedCallable &&
+            !$job instanceof PendingBatch &&
+            !$job instanceof ChainedBatch
+        ) {
+            throw new \RuntimeException(
+                'Strict Queue Mode: Chained jobs must be array callables or batches. Got: ' .
+                    (\is_object($job) ? $job::class : \gettype($job))
+            );
+        }
+
+        return \serialize($job);
     }
 
     /**

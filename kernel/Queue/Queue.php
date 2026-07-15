@@ -9,7 +9,9 @@ use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeEncrypted;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
+use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Queue\Events\JobQueued;
 use MacropaySolutions\Kernel\Queue\Events\JobQueueing;
 use MacropaySolutions\Kernel\Support\Arr;
@@ -110,10 +112,15 @@ abstract class Queue
             $job = CallQueuedCallable::create($job);
         }
 
+        if ($job instanceof StorableCallable) {
+            $job = $job->toStorableCallable();
+        }
+
         if ($job instanceof ShouldBeUnique) {
             self::createPayloadUsing(fn(): array => [
                 'uniqueJobKey' => UniqueLock::getKey($job),
-                'uniqueJobCacheStore' => UniqueLock::getUniqueJobCacheStore($job)
+                'uniqueJobCacheStore' => UniqueLock::getUniqueJobCacheStore($job),
+                'uniqueUntilProcessing' => $job instanceof ShouldBeUniqueUntilProcessing
             ]);
         }
 

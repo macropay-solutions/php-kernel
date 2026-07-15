@@ -5,12 +5,12 @@ namespace MacropaySolutions\Kernel\Broadcasting;
 use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Factory as BroadcastingFactory;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Support\Arr;
-use ReflectionClass;
-use ReflectionProperty;
 
-class BroadcastEvent implements ShouldQueue
+class BroadcastEvent implements ShouldQueue, StorableCallable
 {
     use Queueable;
 
@@ -78,7 +78,7 @@ class BroadcastEvent implements ShouldQueue
 
         $channels = Arr::wrap($this->event->broadcastOn());
 
-        if (empty($channels)) {
+        if ([] === $channels) {
             return;
         }
 
@@ -98,6 +98,60 @@ class BroadcastEvent implements ShouldQueue
     }
 
     /**
+     * The Converter: Extracts primitive data on the web server. Zero objects go to the queue.
+     */
+    public function toStorableCallable(): CallQueuedCallable
+    {
+        $name = \method_exists($this->event, 'broadcastAs') ? $this->event->broadcastAs() : \get_class($this->event);
+        $channels = \MacropaySolutions\Kernel\Support\Arr::wrap($this->event->broadcastOn());
+        
+        $formattedChannels = [];
+
+        foreach ($channels as $channel) {
+            $formattedChannels[] = (string) $channel;
+        }
+
+        $connections = \method_exists($this->event, 'broadcastConnections') ? $this->event->broadcastConnections() : [null];
+        $payload = $this->getPayloadFromEvent($this->event);
+
+        $callable = CallQueuedCallable::createFrom($this->event, [
+            self::class,
+            'executeStorable',
+            [
+                'name'        => $name,
+                'channels'    => $formattedChannels,
+                'payload'     => $payload,
+                'connections' => $connections,
+            ]
+        ]);
+
+        $callable->connection = $this->connection;
+        $callable->queue = $this->queue;
+        $callable->timeout = $this->timeout;
+        $callable->tries = $this->tries;
+        $callable->backoff = $this->backoff;
+        $callable->maxExceptions = $this->maxExceptions;
+
+        return $callable;
+    }
+
+    public static function executeStorable(
+        string $name,
+        array $channels,
+        array $payload,
+        array $connections,
+        BroadcastingFactory $manager
+    ): void {
+        if ([] === $channels) {
+            return;
+        }
+
+        foreach ($connections as $connection) {
+            $manager->connection($connection)->broadcast($channels, $name, $payload);
+        }
+    }
+
+    /**
      * Get the payload for the given event.
      *
      * @param mixed $event
@@ -107,20 +161,13 @@ class BroadcastEvent implements ShouldQueue
     {
         if (
             method_exists($event, 'broadcastWith') &&
-            !is_null($payload = $event->broadcastWith())
+            null !== ($payload = $event->broadcastWith())
         ) {
             return array_merge($payload, ['socket' => data_get($event, 'socket')]);
         }
 
-        $payload = [];
-
-        foreach ((new ReflectionClass($event))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $payload[$property->getName()] = $this->formatProperty($property->getValue($event));
-        }
-
-        unset($payload['broadcastQueue']);
-
-        return $payload;
+        throw new \RuntimeException('Strict Broadcast Mode: Event [' . \get_class($event) .
+            '] must implement a `broadcastWith()` method returning an array. Public property reflection is forbidden.');
     }
 
     /**

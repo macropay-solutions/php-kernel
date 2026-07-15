@@ -9,7 +9,6 @@ use MacropaySolutions\Kernel\Contracts\View\View as ViewContract;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use ReflectionClass;
 use ReflectionMethod;
-use ReflectionProperty;
 
 abstract class Component
 {
@@ -229,19 +228,19 @@ abstract class Component
     {
         $class = static::class;
 
-        if (!isset(static::$propertyCache[$class])) {
-            $reflection = new ReflectionClass($this);
+        if (isset(static::$propertyCache[$class]) === false) {
+            // Unbound closure extracts STRICTLY public properties, bypassing local scope access
+            $publicProps = (\Closure::bind(fn($obj) => \get_object_vars($obj), null, null))($this);
 
-            static::$propertyCache[$class] = collect($reflection->getProperties(ReflectionProperty::IS_PUBLIC))
-                ->reject(function (ReflectionProperty $property) {
-                    return $property->isStatic();
-                })
-                ->reject(function (ReflectionProperty $property) {
-                    return $this->shouldIgnore($property->getName());
-                })
-                ->map(function (ReflectionProperty $property) {
-                    return $property->getName();
-                })->all();
+            $validKeys = [];
+
+            foreach ($publicProps as $key => $value) {
+                if ($this->shouldIgnore($key) === false) {
+                    $validKeys[] = $key;
+                }
+            }
+
+            static::$propertyCache[$class] = $validKeys;
         }
 
         $values = [];

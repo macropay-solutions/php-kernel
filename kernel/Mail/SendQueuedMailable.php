@@ -5,11 +5,14 @@ namespace MacropaySolutions\Kernel\Mail;
 use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Contracts\Mail\Factory as MailFactory;
 use MacropaySolutions\Kernel\Contracts\Mail\Mailable as MailableContract;
+use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeEncrypted;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 
-class SendQueuedMailable
+class SendQueuedMailable implements StorableCallable
 {
     use Queueable;
     use InteractsWithQueue;
@@ -82,6 +85,67 @@ class SendQueuedMailable
     public function handle(MailFactory $factory)
     {
         $this->mailable->send($factory);
+    }
+
+    /**
+     * The Converter: Extracts pure primitive data.
+     */
+    public function toStorableCallable(): CallQueuedCallable
+    {
+        $properties = isset($this->mailable) ? \get_object_vars($this->mailable) : [];
+
+        $payload = [
+            'class' => isset($this->mailable) ? \get_class($this->mailable) : '',
+            'properties' => $properties
+        ];
+
+        $callable = CallQueuedCallable::createFrom($this->mailable, [self::class, 'executeStorable', $payload]);
+        $callable->onFailure([self::class, 'executeFailedStorable', $payload]);
+        
+        $callable->connection = $this->connection;
+        $callable->queue = $this->queue;
+        $callable->timeout = $this->timeout;
+        $callable->tries = $this->tries;
+        $callable->maxExceptions = $this->maxExceptions;
+
+        return $callable;
+    }
+
+    public static function executeStorable(
+        string $class,
+        array $properties,
+        Job $job
+    ): void {
+        $mailable = \app($class);
+
+        foreach ($properties as $key => $value) {
+            $mailable->$key = $value;
+        }
+
+        if (\method_exists($mailable, 'setJob')) {
+            $mailable->setJob($job);
+        }
+
+        $wrapper = new self($mailable);
+
+        if (\method_exists($wrapper, 'setJob')) {
+            $wrapper->setJob($job);
+        }
+
+        \app()->call([$wrapper, 'handle']);
+    }
+
+    public static function executeFailedStorable(string $class, array $properties, \Throwable $e): void
+    {
+        $mailable = \app($class);
+
+        foreach ($properties as $key => $value) {
+            $mailable->$key = $value;
+        }
+
+        if (\method_exists($mailable, 'failed')) {
+            $mailable->failed($e);
+        }
     }
 
     /**

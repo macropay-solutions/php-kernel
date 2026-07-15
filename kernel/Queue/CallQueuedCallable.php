@@ -4,11 +4,13 @@ namespace MacropaySolutions\Kernel\Queue;
 
 use MacropaySolutions\Framework\Bus\PendingCallableDispatch;
 use MacropaySolutions\Kernel\Bus\Batchable;
-use MacropaySolutions\Kernel\Bus\InstanceDispatchable;
 use MacropaySolutions\Kernel\Bus\Queueable;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Queue\Job;
+use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
+use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 
 /**
@@ -16,7 +18,6 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
  */
 class CallQueuedCallable implements ShouldQueue
 {
-    use InstanceDispatchable;
     use Batchable;
     use InteractsWithQueue;
     use Queueable;
@@ -38,6 +39,70 @@ class CallQueuedCallable implements ShouldQueue
     public function __construct(array $callable)
     {
         $this->storableCallable = Queue::storableCallable($callable);
+    }
+
+    /**
+     * Resolve the correct queueable wrapper based on the source's uniqueness.
+     */
+    public static function createFrom(object|string $source, array $storableCallable): static
+    {
+        $isUniqueUntilProcessing = \is_object($source)
+            ? $source instanceof ShouldBeUniqueUntilProcessing
+            : \is_subclass_of($source, ShouldBeUniqueUntilProcessing::class);
+
+        $isUnique = \is_object($source)
+            ? $source instanceof ShouldBeUnique
+            : \is_subclass_of($source, ShouldBeUnique::class);
+
+        $wrapperClass = match (true) {
+            $isUniqueUntilProcessing => UniqueUntilProcessingCallQueuedCallable::class,
+            $isUnique => UniqueCallQueuedCallable::class,
+            default => static::class,
+        };
+
+        $callable = $wrapperClass::create($storableCallable);
+
+        if ($callable instanceof ShouldBeUnique) {
+            $resolvedSource = \is_object($source) ? $source : null;
+
+            if ($resolvedSource === null) {
+                try {
+                    $resolvedSource = \app($source);
+                } catch (\Throwable) {
+                    // Fall back to class defaults if the target cannot be booted
+                }
+            }
+
+            if ($resolvedSource instanceof ShouldBeUnique) {
+                $uniqueId = match (true) {
+                    \method_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId(),
+                    \property_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId,
+                    default => null,
+                };
+
+                if ($uniqueId !== null) {
+                    $callable->setUniqueId((string) $uniqueId);
+                }
+
+                $uniqueFor = match (true) {
+                    \method_exists($resolvedSource, 'uniqueFor') => $resolvedSource->uniqueFor(),
+                    \property_exists($resolvedSource, 'uniqueFor') => $resolvedSource->uniqueFor,
+                    default => null,
+                };
+
+                if ($uniqueFor !== null) {
+                    $callable->setUniqueFor((int) $uniqueFor);
+                }
+
+                $cacheStore = $resolvedSource->uniqueCacheStore ?? null;
+
+                if (\is_string($cacheStore)) {
+                    $callable->setUniqueCacheStore($cacheStore);
+                }
+            }
+        }
+
+        return $callable;
     }
 
     /**
@@ -63,9 +128,8 @@ class CallQueuedCallable implements ShouldQueue
             self::class => $this,
         ];
 
-        if (($this->job ?? null) instanceof \MacropaySolutions\Kernel\Contracts\Queue\Job) {
-            $systemArgs['job'] = $systemArgs[\MacropaySolutions\Kernel\Contracts\Queue\Job::class] = $systemArgs[$this->job::class] =
-                $this->job;
+        if (($this->job ?? null) instanceof Job) {
+            $systemArgs['job'] = $systemArgs[Job::class] = $systemArgs[$this->job::class] = $this->job;
         }
 
         static::invoke(
