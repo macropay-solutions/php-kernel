@@ -32,7 +32,8 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public const DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING = false;
 
     /**
-     * Override this in your \App\Application with false if you need/want
+     * Override this in your \App\Application with false if you need/want.
+     * If you do it, YOU MUST empty your queues before deploying.
      */
     public const FORBID_SERIALIZED_OBJECTS_IN_QUEUE = true;
 
