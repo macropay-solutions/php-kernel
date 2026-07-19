@@ -160,10 +160,11 @@ class BroadcastEvent implements ShouldQueue, StorableCallable
     protected function getPayloadFromEvent($event)
     {
         if (
-            method_exists($event, 'broadcastWith') &&
-            null !== ($payload = $event->broadcastWith())
+            \method_exists($event, 'broadcastWith') &&
+            \is_array($payload = $event->broadcastWith()) &&
+            !\array_is_list($payload)
         ) {
-            return array_merge($payload, ['socket' => data_get($event, 'socket')]);
+            return \array_merge($payload, ['socket' => data_get($event, 'socket')]);
         }
 
         throw new \RuntimeException('Strict Broadcast Mode: Event [' . \get_class($event) .

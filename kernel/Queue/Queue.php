@@ -193,9 +193,16 @@ abstract class Queue
                 };
             }
 
-            static::ensureNoObjects($metadata);
+            $serialized = \app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE
+                ? \json_encode($metadata, \JSON_UNESCAPED_UNICODE)
+                : \serialize($metadata);
 
-            return $this->getMergedObjectJobPayload($payload, $job, \serialize($metadata));
+            return $this->getMergedObjectJobPayload($payload, $job, $serialized);
+        }
+
+        if (\app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE) {
+            throw new \InvalidArgumentException('Strict Queue Mode: Traditional object jobs like [' . \get_class($job) .
+                '] are forbidden. You must use Storable Array Callables or implement StorableCallable.');
         }
 
         return $this->getMergedObjectJobPayload($payload, $job, \serialize($job));
@@ -359,44 +366,12 @@ abstract class Queue
                 );
             }
 
-            static::ensureNoObjects($callable[2]);
-
             return $callable;
         }
 
         throw new \InvalidArgumentException(
             'Storable validation failed: Method [' . $method . '] does not exist on class [' . $class . '].'
         );
-    }
-
-    /**
-     * Recursively ensure no objects are present in the parameter tree.
-     * @throws \InvalidArgumentException
-     */
-    protected static function ensureNoObjects(array $items): void
-    {
-        foreach ($items as $key => $value) {
-            if (\is_object($value)) {
-                throw new \InvalidArgumentException(
-                    'Security validation failed: Object detected at key [' . $key . ']. ' .
-                        'Storable callables only allow primitives (strings, ints, floats, bools, null, or arrays).'
-                );
-            }
-
-            // Strictly match PHP's exact serialization format for Objects (O:) and Custom Objects (C:)
-            // Format: [boundary] O/C : [name_length] : "[class_name]" : [property_count] :
-            if (\is_string($value) && \preg_match('/(?:^|;|{)(?:[OC]:\d+:"[^"]+":\d+:|E:\d+:"[^"]+";)/', $value)) {
-                throw new \InvalidArgumentException(
-                    'Security validation failed: Serialized object signature detected in string at key [' . $key .
-                        ']. Storable callables (including their chained jobs and middleware) only allow primitives ' .
-                        '(strings, integers, floats, booleans, null, or arrays).'
-                );
-            }
-
-            if (\is_array($value)) {
-                static::ensureNoObjects($value);
-            }
-        }
     }
 
     /**
@@ -553,11 +528,6 @@ abstract class Queue
                     : $serialized
             ]),
         ]);
-
-        if (Container::FORBID_SERIALIZED_OBJECTS_IN_QUEUE) {
-            static::ensureNoObjects($return);
-            static::ensureNoObjects([$serialized]);
-        }
 
         return $return;
     }

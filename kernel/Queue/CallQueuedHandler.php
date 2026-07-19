@@ -67,7 +67,7 @@ class CallQueuedHandler
             && '' !== (string)($payload['uniqueJobKey'] ?? '')
         ) {
             $this->container->make(CacheFactory::class)
-                ->store($payload['uniqueJobCacheStore'] ?? '')
+                ->store($payload['uniqueJobCacheStore'] ?? null)
                 ->lock($payload['uniqueJobKey'])
                 ->forceRelease();
 
@@ -117,12 +117,16 @@ class CallQueuedHandler
             !\str_starts_with($command, 'O:') &&
             !\str_starts_with($command, 'a:') &&
             !\str_starts_with($command, 'C:') &&
+            !\str_starts_with($command, '{') &&
+            !\str_starts_with($command, '[') &&
             $this->container->bound(Encrypter::class)
         ) {
             $command = $this->container[Encrypter::class]->decrypt($command);
         }
 
-        $unserialized = \unserialize($command);
+        $unserialized = \app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE
+            ? \json_decode($command, true)
+            : \unserialize($command);
 
         if (\is_array($unserialized) && isset($unserialized['storableCallable'])) {
             $job = CallQueuedCallable::create($unserialized['storableCallable']);
