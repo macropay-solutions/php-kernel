@@ -193,7 +193,7 @@ abstract class Queue
                 };
             }
 
-            $serialized = \json_encode($metadata, \JSON_UNESCAPED_UNICODE);
+            $serialized = \json_encode($metadata, \JSON_UNESCAPED_UNICODE|\JSON_THROW_ON_ERROR);
 
             return $this->getMergedObjectJobPayload($payload, $job, $serialized);
         }

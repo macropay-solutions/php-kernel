@@ -273,18 +273,14 @@ trait Queueable
             $job = \MacropaySolutions\Kernel\Queue\CallQueuedCallable::create($job);
         }
 
-        if (
-            !$job instanceof \MacropaySolutions\Kernel\Queue\CallQueuedCallable &&
-            !$job instanceof PendingBatch &&
-            !$job instanceof ChainedBatch
-        ) {
+        if (!$job instanceof \MacropaySolutions\Kernel\Queue\CallQueuedCallable) {
             throw new \RuntimeException(
-                'Strict Queue Mode: Chained jobs must be array callables or batches. Got: ' .
+                'Strict Queue Mode: Chained jobs must be array callables. Got: ' .
                     (\is_object($job) ? $job::class : \gettype($job))
             );
         }
 
-        return \serialize($job);
+        return \json_encode($job->storableCallable, \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR);
     }
 
     /**

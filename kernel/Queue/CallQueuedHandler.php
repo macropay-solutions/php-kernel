@@ -159,7 +159,7 @@ class CallQueuedHandler
      *
      * @param \MacropaySolutions\Kernel\Contracts\Queue\Job $job
      * @param mixed $command
-     * @param bool $lockAlreadyReleased
+     * @param bool $lockReleased
      * @return mixed
      * @throws Exception
      */
@@ -362,12 +362,13 @@ class CallQueuedHandler
     protected function ensureUniqueJobLockIsReleasedViaJobPayload(Job $job): void
     {
         $jobPayload = $job->payload();
-        $store = $jobPayload['uniqueJobCacheStore'] ?? '';
-        $key = $jobPayload['uniqueJobKey'] ?? '';
+        $key = (string)($jobPayload['uniqueJobKey'] ?? '');
 
-        if ('' === $store || '' === $key) {
+        if ('' === $key) {
             return;
         }
+
+        $store = $jobPayload['uniqueJobCacheStore'] ?? null;
 
         $this->container->make(CacheFactory::class)
             ->store($store)
