@@ -114,19 +114,14 @@ class CallQueuedHandler
         $command = $data['command'];
 
         if (
-            !\str_starts_with($command, 'O:') &&
-            !\str_starts_with($command, 'a:') &&
-            !\str_starts_with($command, 'C:') &&
             !\str_starts_with($command, '{') &&
             !\str_starts_with($command, '[') &&
             $this->container->bound(Encrypter::class)
         ) {
-            $command = $this->container[Encrypter::class]->decrypt($command);
+            $command = $this->container[Encrypter::class]->decryptString($command);
         }
 
-        $unserialized = \app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE
-            ? \json_decode($command, true)
-            : \unserialize($command);
+        $unserialized = \json_decode($command, true, flags: JSON_THROW_ON_ERROR);
 
         if (\is_array($unserialized) && isset($unserialized['storableCallable'])) {
             $job = CallQueuedCallable::create($unserialized['storableCallable']);
@@ -154,10 +149,6 @@ class CallQueuedHandler
             }
 
             return $job;
-        }
-
-        if (\is_object($unserialized)) {
-            return $unserialized;
         }
 
         throw new RuntimeException('Unable to extract job payload.');

@@ -193,19 +193,13 @@ abstract class Queue
                 };
             }
 
-            $serialized = \app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE
-                ? \json_encode($metadata, \JSON_UNESCAPED_UNICODE)
-                : \serialize($metadata);
+            $serialized = \json_encode($metadata, \JSON_UNESCAPED_UNICODE);
 
             return $this->getMergedObjectJobPayload($payload, $job, $serialized);
         }
 
-        if (\app()::FORBID_SERIALIZED_OBJECTS_IN_QUEUE) {
-            throw new \InvalidArgumentException('Strict Queue Mode: Traditional object jobs like [' . \get_class($job) .
-                '] are forbidden. You must use Storable Array Callables or implement StorableCallable.');
-        }
-
-        return $this->getMergedObjectJobPayload($payload, $job, \serialize($job));
+        throw new \InvalidArgumentException('Strict Queue Mode: Traditional object jobs like [' . \get_class($job) .
+            '] are forbidden. You must use Storable Array Callables or implement StorableCallable.');
     }
 
     /**
@@ -524,7 +518,7 @@ abstract class Queue
             'data' => \array_merge($payload['data'], [
                 'commandName' => $job::class,
                 'command' => $this->jobShouldBeEncrypted($job) && $this->container->bound(Encrypter::class)
-                    ? $this->container[Encrypter::class]->encrypt($serialized)
+                    ? $this->container[Encrypter::class]->encryptString($serialized)
                     : $serialized
             ]),
         ]);

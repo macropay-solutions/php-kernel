@@ -124,7 +124,7 @@ class ChainedBatch implements ShouldQueue
     {
         if (!$batch->allowsFailures()) {
             if (\is_string($callback)) {
-                $callback = \unserialize($callback);
+                $callback = \json_decode($callback, true, flags: JSON_THROW_ON_ERROR);
             }
 
             // "Shotgun DI" mapping to guarantee 0-reflection cache hits
@@ -152,7 +152,7 @@ class ChainedBatch implements ShouldQueue
         ?array $chainCatchCallbacks
     ): void {
         if (!$batch->cancelled()) {
-            $next = \is_string($rawNext) ? \unserialize($rawNext) : $rawNext;
+            $next = \is_string($rawNext) ? \json_decode($rawNext, true, flags: JSON_THROW_ON_ERROR) : $rawNext;
 
             if (\is_array($next)) {
                 $next = CallQueuedCallable::create($next);

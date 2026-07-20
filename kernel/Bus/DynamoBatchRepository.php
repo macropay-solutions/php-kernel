@@ -412,7 +412,7 @@ class DynamoBatchRepository implements BatchRepository
             (int)$batch->pending_jobs,
             (int)$batch->failed_jobs,
             $batch->failed_job_ids,
-            $this->unserialize($batch->options) ?? [],
+            $this->unserialize($batch->options),
             CarbonImmutable::createFromTimestamp($batch->created_at),
             $batch->cancelled_at ? CarbonImmutable::createFromTimestamp($batch->cancelled_at) : $batch->cancelled_at,
             $batch->finished_at ? CarbonImmutable::createFromTimestamp($batch->finished_at) : $batch->finished_at
@@ -509,11 +509,10 @@ class DynamoBatchRepository implements BatchRepository
      * Unserialize the given value.
      *
      * @param string $serialized
-     * @return mixed
      */
-    protected function unserialize($serialized)
+    protected function unserialize($serialized): array
     {
-        return unserialize($serialized);
+        return \json_decode($serialized, true, flags: JSON_THROW_ON_ERROR);
     }
 
     /**

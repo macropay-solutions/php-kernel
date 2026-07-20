@@ -232,14 +232,14 @@ class RetryCommand extends Command
      */
     protected function getInstanceFromPayload(array $payload): mixed
     {
-        if (\str_starts_with($payload['data']['command'], 'O:')) {
-            return \unserialize($payload['data']['command']);
-        }
-
         if ($this->app->bound(Encrypter::class)) {
-            return unserialize($this->app->make(Encrypter::class)->decrypt($payload['data']['command']));
+            return \json_decode(
+                $this->app->make(Encrypter::class)->decryptString($payload['data']['command']),
+                true,
+                flags: JSON_THROW_ON_ERROR
+            );
         }
 
-        throw new RuntimeException('Unable to extract job payload.');
+        return \json_decode($payload['data']['command'], true, flags: JSON_THROW_ON_ERROR);
     }
 }

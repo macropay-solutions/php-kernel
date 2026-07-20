@@ -357,7 +357,7 @@ class DatabaseBatchRepository implements PrunableBatchRepository
         }
 
         try {
-            return unserialize($serialized);
+            return \json_decode($serialized, true, flags: JSON_THROW_ON_ERROR);
         } catch (Throwable) {
             return [];
         }

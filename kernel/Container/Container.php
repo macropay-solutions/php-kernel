@@ -30,13 +30,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * Override this in your \App\Application with true if you need/want
      */
     public const DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING = false;
-
-    /**
-     * Override this in your \App\Application with false if you need/want.
-     * If you do it, YOU MUST empty your queues before deploying.
-     */
-    public const FORBID_SERIALIZED_OBJECTS_IN_QUEUE = true;
-
     public const MERGED_CACHED_FILES_PHP = 'merged-cached-files.php';
     public const SERVICES_PHP = 'services.php';
     public const CONFIG_PHP = 'config.php';

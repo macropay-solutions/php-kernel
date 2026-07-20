@@ -174,13 +174,10 @@ if (!function_exists('database_path')) {
 if (!function_exists('encrypt')) {
     /**
      * Encrypt the given value.
-     *
-     * @param string $value
-     * @return string
      */
-    function encrypt($value)
+    function encrypt(mixed $value, bool $serialize): string
     {
-        return app('encrypter')->encrypt($value);
+        return app('encrypter')->encrypt($value, $serialize);
     }
 }
 

@@ -294,8 +294,19 @@ trait Queueable
      */
     public function dispatchNextJobInChain()
     {
-        if (!empty($this->chained)) {
-            dispatch(tap(unserialize(array_shift($this->chained)), function ($next) {
+        if ([] !== $this->chained) {
+            $nextItem = \json_decode(\array_shift($this->chained), true, flags: JSON_THROW_ON_ERROR);
+
+            if (!\is_array($nextItem)) {
+                throw new \RuntimeException(
+                    'Unable to execute chained job. Expected a decoded Storable Array Callable, but received ' .
+                        'an invalid data type. Ensure you are not chaining legacy objects or closures.'
+                );
+            }
+
+            $nextItem = \MacropaySolutions\Kernel\Queue\CallQueuedCallable::create($nextItem);
+
+            \dispatch(\tap($nextItem, function ($next) {
                 $next->chained = $this->chained;
 
                 $next->onConnection($next->connection ?: $this->chainConnection);

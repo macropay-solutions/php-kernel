@@ -207,7 +207,7 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
     protected function prepareData()
     {
         if (is_string($this->data)) {
-            $this->data = unserialize($this->data);
+            $this->data = \json_decode($this->data, true, flags: JSON_THROW_ON_ERROR);
         }
     }
 
