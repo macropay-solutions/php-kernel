@@ -4,6 +4,8 @@ namespace MacropaySolutions\Kernel\Contracts\Database;
 
 class ModelIdentifier
 {
+    public $self = self::class;
+
     /**
      * The class name of the model.
      *

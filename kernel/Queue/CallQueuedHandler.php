@@ -79,13 +79,13 @@ class CallQueuedHandler
                 $job,
                 $this->getCommand($data)
             );
+
+            $this->dispatchThroughMiddleware($job, $command, $lockAlreadyReleased);
         } catch (ModelNotFoundException $e) {
             $this->handleModelNotFound($job, $e);
 
             return;
         }
-
-        $this->dispatchThroughMiddleware($job, $command, $lockAlreadyReleased);
 
         if (!$job->isReleased() && !$command instanceof ShouldBeUniqueUntilProcessing) {
             $this->ensureUniqueJobLockIsReleased($command, $job);
@@ -318,12 +318,11 @@ class CallQueuedHandler
     {
         $class = $job->resolveName();
 
-        try {
-            $shouldDelete = (new ReflectionClass($class))
-                ->getDefaultProperties()['deleteWhenMissingModels'] ?? false;
-        } catch (Exception) {
-            $shouldDelete = false;
+        if (\str_contains($class, '@')) {
+            $class = \explode('@', $class)[0];
         }
+
+        $shouldDelete = \class_exists($class) && (\get_class_vars($class)['deleteWhenMissingModels'] ?? false);
 
         $jobPayload = $job->payload();
 

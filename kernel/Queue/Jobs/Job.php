@@ -277,12 +277,10 @@ abstract class Job
 
     /**
      * Get the decoded body of the job.
-     *
-     * @return array
      */
-    public function payload()
+    public function payload(): array
     {
-        return json_decode($this->getRawBody(), true);
+        return \json_decode($this->getRawBody(), true, flags: JSON_THROW_ON_ERROR);
     }
 
     /**

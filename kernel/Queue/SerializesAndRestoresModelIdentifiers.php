@@ -53,6 +53,24 @@ trait SerializesAndRestoresModelIdentifiers
      */
     protected function getRestoredPropertyValue($value)
     {
+        if (\is_array($value) && ($value['self'] ?? null) === ModelIdentifier::class) {
+            if (
+                !\isset($value['class'])
+                || !\is_string($value['class'])
+                || !\isset($value['id'])
+                || !\is_array($relations = $value['relations'] ?? [])
+            ) {
+                return $value;
+            }
+
+            $value = (new ModelIdentifier(
+                $value['class'],
+                $value['id'],
+                $relations,
+                $value['connection'] ?? null
+            ))->useCollectionClass($value['collectionClass'] ?? null);
+        }
+
         if (!$value instanceof ModelIdentifier) {
             return $value;
         }

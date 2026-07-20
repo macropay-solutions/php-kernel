@@ -12,6 +12,7 @@ use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
+use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 
 /**
  * DO NOT ADD PROPERTY HOOKS IN THIS CLASS OR IN ITS TRAITS TO ALLOW OBJECT RECONSTRUCTION AFTER DESERIALIZATION!
@@ -176,6 +177,12 @@ class CallQueuedCallable implements ShouldQueue
     {
         $container ??= \MacropaySolutions\Kernel\Container\Container::getInstance();
 
+        $restorer = new SerializesModelsHelper();
+
+        foreach ($userArgs as $key => $value) {
+            $userArgs[$key] = $restorer->restorePropertyValue($value);
+        }
+
         if ([] !== $systemArgs && \array_is_list($systemArgs)) {
             return self::manualInvoke($target, $userArgs, $systemArgs, $container, 0);
         }
@@ -195,6 +202,18 @@ class CallQueuedCallable implements ShouldQueue
     {
         $container = \MacropaySolutions\Kernel\Container\Container::getInstance();
         $target = [$callback[0], $callback[1]];
+
+        $restorer = new SerializesModelsHelper();
+
+        if (isset($callback[2]) && \is_array($callback[2])) {
+            try {
+                foreach ($callback[2] as $key => $value) {
+                    $callback[2][$key] = $restorer->restorePropertyValue($value);
+                }
+            } catch (ModelNotFoundException) {
+                return;
+            }
+        }
 
         if ([] !== $systemArgs && \array_is_list($systemArgs)) {
             static::manualInvokeFailure($callback, $e, $systemArgs, $container, $target, 0);

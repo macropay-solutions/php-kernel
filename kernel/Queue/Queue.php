@@ -360,6 +360,12 @@ abstract class Queue
                 );
             }
 
+            $serializer = new SerializesModelsHelper();
+
+            foreach (($callable[2] ?? []) as $key => $value) {
+                $callable[2][$key] = $serializer->serializePropertyValue($value);
+            }
+
             return $callable;
         }
 
