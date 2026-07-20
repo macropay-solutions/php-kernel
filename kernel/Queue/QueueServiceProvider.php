@@ -21,8 +21,6 @@ use MacropaySolutions\Kernel\Support\ServiceProvider;
 
 class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    use SerializesAndRestoresModelIdentifiers;
-
     /**
      * Register the service provider.
      *
