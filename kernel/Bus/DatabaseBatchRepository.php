@@ -334,7 +334,7 @@ class DatabaseBatchRepository implements PrunableBatchRepository
      */
     protected function serialize($value)
     {
-        $serialized = serialize($value);
+        $serialized = \json_encode($value, \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR);
 
         return $this->connection instanceof PostgresConnection
             ? base64_encode($serialized)
@@ -351,7 +351,7 @@ class DatabaseBatchRepository implements PrunableBatchRepository
     {
         if (
             $this->connection instanceof PostgresConnection &&
-            !Str::contains($serialized, [':', ';'])
+            !Str::contains($serialized, ['{', '['])
         ) {
             $serialized = base64_decode($serialized);
         }
