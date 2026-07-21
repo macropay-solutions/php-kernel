@@ -87,11 +87,9 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         $this->timeout = $notification->timeout ?? null;
         $this->maxExceptions = $notification->maxExceptions ?? null;
 
-        if ($notification instanceof ShouldQueueAfterCommit) {
-            $this->afterCommit = true;
-        } else {
-            $this->afterCommit = $notification->afterCommit ?? null;
-        }
+        $this->afterCommit = $notification instanceof ShouldQueueAfterCommit
+            ? true
+            : ($notification->afterCommit ?? null);
 
         $this->shouldBeEncrypted = $notification instanceof ShouldBeEncrypted;
     }
@@ -132,7 +130,11 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         foreach ($notifiables as $notifiable) {
             if ($notifiable instanceof Model) {
                 $notifiablesData[] = ['type' => 'model', 'class' => \get_class($notifiable), 'id' => $notifiable->getKey()];
-            } elseif ($notifiable instanceof AnonymousNotifiable) {
+
+                continue;
+            }
+
+            if ($notifiable instanceof AnonymousNotifiable) {
                 $notifiablesData[] = ['type' => 'anonymous', 'routes' => $notifiable->routes];
             }
         }
