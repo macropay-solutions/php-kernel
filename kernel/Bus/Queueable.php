@@ -66,13 +66,6 @@ trait Queueable
     public $afterCommit;
 
     /**
-     * The middleware the job should be dispatched through.
-     *
-     * @var array
-     */
-    public $middleware = [];
-
-    /**
      * The jobs that should run if this job is successful.
      *
      * @var array
@@ -183,19 +176,6 @@ trait Queueable
     public function beforeCommit()
     {
         $this->afterCommit = false;
-
-        return $this;
-    }
-
-    /**
-     * Specify the middleware the job should be dispatched through.
-     *
-     * @param array|object $middleware
-     * @return $this
-     */
-    public function through($middleware)
-    {
-        $this->middleware = Arr::wrap($middleware);
 
         return $this;
     }

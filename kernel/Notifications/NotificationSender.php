@@ -222,21 +222,11 @@ class NotificationSender
                     $delay = $notification->withDelay($notifiable, $channel) ?? null;
                 }
 
-                $middleware = $notification->middleware ?? [];
-
-                if (method_exists($notification, 'middleware')) {
-                    $middleware = array_merge(
-                        $notification->middleware($notifiable, $channel),
-                        $middleware
-                    );
-                }
-
                 $this->bus->dispatch(
                     (new SendQueuedNotifications($notifiable, $notification, [$channel]))
                         ->onConnection($connection)
                         ->onQueue($queue)
                         ->delay(is_array($delay) ? ($delay[$channel] ?? null) : $delay)
-                        ->through($middleware)
                 );
             }
         }

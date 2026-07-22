@@ -75,7 +75,6 @@ trait InstanceDispatchable
             $callable->chainCatchCallbacks = $this->chainCatchCallbacks ?? null;
             $callable->delay = $this->delay ?? null;
             $callable->afterCommit = $this->afterCommit ?? null;
-            $callable->middleware = $this->middleware ?? [];
             $callable->chained = $this->chained ?? [];
         }
 

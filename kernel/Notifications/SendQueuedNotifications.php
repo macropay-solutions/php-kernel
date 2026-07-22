@@ -161,7 +161,6 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         $callable->queue = $this->queue;
         $callable->delay = $this->delay;
         $callable->afterCommit = $this->afterCommit;
-        $callable->middleware = $this->middleware;
         $callable->tries = $this->tries;
         $callable->timeout = $this->timeout;
         $callable->maxExceptions = $this->maxExceptions;

@@ -15,9 +15,6 @@ use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
-use MacropaySolutions\Kernel\Pipeline\Pipeline;
-use ReflectionClass;
-use RuntimeException;
 
 class CallQueuedHandler
 {
@@ -80,7 +77,7 @@ class CallQueuedHandler
                 $this->getCommand($data)
             );
 
-            $this->dispatchThroughMiddleware($job, $command, $lockAlreadyReleased);
+            $this->dispatch($job, $command, $lockAlreadyReleased);
         } catch (ModelNotFoundException $e) {
             $this->handleModelNotFound($job, $e);
 
@@ -105,11 +102,10 @@ class CallQueuedHandler
      * Get the command from the given payload.
      *
      * @param array $data
-     * @return mixed
      *
      * @throws \RuntimeException
      */
-    protected function getCommand(array $data)
+    protected function getCommand(array $data): CallQueuedCallable
     {
         $command = $data['command'];
 
@@ -151,54 +147,36 @@ class CallQueuedHandler
             return $job;
         }
 
-        throw new RuntimeException('Unable to extract job payload.');
+        throw new \RuntimeException('Unable to extract job payload.');
     }
 
     /**
-     * Dispatch the given job / command through its specified middleware.
-     *
-     * @param \MacropaySolutions\Kernel\Contracts\Queue\Job $job
-     * @param mixed $command
-     * @param bool $lockReleased
-     * @return mixed
-     * @throws Exception
+     * Dispatch the given job / command
      */
-    protected function dispatchThroughMiddleware(Job $job, $command, bool $lockReleased = false)
+    protected function dispatch(Job $job, CallQueuedCallable $command, bool $lockReleased = false): mixed
     {
-        if ($command instanceof \__PHP_Incomplete_Class) {
-            throw new Exception('Job is incomplete class: ' . json_encode($command));
+        if ($command instanceof ShouldBeUniqueUntilProcessing) {
+            if (!$lockReleased) {
+                $this->ensureUniqueJobLockIsReleased($command, $job);
+                $lockReleased = true;
+            }
         }
 
-        return (new Pipeline($this->container))->send($command)
-            ->through(
-                array_merge(
-                    method_exists($command, 'middleware') ? $command->middleware() : [],
-                    $command->middleware ?? []
-                )
-            )
-            ->finally(function (mixed $command) use (&$lockReleased, $job): void {
-                if (
-                    !$lockReleased
-                    && $command instanceof ShouldBeUniqueUntilProcessing
-                    && ($command->job ?? null) instanceof Job
-                    && !$command->job->isReleased()
-                ) {
-                    $this->ensureUniqueJobLockIsReleased($command, $job);
-                }
-            })
-            ->then(function (mixed $command) use ($job, &$lockReleased): mixed {
-                if ($command instanceof ShouldBeUniqueUntilProcessing) {
-                    if (!$lockReleased) {
-                        $this->ensureUniqueJobLockIsReleased($command, $job);
-                        $lockReleased = true;
-                    }
-                }
-
-                return $this->dispatcher->dispatchNow(
-                    $command,
-                    $this->resolveHandler($job, $command)
-                );
-            });
+        try {
+            return $this->dispatcher->dispatchNow(
+                $command,
+                $this->resolveHandler($job, $command)
+            );
+        } finally {
+            if (
+                !$lockReleased
+                && $command instanceof ShouldBeUniqueUntilProcessing
+                && ($command->job ?? null) instanceof Job
+                && !$command->job->isReleased()
+            ) {
+                $this->ensureUniqueJobLockIsReleased($command, $job);
+            }
+        }
     }
 
     /**
