@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Queue;
 
-use Exception;
 use MacropaySolutions\Kernel\Bus\Batchable;
 use MacropaySolutions\Kernel\Bus\BatchRepository;
 use MacropaySolutions\Kernel\Bus\UniqueLock;
