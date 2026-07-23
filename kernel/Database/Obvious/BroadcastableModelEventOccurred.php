@@ -99,14 +99,12 @@ class BroadcastableModelEventOccurred implements ShouldBroadcast
 
     /**
      * Get the data that should be sent with the broadcasted event.
-     *
-     * @return array|null
      */
-    public function broadcastWith()
+    public function broadcastWith(): array
     {
         return method_exists($this->model, 'broadcastWith')
             ? $this->model->broadcastWith($this->event)
-            : null;
+            : $this->model->toArray();
     }
 
     /**
