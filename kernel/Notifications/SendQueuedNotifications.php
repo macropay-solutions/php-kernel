@@ -13,6 +13,7 @@ use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 use MacropaySolutions\Kernel\Queue\SerializesModels;
+use MacropaySolutions\Kernel\Queue\SerializesModelsHelper;
 use MacropaySolutions\Kernel\Support\Collection;
 
 class SendQueuedNotifications implements ShouldQueue, StorableCallable
@@ -141,6 +142,12 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
 
         $notificationProps = isset($this->notification) ? \get_object_vars($this->notification) : [];
 
+        $helper = new SerializesModelsHelper();
+
+        foreach ($notificationProps as $key => $value) {
+            $notificationProps[$key] = $helper->serializePropertyValue($value);
+        }
+
         $payload = [
             'notifiables' => $notifiablesData,
             'notificationClass' => isset($this->notification) ? \get_class($this->notification) : '',
@@ -195,9 +202,10 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         }
 
         $notification = \app($notificationClass);
+        $helper = new SerializesModelsHelper();
 
         foreach ($notificationProps as $key => $value) {
-            $notification->$key = $value;
+            $notification->$key = $helper->restorePropertyValue($value);
         }
 
         $wrapper = new self($restoredNotifiables, $notification, $channels);
@@ -240,9 +248,10 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         }
 
         $notification = \app($notificationClass);
+        $helper = new SerializesModelsHelper();
 
         foreach ($notificationProps as $key => $value) {
-            $notification->$key = $value;
+            $notification->$key = $helper->restorePropertyValue($value);
         }
 
         (new self($restoredNotifiables, $notification, $channels))->failed($e);
