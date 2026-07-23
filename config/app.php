@@ -161,6 +161,10 @@ return [
             'methods' => [],
         ],
         [
+            'path' => \app()->path() . DIRECTORY_SEPARATOR . 'Events',
+            'methods' => [],
+        ],
+        [
             'path' => \app()->path() . DIRECTORY_SEPARATOR . 'CallablesAsArray',
             'methods' => ['*'],
         ],
