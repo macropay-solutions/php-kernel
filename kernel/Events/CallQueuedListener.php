@@ -8,6 +8,7 @@ use MacropaySolutions\Kernel\Contracts\Queue\Job;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
+use MacropaySolutions\Kernel\Queue\SerializesModelsHelper;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 
 class CallQueuedListener implements ShouldQueue, StorableCallable
@@ -17,73 +18,55 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
 
     /**
      * The listener class name.
-     *
-     * @var string
      */
-    public $class;
+    public string $class;
 
     /**
      * The listener method.
-     *
-     * @var string
      */
-    public $method;
+    public string $method;
 
     /**
-     * The data to be passed to the listener.
-     *
-     * @var array
+     * The data to be passed to the listener or event constructor.
      */
-    public $data;
+    public array $data;
+
+    /**
+     * The event class name to reconstruct on the worker.
+     */
+    public ?string $eventClass;
 
     /**
      * The number of times the job may be attempted.
-     *
-     * @var int
      */
-    public $tries;
+    public ?int $tries = null;
 
     /**
      * The maximum number of exceptions allowed, regardless of attempts.
-     *
-     * @var int
      */
-    public $maxExceptions;
+    public ?int $maxExceptions = null;
 
     /**
      * The number of seconds to wait before retrying a job that encountered an uncaught exception.
-     *
-     * @var int
      */
-    public $backoff;
+    public ?int $backoff = null;
 
-    /**
-     * The timestamp indicating when the job should timeout.
-     *
-     * @var int
-     */
-    public $retryUntil;
+    public ?int $retryUntil = null;
 
     /**
      * The number of seconds the job can run before timing out.
-     *
-     * @var int
      */
-    public $timeout;
+    public ?int $timeout = null;
 
     /**
      * Indicates if the job should fail if the timeout is exceeded.
-     *
-     * @var bool
      */
-    public $failOnTimeout = false;
+    public bool $failOnTimeout = false;
 
     /**
      * Indicates if the job should be encrypted.
-     *
-     * @var bool
      */
-    public $shouldBeEncrypted = false;
+    public bool $shouldBeEncrypted = false;
 
     /**
      * Create a new job instance.
@@ -91,42 +74,81 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
      * @param string $class
      * @param string $method
      * @param array $data
-     * @return void
+     * @param string|null $eventClass
      */
-    public function __construct($class, $method, $data)
+    public function __construct(string $class, string $method, array $data, ?string $eventClass = null)
     {
-        $this->data = $data;
         $this->class = $class;
         $this->method = $method;
+        $this->data = $data;
+        $this->eventClass = $eventClass;
     }
 
     /**
      * Handle the queued job.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @return void
      */
-    public function handle(Container $container)
+    public function handle(Container $container): void
     {
-        $this->prepareData();
-
         $handler = $this->setJobInstanceIfNecessary(
             $this->job,
             $container->make($this->class)
         );
 
-        $handler->{$this->method}(...array_values($this->data));
+        $handler->{$this->method}(...$this->reconstructEvent());
     }
 
     /**
-     * The Converter: Passes pure primitive arrays directly.
+     * Reinstantiate the event object in worker memory if an eventClass is present.
+     *
+     * @return array
+     */
+    public function reconstructEvent(): array
+    {
+        if ('' !== (string)$this->eventClass && \class_exists($this->eventClass)) {
+            if (isset($this->data[0]) && $this->data[0] instanceof $this->eventClass) {
+                return $this->data;
+            }
+
+            if (isset($this->data[1][0]) && $this->data[1][0] instanceof $this->eventClass) {
+                return $this->data;
+            }
+        }
+
+        $helper = new SerializesModelsHelper();
+        $data = $helper->restorePropertyValue($this->data);
+
+        if ('' !== (string)$this->eventClass && \class_exists($this->eventClass)) {
+            if (isset($data[0]) && \is_array($data[0])) {
+                $data[0] = \app($this->eventClass, $data[0]);
+
+                return $data;
+            }
+
+            if (isset($data[1][0]) && \is_array($data[1][0]) && \is_string($data[0])) {
+                $data[1][0] = \app($this->eventClass, $data[1][0]);
+
+                return $data;
+            }
+        }
+
+        return \is_array($data) ? $data : [$data];
+    }
+
+    /**
+     * The Converter: Passes pure primitive arrays directly over the wire.
      */
     public function toStorableCallable(): CallQueuedCallable
     {
+        $storableData = $this->getStorableData();
+
         $payload = [
             'class' => $this->class,
             'method' => $this->method,
-            'data' => $this->data,
+            'data' => $storableData,
+            'eventClass' => $this->eventClass,
         ];
 
         $callable = CallQueuedCallable::createFrom($this->class, [self::class, 'executeStorable', $payload]);
@@ -138,17 +160,24 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
         $callable->tries = $this->tries;
         $callable->maxExceptions = $this->maxExceptions;
         $callable->backoff = $this->backoff;
+        $callable->retryUntil = $this->retryUntil;
+        $callable->failOnTimeout = $this->failOnTimeout;
+        $callable->shouldBeEncrypted = $this->shouldBeEncrypted;
 
         return $callable;
     }
 
+    /**
+     * Execute the storable callable on the queue worker.
+     */
     public static function executeStorable(
         string $class,
         string $method,
         array $data,
+        ?string $eventClass,
         Job $job
     ): void {
-        $wrapper = new self($class, $method, $data);
+        $wrapper = new self($class, $method, $data, $eventClass);
 
         if (\method_exists($wrapper, 'setJob')) {
             $wrapper->setJob($job);
@@ -157,21 +186,29 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
         \app()->call([$wrapper, 'handle']);
     }
 
-    public static function executeFailedStorable(string $class, string $method, array $data, \Throwable $e): void
-    {
-        (new self($class, $method, $data))->failed($e);
+    /**
+     * Execute the failed storable callable on the queue worker.
+     */
+    public static function executeFailedStorable(
+        string $class,
+        string $method,
+        array $data,
+        ?string $eventClass,
+        \Throwable $e
+    ): void {
+        (new self($class, $method, $data, $eventClass))->failed($e);
     }
 
     /**
      * Set the job instance of the given class if necessary.
      *
-     * @param \MacropaySolutions\Kernel\Contracts\Queue\Job $job
+     * @param Job $job
      * @param object $instance
      * @return object
      */
-    protected function setJobInstanceIfNecessary(Job $job, $instance)
+    protected function setJobInstanceIfNecessary(Job $job, object $instance): object
     {
-        if (in_array(InteractsWithQueue::class, class_uses_recursive($instance))) {
+        if (\in_array(InteractsWithQueue::class, \class_uses_recursive($instance), true)) {
             $instance->setJob($job);
         }
 
@@ -179,44 +216,21 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
     }
 
     /**
-     * Call the failed method on the job instance.
-     *
-     * The event instance and the exception will be passed.
-     *
-     * @param \Throwable $e
-     * @return void
+     * Call the failed method on the listener instance.
      */
-    public function failed($e)
+    public function failed(\Throwable $e): void
     {
-        $this->prepareData();
-
         $handler = Container::getInstance()->make($this->class);
 
-        $parameters = array_merge(array_values($this->data), [$e]);
-
-        if (method_exists($handler, 'failed')) {
-            $handler->failed(...$parameters);
-        }
-    }
-
-    /**
-     * Unserialize the data if needed.
-     *
-     * @return void
-     */
-    protected function prepareData()
-    {
-        if (is_string($this->data)) {
-            $this->data = \json_decode($this->data, true, flags: JSON_THROW_ON_ERROR);
+        if (\method_exists($handler, 'failed')) {
+            $handler->failed(...\array_merge(\array_values($this->reconstructEvent()), [$e]));
         }
     }
 
     /**
      * Get the display name for the queued job.
-     *
-     * @return string
      */
-    public function displayName()
+    public function displayName(): string
     {
         return $this->class;
     }
@@ -226,10 +240,33 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
      *
      * @return void
      */
-    public function __clone()
+    public function __clone(): void
     {
         $this->data = array_map(function ($data) {
             return is_object($data) ? clone $data : $data;
         }, $this->data);
+    }
+
+    protected function getStorableData(): array
+    {
+        if ('' === (string)$this->eventClass) {
+            return $this->data;
+        }
+
+        $storableData = $this->data;
+
+        if (isset($storableData[0]) && $storableData[0] instanceof $this->eventClass) {
+            $storableData[0] = \get_object_vars($storableData[0]);
+
+            return $storableData;
+        }
+
+        if (isset($storableData[1][0]) && $storableData[1][0] instanceof $this->eventClass) {
+            $storableData[1][0] = \get_object_vars($storableData[1][0]);
+
+            return $storableData;
+        }
+
+        return $storableData;
     }
 }
