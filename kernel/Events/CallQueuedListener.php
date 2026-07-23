@@ -102,8 +102,6 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
 
     /**
      * Reinstantiate the event object in worker memory if an eventClass is present.
-     *
-     * @return array
      */
     public function reconstructEvent(): array
     {
@@ -117,17 +115,27 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
             }
         }
 
+        $data = $this->data;
         $helper = new SerializesModelsHelper();
-        $data = $helper->restorePropertyValue($this->data);
 
         if ('' !== (string)$this->eventClass && \class_exists($this->eventClass)) {
+            // Shape 1: Direct Event Object
             if (isset($data[0]) && \is_array($data[0])) {
+                foreach ($data[0] as $key => $value) {
+                    $data[0][$key] = $helper->restorePropertyValue($value);
+                }
+
                 $data[0] = \app($this->eventClass, $data[0]);
 
                 return $data;
             }
 
+            // Shape 2: Named Event
             if (isset($data[1][0]) && \is_array($data[1][0]) && \is_string($data[0])) {
+                foreach ($data[1][0] as $key => $value) {
+                    $data[1][0][$key] = $helper->restorePropertyValue($value);
+                }
+
                 $data[1][0] = \app($this->eventClass, $data[1][0]);
 
                 return $data;
@@ -254,15 +262,26 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
         }
 
         $storableData = $this->data;
+        $helper = new SerializesModelsHelper();
 
+        // Shape 1: Direct Event Object [$event]
         if (isset($storableData[0]) && $storableData[0] instanceof $this->eventClass) {
             $storableData[0] = \get_object_vars($storableData[0]);
+
+            foreach ($storableData[0] as $key => $value) {
+                $storableData[0][$key] = $helper->serializePropertyValue($value);
+            }
 
             return $storableData;
         }
 
+        // Shape 2: Named Event [$eventName, [$event]]
         if (isset($storableData[1][0]) && $storableData[1][0] instanceof $this->eventClass) {
             $storableData[1][0] = \get_object_vars($storableData[1][0]);
+
+            foreach ($storableData[1][0] as $key => $value) {
+                $storableData[1][0][$key] = $helper->serializePropertyValue($value);
+            }
 
             return $storableData;
         }
