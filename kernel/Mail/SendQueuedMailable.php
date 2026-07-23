@@ -11,6 +11,7 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
 use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
+use MacropaySolutions\Kernel\Queue\SerializesModelsHelper;
 
 class SendQueuedMailable implements StorableCallable
 {
@@ -94,6 +95,12 @@ class SendQueuedMailable implements StorableCallable
     {
         $properties = isset($this->mailable) ? \get_object_vars($this->mailable) : [];
 
+        $helper = new SerializesModelsHelper();
+
+        foreach ($properties as $key => $value) {
+            $properties[$key] = $helper->serializePropertyValue($value);
+        }
+
         $payload = [
             'class' => isset($this->mailable) ? \get_class($this->mailable) : '',
             'properties' => $properties
@@ -117,9 +124,10 @@ class SendQueuedMailable implements StorableCallable
         Job $job
     ): void {
         $mailable = \app($class);
+        $helper = new SerializesModelsHelper();
 
         foreach ($properties as $key => $value) {
-            $mailable->$key = $value;
+            $mailable->$key = $helper->restorePropertyValue($value);
         }
 
         if (\method_exists($mailable, 'setJob')) {
@@ -138,9 +146,10 @@ class SendQueuedMailable implements StorableCallable
     public static function executeFailedStorable(string $class, array $properties, \Throwable $e): void
     {
         $mailable = \app($class);
+        $helper = new SerializesModelsHelper();
 
         foreach ($properties as $key => $value) {
-            $mailable->$key = $value;
+            $mailable->$key = $helper->restorePropertyValue($value);
         }
 
         if (\method_exists($mailable, 'failed')) {
