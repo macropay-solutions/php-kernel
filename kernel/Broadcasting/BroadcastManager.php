@@ -2,11 +2,9 @@
 
 namespace MacropaySolutions\Kernel\Broadcasting;
 
-use Ably\AblyRest;
 use Closure;
 use GuzzleHttp\Client as GuzzleClient;
 use InvalidArgumentException;
-use MacropaySolutions\Kernel\Broadcasting\Broadcasters\AblyBroadcaster;
 use MacropaySolutions\Kernel\Broadcasting\Broadcasters\LogBroadcaster;
 use MacropaySolutions\Kernel\Broadcasting\Broadcasters\NullBroadcaster;
 use MacropaySolutions\Kernel\Broadcasting\Broadcasters\PusherBroadcaster;
@@ -322,28 +320,6 @@ class BroadcastManager implements FactoryContract
         }
 
         return $pusher;
-    }
-
-    /**
-     * Create an instance of the driver.
-     *
-     * @param array $config
-     * @return \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
-     */
-    protected function createAblyDriver(array $config)
-    {
-        return new AblyBroadcaster($this->ably($config));
-    }
-
-    /**
-     * Get an Ably instance for the given configuration.
-     *
-     * @param array $config
-     * @return \Ably\AblyRest
-     */
-    public function ably(array $config)
-    {
-        return new AblyRest($config);
     }
 
     /**
