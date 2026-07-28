@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\Kernel\Auth;
 
+use MacropaySolutions\Framework\Http\ResponseFactory;
+use MacropaySolutions\Framework\Routing\UrlGenerator;
 use MacropaySolutions\Kernel\Auth\Access\Gate;
 use MacropaySolutions\Kernel\Auth\Middleware\RequirePassword;
 use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate as GateContract;
 use MacropaySolutions\Kernel\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use MacropaySolutions\Kernel\Contracts\Routing\ResponseFactory;
-use MacropaySolutions\Kernel\Contracts\Routing\UrlGenerator;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

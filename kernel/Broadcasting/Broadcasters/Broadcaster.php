@@ -7,7 +7,6 @@ use Exception;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster as BroadcasterContract;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\HasBroadcastChannel;
-use MacropaySolutions\Kernel\Contracts\Routing\BindingRegistrar;
 use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Reflector;
@@ -37,13 +36,6 @@ abstract class Broadcaster implements BroadcasterContract
      * @var array
      */
     protected $channelOptions = [];
-
-    /**
-     * The binding registrar instance.
-     *
-     * @var \MacropaySolutions\Kernel\Contracts\Routing\BindingRegistrar
-     */
-    protected $bindingRegistrar;
 
     /**
      * Resolve the authenticated user payload for the incoming connection request.
@@ -227,12 +219,6 @@ abstract class Broadcaster implements BroadcasterContract
      */
     protected function resolveExplicitBindingIfPossible($key, $value)
     {
-        $binder = $this->binder();
-
-        if ($binder && $binder->getBindingCallback($key)) {
-            return call_user_func($binder->getBindingCallback($key), $value);
-        }
-
         return $value;
     }
 
@@ -289,21 +275,6 @@ abstract class Broadcaster implements BroadcasterContract
         return array_map(function ($channel) {
             return (string)$channel;
         }, $channels);
-    }
-
-    /**
-     * Get the model binding registrar instance.
-     *
-     * @return \MacropaySolutions\Kernel\Contracts\Routing\BindingRegistrar
-     */
-    protected function binder()
-    {
-        if (!$this->bindingRegistrar) {
-            $this->bindingRegistrar = Container::getInstance()->bound(BindingRegistrar::class)
-                ? Container::getInstance()->make(BindingRegistrar::class) : null;
-        }
-
-        return $this->bindingRegistrar;
     }
 
     /**

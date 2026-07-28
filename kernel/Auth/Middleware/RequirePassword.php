@@ -3,22 +3,22 @@
 namespace MacropaySolutions\Kernel\Auth\Middleware;
 
 use Closure;
-use MacropaySolutions\Kernel\Contracts\Routing\ResponseFactory;
-use MacropaySolutions\Kernel\Contracts\Routing\UrlGenerator;
+use MacropaySolutions\Framework\Http\ResponseFactory;
+use MacropaySolutions\Framework\Routing\UrlGenerator;
 
 class RequirePassword
 {
     /**
      * The response factory instance.
      *
-     * @var \MacropaySolutions\Kernel\Contracts\Routing\ResponseFactory
+     * @var \MacropaySolutions\Framework\Http\ResponseFactory
      */
     protected $responseFactory;
 
     /**
      * The URL generator instance.
      *
-     * @var \MacropaySolutions\Kernel\Contracts\Routing\UrlGenerator
+     * @var \MacropaySolutions\Framework\Routing\UrlGenerator
      */
     protected $urlGenerator;
 
@@ -32,8 +32,8 @@ class RequirePassword
     /**
      * Create a new middleware instance.
      *
-     * @param \MacropaySolutions\Kernel\Contracts\Routing\ResponseFactory $responseFactory
-     * @param \MacropaySolutions\Kernel\Contracts\Routing\UrlGenerator $urlGenerator
+     * @param \MacropaySolutions\Framework\Http\ResponseFactory $responseFactory
+     * @param \MacropaySolutions\Framework\Routing\UrlGenerator $urlGenerator
      * @param int|null $passwordTimeout
      * @return void
      */
