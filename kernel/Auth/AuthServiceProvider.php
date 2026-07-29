@@ -2,11 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Auth;
 
-use MacropaySolutions\Framework\Http\ResponseFactory;
-use MacropaySolutions\Framework\Routing\UrlGenerator;
-use MacropaySolutions\Kernel\Auth\Access\Gate;
-use MacropaySolutions\Kernel\Auth\Middleware\RequirePassword;
-use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate as GateContract;
 use MacropaySolutions\Kernel\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
@@ -21,8 +16,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerAuthenticator();
         $this->registerUserResolver();
-        $this->registerAccessGate();
-        $this->registerRequirePassword();
         $this->registerRequestRebindHandler();
         $this->registerEventRebindHandler();
     }
@@ -47,34 +40,6 @@ class AuthServiceProvider extends ServiceProvider
     protected function registerUserResolver()
     {
         $this->app->bind(AuthenticatableContract::class, fn($app) => call_user_func($app['auth']->userResolver()));
-    }
-
-    /**
-     * Register the access gate service.
-     *
-     * @return void
-     */
-    protected function registerAccessGate()
-    {
-        $this->app->singleton(GateContract::class, function ($app) {
-            return new Gate($app, fn() => call_user_func($app['auth']->userResolver()));
-        });
-    }
-
-    /**
-     * Register a resolver for the authenticated user.
-     *
-     * @return void
-     */
-    protected function registerRequirePassword()
-    {
-        $this->app->bind(RequirePassword::class, function ($app) {
-            return new RequirePassword(
-                $app[ResponseFactory::class],
-                $app[UrlGenerator::class],
-                $app['config']->get('auth.password_timeout')
-            );
-        });
     }
 
     /**

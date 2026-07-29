@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Framework;
 
+use MacropaySolutions\Kernel\Auth\Access\Gate;
 use MacropaySolutions\Kernel\Auth\AuthServiceProvider;
 use MacropaySolutions\Kernel\Broadcasting\BroadcastServiceProvider;
 use MacropaySolutions\Kernel\Bus\BusServiceProvider;
@@ -307,19 +308,7 @@ class Application extends Container implements ApplicationContract
      */
     public function make($abstract, array $parameters = [])
     {
-        $abstract = $this->getAlias($abstract);
-
-        if (
-            !$this->bound($abstract) &&
-            array_key_exists($abstract, $this->availableBindings) &&
-            !array_key_exists($this->availableBindings[$abstract], $this->ranServiceBinders)
-        ) {
-            $this->{$method = $this->availableBindings[$abstract]}();
-
-            $this->ranServiceBinders[$method] = true;
-        }
-
-        return parent::make($abstract, $parameters);
+        return parent::make($this->handleDeferredProvidersAndReturnAlias($abstract), $parameters);
     }
 
     /**
@@ -327,19 +316,54 @@ class Application extends Container implements ApplicationContract
      */
     public function makeWithoutAlias(string $abstract, array $parameters = []): mixed
     {
+        $this->handleDeferredProvidersAndReturnAlias($abstract);
+
+        return parent::makeWithoutAlias($abstract, $parameters);
+    }
+
+    protected function handleDeferredProvidersAndReturnAlias(string $abstract): string
+    {
         $alias = $this->getAlias($abstract);
 
         if (
-            !$this->bound($alias) &&
-            \array_key_exists($alias, $this->availableBindings) &&
-            !\array_key_exists($this->availableBindings[$alias], $this->ranServiceBinders)
+            !isset($this->bindings[$alias]) &&
+            !isset($this->instances[$alias]) &&
+            isset($this->availableBindings[$alias]) &&
+            !isset($this->ranServiceBinders[$this->availableBindings[$alias]])
         ) {
-            $this->{$method = $this->availableBindings[$alias]}();
+            $this->{$this->availableBindings[$alias]}();
 
-            $this->ranServiceBinders[$method] = true;
+            $this->ranServiceBinders[$this->availableBindings[$alias]] = true;
         }
 
-        return parent::makeWithoutAlias($abstract, $parameters);
+        return $alias;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function has(string $id): bool
+    {
+        return isset($this->availableBindings[$id]) ||
+            isset($this->bindings[$id]) ||
+            isset($this->instances[$id]) ||
+            (
+                isset($this->aliases[$id]) && (
+                    isset($this->availableBindings[$alias = $this->getAlias($id)]) ||
+                    isset($this->bindings[$alias]) ||
+                    isset($this->instances[$alias])
+                )
+            );
+    }
+
+    /**
+     * Determine if a given offset exists.
+     *
+     * @param string $offset
+     */
+    public function offsetExists($offset): bool
+    {
+        return $this->has($offset);
     }
 
     /**
@@ -351,6 +375,23 @@ class Application extends Container implements ApplicationContract
     {
         $this->configure('auth');
         $this->register(AuthServiceProvider::class);
+    }
+
+    /**
+     * Register container bindings for the application.
+     *
+     * @return void
+     */
+    protected function registerGateAuthBindings()
+    {
+        if (!isset($this->ranServiceBinders['registerAuthBindings'])) {
+            $this->registerAuthBindings();
+            $this->ranServiceBinders['registerAuthBindings'] = true;
+        }
+
+        $this->singleton(\MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class, function ($app) {
+            return new Gate($app, fn() => call_user_func($app['auth']->userResolver()));
+        });
     }
 
     /**
@@ -1194,7 +1235,7 @@ class Application extends Container implements ApplicationContract
         'auth.driver' => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Auth\AuthManager::class => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Contracts\Auth\Guard::class => 'registerAuthBindings',
-        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerAuthBindings',
+        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerGateAuthBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class => 'registerBusBindings',

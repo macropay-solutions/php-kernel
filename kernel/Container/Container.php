@@ -261,8 +261,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * {@inheritdoc}
-     *
-     * @return bool
      */
     public function has(string $id): bool
     {
