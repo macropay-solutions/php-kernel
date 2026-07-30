@@ -2187,7 +2187,9 @@ trait HasAttributes
     {
         $instance = \is_object($classOrInstance) ? $classOrInstance : new $classOrInstance();
 
-        static::$mutatorCache[$instance::class] = \array_keys($instance->thisSegregatedAccessorsDefinitionMap());
+        static::$mutatorCache[$instance::class] = \array_keys(
+            \array_filter($instance->thisSegregatedAccessorsDefinitionMap())
+        );
     }
 
     /**
