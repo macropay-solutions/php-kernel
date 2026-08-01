@@ -48,11 +48,11 @@ abstract class Component
     protected static $componentsResolver;
 
     /**
-     * The cache of blade view names, keyed by contents.
+     * The cache of template view names, keyed by contents.
      *
      * @var array<string, string>
      */
-    protected static $bladeViewCache = [];
+    protected static $templateViewCache = [];
 
     /**
      * The cache of public property names, keyed by class.
@@ -126,7 +126,7 @@ abstract class Component
     }
 
     /**
-     * Resolve the Blade view or view file that should be used when rendering the component.
+     * Resolve the Template view or view file that should be used when rendering the component.
      *
      * @return \MacropaySolutions\Kernel\Contracts\View\View|\MacropaySolutions\Kernel\Contracts\Support\Htmlable|\Closure|string
      */
@@ -147,7 +147,7 @@ abstract class Component
                 return $view;
             }
 
-            return $this->extractBladeViewFromString($view);
+            return $this->extractTemplateViewFromString($view);
         };
 
         return $view instanceof Closure ? function (array $data = []) use ($view, $resolver) {
@@ -157,41 +157,41 @@ abstract class Component
     }
 
     /**
-     * Create a Blade view with the raw component string content.
+     * Create a Template view with the raw component string content.
      *
      * @param string $contents
      * @return string
      */
-    protected function extractBladeViewFromString($contents)
+    protected function extractTemplateViewFromString($contents)
     {
         $key = sprintf('%s::%s', static::class, $contents);
 
-        if (isset(static::$bladeViewCache[$key])) {
-            return static::$bladeViewCache[$key];
+        if (isset(static::$templateViewCache[$key])) {
+            return static::$templateViewCache[$key];
         }
 
         if (strlen($contents) <= PHP_MAXPATHLEN && $this->factory()->exists($contents)) {
-            return static::$bladeViewCache[$key] = $contents;
+            return static::$templateViewCache[$key] = $contents;
         }
 
-        return static::$bladeViewCache[$key] = $this->createBladeViewFromString($this->factory(), $contents);
+        return static::$templateViewCache[$key] = $this->createTemplateViewFromString($this->factory(), $contents);
     }
 
     /**
-     * Create a Blade view with the raw component string content.
+     * Create a Template view with the raw component string content.
      *
      * @param \MacropaySolutions\Kernel\Contracts\View\Factory $factory
      * @param string $contents
      * @return string
      */
-    protected function createBladeViewFromString($factory, $contents)
+    protected function createTemplateViewFromString($factory, $contents)
     {
         $factory->addNamespace(
             '__components',
             $directory = Container::getInstance()['config']->get('view.compiled')
         );
 
-        $viewFile = $directory . '/' . hash('xxh128', $contents) . '.blade.php';
+        $viewFile = $directory . '/' . hash('xxh128', $contents) . '.template.php';
 
         if (!\is_file($viewFile) || \filesize($viewFile) === 0) {
             if (!\is_dir($directory)) {
@@ -201,7 +201,7 @@ abstract class Component
             \di(Filesystem::class)->replace($viewFile, $contents);
         }
 
-        return '__components::' . basename($viewFile, '.blade.php');
+        return '__components::' . basename($viewFile, '.template.php');
     }
 
     /**
@@ -427,7 +427,7 @@ abstract class Component
      */
     public static function flushCache()
     {
-        static::$bladeViewCache = [];
+        static::$templateViewCache = [];
         static::$constructorParametersCache = [];
         static::$methodCache = [];
         static::$propertyCache = [];

@@ -31,7 +31,7 @@ trait CompilesEchos
     }
 
     /**
-     * Compile Blade echos into valid PHP.
+     * Compile Template echos into valid PHP.
      *
      * @param string $value
      * @return string
@@ -123,14 +123,14 @@ trait CompilesEchos
     }
 
     /**
-     * Add an instance of the blade echo handler to the start of the compiled string.
+     * Add an instance of the template echo handler to the start of the compiled string.
      *
      * @param string $result
      * @return string
      */
-    protected function addBladeCompilerVariable($result)
+    protected function addTemplateCompilerVariable($result)
     {
-        return "<?php \$__bladeCompiler = app('blade.compiler'); ?>" . $result;
+        return "<?php \$__templateCompiler = app('template.compiler'); ?>" . $result;
     }
 
     /**
@@ -147,7 +147,7 @@ trait CompilesEchos
                 return $str->beforeLast(';');
             });
 
-        return empty($this->echoHandlers) ? $value : '$__bladeCompiler->applyEchoHandler(' . $value . ')';
+        return empty($this->echoHandlers) ? $value : '$__templateCompiler->applyEchoHandler(' . $value . ')';
     }
 
     /**

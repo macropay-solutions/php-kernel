@@ -5,7 +5,7 @@ namespace MacropaySolutions\Kernel\View\Compilers\Concerns;
 trait CompilesComments
 {
     /**
-     * Compile Blade comments into an empty string.
+     * Compile Template comments into an empty string.
      *
      * @param string $value
      * @return string

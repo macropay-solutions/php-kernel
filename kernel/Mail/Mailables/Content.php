@@ -9,14 +9,14 @@ class Content
     use Conditionable;
 
     /**
-     * The Blade view that should be rendered for the mailable.
+     * The Template view that should be rendered for the mailable.
      *
      * @var string|null
      */
     public $view;
 
     /**
-     * The Blade view that should be rendered for the mailable.
+     * The Template view that should be rendered for the mailable.
      *
      * Alternative syntax for "view".
      *
@@ -25,14 +25,14 @@ class Content
     public $html;
 
     /**
-     * The Blade view that represents the text version of the message.
+     * The Template view that represents the text version of the message.
      *
      * @var string|null
      */
     public $text;
 
     /**
-     * The Blade view that represents the Markdown version of the message.
+     * The Template view that represents the Markdown version of the message.
      *
      * @var string|null
      */

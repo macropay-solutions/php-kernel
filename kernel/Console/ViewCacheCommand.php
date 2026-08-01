@@ -23,7 +23,7 @@ class ViewCacheCommand extends Command
      *
      * @var string
      */
-    protected $description = "Compile all the application's Blade templates";
+    protected $description = "Compile all the application's Template templates";
 
     /**
      * Execute the console command.
@@ -39,12 +39,12 @@ class ViewCacheCommand extends Command
 
             $this->components->task($prefix . $path, null, OutputInterface::VERBOSITY_VERBOSE);
 
-            $this->compileViews($this->bladeFilesIn([$path]));
+            $this->compileViews($this->templateFilesIn([$path]));
         });
 
         $this->newLine();
 
-        $this->components->info('Blade templates cached successfully.');
+        $this->components->info('Template templates cached successfully.');
     }
 
     /**
@@ -55,7 +55,7 @@ class ViewCacheCommand extends Command
      */
     protected function compileViews(Collection $views)
     {
-        $compiler = $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler();
+        $compiler = $this->app['view']->getEngineResolver()->resolve('template')->getCompiler();
 
         $views->map(function (SplFileInfo $file) use ($compiler) {
             $this->components->task(
@@ -73,15 +73,15 @@ class ViewCacheCommand extends Command
     }
 
     /**
-     * Get the Blade files in the given path.
+     * Get the Template files in the given path.
      *
      * @param array $paths
      * @return \MacropaySolutions\Kernel\Support\Collection
      */
-    protected function bladeFilesIn(array $paths)
+    protected function templateFilesIn(array $paths)
     {
         $extensions = collect($this->app['view']->getExtensions())
-            ->filter(fn($value) => $value === 'blade')
+            ->filter(fn($value) => $value === 'template')
             ->keys()
             ->map(fn($extension) => "*.{$extension}")
             ->all();

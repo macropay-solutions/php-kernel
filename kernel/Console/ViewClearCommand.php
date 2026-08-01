@@ -59,7 +59,7 @@ class ViewClearCommand extends Command
         }
 
         $this->app['view.engine.resolver']
-            ->resolve('blade')
+            ->resolve('template')
             ->forgetCompiledOrNotExpired();
 
         foreach ($this->files->glob("{$path}/*") as $view) {

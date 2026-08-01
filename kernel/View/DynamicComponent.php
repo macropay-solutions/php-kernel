@@ -18,7 +18,7 @@ class DynamicComponent extends Component
     /**
      * The component tag compiler instance.
      *
-     * @var \MacropaySolutions\Kernel\View\Compilers\BladeTagCompiler
+     * @var \MacropaySolutions\Kernel\View\Compilers\TemplateTagCompiler
      */
     protected static $compiler;
 
@@ -167,7 +167,7 @@ EOF;
     }
 
     /**
-     * Get an instance of the Blade tag compiler.
+     * Get an instance of the Template tag compiler.
      *
      * @return \MacropaySolutions\Kernel\View\Compilers\ComponentTagCompiler
      */
@@ -175,9 +175,9 @@ EOF;
     {
         if (!static::$compiler) {
             static::$compiler = new ComponentTagCompiler(
-                Container::getInstance()->make('blade.compiler')->getClassComponentAliases(),
-                Container::getInstance()->make('blade.compiler')->getClassComponentNamespaces(),
-                Container::getInstance()->make('blade.compiler')
+                Container::getInstance()->make('template.compiler')->getClassComponentAliases(),
+                Container::getInstance()->make('template.compiler')->getClassComponentNamespaces(),
+                Container::getInstance()->make('template.compiler')
             );
         }
 

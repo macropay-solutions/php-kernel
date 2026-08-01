@@ -12,7 +12,7 @@ use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use MacropaySolutions\Kernel\View\Component;
 
-class BladeCompiler extends Compiler implements CompilerInterface
+class TemplateCompiler extends Compiler implements CompilerInterface
 {
     use Concerns\CompilesAuthorizations;
     use Concerns\CompilesClasses;
@@ -259,7 +259,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Compile the given Blade template contents.
+     * Compile the given Template template contents.
      *
      * @param string $value
      * @return string
@@ -274,9 +274,9 @@ class BladeCompiler extends Compiler implements CompilerInterface
 
         $value = $this->storeUncompiledBlocks($value);
 
-        // First we will compile the Blade component tags. This is a precompile style
-        // step which compiles the component Blade tags into @component directives
-        // that may be used by Blade. Then we should call any other precompilers.
+        // First we will compile the Template component tags. This is a precompile style
+        // step which compiles the component Template tags into @component directives
+        // that may be used by Template. Then we should call any other precompilers.
         $value = $this->compileComponentTags(
             $this->compileComments($value)
         );
@@ -304,7 +304,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
         }
 
         if (!empty($this->echoHandlers)) {
-            $result = $this->addBladeCompilerVariable($result);
+            $result = $this->addTemplateCompilerVariable($result);
         }
 
         return str_replace(
@@ -315,7 +315,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Evaluate and render a Blade string to HTML.
+     * Evaluate and render a Template string to HTML.
      *
      * @param string $string
      * @param array $data
@@ -525,7 +525,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Compile Blade statements that start with "@".
+     * Compile Template statements that start with "@".
      *
      * @param string $template
      * @return string
@@ -638,7 +638,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Compile a single Blade @ statement.
+     * Compile a single Template @ statement.
      *
      * @param array $match
      * @return string
@@ -692,7 +692,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     }
 
     /**
-     * Register a custom Blade compiler.
+     * Register a custom Template compiler.
      *
      * @param callable $compiler
      * @return void
@@ -725,20 +725,20 @@ class BladeCompiler extends Compiler implements CompilerInterface
 
         $this->directive($name, function ($expression) use ($name) {
             return $expression !== ''
-                ? "<?php if (\\app('blade.compiler')->check('{$name}', {$expression})): ?>"
-                : "<?php if (\\app('blade.compiler')->check('{$name}')): ?>";
+                ? "<?php if (\\app('template.compiler')->check('{$name}', {$expression})): ?>"
+                : "<?php if (\\app('template.compiler')->check('{$name}')): ?>";
         });
 
         $this->directive('unless' . $name, function ($expression) use ($name) {
             return $expression !== ''
-                ? "<?php if (! \\app('blade.compiler')->check('{$name}', {$expression})): ?>"
-                : "<?php if (! \\app('blade.compiler')->check('{$name}')): ?>";
+                ? "<?php if (! \\app('template.compiler')->check('{$name}', {$expression})): ?>"
+                : "<?php if (! \\app('template.compiler')->check('{$name}')): ?>";
         });
 
         $this->directive('else' . $name, function ($expression) use ($name) {
             return $expression !== ''
-                ? "<?php elseif (\\app('blade.compiler')->check('{$name}', {$expression})): ?>"
-                : "<?php elseif (\\app('blade.compiler')->check('{$name}')): ?>";
+                ? "<?php elseif (\\app('template.compiler')->check('{$name}', {$expression})): ?>"
+                : "<?php elseif (\\app('template.compiler')->check('{$name}')): ?>";
         });
 
         $this->directive('end' . $name, function () {

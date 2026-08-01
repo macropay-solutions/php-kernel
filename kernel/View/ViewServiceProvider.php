@@ -5,7 +5,7 @@ namespace MacropaySolutions\Kernel\View;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
-use MacropaySolutions\Kernel\View\Compilers\BladeCompiler;
+use MacropaySolutions\Kernel\View\Compilers\TemplateCompiler;
 use MacropaySolutions\Kernel\View\Engines\CompilerEngine;
 use MacropaySolutions\Kernel\View\Engines\EngineResolver;
 use MacropaySolutions\Kernel\View\Engines\FileEngine;
@@ -22,7 +22,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
     {
         $this->registerFactory();
         $this->registerViewFinder();
-        $this->registerBladeCompiler();
+        $this->registerTemplateCompiler();
         $this->registerEngineResolver();
 
         $this->app->terminating(static function () {
@@ -40,7 +40,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         $this->app->singleton('view', function ($app) {
             // Next we need to grab the engine resolver instance that will be used by the
             // environment. The resolver will be used by an environment to get each of
-            // the various engine implementations such as plain PHP or Blade engine.
+            // the various engine implementations such as plain PHP or Template engine.
             $resolver = $app['view.engine.resolver'];
 
             $finder = $app['view.finder'];
@@ -88,23 +88,23 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
     }
 
     /**
-     * Register the Blade compiler implementation.
+     * Register the Template compiler implementation.
      *
      * @return void
      */
-    public function registerBladeCompiler()
+    public function registerTemplateCompiler()
     {
-        $this->app->singleton('blade.compiler', function ($app) {
+        $this->app->singleton('template.compiler', function ($app) {
             return tap(
-                new BladeCompiler(
+                new TemplateCompiler(
                     $app['files'],
                     $app['config']['view.compiled'],
                     $app['config']->get('view.relative_hash', false) ? $app->basePath() : '',
                     $app['config']->get('view.cache', true),
                     $app['config']->get('view.compiled_extension', 'php'),
                 ),
-                function ($blade) {
-                    $blade->component('dynamic-component', DynamicComponent::class);
+                function ($template) {
+                    $template->component('dynamic-component', DynamicComponent::class);
                 }
             );
         });
@@ -123,7 +123,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
             // Next, we will register the various view engines with the resolver so that the
             // environment will resolve the engines needed for various views based on the
             // extension of view file. We call a method for each of the view's engines.
-            foreach (['file', 'php', 'blade'] as $engine) {
+            foreach (['file', 'php', 'template'] as $engine) {
                 $this->{'register' . ucfirst($engine) . 'Engine'}($resolver);
             }
 
@@ -158,18 +158,18 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
     }
 
     /**
-     * Register the Blade engine implementation.
+     * Register the Template engine implementation.
      *
      * @param \MacropaySolutions\Kernel\View\Engines\EngineResolver $resolver
      * @return void
      */
-    public function registerBladeEngine($resolver)
+    public function registerTemplateEngine($resolver)
     {
-        $resolver->register('blade', function () {
+        $resolver->register('template', function () {
             $app = Container::getInstance();
 
             $compiler = new CompilerEngine(
-                $app->make('blade.compiler'),
+                $app->make('template.compiler'),
                 $app->make('files'),
             );
 
@@ -191,7 +191,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         return [
             'view',
             'view.finder',
-            'blade.compiler',
+            'template.compiler',
             'view.engine.resolver',
         ];
     }

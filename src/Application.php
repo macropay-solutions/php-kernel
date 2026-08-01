@@ -1165,8 +1165,8 @@ class Application extends Container implements ApplicationContract
             'files' => [
                 \MacropaySolutions\Kernel\Filesystem\Filesystem::class,
             ],
-            'blade.compiler' => [
-                \MacropaySolutions\Kernel\View\Compilers\BladeCompiler::class,
+            'template.compiler' => [
+                \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler::class,
             ],
             'view.engine.resolver' => [
                 \MacropaySolutions\Kernel\View\Engines\EngineResolver::class,
@@ -1220,7 +1220,7 @@ class Application extends Container implements ApplicationContract
             \MacropaySolutions\Kernel\Translation\Translator::class => 'translator',
             \MacropaySolutions\Kernel\Validation\Factory::class => 'validator',
             \MacropaySolutions\Kernel\View\Factory::class => 'view',
-            \MacropaySolutions\Kernel\View\Compilers\BladeCompiler::class => 'blade.compiler',
+            \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler::class => 'template.compiler',
             \MacropaySolutions\Kernel\View\Engines\EngineResolver::class => 'view.engine.resolver',
         ];
     }
@@ -1275,7 +1275,7 @@ class Application extends Container implements ApplicationContract
         'view' => 'registerViewBindings',
         \MacropaySolutions\Kernel\Contracts\View\Factory::class => 'registerViewBindings',
         'view.finder' => 'registerViewBindings',
-        'blade.compiler' => 'registerViewBindings',
+        'template.compiler' => 'registerViewBindings',
         'view.engine.resolver' => 'registerViewBindings',
         \MacropaySolutions\Kernel\View\Engines\EngineResolver::class => 'registerViewBindings',
 

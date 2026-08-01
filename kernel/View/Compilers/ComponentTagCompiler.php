@@ -16,11 +16,11 @@ use ReflectionClass;
 class ComponentTagCompiler
 {
     /**
-     * The Blade compiler instance.
+     * The Template compiler instance.
      *
-     * @var \MacropaySolutions\Kernel\View\Compilers\BladeCompiler
+     * @var \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler
      */
-    protected $blade;
+    protected $template;
 
     /**
      * The component class aliases.
@@ -48,16 +48,16 @@ class ComponentTagCompiler
      *
      * @param array $aliases
      * @param array $namespaces
-     * @param \MacropaySolutions\Kernel\View\Compilers\BladeCompiler|null $blade
+     * @param \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler|null $template
      * @return void
      */
-    public function __construct(array $aliases = [], array $namespaces = [], ?BladeCompiler $blade = null)
+    public function __construct(array $aliases = [], array $namespaces = [], ?TemplateCompiler $template = null)
     {
         $this->aliases = $aliases;
         $this->namespaces = $namespaces;
 
-//        $this->blade = $blade ?: new BladeCompiler(new Filesystem, sys_get_temp_dir());
-        $this->blade = $blade ?: new BladeCompiler(\di(Filesystem::class), sys_get_temp_dir());
+//        $this->template = $template ?: new TemplateCompiler(new Filesystem, sys_get_temp_dir());
+        $this->template = $template ?: new TemplateCompiler(\di(Filesystem::class), sys_get_temp_dir());
     }
 
     /**
@@ -219,7 +219,7 @@ class ComponentTagCompiler
     }
 
     /**
-     * Compile the Blade component string for the given component and attributes.
+     * Compile the Template component string for the given component and attributes.
      *
      * @param string $component
      * @param array $attributes
@@ -329,7 +329,7 @@ class ComponentTagCompiler
     {
         $delimiter = ViewFinderInterface::HINT_PATH_DELIMITER;
 
-        foreach ($this->blade->getAnonymousComponentPaths() as $path) {
+        foreach ($this->template->getAnonymousComponentPaths() as $path) {
             try {
                 if (
                     str_contains($component, $delimiter) &&
@@ -372,7 +372,7 @@ class ComponentTagCompiler
      */
     protected function guessAnonymousComponentUsingNamespaces(Factory $viewFactory, string $component)
     {
-        return collect($this->blade->getAnonymousComponentNamespaces())
+        return collect($this->template->getAnonymousComponentNamespaces())
             ->filter(function ($directory, $prefix) use ($component) {
                 return Str::startsWith($component, $prefix . '::');
             })
@@ -749,7 +749,7 @@ class ComponentTagCompiler
     }
 
     /**
-     * Compile any Blade echo statements that are present in the attribute string.
+     * Compile any Template echo statements that are present in the attribute string.
      *
      * These echo statements need to be converted to string concatenation statements.
      *
@@ -758,7 +758,7 @@ class ComponentTagCompiler
      */
     protected function compileAttributeEchos(string $attributeString)
     {
-        $value = $this->blade->compileEchos($attributeString);
+        $value = $this->template->compileEchos($attributeString);
 
         $value = $this->escapeSingleQuotesOutsideOfPhpBlocks($value);
 
@@ -801,7 +801,7 @@ class ComponentTagCompiler
                 return $escapeBound && isset($this->boundAttributes[$attribute]) && $value !== 'true' && !is_numeric(
                     $value
                 )
-                    ? "'{$attribute}' => \MacropaySolutions\Kernel\View\Compilers\BladeCompiler::sanitizeComponentAttribute({$value})"
+                    ? "'{$attribute}' => \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler::sanitizeComponentAttribute({$value})"
                     : "'{$attribute}' => {$value}";
             })
             ->implode(',');

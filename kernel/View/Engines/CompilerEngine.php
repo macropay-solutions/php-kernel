@@ -12,7 +12,7 @@ use Throwable;
 class CompilerEngine extends PhpEngine
 {
     /**
-     * The Blade compiler instance.
+     * The Template compiler instance.
      *
      * @var \MacropaySolutions\Kernel\View\Compilers\CompilerInterface
      */

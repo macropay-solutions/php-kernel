@@ -7,7 +7,7 @@ use MacropaySolutions\Kernel\Console\Application as ConsoleApp;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesConfiguration;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesRoutes;
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
-use MacropaySolutions\Kernel\View\Compilers\BladeCompiler;
+use MacropaySolutions\Kernel\View\Compilers\TemplateCompiler;
 
 abstract class ServiceProvider
 {
@@ -190,9 +190,9 @@ abstract class ServiceProvider
      */
     protected function loadViewComponentsAs($prefix, array $components)
     {
-        $this->callAfterResolving(BladeCompiler::class, function ($blade) use ($prefix, $components) {
+        $this->callAfterResolving(TemplateCompiler::class, function ($template) use ($prefix, $components) {
             foreach ($components as $alias => $component) {
-                $blade->component($component, is_string($alias) ? $alias : null, $prefix);
+                $template->component($component, is_string($alias) ? $alias : null, $prefix);
             }
         });
     }

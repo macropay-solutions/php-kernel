@@ -63,7 +63,7 @@ class Factory implements FactoryContract
      * @var array
      */
     protected $extensions = [
-        'blade.php' => 'blade',
+        'template.php' => 'template',
         'php' => 'php',
         'css' => 'file',
         'html' => 'file',
