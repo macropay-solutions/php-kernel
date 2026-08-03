@@ -15,11 +15,11 @@ class PaginationServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'pagination');
 
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/pagination'),
-            ], 'framework-pagination');
-        }
+//        if ($this->app->runningInConsole()) {
+//            $this->publishes([
+//                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/pagination'),
+//            ], 'framework-pagination');
+//        }
     }
 
     /**

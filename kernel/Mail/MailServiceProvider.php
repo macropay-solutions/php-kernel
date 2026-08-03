@@ -41,11 +41,11 @@ class MailServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerMarkdownRenderer()
     {
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/mail'),
-            ], 'framework-mail');
-        }
+//        if ($this->app->runningInConsole()) {
+//            $this->publishes([
+//                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/mail'),
+//            ], 'framework-mail');
+//        }
 
         $this->app->singleton(Markdown::class, function ($app) {
             $config = $app->make('config');

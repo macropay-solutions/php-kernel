@@ -17,11 +17,11 @@ class NotificationServiceProvider extends ServiceProvider
     {
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'notifications');
 
-        if ($this->app->runningInConsole()) {
-            $this->publishes([
-                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/notifications'),
-            ], 'framework-notifications');
-        }
+//        if ($this->app->runningInConsole()) {
+//            $this->publishes([
+//                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/notifications'),
+//            ], 'framework-notifications');
+//        }
     }
 
     /**
