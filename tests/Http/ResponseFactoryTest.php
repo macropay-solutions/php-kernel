@@ -1,10 +1,10 @@
 <?php
 
-use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
-use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Framework\Http\ResponseFactory;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Http\Base\Response as SymfonyResponse;
+use MacropaySolutions\Kernel\Http\Response;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class ResponseFactoryTest extends TestCase
 {

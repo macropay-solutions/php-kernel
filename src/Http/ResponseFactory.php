@@ -2,12 +2,12 @@
 
 namespace MacropaySolutions\Framework\Http;
 
+use MacropaySolutions\Kernel\Http\Base\BinaryFileResponse;
+use MacropaySolutions\Kernel\Http\Base\StreamedResponse;
 use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ResponseFactory
 {
@@ -63,7 +63,7 @@ class ResponseFactory
      * @param \Closure $callback
      * @param int $status
      * @param array $headers
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\StreamedResponse
      */
     public function stream($callback, $status = 200, array $headers = [])
     {
@@ -78,7 +78,7 @@ class ResponseFactory
      * @param string|null $name
      * @param array $headers
      * @param string|null $disposition
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\StreamedResponse
      */
     public function streamDownload($callback, $name = null, array $headers = [], $disposition = 'attachment')
     {
@@ -106,7 +106,7 @@ class ResponseFactory
      * @param string $name
      * @param array $headers
      * @param null|string $disposition
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\BinaryFileResponse
      */
     public function download($file, $name = null, array $headers = [], $disposition = 'attachment')
     {
@@ -136,7 +136,7 @@ class ResponseFactory
      *
      * @param \SplFileInfo|string $file
      * @param array $headers
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\BinaryFileResponse
      */
     public function file($file, array $headers = [])
     {

@@ -11,7 +11,7 @@ class FrameGuard
      *
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Closure $next
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \MacropaySolutions\Kernel\Http\Base\Response
      */
     public function handle($request, Closure $next)
     {

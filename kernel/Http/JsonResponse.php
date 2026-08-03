@@ -6,16 +6,10 @@ use InvalidArgumentException;
 use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
+use MacropaySolutions\Kernel\Http\Base\JsonResponse as BaseJsonResponse;
 
 class JsonResponse extends BaseJsonResponse
 {
-    use ResponseTrait;
-    use Macroable {
-        Macroable::__call as macroCall;
-    }
-
     /**
      * Create a new JSON response instance.
      *

@@ -16,7 +16,7 @@ interface Factory
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \Symfony\Component\HttpFoundation\Cookie
+     * @return \MacropaySolutions\Kernel\Http\Base\Cookie
      */
     public function make(
         $name,
@@ -41,7 +41,7 @@ interface Factory
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \Symfony\Component\HttpFoundation\Cookie
+     * @return \MacropaySolutions\Kernel\Http\Base\Cookie
      */
     public function forever(
         $name,
@@ -60,7 +60,7 @@ interface Factory
      * @param string $name
      * @param string|null $path
      * @param string|null $domain
-     * @return \Symfony\Component\HttpFoundation\Cookie
+     * @return \MacropaySolutions\Kernel\Http\Base\Cookie
      */
     public function forget($name, $path = null, $domain = null);
 }

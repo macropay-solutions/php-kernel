@@ -8,11 +8,11 @@ use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster as BroadcasterContract;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\HasBroadcastChannel;
 use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
+use MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Reflector;
 use ReflectionClass;
 use ReflectionFunction;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 abstract class Broadcaster implements BroadcasterContract
 {
@@ -95,7 +95,7 @@ abstract class Broadcaster implements BroadcasterContract
      * @param string $channel
      * @return mixed
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException
      */
     protected function verifyUserCanAccessChannel($request, $channel)
     {
@@ -230,7 +230,7 @@ abstract class Broadcaster implements BroadcasterContract
      * @param array $callbackParameters
      * @return mixed
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException
      */
     protected function resolveImplicitBindingIfPossible($key, $value, $callbackParameters)
     {

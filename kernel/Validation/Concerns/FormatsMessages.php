@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\Validation\Concerns;
 
 use Closure;
+use MacropaySolutions\Kernel\Http\Base\File;
+use MacropaySolutions\Kernel\Http\Base\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 trait FormatsMessages
 {

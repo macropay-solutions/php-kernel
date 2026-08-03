@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Http\Exceptions;
 
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use MacropaySolutions\Kernel\Http\Base\HttpException;
 use Throwable;
 
 class PostTooLargeException extends HttpException

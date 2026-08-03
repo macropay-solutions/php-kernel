@@ -3,7 +3,6 @@
 namespace MacropaySolutions\Kernel\Http\Exceptions;
 
 use RuntimeException;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class HttpResponseException extends RuntimeException
@@ -11,14 +10,14 @@ class HttpResponseException extends RuntimeException
     /**
      * The underlying response instance.
      *
-     * @var \Symfony\Component\HttpFoundation\Response
+     * @var \MacropaySolutions\Kernel\Http\Base\Response
      */
     protected $response;
 
     /**
      * Create a new HTTP response exception instance.
      *
-     * @param \Symfony\Component\HttpFoundation\Response $response
+     * @param \MacropaySolutions\Kernel\Http\Base\Response $response
      * @param \Throwable $previous
      * @return void
      */
@@ -32,7 +31,7 @@ class HttpResponseException extends RuntimeException
     /**
      * Get the underlying response instance.
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \MacropaySolutions\Kernel\Http\Base\Response
      */
     public function getResponse()
     {

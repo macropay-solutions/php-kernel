@@ -24,6 +24,7 @@ use League\Flysystem\UnableToWriteFile;
 use League\Flysystem\Visibility;
 use MacropaySolutions\Kernel\Contracts\Filesystem\Cloud as CloudFilesystemContract;
 use MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem as FilesystemContract;
+use MacropaySolutions\Kernel\Http\Base\StreamedResponse;
 use MacropaySolutions\Kernel\Http\File;
 use MacropaySolutions\Kernel\Http\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
@@ -33,7 +34,6 @@ use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * @mixin \League\Flysystem\FilesystemOperator
@@ -286,7 +286,7 @@ class FilesystemAdapter implements CloudFilesystemContract
      * @param string|null $name
      * @param array $headers
      * @param string|null $disposition
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\StreamedResponse
      */
     public function response($path, $name = null, array $headers = [], $disposition = 'inline')
     {
@@ -323,7 +323,7 @@ class FilesystemAdapter implements CloudFilesystemContract
      *
      * @param string $path
      * @param string|null $name
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     * @return \MacropaySolutions\Kernel\Http\Base\StreamedResponse
      */
     public function download($path, $name = null, array $headers = [])
     {

@@ -3,9 +3,9 @@
 namespace MacropaySolutions\Kernel\Session;
 
 use MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory as CookieJar;
+use MacropaySolutions\Kernel\Http\Base\Request;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
 use SessionHandlerInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class CookieSessionHandler implements SessionHandlerInterface
 {
@@ -21,7 +21,7 @@ class CookieSessionHandler implements SessionHandlerInterface
     /**
      * The request instance.
      *
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var \MacropaySolutions\Kernel\Http\Base\Request
      */
     protected $request;
 
@@ -133,7 +133,7 @@ class CookieSessionHandler implements SessionHandlerInterface
     /**
      * Set the request instance.
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
      * @return void
      */
     public function setRequest(Request $request)

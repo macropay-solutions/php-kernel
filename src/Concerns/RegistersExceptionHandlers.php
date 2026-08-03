@@ -4,13 +4,13 @@ namespace MacropaySolutions\Framework\Concerns;
 
 use ErrorException;
 use Exception;
-use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
-use MacropaySolutions\Kernel\Log\LogManager;
 use MacropaySolutions\Framework\Exceptions\Handler;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Http\Base\HttpException;
+use MacropaySolutions\Kernel\Http\Base\NotFoundHttpException;
+use MacropaySolutions\Kernel\Log\LogManager;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\ErrorHandler\Error\FatalError;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 trait RegistersExceptionHandlers
@@ -23,7 +23,7 @@ trait RegistersExceptionHandlers
      * @param array $headers
      * @return void
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\HttpException
      */
     public function abort($code, $message = '', array $headers = [])
     {
@@ -191,7 +191,7 @@ trait RegistersExceptionHandlers
      * Send the exception to the handler and return the response.
      *
      * @param \Throwable $e
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \MacropaySolutions\Kernel\Http\Base\Response
      */
     protected function sendExceptionToHandler(Throwable $e)
     {

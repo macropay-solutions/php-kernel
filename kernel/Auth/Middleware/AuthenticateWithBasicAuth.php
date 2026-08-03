@@ -48,7 +48,7 @@ class AuthenticateWithBasicAuth
      * @param string|null $field
      * @return mixed
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\UnauthorizedHttpException
      */
     public function handle($request, Closure $next, $guard = null, $field = null)
     {

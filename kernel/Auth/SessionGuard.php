@@ -18,13 +18,13 @@ use MacropaySolutions\Kernel\Contracts\Auth\UserProvider;
 use MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory as CookieJar;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Session\Session;
+use MacropaySolutions\Kernel\Http\Base\Request;
+use MacropaySolutions\Kernel\Http\Base\UnauthorizedHttpException;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Timebox;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SessionGuard implements
     StatefulGuard,
@@ -82,7 +82,7 @@ class SessionGuard implements
     /**
      * The request instance.
      *
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var \MacropaySolutions\Kernel\Http\Base\Request
      */
     protected $request;
 
@@ -120,7 +120,7 @@ class SessionGuard implements
      * @param string $name
      * @param \MacropaySolutions\Kernel\Contracts\Auth\UserProvider $provider
      * @param \MacropaySolutions\Kernel\Contracts\Session\Session $session
-     * @param \Symfony\Component\HttpFoundation\Request|null $request
+     * @param \MacropaySolutions\Kernel\Http\Base\Request|null $request
      * @param \MacropaySolutions\Kernel\Support\Timebox|null $timebox
      * @return void
      */
@@ -296,7 +296,7 @@ class SessionGuard implements
      * @param array $extraConditions
      * @return null
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\UnauthorizedHttpException
      */
     public function basic($field = 'email', $extraConditions = [])
     {
@@ -321,7 +321,7 @@ class SessionGuard implements
      * @param array $extraConditions
      * @return null
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\UnauthorizedHttpException
      */
     public function onceBasic($field = 'email', $extraConditions = [])
     {
@@ -335,7 +335,7 @@ class SessionGuard implements
     /**
      * Attempt to authenticate using basic authentication.
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
      * @param string $field
      * @param array $extraConditions
      * @return bool
@@ -357,7 +357,7 @@ class SessionGuard implements
     /**
      * Get the credential array for an HTTP Basic request.
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
      * @param string $field
      * @return array
      */
@@ -371,7 +371,7 @@ class SessionGuard implements
      *
      * @return void
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\UnauthorizedHttpException
      */
     protected function failedBasicResponse()
     {
@@ -567,7 +567,7 @@ class SessionGuard implements
      * Create a "remember me" cookie for a given ID.
      *
      * @param string $value
-     * @return \Symfony\Component\HttpFoundation\Cookie
+     * @return \MacropaySolutions\Kernel\Http\Base\Cookie
      */
     protected function createRecaller($value)
     {
@@ -945,7 +945,7 @@ class SessionGuard implements
     /**
      * Get the current request instance.
      *
-     * @return \Symfony\Component\HttpFoundation\Request
+     * @return \MacropaySolutions\Kernel\Http\Base\Request
      */
     public function getRequest()
     {
@@ -955,7 +955,7 @@ class SessionGuard implements
     /**
      * Set the current request instance.
      *
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
      * @return $this
      */
     public function setRequest(Request $request)

@@ -11,6 +11,7 @@ use MacropaySolutions\Kernel\Contracts\Validation\ImplicitRule;
 use MacropaySolutions\Kernel\Contracts\Validation\Rule as RuleContract;
 use MacropaySolutions\Kernel\Contracts\Validation\Validator as ValidatorContract;
 use MacropaySolutions\Kernel\Contracts\Validation\ValidatorAwareRule;
+use MacropaySolutions\Kernel\Http\Base\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Fluent;
 use MacropaySolutions\Kernel\Support\MessageBag;
@@ -20,7 +21,6 @@ use MacropaySolutions\Kernel\Validation\Rules\Exists;
 use MacropaySolutions\Kernel\Validation\Rules\Unique;
 use RuntimeException;
 use stdClass;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class Validator implements ValidatorContract
 {

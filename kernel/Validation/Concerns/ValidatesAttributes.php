@@ -15,14 +15,14 @@ use Exception;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
+use MacropaySolutions\Kernel\Http\Base\File;
+use MacropaySolutions\Kernel\Http\Base\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Exceptions\MathException;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Validation\Rules\Exists;
 use MacropaySolutions\Kernel\Validation\Rules\Unique;
 use MacropaySolutions\Kernel\Validation\ValidationData;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use ValueError;
 
 trait ValidatesAttributes

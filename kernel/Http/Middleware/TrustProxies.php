@@ -34,7 +34,7 @@ class TrustProxies
      * @param \Closure $next
      * @return mixed
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws \MacropaySolutions\Kernel\Http\Base\HttpException
      */
     public function handle(Request $request, Closure $next)
     {

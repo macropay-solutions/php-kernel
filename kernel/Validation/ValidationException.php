@@ -17,7 +17,7 @@ class ValidationException extends Exception
     /**
      * The recommended response to send to the client.
      *
-     * @var \Symfony\Component\HttpFoundation\Response|null
+     * @var \MacropaySolutions\Kernel\Http\Base\Response|null
      */
     public $response;
 
@@ -46,7 +46,7 @@ class ValidationException extends Exception
      * Create a new exception instance.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Validation\Validator $validator
-     * @param \Symfony\Component\HttpFoundation\Response|null $response
+     * @param \MacropaySolutions\Kernel\Http\Base\Response|null $response
      * @param string $errorBag
      * @return void
      */
@@ -153,7 +153,7 @@ class ValidationException extends Exception
     /**
      * Get the underlying response instance.
      *
-     * @return \Symfony\Component\HttpFoundation\Response|null
+     * @return \MacropaySolutions\Kernel\Http\Base\Response|null
      */
     public function getResponse()
     {

@@ -9,9 +9,12 @@ use MacropaySolutions\Kernel\Console\View\Components\BulletList;
 use MacropaySolutions\Kernel\Console\View\Components\Error;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Support\Responsable;
-use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
+use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
+use MacropaySolutions\Kernel\Http\Base\HttpException;
+use MacropaySolutions\Kernel\Http\Base\HttpExceptionInterface;
+use MacropaySolutions\Kernel\Http\Base\NotFoundHttpException;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
 use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Kernel\Http\Response;
@@ -23,10 +26,6 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler implements ExceptionHandler
@@ -118,7 +117,7 @@ class Handler implements ExceptionHandler
      *
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Throwable $e
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \MacropaySolutions\Kernel\Http\Base\Response
      *
      * @throws \Throwable
      */
