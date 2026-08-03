@@ -33,20 +33,6 @@ abstract class ServiceProvider
     protected $bootedCallbacks = [];
 
     /**
-     * The paths that should be published.
-     *
-     * @var array
-     */
-    public static $publishes = [];
-
-    /**
-     * The paths that should be published by group.
-     *
-     * @var array
-     */
-    public static $publishGroups = [];
-
-    /**
      * Create a new service provider instance.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Foundation\Application $app
@@ -240,18 +226,6 @@ abstract class ServiceProvider
     }
 
     /**
-     * Register Obvious model factory paths.
-     *
-     * @param array|string $paths
-     * @return void
-     * @deprecated Will be removed in a future Kernel version.
-     *
-     */
-    protected function loadFactoriesFrom($paths)
-    {
-    }
-
-    /**
      * Set up an after resolving listener, or fire immediately if already resolved.
      *
      * @param string $name
@@ -265,130 +239,6 @@ abstract class ServiceProvider
         if ($this->app->resolved($name)) {
             $callback($this->app->make($name), $this->app);
         }
-    }
-
-    /**
-     * Register paths to be published by the publish command.
-     *
-     * @param array $paths
-     * @param mixed $groups
-     * @return void
-     */
-    protected function publishes(array $paths, $groups = null)
-    {
-        $this->ensurePublishArrayInitialized($class = static::class);
-
-        static::$publishes[$class] = array_merge(static::$publishes[$class], $paths);
-
-        foreach ((array)$groups as $group) {
-            $this->addPublishGroup($group, $paths);
-        }
-    }
-
-    /**
-     * Ensure the publish array for the service provider is initialized.
-     *
-     * @param string $class
-     * @return void
-     */
-    protected function ensurePublishArrayInitialized($class)
-    {
-        if (!array_key_exists($class, static::$publishes)) {
-            static::$publishes[$class] = [];
-        }
-    }
-
-    /**
-     * Add a publish group / tag to the service provider.
-     *
-     * @param string $group
-     * @param array $paths
-     * @return void
-     */
-    protected function addPublishGroup($group, $paths)
-    {
-        if (!array_key_exists($group, static::$publishGroups)) {
-            static::$publishGroups[$group] = [];
-        }
-
-        static::$publishGroups[$group] = array_merge(
-            static::$publishGroups[$group],
-            $paths
-        );
-    }
-
-    /**
-     * Get the paths to publish.
-     *
-     * @param string|null $provider
-     * @param string|null $group
-     * @return array
-     */
-    public static function pathsToPublish($provider = null, $group = null)
-    {
-        if (!is_null($paths = static::pathsForProviderOrGroup($provider, $group))) {
-            return $paths;
-        }
-
-        return collect(static::$publishes)->reduce(function ($paths, $p) {
-            return array_merge($paths, $p);
-        }, []);
-    }
-
-    /**
-     * Get the paths for the provider or group (or both).
-     *
-     * @param string|null $provider
-     * @param string|null $group
-     * @return array
-     */
-    protected static function pathsForProviderOrGroup($provider, $group)
-    {
-        if ($provider && $group) {
-            return static::pathsForProviderAndGroup($provider, $group);
-        } elseif ($group && array_key_exists($group, static::$publishGroups)) {
-            return static::$publishGroups[$group];
-        } elseif ($provider && array_key_exists($provider, static::$publishes)) {
-            return static::$publishes[$provider];
-        } elseif ($group || $provider) {
-            return [];
-        }
-    }
-
-    /**
-     * Get the paths for the provider and group.
-     *
-     * @param string $provider
-     * @param string $group
-     * @return array
-     */
-    protected static function pathsForProviderAndGroup($provider, $group)
-    {
-        if (!empty(static::$publishes[$provider]) && !empty(static::$publishGroups[$group])) {
-            return array_intersect_key(static::$publishes[$provider], static::$publishGroups[$group]);
-        }
-
-        return [];
-    }
-
-    /**
-     * Get the service providers available for publishing.
-     *
-     * @return array
-     */
-    public static function publishableProviders()
-    {
-        return array_keys(static::$publishes);
-    }
-
-    /**
-     * Get the groups available for publishing.
-     *
-     * @return array
-     */
-    public static function publishableGroups()
-    {
-        return array_keys(static::$publishGroups);
     }
 
     /**
