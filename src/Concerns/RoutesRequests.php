@@ -4,21 +4,21 @@ namespace MacropaySolutions\Framework\Concerns;
 
 use Closure;
 use FastRoute\Dispatcher;
-use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
-use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
-use MacropaySolutions\Framework\Routing\Pipeline;
-use MacropaySolutions\Framework\Routing\Router;
 use MacropaySolutions\Kernel\Contracts\Support\Responsable;
-use MacropaySolutions\Kernel\Http\Base\BinaryFileResponse;
-use MacropaySolutions\Kernel\Http\Base\NotFoundHttpException;
-use MacropaySolutions\Kernel\Http\Base\Response as SymfonyResponse;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
 use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
+use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
+use MacropaySolutions\Framework\Routing\Pipeline;
+use MacropaySolutions\Framework\Routing\Router;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use RuntimeException;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 trait RoutesRequests

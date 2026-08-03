@@ -5,12 +5,16 @@ namespace MacropaySolutions\Kernel\Http;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Filesystem\Factory as FilesystemFactory;
 use MacropaySolutions\Kernel\Contracts\Filesystem\FileNotFoundException;
-use MacropaySolutions\Kernel\Http\Base\UploadedFile as BaseUploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\KernelDev\Http\Testing\FileFactory;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
-class UploadedFile extends BaseUploadedFile
+class UploadedFile extends SymfonyUploadedFile
 {
+    use FileHelpers;
+    use Macroable;
+
     /**
      * Begin creating a new file fake.
      *
@@ -125,11 +129,11 @@ class UploadedFile extends BaseUploadedFile
     /**
      * Create a new file instance from a base instance.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\UploadedFile $file
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $file
      * @param bool $test
      * @return static
      */
-    public static function createFromBase(BaseUploadedFile $file, $test = false)
+    public static function createFromBase(SymfonyUploadedFile $file, $test = false)
     {
 //        return $file instanceof static ? $file : new static(
         return $file instanceof static ? $file : \di(static::class, [

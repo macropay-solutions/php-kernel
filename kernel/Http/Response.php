@@ -8,11 +8,17 @@ use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Contracts\Support\Renderable;
-use MacropaySolutions\Kernel\Http\Base\Response as BaseResponse;
+use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
-class Response extends BaseResponse
+class Response extends SymfonyResponse
 {
+    use ResponseTrait;
+    use Macroable {
+        Macroable::__call as macroCall;
+    }
+
     /**
      * Create a new HTTP response.
      *

@@ -29,7 +29,7 @@ interface ExceptionHandler
      *
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Throwable $e
-     * @return \MacropaySolutions\Kernel\Http\Base\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Throwable
      */

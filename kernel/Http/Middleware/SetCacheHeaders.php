@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\Http\Middleware;
 
 use Closure;
-use MacropaySolutions\Kernel\Http\Base\BinaryFileResponse;
-use MacropaySolutions\Kernel\Http\Base\StreamedResponse;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SetCacheHeaders
 {
@@ -34,7 +34,7 @@ class SetCacheHeaders
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param \Closure $next
      * @param string|array $options
-     * @return \MacropaySolutions\Kernel\Http\Base\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \InvalidArgumentException
      */

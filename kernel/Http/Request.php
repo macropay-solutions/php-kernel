@@ -4,17 +4,25 @@ namespace MacropaySolutions\Kernel\Http;
 
 use ArrayAccess;
 use Closure;
-use MacropaySolutions\Kernel\Http\Base\Request as BaseRequest;
+use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Session\SymfonySessionDecorator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
+use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-class Request extends BaseRequest implements ArrayAccess
+class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 {
+    use Concerns\CanBePrecognitive;
+    use Concerns\InteractsWithContentTypes;
+    use Concerns\InteractsWithFlashData;
+    use Concerns\InteractsWithInput;
+    use Macroable;
+
     /**
      * Override this into your \App\Request Class if needed
      */
@@ -622,10 +630,10 @@ class Request extends BaseRequest implements ArrayAccess
     /**
      * Create an MacropaySolutions Kernel  request from a Symfony instance.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
+     * @param \Symfony\Component\HttpFoundation\Request $request
      * @return static
      */
-    public static function createFromBase(BaseRequest $request)
+    public static function createFromBase(SymfonyRequest $request)
     {
         $newRequest = new static(
             $request->query->all(),

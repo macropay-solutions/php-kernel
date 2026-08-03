@@ -4,10 +4,10 @@ namespace MacropaySolutions\Kernel\Broadcasting\Broadcasters;
 
 use MacropaySolutions\Kernel\Broadcasting\BroadcastException;
 use MacropaySolutions\Kernel\Contracts\Redis\Factory as Redis;
-use MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException;
 use MacropaySolutions\Kernel\Support\Arr;
 use Predis\Connection\ConnectionException;
 use RedisException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class RedisBroadcaster extends Broadcaster
 {
@@ -55,7 +55,7 @@ class RedisBroadcaster extends Broadcaster
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @return mixed
      *
-     * @throws \MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      */
     public function auth($request)
     {

@@ -14,16 +14,16 @@ interface Kernel
     /**
      * Handle an incoming HTTP request.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
-     * @return \MacropaySolutions\Kernel\Http\Base\Response
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle($request);
 
     /**
      * Perform any final actions for the request lifecycle.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Request $request
-     * @param \MacropaySolutions\Kernel\Http\Base\Response $response
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param \Symfony\Component\HttpFoundation\Response $response
      * @return void
      */
     public function terminate($request, $response);

@@ -3,10 +3,10 @@
 namespace MacropaySolutions\Kernel\View\Engines;
 
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
-use MacropaySolutions\Kernel\Http\Base\HttpException;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
 use MacropaySolutions\Kernel\View\Compilers\CompilerInterface;
 use MacropaySolutions\Kernel\View\ViewException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class CompilerEngine extends PhpEngine

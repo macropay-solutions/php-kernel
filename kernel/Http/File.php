@@ -2,6 +2,9 @@
 
 namespace MacropaySolutions\Kernel\Http;
 
-class File extends \MacropaySolutions\Kernel\Http\Base\File
+use Symfony\Component\HttpFoundation\File\File as SymfonyFile;
+
+class File extends SymfonyFile
 {
+    use FileHelpers;
 }

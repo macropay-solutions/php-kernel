@@ -1,17 +1,18 @@
 <?php
 
-use MacropaySolutions\Framework\Application;
-use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
-use MacropaySolutions\Framework\Http\Request;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Validation\Factory;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\View\ViewServiceProvider;
+use MacropaySolutions\Framework\Application;
+use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
+use MacropaySolutions\Framework\Http\Request;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class FullApplicationTest extends TestCase
 {

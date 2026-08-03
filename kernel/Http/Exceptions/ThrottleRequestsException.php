@@ -2,7 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Http\Exceptions;
 
-use MacropaySolutions\Kernel\Http\Base\TooManyRequestsHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Throwable;
 
 class ThrottleRequestsException extends TooManyRequestsHttpException

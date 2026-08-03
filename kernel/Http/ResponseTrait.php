@@ -101,7 +101,7 @@ trait ResponseTrait
     /**
      * Add a cookie to the response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Cookie|mixed $cookie
+     * @param \Symfony\Component\HttpFoundation\Cookie|mixed $cookie
      * @return $this
      */
     public function cookie($cookie)
@@ -112,7 +112,7 @@ trait ResponseTrait
     /**
      * Add a cookie to the response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Cookie|mixed $cookie
+     * @param \Symfony\Component\HttpFoundation\Cookie|mixed $cookie
      * @return $this
      */
     public function withCookie($cookie)
@@ -129,7 +129,7 @@ trait ResponseTrait
     /**
      * Expire a cookie when sending the response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Cookie|mixed $cookie
+     * @param \Symfony\Component\HttpFoundation\Cookie|mixed $cookie
      * @param string|null $path
      * @param string|null $domain
      * @return $this

@@ -3,7 +3,7 @@
 namespace MacropaySolutions\Kernel\Http\Middleware;
 
 use Closure;
-use MacropaySolutions\Kernel\Http\Base\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckResponseForModifications
 {

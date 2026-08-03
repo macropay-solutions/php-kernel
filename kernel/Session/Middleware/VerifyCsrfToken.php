@@ -9,9 +9,9 @@ use MacropaySolutions\Kernel\Contracts\Foundation\Application;
 use MacropaySolutions\Kernel\Contracts\Support\Responsable;
 use MacropaySolutions\Kernel\Cookie\CookieValuePrefix;
 use MacropaySolutions\Kernel\Cookie\Middleware\EncryptCookies;
-use MacropaySolutions\Kernel\Http\Base\Cookie;
 use MacropaySolutions\Kernel\Session\TokenMismatchException;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class VerifyCsrfToken
 {
@@ -177,8 +177,8 @@ class VerifyCsrfToken
      * Add the CSRF token to the response cookies.
      *
      * @param \MacropaySolutions\Kernel\Http\Request $request
-     * @param \MacropaySolutions\Kernel\Http\Base\Response $response
-     * @return \MacropaySolutions\Kernel\Http\Base\Response
+     * @param \Symfony\Component\HttpFoundation\Response $response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function addCookieToResponse($request, $response)
     {
@@ -198,7 +198,7 @@ class VerifyCsrfToken
      *
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @param array $config
-     * @return \MacropaySolutions\Kernel\Http\Base\Cookie
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
     protected function newCookie($request, $config)
     {

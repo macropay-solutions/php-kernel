@@ -1,6 +1,5 @@
 <?php
 
-use MacropaySolutions\Framework\Bus\PendingDispatch;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Auth\Factory as AuthFactory;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Factory as BroadcastFactory;
@@ -8,6 +7,7 @@ use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Cookie\Factory as CookieFactory;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Support\HtmlString;
+use MacropaySolutions\Framework\Bus\PendingDispatch;
 
 if (!function_exists('abort')) {
     /**
@@ -18,8 +18,8 @@ if (!function_exists('abort')) {
      * @param array $headers
      * @return void
      *
-     * @throws \MacropaySolutions\Kernel\Http\Base\HttpException
-     * @throws \MacropaySolutions\Kernel\Http\Base\NotFoundHttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     function abort($code, $message = '', array $headers = [])
     {
@@ -557,7 +557,7 @@ if (!function_exists('cookie')) {
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \MacropaySolutions\Kernel\Cookie\CookieJar|\MacropaySolutions\Kernel\Http\Base\Cookie
+     * @return \MacropaySolutions\Kernel\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
      */
     function cookie(
         $name = null,

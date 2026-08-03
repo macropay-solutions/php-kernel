@@ -3,11 +3,11 @@
 namespace MacropaySolutions\Kernel\Broadcasting\Broadcasters;
 
 use MacropaySolutions\Kernel\Broadcasting\BroadcastException;
-use MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use Pusher\ApiErrorException;
 use Pusher\Pusher;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class PusherBroadcaster extends Broadcaster
 {
@@ -72,7 +72,7 @@ class PusherBroadcaster extends Broadcaster
      * @param \MacropaySolutions\Kernel\Http\Request $request
      * @return mixed
      *
-     * @throws \MacropaySolutions\Kernel\Http\Base\AccessDeniedHttpException
+     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      */
     public function auth($request)
     {

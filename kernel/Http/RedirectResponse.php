@@ -3,13 +3,13 @@
 namespace MacropaySolutions\Kernel\Http;
 
 use MacropaySolutions\Kernel\Contracts\Support\MessageProvider;
-use MacropaySolutions\Kernel\Http\Base\UploadedFile as BaseUploadedFile;
 use MacropaySolutions\Kernel\Session\Store as SessionStore;
 use MacropaySolutions\Kernel\Support\MessageBag;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
 use MacropaySolutions\Kernel\Support\ViewErrorBag;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse as BaseRedirectResponse;
 
 class RedirectResponse extends BaseRedirectResponse
@@ -97,7 +97,7 @@ class RedirectResponse extends BaseRedirectResponse
                 $input[$key] = $this->removeFilesFromInput($value);
             }
 
-            if ($value instanceof BaseUploadedFile) {
+            if ($value instanceof SymfonyUploadedFile) {
                 unset($input[$key]);
             }
         }

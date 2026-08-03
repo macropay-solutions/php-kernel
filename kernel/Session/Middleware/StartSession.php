@@ -4,11 +4,11 @@ namespace MacropaySolutions\Kernel\Session\Middleware;
 
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Session\Session;
-use MacropaySolutions\Kernel\Http\Base\Cookie;
-use MacropaySolutions\Kernel\Http\Base\Response;
 use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Session\SessionManager;
 use MacropaySolutions\Kernel\Support\Carbon;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Response;
 
 class StartSession
 {
@@ -209,7 +209,7 @@ class StartSession
     /**
      * Add the session cookie to the application response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Base\Response $response
+     * @param \Symfony\Component\HttpFoundation\Response $response
      * @param \MacropaySolutions\Kernel\Contracts\Session\Session $session
      * @return void
      */

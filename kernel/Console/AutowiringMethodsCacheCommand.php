@@ -184,15 +184,15 @@ class AutowiringMethodsCacheCommand extends Command
 
         foreach (
             [
-                \MacropaySolutions\Kernel\Http\Base\Response::class,
+                \Symfony\Component\HttpFoundation\Response::class,
                 \MacropaySolutions\Kernel\Http\Response::class,
-                \MacropaySolutions\Kernel\Http\Base\JsonResponse::class,
+                \Symfony\Component\HttpFoundation\JsonResponse::class,
                 \MacropaySolutions\Kernel\Http\JsonResponse::class,
                 \MacropaySolutions\CrufdWizard\Responses\DecoratableJsonResponse::class,
                 \MacropaySolutions\RestWizard\Responses\DecoratableJsonResponse::class,
-                \MacropaySolutions\Kernel\Http\Base\BinaryFileResponse::class,
-                \MacropaySolutions\Kernel\Http\Base\StreamedResponse::class,
-                \MacropaySolutions\Kernel\Http\Base\StreamedJsonResponse::class,
+                \Symfony\Component\HttpFoundation\BinaryFileResponse::class,
+                \Symfony\Component\HttpFoundation\StreamedResponse::class,
+                \Symfony\Component\HttpFoundation\StreamedJsonResponse::class,
                 \Symfony\Component\HttpFoundation\RedirectResponse::class,
                 \MacropaySolutions\Kernel\Http\RedirectResponse::class,
                 CallQueuedHandler::class,
