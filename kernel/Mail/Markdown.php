@@ -58,20 +58,11 @@ class Markdown
      */
     public function render($view, array $data = [], $inliner = null)
     {
-        $this->view->flushFinderCache();
+        $contents = $this->view->make($view, $data)->render();
 
-        $contents = $this->view->replaceNamespace(
-            'mail',
-            $this->htmlComponentPaths()
-        )->make($view, $data)->render();
-
-        if ($this->view->exists($customTheme = Str::start($this->theme, 'mail.'))) {
-            $theme = $customTheme;
-        } else {
-            $theme = str_contains($this->theme, '::')
-                ? $this->theme
-                : 'mail::themes.' . $this->theme;
-        }
+        $theme = $this->view->exists($customTheme = 'mail.themes.' . $this->theme)
+            ? $customTheme
+            : 'vendor.mail.html.themes.' . $this->theme;
 
         return new HtmlString(
             ($inliner ?: new CssToInlineStyles())->convert(
@@ -153,8 +144,8 @@ class Markdown
      */
     protected function componentPaths()
     {
-        return array_unique(array_merge($this->componentPaths, [
-            __DIR__ . '/resources/views',
+        return \array_unique(\array_merge($this->componentPaths, [
+            \resource_path('views/vendor/mail')
         ]));
     }
 

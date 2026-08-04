@@ -126,6 +126,25 @@
             "src/helpers.php"
         ]
     },
+    "extra": {
+        "publish-assets": {
+            "config/app.php": "config/app.php",
+            "config/auth.php": "config/auth.php",
+            "config/broadcasting.php": "config/broadcasting.php",
+            "config/cache.php": "config/cache.php",
+            "config/database.php": "config/database.php",
+            "config/filesystems.php": "config/filesystems.php",
+            "config/logging.php": "config/logging.php",
+            "config/queue.php": "config/queue.php",
+            "config/services.php": "config/services.php",
+            "config/session.php": "config/session.php",
+            "config/view.php": "config/view.php",
+            "kernel/Translation/lang": "resources/lang",
+            "kernel/Mail/resources/views": "resources/views/vendor/mail",
+            "kernel/Notifications/resources/views": "resources/views/vendor/notifications",
+            "kernel/Pagination/resources/views": "resources/views/vendor/pagination"
+        }
+    },
     "minimum-stability": "RC",
     "prefer-stable": true
 }
