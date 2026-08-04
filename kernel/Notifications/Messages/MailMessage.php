@@ -33,7 +33,7 @@ class MailMessage extends SimpleMessage implements Renderable
      *
      * @var string|null
      */
-    public $markdown = 'notifications::email';
+    public $markdown = 'vendor.notifications.email';
 
     /**
      * The current theme being used when generating emails.

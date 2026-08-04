@@ -143,32 +143,9 @@ abstract class ServiceProvider
     }
 
     /**
-     * Register a view file namespace.
-     *
-     * @param string|array $path
-     * @param string $namespace
-     * @return void
-     */
-    protected function loadViewsFrom($path, $namespace)
-    {
-        $this->callAfterResolving('view', function ($view) use ($path, $namespace) {
-            if (
-                isset($this->app->config['view']['paths']) &&
-                is_array($this->app->config['view']['paths'])
-            ) {
-                foreach ($this->app->config['view']['paths'] as $viewPath) {
-                    if (is_dir($appPath = $viewPath . '/vendor/' . $namespace)) {
-                        $view->addNamespace($namespace, $appPath);
-                    }
-                }
-            }
-
-            $view->addNamespace($namespace, $path);
-        });
-    }
-
-    /**
      * Register the given view components with a custom prefix.
+     * Call this ONLY from a deferred service provider like for example
+     * @see \MacropaySolutions\Kernel\Mail\MailServiceProvider
      *
      * @param string $prefix
      * @param array $components
@@ -179,48 +156,6 @@ abstract class ServiceProvider
         $this->callAfterResolving(TemplateCompiler::class, function ($template) use ($prefix, $components) {
             foreach ($components as $alias => $component) {
                 $template->component($component, is_string($alias) ? $alias : null, $prefix);
-            }
-        });
-    }
-
-    /**
-     * Register a translation file namespace.
-     *
-     * @param string $path
-     * @param string $namespace
-     * @return void
-     */
-    protected function loadTranslationsFrom($path, $namespace)
-    {
-        $this->callAfterResolving('translator', function ($translator) use ($path, $namespace) {
-            $translator->addNamespace($namespace, $path);
-        });
-    }
-
-    /**
-     * Register a JSON translation file path.
-     *
-     * @param string $path
-     * @return void
-     */
-    protected function loadJsonTranslationsFrom($path)
-    {
-        $this->callAfterResolving('translator', function ($translator) use ($path) {
-            $translator->addJsonPath($path);
-        });
-    }
-
-    /**
-     * Register database migration paths.
-     *
-     * @param array|string $paths
-     * @return void
-     */
-    protected function loadMigrationsFrom($paths)
-    {
-        $this->callAfterResolving('migrator', function ($migrator) use ($paths) {
-            foreach ((array)$paths as $path) {
-                $migrator->path($path);
             }
         });
     }

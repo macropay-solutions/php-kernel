@@ -114,14 +114,14 @@ abstract class AbstractPaginator implements Htmlable
      *
      * @var string
      */
-    public static $defaultView = 'pagination::tailwind';
+    public static $defaultView = 'vendor.pagination.default';
 
     /**
      * The default "simple" pagination view.
      *
      * @var string
      */
-    public static $defaultSimpleView = 'pagination::simple-tailwind';
+    public static $defaultSimpleView = 'vendor.pagination.simple-default';
 
     /**
      * Determine if the given value is a valid page number.
@@ -593,17 +593,6 @@ abstract class AbstractPaginator implements Htmlable
     }
 
     /**
-     * Indicate that Tailwind styling should be used for generated links.
-     *
-     * @return void
-     */
-    public static function useTailwind()
-    {
-        static::defaultView('pagination::tailwind');
-        static::defaultSimpleView('pagination::simple-tailwind');
-    }
-
-    /**
      * Indicate that Bootstrap 4 styling should be used for generated links.
      *
      * @return void
@@ -620,8 +609,8 @@ abstract class AbstractPaginator implements Htmlable
      */
     public static function useBootstrapThree()
     {
-        static::defaultView('pagination::default');
-        static::defaultSimpleView('pagination::simple-default');
+        static::defaultView('vendor.pagination.default');
+        static::defaultSimpleView('vendor.pagination.simple-default');
     }
 
     /**
@@ -631,8 +620,8 @@ abstract class AbstractPaginator implements Htmlable
      */
     public static function useBootstrapFour()
     {
-        static::defaultView('pagination::bootstrap-4');
-        static::defaultSimpleView('pagination::simple-bootstrap-4');
+        static::defaultView('vendor.pagination.bootstrap-4');
+        static::defaultSimpleView('vendor.pagination.simple-bootstrap-4');
     }
 
     /**
@@ -642,8 +631,8 @@ abstract class AbstractPaginator implements Htmlable
      */
     public static function useBootstrapFive()
     {
-        static::defaultView('pagination::bootstrap-5');
-        static::defaultSimpleView('pagination::simple-bootstrap-5');
+        static::defaultView('vendor.pagination.bootstrap-5');
+        static::defaultSimpleView('vendor.pagination.simple-bootstrap-5');
     }
 
     /**

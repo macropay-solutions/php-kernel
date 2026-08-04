@@ -9,22 +9,6 @@ use MacropaySolutions\Kernel\Support\ServiceProvider;
 class NotificationServiceProvider extends ServiceProvider
 {
     /**
-     * Boot the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'notifications');
-
-//        if ($this->app->runningInConsole()) {
-//            $this->publishes([
-//                __DIR__ . '/resources/views' => $this->app->resourcePath('views/vendor/notifications'),
-//            ], 'framework-notifications');
-//        }
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void
