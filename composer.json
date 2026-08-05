@@ -146,5 +146,10 @@
         }
     },
     "minimum-stability": "RC",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "macropay-solutions/php-kernel-dev": true
+        }
+    }
 }
