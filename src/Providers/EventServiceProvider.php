@@ -44,10 +44,7 @@ class EventServiceProvider extends ServiceProvider
         $events = $this->app['events'];
 
         $events->listen($this->getEvents());
-
-        if ($this->app->resolved('db')) {
-            Model::getEventDispatcher()->listen($this->getEventsAsObservers());
-        }
+        $events->listen($this->getEventsAsObservers());
 
         foreach ($this->subscribe as $subscriber) {
             $events->subscribe($subscriber);

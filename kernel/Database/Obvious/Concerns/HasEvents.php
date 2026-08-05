@@ -3,12 +3,18 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Events\NullDispatcher;
 use MacropaySolutions\Kernel\Support\Arr;
 
 trait HasEvents
 {
+    /**
+     * The event dispatcher instance.
+     */
+    private static ?Dispatcher $dispatcher = null;
+
     /**
      * The event map for the model.
      *
@@ -165,11 +171,7 @@ trait HasEvents
      */
     protected static function registerModelEvent($event, $callback)
     {
-        if (isset(static::$dispatcher)) {
-            $name = static::class;
-
-            static::$dispatcher->listen("obvious.{$event}: {$name}", $callback);
-        }
+        static::getEventDispatcher()->listen('obvious.' . $event . ': ' . static::class, $callback);
     }
 
     /**
@@ -181,10 +183,6 @@ trait HasEvents
      */
     protected function fireModelEvent($event, $halt = true)
     {
-        if (!isset(static::$dispatcher)) {
-            return true;
-        }
-
         // First, we will get the proper method to call on the event dispatcher, and then we
         // will attempt to fire a custom, object based event for the given event. If that
         // returns a result we can return that result, or we'll call the string events.
@@ -198,8 +196,8 @@ trait HasEvents
             return false;
         }
 
-        return !empty($result) ? $result : static::$dispatcher->{$method}(
-            "obvious.{$event}: " . static::class,
+        return !empty($result) ? $result : static::getEventDispatcher()->{$method}(
+            'obvious.' . $event . ': ' . static::class,
             $this
         );
     }
@@ -217,7 +215,7 @@ trait HasEvents
             return;
         }
 
-        $result = static::$dispatcher->$method(new $this->dispatchesEvents[$event]($this));
+        $result = static::getEventDispatcher()->$method(new $this->dispatchesEvents[$event]($this));
 
         if (!is_null($result)) {
             return $result;
@@ -358,40 +356,35 @@ trait HasEvents
      */
     public static function flushEventListeners()
     {
-        if (!isset(static::$dispatcher)) {
+        if (!isset(self::$dispatcher)) {
             return;
         }
 
         $instance = new static();
 
         foreach ($instance->getObservableEvents() as $event) {
-            static::$dispatcher->forget("obvious.{$event}: " . static::class);
+            self::$dispatcher->forget('obvious.' . $event . ': ' . static::class);
         }
 
-        foreach (array_values($instance->dispatchesEvents) as $event) {
-            static::$dispatcher->forget($event);
+        foreach ($instance->dispatchesEvents as $event) {
+            self::$dispatcher->forget($event);
         }
     }
 
     /**
      * Get the event dispatcher instance.
-     *
-     * @return \MacropaySolutions\Kernel\Contracts\Events\Dispatcher
      */
-    public static function getEventDispatcher()
+    public static function getEventDispatcher(): Dispatcher
     {
-        return static::$dispatcher;
+        return self::$dispatcher ??= Container::getInstance()->make('events');
     }
 
     /**
      * Set the event dispatcher instance.
-     *
-     * @param \MacropaySolutions\Kernel\Contracts\Events\Dispatcher $dispatcher
-     * @return void
      */
-    public static function setEventDispatcher(Dispatcher $dispatcher)
+    public static function setEventDispatcher(Dispatcher $dispatcher): void
     {
-        static::$dispatcher = $dispatcher;
+        self::$dispatcher = $dispatcher;
     }
 
     /**
@@ -401,7 +394,7 @@ trait HasEvents
      */
     public static function unsetEventDispatcher()
     {
-        static::$dispatcher = null;
+        self::$dispatcher = null;
     }
 
     /**

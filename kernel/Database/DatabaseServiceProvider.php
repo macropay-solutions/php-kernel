@@ -21,18 +21,6 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
     protected static $fakers = [];
 
     /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        Model::setConnectionResolver($this->app['db']);
-
-        Model::setEventDispatcher($this->app['events']);
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void

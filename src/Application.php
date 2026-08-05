@@ -776,16 +776,6 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Load the Obvious library for the application.
-     *
-     * @return void
-     */
-    public function withObvious()
-    {
-        $this->make('db');
-    }
-
-    /**
      * Get the path to the application "app" directory.
      *
      * @return string

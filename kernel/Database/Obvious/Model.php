@@ -6,6 +6,7 @@ use ArrayAccess;
 use JsonException;
 use JsonSerializable;
 use LogicException;
+use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\HasBroadcastChannel;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableCollection;
 use MacropaySolutions\Kernel\Contracts\Queue\QueueableEntity;
@@ -136,17 +137,8 @@ abstract class Model implements
 
     /**
      * The connection resolver instance.
-     *
-     * @var \MacropaySolutions\Kernel\Database\ConnectionResolverInterface
      */
-    protected static $resolver;
-
-    /**
-     * The event dispatcher instance.
-     *
-     * @var \MacropaySolutions\Kernel\Contracts\Events\Dispatcher
-     */
-    protected static $dispatcher;
+    private static ?Resolver $resolver = null;
 
     /**
      * The array of booted models.
@@ -1969,28 +1961,26 @@ abstract class Model implements
      */
     public static function resolveConnection($connection = null)
     {
-        return static::$resolver->connection($connection);
+        return static::getConnectionResolver()->connection($connection);
     }
 
     /**
      * Get the connection resolver instance.
-     *
-     * @return \MacropaySolutions\Kernel\Database\ConnectionResolverInterface|null
      */
-    public static function getConnectionResolver()
+    public static function getConnectionResolver(): Resolver
     {
-        return static::$resolver;
+        return (self::$resolver ??= Container::getInstance()->make('db'));
     }
 
     /**
      * Set the connection resolver instance.
      *
-     * @param \MacropaySolutions\Kernel\Database\ConnectionResolverInterface $resolver
+     * @param Resolver $resolver
      * @return void
      */
     public static function setConnectionResolver(Resolver $resolver)
     {
-        static::$resolver = $resolver;
+        self::$resolver = $resolver;
     }
 
     /**
@@ -2000,7 +1990,7 @@ abstract class Model implements
      */
     public static function unsetConnectionResolver()
     {
-        static::$resolver = null;
+        self::$resolver = null;
     }
 
     /**
