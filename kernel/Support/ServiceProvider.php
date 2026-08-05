@@ -168,7 +168,7 @@ abstract class ServiceProvider
      */
     protected function callAfterResolving(string $name, callable $callback): void
     {
-        if (!$this instanceof DeferrableProvider) {
+        if (!$this instanceof DeferrableProvider || !$this->app->isBooted()) {
             throw new \RuntimeException(__FUNCTION__ . ' should be called only from a deferred service provider');
         }
 
