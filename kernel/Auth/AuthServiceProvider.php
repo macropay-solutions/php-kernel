@@ -3,9 +3,10 @@
 namespace MacropaySolutions\Kernel\Auth;
 
 use MacropaySolutions\Kernel\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
-class AuthServiceProvider extends ServiceProvider
+class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register the service provider.
@@ -75,5 +76,19 @@ class AuthServiceProvider extends ServiceProvider
                 $guard->setDispatcher($dispatcher);
             }
         });
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [
+            'auth',
+            'auth.driver',
+            AuthenticatableContract::class,
+        ];
     }
 }

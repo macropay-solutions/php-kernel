@@ -163,12 +163,19 @@ abstract class ServiceProvider
     /**
      * Set up an after resolving listener, or fire immediately if already resolved.
      *
-     * @param string $name
-     * @param callable $callback
-     * @return void
+     *  Call this ONLY from a deferred service provider like for example
+     * @see \MacropaySolutions\Kernel\Mail\MailServiceProvider
      */
-    protected function callAfterResolving($name, $callback)
+    protected function callAfterResolving(string $name, callable $callback): void
     {
+        if (!$this instanceof DeferrableProvider) {
+            throw new \RuntimeException(__FUNCTION__ . ' should be called only from a deferred service provider');
+        }
+
+        if (!\in_array($name, $this->provides(), true)) {
+            throw new \RuntimeException($name . ' is not provided by ' . $this::class);
+        }
+
         $this->app->afterResolving($name, $callback);
 
         if ($this->app->resolved($name)) {

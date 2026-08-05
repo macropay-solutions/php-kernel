@@ -2,9 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Filesystem;
 
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
-class FilesystemServiceProvider extends ServiceProvider
+class FilesystemServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register the service provider.
@@ -78,5 +79,20 @@ class FilesystemServiceProvider extends ServiceProvider
     protected function getCloudDriver()
     {
         return $this->app['config']['filesystems.cloud'];
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [
+            'files',
+            'filesystem',
+            'filesystem.disk',
+            'filesystem.cloud',
+        ];
     }
 }

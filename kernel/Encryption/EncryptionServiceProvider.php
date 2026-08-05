@@ -2,10 +2,11 @@
 
 namespace MacropaySolutions\Kernel\Encryption;
 
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 use MacropaySolutions\Kernel\Support\Str;
 
-class EncryptionServiceProvider extends ServiceProvider
+class EncryptionServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register the service provider.
@@ -67,5 +68,17 @@ class EncryptionServiceProvider extends ServiceProvider
                 throw new MissingAppKeyException();
             }
         });
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [
+            'encrypter',
+        ];
     }
 }

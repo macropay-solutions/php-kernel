@@ -3,9 +3,10 @@
 namespace MacropaySolutions\Kernel\Events;
 
 use MacropaySolutions\Kernel\Contracts\Queue\Factory as QueueFactoryContract;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
-class EventServiceProvider extends ServiceProvider
+class EventServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register the service provider.
@@ -24,5 +25,17 @@ class EventServiceProvider extends ServiceProvider
                     : null;
             });
         });
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [
+            'events',
+        ];
     }
 }
