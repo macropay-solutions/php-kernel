@@ -149,7 +149,19 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
         // Make sure we have a queue name to properly determine if it's a FIFO queue...
         $queue ??= (string)$this->default;
 
-        $isJobAnObject = \is_object($job);
+        $callableClass = null;
+        $callableArgs = [];
+
+        if (\is_array($job) && isset($job[0], $job[1])) {
+            $callableClass = $job[0];
+            $callableArgs = $job[2] ?? [];
+        }
+
+        if ($job instanceof CallQueuedCallable) {
+            $callableClass = $job->storableCallable[0] ?? null;
+            $callableArgs = $job->storableCallable[2] ?? [];
+        }
+
         $options = [];
 
         if (!\str_ends_with($queue, '.fifo')) {
@@ -158,36 +170,60 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
                 $options['DelaySeconds'] = $this->secondsUntil($delay);
             }
 
-            // If the job is a string job on a standard queue, there are no more options...
-            if (!$isJobAnObject) {
-                return $options;
+            $group = $this->resolveMessageGroupId($job, $callableClass, $callableArgs);
+
+            if ((string)$group !== '') {
+                $options['MessageGroupId'] = $group;
             }
 
-            $options['MessageGroupId'] = (string)$job->messageGroup;
-
             return \array_filter($options);
         }
 
-        // The message group ID is required for FIFO queues and is optional for
-        // standard queues. Job objects contain a group ID. With string jobs
-        // sent to FIFO queues, assign these to the same message group ID.
+        // The message group ID is required for FIFO queues and is optional for standard queues.
+        $options['MessageGroupId'] = $this->resolveMessageGroupId($job, $callableClass, $callableArgs) ?: $queue;
 
-        if (!$isJobAnObject) {
-            $options['MessageGroupId'] = $queue;
-
-            return \array_filter($options);
-        }
-
-        $options['MessageGroupId'] = (string)$job->messageGroup;
-
-        // The message deduplication ID is only valid for FIFO queues. Every job
-        // without the method will be considered unique. To use content-based
-        // deduplication enable it in AWS and have the method return empty.
-        $options['MessageDeduplicationId'] = \method_exists($job, 'deduplicationId') ?
-            (string)$job->deduplicationId() :
-            Str::orderedUuid()->toString();
+        // The message deduplication ID is only valid for FIFO queues.
+        $options['MessageDeduplicationId'] = $this->resolveDeduplicationId($job, $callableClass, $callableArgs);
 
         return \array_filter($options);
+    }
+
+    /**
+     * Resolve the Message Group ID for the job.
+     */
+    protected function resolveMessageGroupId(mixed $job, ?string $callableClass, array $callableArgs): ?string
+    {
+        if (\is_object($job)) {
+            if (isset($job->messageGroup) && (string)$job->messageGroup !== '') {
+                return (string)$job->messageGroup;
+            }
+
+            if (\method_exists($job, 'messageGroup')) {
+                return (string)$job->messageGroup();
+            }
+        }
+
+        if ((string)$callableClass !== '' && \is_callable([$callableClass, 'messageGroup'])) {
+            return (string)$callableClass::messageGroup($callableArgs);
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the Message Deduplication ID for the job.
+     */
+    protected function resolveDeduplicationId(mixed $job, ?string $callableClass, array $callableArgs): string
+    {
+        if (\is_object($job) && \method_exists($job, 'deduplicationId')) {
+            return (string)$job->deduplicationId();
+        }
+
+        if ((string)$callableClass !== '' && \is_callable([$callableClass, 'deduplicationId'])) {
+            return (string)$callableClass::deduplicationId($callableArgs);
+        }
+
+        return Str::orderedUuid()->toString();
     }
 
     /**
