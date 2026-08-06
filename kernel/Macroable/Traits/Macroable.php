@@ -4,8 +4,6 @@ namespace MacropaySolutions\Kernel\Support\Traits;
 
 use BadMethodCallException;
 use Closure;
-use ReflectionClass;
-use ReflectionMethod;
 
 trait Macroable
 {
@@ -36,28 +34,6 @@ trait Macroable
         } catch (\Throwable) {
             // Keep original closure if locked by php if inside a nonstatic closure already (db transaction closure)
             static::$macros[$name] = $macro;
-        }
-    }
-
-    /**
-     * Mix another object into the class.
-     *
-     * @param object $mixin
-     * @param bool $replace
-     * @return void
-     *
-     * @throws \ReflectionException
-     */
-    public static function mixin($mixin, $replace = true)
-    {
-        $methods = (new ReflectionClass($mixin))->getMethods(
-            ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED
-        );
-
-        foreach ($methods as $method) {
-            if ($replace || !static::hasMacro($method->name)) {
-                static::macro($method->name, $method->invoke($mixin));
-            }
         }
     }
 

@@ -19,8 +19,6 @@ use MacropaySolutions\Kernel\Pagination\Paginator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use ReflectionClass;
-use ReflectionMethod;
 
 /**
  * @property-read HigherOrderBuilderProxy $orWhere
@@ -2051,37 +2049,11 @@ class Builder implements BuilderContract
             return;
         }
 
-        if ($method === 'mixin') {
-            static::registerMixin($parameters[0], $parameters[1] ?? true);
-
-            return;
-        }
-
         if (!static::hasGlobalMacro($method)) {
             static::throwBadMethodCallException($method);
         }
 
         return static::$macros[$method](...$parameters);
-    }
-
-    /**
-     * Register the given mixin with the builder.
-     *
-     * @param string $mixin
-     * @param bool $replace
-     * @return void
-     */
-    protected static function registerMixin($mixin, $replace)
-    {
-        $methods = (new ReflectionClass($mixin))->getMethods(
-            ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED
-        );
-
-        foreach ($methods as $method) {
-            if ($replace || !static::hasGlobalMacro($method->name)) {
-                static::macro($method->name, $method->invoke($mixin));
-            }
-        }
     }
 
     /**

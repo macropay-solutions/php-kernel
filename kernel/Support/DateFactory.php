@@ -53,7 +53,6 @@ use InvalidArgumentException;
  * @method Carbon|null make($var)
  * @method Carbon maxValue()
  * @method Carbon minValue()
- * @method void mixin($mixin)
  * @method Carbon now($tz = null)
  * @method Carbon parse($time = null, $tz = null)
  * @method string pluralUnit(string $unit)
