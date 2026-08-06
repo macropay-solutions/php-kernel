@@ -342,11 +342,12 @@ class Connection implements ConnectionInterface
      */
     public function query()
     {
-        return new QueryBuilder(
+//        return new QueryBuilder(
+        return \di(QueryBuilder::class, [
             $this,
             $this->getQueryGrammar(),
             $this->getPostProcessor()
-        );
+        ]);
     }
 
     /**
