@@ -178,6 +178,54 @@ trait HasAttributes
     public static $encrypter;
 
     /**
+     * Prevent updates
+     * Note that relations can be loaded and updated during the lock
+     */
+    public function lockUpdates(bool $checkDirty = true): bool
+    {
+        if (
+            !$this->exists
+            || $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts !== null
+            || ($checkDirty && $this->isDirty())
+        ) {
+            return false;
+        }
+
+        $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = [];
+
+        return true;
+    }
+
+    /**
+     * Unlock updates
+     *
+     * To reset the model's $attributes and get the changes from dirty applied during the lock use:
+     *
+     * if ($this->unlockUpdates()) {
+     *  $dirty = $this->getDirty();
+     *  $this->attributes = $this->original;
+     *  $this->classCastCache = [];
+     * }
+     *
+     * Note that relations can be loaded during the lock
+     */
+    public function unlockUpdates(): bool
+    {
+        if ($this->hasUnlockedUpdates()) {
+            return false;
+        }
+
+        $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = null;
+
+        return true;
+    }
+
+    public function hasUnlockedUpdates(): bool
+    {
+        return $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts !== [];
+    }
+
+    /**
      * Convert the model's attributes to an array.
      *
      * @return array
