@@ -63,18 +63,34 @@ class CallQueuedCallable implements ShouldQueue
 
         $callable = $wrapperClass::create($storableCallable);
 
-        if ($callable instanceof ShouldBeUnique) {
-            $resolvedSource = \is_object($source) ? $source : null;
+        $resolvedSource = \is_object($source) ? $source : null;
 
-            if ($resolvedSource === null) {
-                try {
-                    $resolvedSource = \app($source);
-                } catch (\Throwable) {
-                    // Fall back to class defaults if the target cannot be booted
-                }
+        if ($resolvedSource === null && \is_string($source) && \class_exists($source)) {
+            try {
+                $resolvedSource = \app($source);
+            } catch (\Throwable) {
+                // Fall back to class defaults if the target cannot be booted
+            }
+        }
+
+        if ($resolvedSource !== null) {
+            $group = self::getMessageGroup($resolvedSource);
+
+            if ($group !== '') {
+                $callable->messageGroup = $group;
             }
 
-            if ($resolvedSource instanceof ShouldBeUnique) {
+            $dedup = '';
+
+            if (\method_exists($resolvedSource, 'deduplicationId')) {
+                $dedup = (string)$resolvedSource->deduplicationId();
+            }
+
+            if ($dedup !== '') {
+                $callable->deduplicationId = $dedup;
+            }
+
+            if ($callable instanceof ShouldBeUnique && $resolvedSource instanceof ShouldBeUnique) {
                 $uniqueId = match (true) {
                     \method_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId(),
                     \property_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId,
@@ -104,6 +120,19 @@ class CallQueuedCallable implements ShouldQueue
         }
 
         return $callable;
+    }
+
+    protected static function getMessageGroup(object $resolvedSource): string
+    {
+        if (isset($resolvedSource->messageGroup) && (string)$resolvedSource->messageGroup !== '') {
+            return (string)$resolvedSource->messageGroup;
+        }
+
+        if (\method_exists($resolvedSource, 'messageGroup')) {
+            return (string)$resolvedSource->messageGroup();
+        }
+
+        return '';
     }
 
     /**

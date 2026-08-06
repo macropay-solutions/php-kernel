@@ -131,6 +131,11 @@ class BroadcastEvent implements ShouldQueue, StorableCallable
         $callable->tries = $this->tries;
         $callable->backoff = $this->backoff;
         $callable->maxExceptions = $this->maxExceptions;
+        
+        $callable->messageGroup = $this->event->messageGroup ??
+            (\method_exists($this->event, 'messageGroup') ? (string)$this->event->messageGroup() : null);
+        $callable->deduplicationId =
+            \method_exists($this->event, 'deduplicationId') ? (string)$this->event->deduplicationId() : null;
 
         return $callable;
     }

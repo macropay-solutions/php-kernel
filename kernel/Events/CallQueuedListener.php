@@ -171,6 +171,12 @@ class CallQueuedListener implements ShouldQueue, StorableCallable
         $callable->retryUntil = $this->retryUntil;
         $callable->failOnTimeout = $this->failOnTimeout;
         $callable->shouldBeEncrypted = $this->shouldBeEncrypted;
+        
+        $callable->messageGroup =
+            \method_exists($this->class, 'messageGroup') ? (string)$this->class::messageGroup($storableData) : null;
+        $callable->deduplicationId = \method_exists($this->class, 'deduplicationId') ?
+            (string)$this->class::deduplicationId($storableData) :
+            null;
 
         return $callable;
     }

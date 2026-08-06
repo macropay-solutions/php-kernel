@@ -114,6 +114,12 @@ class SendQueuedMailable implements StorableCallable
         $callable->timeout = $this->timeout;
         $callable->tries = $this->tries;
         $callable->maxExceptions = $this->maxExceptions;
+        
+        $callable->messageGroup = $this->mailable->messageGroup ??
+            (\method_exists($this->mailable, 'messageGroup') ? (string)$this->mailable->messageGroup() : null);
+        $callable->deduplicationId = \method_exists($this->mailable, 'deduplicationId') ?
+            (string)$this->mailable->deduplicationId() :
+            null;
 
         return $callable;
     }

@@ -31,6 +31,11 @@ trait Queueable
     public ?string $messageGroup = null;
 
     /**
+     * The SQS FIFO Message Deduplication ID.
+     */
+    public ?string $deduplicationId = null;
+
+    /**
      * The name of the connection the chain should be sent to.
      *
      * @var string|null
@@ -111,6 +116,18 @@ trait Queueable
 
             default => $group,
         };
+
+        return $this;
+    }
+
+    /**
+     * Set the desired deduplication ID.
+     *
+     * This feature is only supported by some queues, such as Amazon SQS FIFO.
+     */
+    public function withDeduplicationId(string $deduplicationId): static
+    {
+        $this->deduplicationId = $deduplicationId;
 
         return $this;
     }

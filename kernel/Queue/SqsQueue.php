@@ -149,6 +149,17 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
         // Make sure we have a queue name to properly determine if it's a FIFO queue...
         $queue ??= (string)$this->default;
 
+        $options = [];
+
+        if (!\str_ends_with($queue, '.fifo')) {
+            // DelaySeconds cannot be used with FIFO queues. AWS will return an error...
+            if (isset($delay)) {
+                $options['DelaySeconds'] = $this->secondsUntil($delay);
+            }
+
+            return \array_filter($options);
+        }
+
         $callableClass = null;
         $callableArgs = [];
 
@@ -160,23 +171,6 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
         if ($job instanceof CallQueuedCallable) {
             $callableClass = $job->storableCallable[0] ?? null;
             $callableArgs = $job->storableCallable[2] ?? [];
-        }
-
-        $options = [];
-
-        if (!\str_ends_with($queue, '.fifo')) {
-            // DelaySeconds cannot be used with FIFO queues. AWS will return an error...
-            if (isset($delay)) {
-                $options['DelaySeconds'] = $this->secondsUntil($delay);
-            }
-
-            $group = $this->resolveMessageGroupId($job, $callableClass, $callableArgs);
-
-            if ((string)$group !== '') {
-                $options['MessageGroupId'] = $group;
-            }
-
-            return \array_filter($options);
         }
 
         // The message group ID is required for FIFO queues and is optional for standard queues.

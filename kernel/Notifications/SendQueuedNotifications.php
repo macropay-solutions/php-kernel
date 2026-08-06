@@ -171,6 +171,12 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
         $callable->tries = $this->tries;
         $callable->timeout = $this->timeout;
         $callable->maxExceptions = $this->maxExceptions;
+        
+        $callable->messageGroup = $this->notification->messageGroup ??
+            (\method_exists($this->notification, 'messageGroup') ? (string)$this->notification->messageGroup() : null);
+        $callable->deduplicationId = \method_exists($this->notification, 'deduplicationId') ?
+            (string)$this->notification->deduplicationId() :
+            null;
 
         return $callable;
     }
