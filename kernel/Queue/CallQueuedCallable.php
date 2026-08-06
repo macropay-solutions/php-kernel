@@ -74,20 +74,24 @@ class CallQueuedCallable implements ShouldQueue
         }
 
         if ($resolvedSource !== null) {
-            $group = self::getMessageGroup($resolvedSource);
+            if (!isset($callable->messageGroup)) {
+                $group = self::getMessageGroup($resolvedSource);
 
-            if ($group !== '') {
-                $callable->messageGroup = $group;
+                if ($group !== '') {
+                    $callable->messageGroup = $group;
+                }
             }
 
-            $dedup = '';
+            if (!isset($callable->deduplicationId)) {
+                $dedup = '';
 
-            if (\method_exists($resolvedSource, 'deduplicationId')) {
-                $dedup = (string)$resolvedSource->deduplicationId();
-            }
+                if (\method_exists($resolvedSource, 'deduplicationId')) {
+                    $dedup = (string)$resolvedSource->deduplicationId();
+                }
 
-            if ($dedup !== '') {
-                $callable->deduplicationId = $dedup;
+                if ($dedup !== '') {
+                    $callable->deduplicationId = $dedup;
+                }
             }
 
             if ($callable instanceof ShouldBeUnique && $resolvedSource instanceof ShouldBeUnique) {
