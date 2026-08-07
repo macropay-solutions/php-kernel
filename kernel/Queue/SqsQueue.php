@@ -174,6 +174,8 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
         }
 
         // The message group ID is required for FIFO queues and is optional for standard queues.
+        // Job objects contain a group ID. With string jobs
+        // sent to FIFO queues, assign these to the same message group ID.
         $options['MessageGroupId'] = $this->resolveMessageGroupId($job, $callableClass, $callableArgs) ?: $queue;
 
         // The message deduplication ID is only valid for FIFO queues.

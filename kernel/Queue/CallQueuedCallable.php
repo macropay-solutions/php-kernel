@@ -47,11 +47,12 @@ class CallQueuedCallable implements ShouldQueue
      */
     public static function createFrom(object|string $source, array $storableCallable): static
     {
-        $isUniqueUntilProcessing = \is_object($source)
+        $sourceIsObject = \is_object($source);
+        $isUniqueUntilProcessing = $sourceIsObject
             ? $source instanceof ShouldBeUniqueUntilProcessing
             : \is_subclass_of($source, ShouldBeUniqueUntilProcessing::class);
 
-        $isUnique = \is_object($source)
+        $isUnique = $sourceIsObject
             ? $source instanceof ShouldBeUnique
             : \is_subclass_of($source, ShouldBeUnique::class);
 
@@ -63,19 +64,9 @@ class CallQueuedCallable implements ShouldQueue
 
         $callable = $wrapperClass::create($storableCallable);
 
-        $resolvedSource = \is_object($source) ? $source : null;
-
-        if ($resolvedSource === null && \is_string($source) && \class_exists($source)) {
-            try {
-                $resolvedSource = \app($source);
-            } catch (\Throwable) {
-                // Fall back to class defaults if the target cannot be booted
-            }
-        }
-
-        if ($resolvedSource !== null) {
+        if ($sourceIsObject) {
             if (!isset($callable->messageGroup)) {
-                $group = self::getMessageGroup($resolvedSource);
+                $group = self::getMessageGroup($source);
 
                 if ($group !== '') {
                     $callable->messageGroup = $group;
@@ -85,16 +76,28 @@ class CallQueuedCallable implements ShouldQueue
             if (!isset($callable->deduplicationId)) {
                 $dedup = '';
 
-                if (\method_exists($resolvedSource, 'deduplicationId')) {
-                    $dedup = (string)$resolvedSource->deduplicationId();
+                if (\method_exists($source, 'deduplicationId')) {
+                    $dedup = (string)$source->deduplicationId();
                 }
 
                 if ($dedup !== '') {
                     $callable->deduplicationId = $dedup;
                 }
             }
+        }
 
-            if ($callable instanceof ShouldBeUnique && $resolvedSource instanceof ShouldBeUnique) {
+        if ($callable instanceof ShouldBeUnique) {
+            $resolvedSource = $sourceIsObject ? $source : null;
+
+            if ($resolvedSource === null && \is_string($source) && \class_exists($source)) {
+                try {
+                    $resolvedSource = \app($source);
+                } catch (\Throwable) {
+                    // Fall back to class defaults if the target cannot be booted
+                }
+            }
+
+            if ($resolvedSource instanceof ShouldBeUnique) {
                 $uniqueId = match (true) {
                     \method_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId(),
                     \property_exists($resolvedSource, 'uniqueId') => $resolvedSource->uniqueId,
