@@ -9,19 +9,18 @@ trait Macroable
 {
     /**
      * The registered string macros.
-     *
-     * @var array
      */
-    protected static $macros = [];
+    protected static array $macros = [];
+
+    /**
+     * The registered string deferred macros.
+     */
+    protected static array $deferredMacros = [];
 
     /**
      * Register a custom macro.
-     *
-     * @param string $name
-     * @param object|callable $macro
-     * @return void
      */
-    public static function macro($name, $macro)
+    public static function macro(string $name, callable|object $macro): void
     {
         if (!$macro instanceof Closure) {
             static::$macros[$name] = $macro;
@@ -38,6 +37,19 @@ trait Macroable
     }
 
     /**
+     * Register a custom deferred macro.
+     * $callableMethod must be array callable that resolves to a static method and returns the macro closure.
+     */
+    public static function deferredMacro(string $name, array $callableMethod): void
+    {
+        if ( !\is_callable($callableMethod)) {
+            throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
+        }
+
+        static::$deferredMacros[$name] = $callableMethod;
+    }
+
+    /**
      * Checks if macro is registered.
      *
      * @param string $name
@@ -45,17 +57,16 @@ trait Macroable
      */
     public static function hasMacro($name)
     {
-        return isset(static::$macros[$name]);
+        return isset(static::$deferredMacros[$name]) || isset(static::$macros[$name]);
     }
 
     /**
      * Flush the existing macros.
-     *
-     * @return void
      */
-    public static function flushMacros()
+    public static function flushMacros(): void
     {
         static::$macros = [];
+        static::$deferredMacros = [];
     }
 
     /**
@@ -77,6 +88,11 @@ trait Macroable
                     $method
                 )
             );
+        }
+
+        if (isset(static::$deferredMacros[$method])) {
+            static::macro($method, static::$deferredMacros[$method]());
+            unset(static::$deferredMacros[$method]);
         }
 
         return static::$macros[$method](...$parameters);
@@ -101,6 +117,11 @@ trait Macroable
                     $method
                 )
             );
+        }
+
+        if (isset(static::$deferredMacros[$method])) {
+            static::macro($method, static::$deferredMacros[$method]());
+            unset(static::$deferredMacros[$method]);
         }
 
         $macro = static::$macros[$method];

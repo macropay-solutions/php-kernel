@@ -58,17 +58,18 @@ class Builder implements BuilderContract
 
     /**
      * All the globally registered builder macros.
-     *
-     * @var array
      */
-    protected static $macros = [];
+    protected static array $macros = [];
+
+    /**
+     * All the globally registered builder deferred macros.
+     */
+    protected static array $deferredMacros = [];
 
     /**
      * All the locally registered builder macros.
-     *
-     * @var array
      */
-    protected $localMacros = [];
+    protected array $localMacros = [];
 
     /**
      * A replacement for the typical delete function.
@@ -1948,6 +1949,19 @@ class Builder implements BuilderContract
     }
 
     /**
+     * Register a custom deferred global macro.
+     * $callableMethod must be an array callable that resolves to a static method and returns the macro closure.
+     */
+    public static function deferredMacro(string $name, array $callableMethod): void
+    {
+        if ( !\is_callable($callableMethod)) {
+            throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
+        }
+
+        static::$deferredMacros[$name] = $callableMethod;
+    }
+
+    /**
      * Checks if a global macro is registered.
      *
      * @param string $name
@@ -1955,7 +1969,7 @@ class Builder implements BuilderContract
      */
     public static function hasGlobalMacro($name)
     {
-        return isset(static::$macros[$name]);
+        return isset(static::$deferredMacros[$name]) || isset(static::$macros[$name]);
     }
 
     /**
@@ -1999,6 +2013,11 @@ class Builder implements BuilderContract
             array_unshift($parameters, $this);
 
             return $this->localMacros[$method](...$parameters);
+        }
+
+        if (isset(static::$deferredMacros[$method])) {
+            static::macro($method, static::$deferredMacros[$method]());
+            unset(static::$deferredMacros[$method]);
         }
 
         if (static::hasGlobalMacro($method)) {
@@ -2047,6 +2066,11 @@ class Builder implements BuilderContract
             static::$macros[$parameters[0]] = $parameters[1];
 
             return;
+        }
+
+        if (isset(static::$deferredMacros[$method])) {
+            static::macro($method, static::$deferredMacros[$method]());
+            unset(static::$deferredMacros[$method]);
         }
 
         if (!static::hasGlobalMacro($method)) {
