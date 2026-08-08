@@ -20,7 +20,7 @@ trait Macroable
     /**
      * Register a custom macro.
      */
-    public static function macro(string $name, callable|object $macro): void
+    private static function macro(string $name, callable|object $macro): void
     {
         if (!$macro instanceof Closure) {
             static::$macros[$name] = $macro;

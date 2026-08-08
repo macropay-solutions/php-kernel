@@ -2052,22 +2052,6 @@ class Builder implements BuilderContract
      */
     public static function __callStatic($method, $parameters)
     {
-        if ($method === 'macro') {
-            if ($parameters[1] instanceof Closure) {
-                try {
-                    static::$macros[$parameters[0]] = $parameters[1]->bindTo(null, static::class) ?? $parameters[1];
-
-                    return;
-                } catch (\Throwable) {
-                    // do not unbind macros bound to $this
-                }
-            }
-
-            static::$macros[$parameters[0]] = $parameters[1];
-
-            return;
-        }
-
         if (isset(static::$deferredMacros[$method])) {
             static::macro($method, static::$deferredMacros[$method]());
             unset(static::$deferredMacros[$method]);
