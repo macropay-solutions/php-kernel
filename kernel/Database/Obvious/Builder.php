@@ -62,11 +62,6 @@ class Builder implements BuilderContract
     protected static array $macros = [];
 
     /**
-     * All the globally registered builder deferred macros.
-     */
-    protected static array $deferredMacros = [];
-
-    /**
      * All the locally registered builder macros.
      */
     protected array $localMacros = [];
@@ -1958,7 +1953,7 @@ class Builder implements BuilderContract
             throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
         }
 
-        static::$deferredMacros[$name] = $callableMethod;
+        static::$macros[$name] = ['c' => $callableMethod];
     }
 
     /**
@@ -1969,7 +1964,7 @@ class Builder implements BuilderContract
      */
     public static function hasGlobalMacro($name)
     {
-        return isset(static::$deferredMacros[$name]) || isset(static::$macros[$name]);
+        return isset(static::$macros[$name]);
     }
 
     /**
@@ -2015,9 +2010,8 @@ class Builder implements BuilderContract
             return $this->localMacros[$method](...$parameters);
         }
 
-        if (isset(static::$deferredMacros[$method])) {
-            self::macro($method, static::$deferredMacros[$method]());
-            unset(static::$deferredMacros[$method]);
+        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
+            self::macro($method, static::$macros[$method]['c']());
         }
 
         if (static::hasGlobalMacro($method)) {
@@ -2071,9 +2065,8 @@ class Builder implements BuilderContract
      */
     public static function __callStatic($method, $parameters)
     {
-        if (isset(static::$deferredMacros[$method])) {
-            self::macro($method, static::$deferredMacros[$method]());
-            unset(static::$deferredMacros[$method]);
+        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
+            self::macro($method, static::$macros[$method]['c']());
         }
 
         if (!static::hasGlobalMacro($method)) {

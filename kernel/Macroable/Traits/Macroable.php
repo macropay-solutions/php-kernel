@@ -13,11 +13,6 @@ trait Macroable
     protected static array $macros = [];
 
     /**
-     * The registered string deferred macros.
-     */
-    protected static array $deferredMacros = [];
-
-    /**
      * Register a custom macro.
      */
     private static function macro(string $name, callable|object $macro): void
@@ -42,11 +37,11 @@ trait Macroable
      */
     public static function deferredMacro(string $name, array $callableMethod): void
     {
-        if ( !\is_callable($callableMethod)) {
+        if (!\is_callable($callableMethod)) {
             throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
         }
 
-        static::$deferredMacros[$name] = $callableMethod;
+        static::$macros[$name] = ['c' => $callableMethod];
     }
 
     /**
@@ -57,7 +52,7 @@ trait Macroable
      */
     public static function hasMacro($name)
     {
-        return isset(static::$deferredMacros[$name]) || isset(static::$macros[$name]);
+        return isset(static::$macros[$name]);
     }
 
     /**
@@ -66,7 +61,6 @@ trait Macroable
     public static function flushMacros(): void
     {
         static::$macros = [];
-        static::$deferredMacros = [];
     }
 
     /**
@@ -90,9 +84,8 @@ trait Macroable
             );
         }
 
-        if (isset(static::$deferredMacros[$method])) {
-            self::macro($method, static::$deferredMacros[$method]());
-            unset(static::$deferredMacros[$method]);
+        if (isset(static::$macros[$method]['c'])) {
+            self::macro($method, static::$macros[$method]['c']());
         }
 
         return static::$macros[$method](...$parameters);
@@ -119,9 +112,8 @@ trait Macroable
             );
         }
 
-        if (isset(static::$deferredMacros[$method])) {
-            self::macro($method, static::$deferredMacros[$method]());
-            unset(static::$deferredMacros[$method]);
+        if (isset(static::$macros[$method]['c'])) {
+            self::macro($method, static::$macros[$method]['c']());
         }
 
         $macro = static::$macros[$method];
