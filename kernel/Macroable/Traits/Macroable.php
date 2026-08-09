@@ -91,7 +91,7 @@ trait Macroable
         }
 
         if (isset(static::$deferredMacros[$method])) {
-            static::macro($method, static::$deferredMacros[$method]());
+            self::macro($method, static::$deferredMacros[$method]());
             unset(static::$deferredMacros[$method]);
         }
 
@@ -120,7 +120,7 @@ trait Macroable
         }
 
         if (isset(static::$deferredMacros[$method])) {
-            static::macro($method, static::$deferredMacros[$method]());
+            self::macro($method, static::$deferredMacros[$method]());
             unset(static::$deferredMacros[$method]);
         }
 

@@ -2016,7 +2016,7 @@ class Builder implements BuilderContract
         }
 
         if (isset(static::$deferredMacros[$method])) {
-            static::macro($method, static::$deferredMacros[$method]());
+            self::macro($method, static::$deferredMacros[$method]());
             unset(static::$deferredMacros[$method]);
         }
 
@@ -2042,6 +2042,25 @@ class Builder implements BuilderContract
     }
 
     /**
+     * Register a custom macro.
+     */
+    private static function macro(string $name, callable|object $macro): void
+    {
+        if (!$macro instanceof Closure) {
+            static::$macros[$name] = $macro;
+
+            return;
+        }
+
+        try {
+            static::$macros[$name] = $macro->bindTo(null, static::class) ?? $macro;
+        } catch (\Throwable) {
+            // Keep original closure if locked by php if inside a nonstatic closure already (db transaction closure)
+            static::$macros[$name] = $macro;
+        }
+    }
+
+    /**
      * Dynamically handle calls into the query instance.
      *
      * @param string $method
@@ -2053,7 +2072,7 @@ class Builder implements BuilderContract
     public static function __callStatic($method, $parameters)
     {
         if (isset(static::$deferredMacros[$method])) {
-            static::macro($method, static::$deferredMacros[$method]());
+            self::macro($method, static::$deferredMacros[$method]());
             unset(static::$deferredMacros[$method]);
         }
 
