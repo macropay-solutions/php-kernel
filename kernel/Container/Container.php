@@ -13,7 +13,6 @@ use MacropaySolutions\Kernel\Contracts\Foundation\CachesConfiguration;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesRoutes;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionFunction;
 use ReflectionParameter;
 use TypeError;
 
@@ -139,25 +138,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     protected $tags = [];
 
     /**
-     * The stack of concretions currently being built.
-     *
-     * @var string[]
-     */
-    protected $buildStack = [];
-
-    /**
      * The parameters temporary property to avoid passing them around in many function calls.
      *
      * @var array
      */
     protected $with = [];
-
-    /**
-     * The contextual binding map.
-     *
-     * @var array[]
-     */
-    public $contextual = [];
 
     /**
      * All the registered rebound callbacks.
@@ -227,23 +212,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public function version(): string
     {
         return static::VERSION;
-    }
-
-    /**
-     * Define a contextual binding.
-     *
-     * @param array|string $concrete
-     * @return \MacropaySolutions\Kernel\Contracts\Container\ContextualBindingBuilder
-     */
-    public function when($concrete)
-    {
-        $aliases = [];
-
-        foreach (Util::arrayWrap($concrete) as $c) {
-            $aliases[] = $this->getAlias($c);
-        }
-
-        return new ContextualBindingBuilder($this, $aliases);
     }
 
     /**
@@ -442,19 +410,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public function callMethodBinding($method, $instance)
     {
         return $this->methodBindings[$method]($instance, $this);
-    }
-
-    /**
-     * Add a contextual binding to the container.
-     *
-     * @param string $concrete
-     * @param string $abstract
-     * @param \Closure|string $implementation
-     * @return void
-     */
-    public function addContextualBinding($concrete, $abstract, $implementation)
-    {
-        $this->contextual[$concrete][$this->getAlias($abstract)] = $implementation;
     }
 
     /**
@@ -762,61 +717,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function call($callback, array $parameters = [], $defaultMethod = null)
     {
-        if ([] === $this->contextual) {
-            return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
-        }
-
-        $pushedToBuildStack = false;
-
-        if (
-            ($className = $this->getClassForCallable($callback)) && !\in_array(
-                $className,
-                $this->buildStack,
-                true
-            )
-        ) {
-            $this->buildStack[] = $className;
-
-            $pushedToBuildStack = true;
-        }
-
-        try {
-            return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
-        } finally {
-            if ($pushedToBuildStack) {
-                \array_pop($this->buildStack);
-            }
-        }
-    }
-
-    /**
-     * Get the class name for the given callback, if one can be determined.
-     *
-     * @param callable|string $callback
-     * @return string|false
-     */
-    protected function getClassForCallable($callback)
-    {
-        if ([] === $this->contextual) {
-            return false;
-        }
-
-        if (!\is_array($callback)) {
-            if (PHP_VERSION_ID >= 80200) {
-                if (
-                    is_callable($callback) &&
-                    !($reflector = new ReflectionFunction($callback(...)))->isAnonymous()
-                ) {
-                    return $reflector->getClosureScopeClass()->name ?? false;
-                }
-
-                return false;
-            }
-
-            return false;
-        }
-
-        return is_string($callback[0]) ? $callback[0] : get_class($callback[0]);
+        return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
     }
 
     /**
@@ -965,20 +866,16 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             $this->fireBeforeResolvingCallbacks($abstract, $parameters);
         }
 
-        $concrete = $this->getContextualConcrete($abstract);
-
-        $needsContextualBuild = [] !== $parameters || null !== $concrete;
+        $hasParameterOverrides = [] !== $parameters;
 
         // If an instance of the type is currently being managed as a singleton we'll
         // just return an existing instance instead of instantiating new instances
         // so the developer can keep using the same objects instance every time.
-        if (isset($this->instances[$abstract]) && !$needsContextualBuild) {
+        if (isset($this->instances[$abstract]) && !$hasParameterOverrides) {
             return $this->instances[$abstract];
         }
 
-        if (!isset($concrete)) {
-            $concrete = $this->getConcrete($abstract);
-        }
+        $concrete = $this->getConcrete($abstract);
 
         // We're ready to instantiate an instance of the concrete type registered for
         // the binding. This will instantiate the types, as well as resolve any of
@@ -997,7 +894,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // If the requested type is registered as a singleton we'll want to cache off
         // the instances in "memory" so we can return it later without creating an
         // entirely new instance of an object on each subsequent request for it.
-        if ($this->isShared($abstract) && !$needsContextualBuild) {
+        if ($this->isShared($abstract) && !$hasParameterOverrides) {
             $this->instances[$abstract] = $object;
         }
 
@@ -1103,51 +1000,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
-     * Get the contextual concrete binding for the given abstract.
-     *
-     * @param string $abstract
-     * @return \Closure|string|array|null
-     */
-    protected function getContextualConcrete($abstract)
-    {
-        if ([] === $this->contextual) {
-            return null;
-        }
-
-        if (null !== $binding = $this->findInContextualBindings($abstract)) {
-            return $binding;
-        }
-
-        // Next we need to see if a contextual binding might be bound under an alias of the
-        // given abstract type. So, we will need to check if any aliases exist with this
-        // type and then spin through them and check for contextual bindings on these.
-        if (empty($this->abstractAliases[$abstract])) {
-            return null;
-        }
-
-        foreach ($this->abstractAliases[$abstract] as $alias) {
-            if (null !== $binding = $this->findInContextualBindings($alias)) {
-                return $binding;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Find the concrete binding for the given abstract in the contextual binding array.
-     *
-     * @param string $abstract
-     * @return \Closure|string|null
-     */
-    protected function findInContextualBindings($abstract)
-    {
-        return $this->buildStack !== [] && \is_string($k = $this->buildStack[\array_key_last($this->buildStack)]) ?
-            ($this->contextual[$k][$abstract] ?? null) :
-            null;
-    }
-
-    /**
      * Determine if the given concrete is buildable.
      *
      * @param mixed $concrete
@@ -1180,26 +1032,24 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             return $concrete($this, $lastParameterOverride);
         }
 
-        if (!isset($this->contextual[$concrete])) {
-            if (
-                [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
-                    \ltrim($concrete, '\\'),
-                    '__construct'
-                )
-            ) {
-                return new $concrete();
-            }
+        if (
+            [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                \ltrim($concrete, '\\'),
+                '__construct'
+            )
+        ) {
+            return new $concrete();
+        }
 
-            if (
-                $lastParameterOverride === []
-                || !($isListLastParameterOverride = \array_is_list($lastParameterOverride))
-            ) {
-                return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
-                    $this,
-                    $concrete,
-                    $lastParameterOverride
-                )));
-            }
+        if (
+            $lastParameterOverride === []
+            || !($isListLastParameterOverride = \array_is_list($lastParameterOverride))
+        ) {
+            return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
+                $this,
+                $concrete,
+                $lastParameterOverride
+            )));
         }
 
         $isListLastParameterOverride =
@@ -1228,46 +1078,23 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
         BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
 
-        $pushedToBuildStack = false;
-
-        if ([] !== $this->contextual) {
-            $this->buildStack[] = $concrete;
-            $pushedToBuildStack = true;
-        }
-
         $constructor = $reflector->getConstructor();
 
         // If there are no constructors, that means there are no dependencies then
         // we can just resolve the instances of the objects right away, without
         // resolving any other types or dependencies out of these containers.
         if (null === $constructor) {
-            if ($pushedToBuildStack) {
-                \array_pop($this->buildStack);
-            }
-
             return new $concrete();
         }
 
         // Once we have all the constructor's parameters we can create each of the
         // dependency instances and then use the reflection instances to make a
         // new instance of this class, injecting the created dependencies in.
-        try {
-            $instances = $this->resolveDependencies(
-                $constructor->getParameters(),
-                $lastParameterOverride,
-                $isListLastParameterOverride
-            );
-        } catch (BindingResolutionException $e) {
-            if ($pushedToBuildStack) {
-                \array_pop($this->buildStack);
-            }
-
-            throw $e;
-        }
-
-        if ($pushedToBuildStack) {
-            \array_pop($this->buildStack);
-        }
+        $instances = $this->resolveDependencies(
+            $constructor->getParameters(),
+            $lastParameterOverride,
+            $isListLastParameterOverride
+        );
 
         return $reflector->newInstanceArgs($instances);
     }
@@ -1397,10 +1224,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function resolvePrimitive(ReflectionParameter $parameter)
     {
-        if (null !== ($concrete = $this->getContextualConcrete('$' . $parameter->getName()))) {
-            return Util::unwrapIfClosure($concrete, $this);
-        }
-
         if ($parameter->isDefaultValueAvailable()) {
             return $parameter->getDefaultValue();
         }
@@ -1427,7 +1250,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             && $parameter->isDefaultValueAvailable()
             && \is_string($class = Util::getParameterClassName($parameter))
             && !$this->bound($class)
-            && null === $this->findInContextualBindings($class)
         ) {
             return $parameter->getDefaultValue();
         }
@@ -1460,15 +1282,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function resolveVariadicClass(ReflectionParameter $parameter)
     {
-        $className = (string)Util::getParameterClassName($parameter);
-
-        $abstract = $this->getAlias($className);
-
-        if (!is_array($concrete = $this->getContextualConcrete($abstract))) {
-            return $this->make($className);
-        }
-
-        return array_map(fn($abstract) => $this->resolve($abstract), $concrete);
+        return $this->make((string)Util::getParameterClassName($parameter));
     }
 
     /**
@@ -1481,15 +1295,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function notInstantiable($concrete)
     {
-        if (!empty($this->buildStack)) {
-            $previous = implode(', ', $this->buildStack);
-
-            $message = "Target [$concrete] is not instantiable while building [$previous].";
-        } else {
-            $message = "Target [$concrete] is not instantiable.";
-        }
-
-        throw new BindingResolutionException($message);
+        throw new BindingResolutionException('Target [' . $concrete . '] is not instantiable.');
     }
 
     /**

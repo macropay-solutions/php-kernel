@@ -129,24 +129,6 @@ interface Container extends ContainerInterface
     public function instance($abstract, $instance);
 
     /**
-     * Add a contextual binding to the container.
-     *
-     * @param string $concrete
-     * @param string $abstract
-     * @param \Closure|string $implementation
-     * @return void
-     */
-    public function addContextualBinding($concrete, $abstract, $implementation);
-
-    /**
-     * Define a contextual binding.
-     *
-     * @param string|array $concrete
-     * @return \MacropaySolutions\Kernel\Contracts\Container\ContextualBindingBuilder
-     */
-    public function when($concrete);
-
-    /**
      * Get a closure to resolve the given type from the container.
      *
      * @param string $abstract
