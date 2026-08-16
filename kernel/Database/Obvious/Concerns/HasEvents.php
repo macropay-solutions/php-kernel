@@ -43,6 +43,13 @@ trait HasEvents
      */
     public static function observe($classes)
     {
+        if (
+            Container::getCachedFileContentsFromMemory(Container::OBSERVERS_PHP) !== null
+            && !Container::getInstance()->isBooted()
+        ) {
+            return;
+        }
+
         $instance = new static();
 
         foreach (Arr::wrap($classes) as $class) {
@@ -166,7 +173,7 @@ trait HasEvents
      * Register a model event with the dispatcher.
      *
      * @param string $event
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     protected static function registerModelEvent($event, $callback)
@@ -242,7 +249,7 @@ trait HasEvents
     /**
      * Register a retrieved model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function retrieved($callback)
@@ -253,7 +260,7 @@ trait HasEvents
     /**
      * Register a saving model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function saving($callback)
@@ -264,7 +271,7 @@ trait HasEvents
     /**
      * Register a saved model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function saved($callback)
@@ -275,7 +282,7 @@ trait HasEvents
     /**
      * Register an updating model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function updating($callback)
@@ -286,7 +293,7 @@ trait HasEvents
     /**
      * Register an updated model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function updated($callback)
@@ -297,7 +304,7 @@ trait HasEvents
     /**
      * Register a creating model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function creating($callback)
@@ -308,7 +315,7 @@ trait HasEvents
     /**
      * Register a created model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function created($callback)
@@ -319,7 +326,7 @@ trait HasEvents
     /**
      * Register a replicating model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function replicating($callback)
@@ -330,7 +337,7 @@ trait HasEvents
     /**
      * Register a deleting model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function deleting($callback)
@@ -341,7 +348,7 @@ trait HasEvents
     /**
      * Register a deleted model event with the dispatcher.
      *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|\Closure|string|array $callback
+     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
      * @return void
      */
     public static function deleted($callback)
