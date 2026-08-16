@@ -17,13 +17,11 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Macroable;
-use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use ReflectionClass;
 
 class Dispatcher implements DispatcherContract
 {
     use Macroable;
-    use ReflectsClosures;
 
     /**
      * The IoC container instance.
@@ -80,31 +78,14 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Register an event listener with the dispatcher.
-     *
-     * @param \Closure|string|array $events
      *  For cached observers call listen(["obvious.{$event}: {$modelFQN}" => ["{$observerFQN}@{$event}", ], ])
      *  For cached or not cached event listeners call listen(["{$eventFQN}" => ["{$listenerFQN}[@handle]", ], ])
-     * @param \Closure|string|array|null $listener
      * @return void
      */
-    public function listen($events, $listener = null)
-    {
-        if ($events instanceof Closure) {
-            collect($this->firstClosureParameterTypes($events))
-                ->each(function ($event) use ($events) {
-                    $this->listen($event, $events);
-                });
-
-            return;
-        }
-
-        if ($events instanceof QueuedCallable) {
-            throw new \InvalidArgumentException(
-                'Auto-discovery of event types is not supported for queued array callbacks. ' .
-                'Please provide the event name explicitly: Event::listen(EventName::class, $callable).'
-            );
-        }
-
+    public function listen(
+        string|array $events,
+        string|array|QueuedCallable|null $listener = null
+    ) {
         if ($listener instanceof QueuedCallable) {
             $listener = $listener->resolve();
         }
@@ -177,31 +158,6 @@ class Dispatcher implements DispatcherContract
         }
 
         return false;
-    }
-
-    /**
-     * Register an event and payload to be fired later.
-     *
-     * @param string $event
-     * @param object|array $payload
-     * @return void
-     */
-    public function push($event, $payload = [])
-    {
-        $this->listen($event . '_pushed', function () use ($event, $payload) {
-            $this->dispatch($event, $payload);
-        });
-    }
-
-    /**
-     * Flush a set of pushed events.
-     *
-     * @param string $event
-     * @return void
-     */
-    public function flush($event)
-    {
-        $this->dispatch($event . '_pushed');
     }
 
     /**
@@ -530,9 +486,13 @@ class Dispatcher implements DispatcherContract
      */
     protected function createClassCallable($listener, ?string $eventClass = null)
     {
-        [$class, $method] = is_array($listener)
+        [$class, $method] = $callable = \is_array($listener)
             ? $listener
             : $this->parseClassCallable($listener);
+
+        if (\is_callable($callable)) {
+            return $callable;
+        }
 
         if (!method_exists($class, $method)) {
             $method = '__invoke';
@@ -778,20 +738,6 @@ class Dispatcher implements DispatcherContract
         foreach ($this->wildcardsCache as $key => $listeners) {
             if (Str::is($event, $key)) {
                 unset($this->wildcardsCache[$key]);
-            }
-        }
-    }
-
-    /**
-     * Forget all the pushed listeners.
-     *
-     * @return void
-     */
-    public function forgetPushed()
-    {
-        foreach ($this->listeners as $key => $value) {
-            if (str_ends_with($key, '_pushed')) {
-                $this->forget($key);
             }
         }
     }
