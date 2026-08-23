@@ -919,8 +919,12 @@ trait HasAttributes
         // which simply lets the developers tweak the attribute as it is set on
         // this model, such as "json_encoding" a listing of data for storage.
         if ($this->hasSetMutator($key)) {
-            return $this->setMutatedAttributeValue($key, $value);
-        } elseif (!is_null($value) && $this->isDateAttribute($key)) {
+            $this->setMutatedAttributeValue($key, $value);
+
+            return $this;
+        }
+
+        if (!is_null($value) && $this->isDateAttribute($key)) {
             // If an attribute is listed as a "date", we'll convert it from a DateTime
             // instance into a form proper for storage on the database tables using
             // the connection grammar's date format. We will auto set the values.
