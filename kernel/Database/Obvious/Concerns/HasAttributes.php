@@ -919,9 +919,7 @@ trait HasAttributes
         // which simply lets the developers tweak the attribute as it is set on
         // this model, such as "json_encoding" a listing of data for storage.
         if ($this->hasSetMutator($key)) {
-            $this->setMutatedAttributeValue($key, $value);
-
-            return $this;
+            return $this->setMutatedAttributeValue($key, $value);
         }
 
         if (!is_null($value) && $this->isDateAttribute($key)) {
@@ -980,14 +978,29 @@ trait HasAttributes
 
     /**
      * Set the value of an attribute using its mutator.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    protected function setMutatedAttributeValue($key, $value)
+    protected function setMutatedAttributeValue(string $key, mixed $value): static
     {
-        return $this->resolveSegregatedMutatorClosure($key)->call($this, $value);
+        $this->resolveSegregatedMutatorClosure($key)->call($this, $value);
+
+        if (
+            isset($this->attributes[$key]) &&
+            !\is_int($this->attributes[$key]) &&
+            !\is_string($this->attributes[$key]) && 
+            !($writtenValue instanceof \BackedEnum)
+        ) {
+            throw new \RuntimeException(\sprintf(
+                'The mutator for "%s" on model "%s" attempted ' .
+                    'to store an object of type "%s" in the $attributes array. ' .
+                    'Mutators must strictly store primitives (int, string, null) or ' .
+                    '\BackedEnum to prevent memory leaks and PDO binding errors.',
+                $key,
+                static::class,
+                \get_debug_type($this->attributes[$key])
+            ));
+        }
+
+        return $this;
     }
 
     /**
