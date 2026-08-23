@@ -646,7 +646,25 @@ trait HasAttributes
      */
     protected function mutateAttribute($key, $value)
     {
-        return $this->resolveSegregatedAccessorClosure($key)->call($this, $value);
+        $value = $this->resolveSegregatedAccessorClosure($key)->call($this, $value);
+
+        if (
+            isset($value) &&
+            !\is_int($value) &&
+            !\is_string($value) && 
+            !($value instanceof \BackedEnum)
+        ) {
+            throw new \RuntimeException(\sprintf(
+                'Accessor for attribute "%s" on model "%s" must return int, string, \BackedEnum, or null.' .
+                    'Returned "%s". ' .
+                    'Mutable objects are strictly forbidden to prevent state-synchronization flaws.',
+                $key,
+                static::class,
+                \get_debug_type($value)
+            ));
+        }
+
+        return $value;
     }
 
     /**
@@ -987,7 +1005,7 @@ trait HasAttributes
             isset($this->attributes[$key]) &&
             !\is_int($this->attributes[$key]) &&
             !\is_string($this->attributes[$key]) && 
-            !($writtenValue instanceof \BackedEnum)
+            !($this->attributes[$key] instanceof \BackedEnum)
         ) {
             throw new \RuntimeException(\sprintf(
                 'The mutator for "%s" on model "%s" attempted ' .
