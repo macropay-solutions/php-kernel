@@ -157,13 +157,6 @@ trait HasAttributes
     protected static $mutatorCache = [];
 
     /**
-     * The cache of the "Attribute" return type marked mutated attributes for each class.
-     *
-     * @var array
-     */
-    protected static $attributeMutatorCache = [];
-
-    /**
      * The cache of the converted cast types.
      *
      * @var array
@@ -642,21 +635,6 @@ trait HasAttributes
     public function hasGetMutator($key)
     {
         return $this->resolveSegregatedAccessorClosure($key) instanceof \Closure;
-    }
-
-    /**
-     * Determine if a "Attribute" return type marked get mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasAttributeGetMutator($key)
-    {
-        if (isset(static::$getAttributeMutatorCache[static::class][$key])) {
-            return static::$getAttributeMutatorCache[static::class][$key];
-        }
-
-        return static::$getAttributeMutatorCache[static::class][$key] = false;
     }
 
     /**
