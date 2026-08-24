@@ -982,7 +982,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
                     return $this->attributes->filter($key, $default, $filter, $options);
                 }
 
-                if (\in_array(\strtoupper($this->getRealMethod()), ['POST', 'PUT', 'PATCH', 'QUEUE'], true)) {
+                if (\in_array(\strtoupper($this->getRealMethod()), ['POST', 'PUT', 'PATCH', 'QUERY'], true)) {
                     if ($this->request->has($key)) {
                         return $this->request->filter($key, $default, $filter, $options);
                     }
