@@ -262,7 +262,7 @@ abstract class Model implements
                 && (string)$this->primaryKey !== ''
                 && ($this->keyType === 'int' || $this->keyType === 'integer')
         ) {
-            $this->casts[$this->getKeyName()] ??= $this->getKeyType();
+            $this->casts[$this->primaryKey] ??= 'int';
         }
 
         $this->bootIfNotBooted();
