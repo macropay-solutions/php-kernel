@@ -157,13 +157,6 @@ trait HasAttributes
     protected static $mutatorCache = [];
 
     /**
-     * The cache of the "Attribute" return type marked mutated attributes for each class.
-     *
-     * @var array
-     */
-    protected static $attributeMutatorCache = [];
-
-    /**
      * The cache of the converted cast types.
      *
      * @var array
@@ -645,21 +638,6 @@ trait HasAttributes
     }
 
     /**
-     * Determine if a "Attribute" return type marked get mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasAttributeGetMutator($key)
-    {
-        if (isset(static::$getAttributeMutatorCache[static::class][$key])) {
-            return static::$getAttributeMutatorCache[static::class][$key];
-        }
-
-        return static::$getAttributeMutatorCache[static::class][$key] = false;
-    }
-
-    /**
      * Get the value of an attribute using its mutator.
      *
      * @param string $key
@@ -668,7 +646,25 @@ trait HasAttributes
      */
     protected function mutateAttribute($key, $value)
     {
-        return $this->resolveSegregatedAccessorClosure($key)->call($this, $value);
+        $value = $this->resolveSegregatedAccessorClosure($key)->call($this, $value);
+
+        if (
+            isset($value) &&
+            !\is_int($value) &&
+            !\is_string($value) && 
+            !($value instanceof \BackedEnum)
+        ) {
+            throw new \RuntimeException(\sprintf(
+                'Accessor for attribute "%s" on model "%s" must return int, string, \BackedEnum, or null.' .
+                    'Returned "%s". ' .
+                    'Mutable objects are strictly forbidden to prevent state-synchronization flaws.',
+                $key,
+                static::class,
+                \get_debug_type($value)
+            ));
+        }
+
+        return $value;
     }
 
     /**
@@ -942,7 +938,9 @@ trait HasAttributes
         // this model, such as "json_encoding" a listing of data for storage.
         if ($this->hasSetMutator($key)) {
             return $this->setMutatedAttributeValue($key, $value);
-        } elseif (!is_null($value) && $this->isDateAttribute($key)) {
+        }
+
+        if (!is_null($value) && $this->isDateAttribute($key)) {
             // If an attribute is listed as a "date", we'll convert it from a DateTime
             // instance into a form proper for storage on the database tables using
             // the connection grammar's date format. We will auto set the values.
@@ -998,14 +996,29 @@ trait HasAttributes
 
     /**
      * Set the value of an attribute using its mutator.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    protected function setMutatedAttributeValue($key, $value)
+    protected function setMutatedAttributeValue(string $key, mixed $value): static
     {
-        return $this->resolveSegregatedMutatorClosure($key)->call($this, $value);
+        $this->resolveSegregatedMutatorClosure($key)->call($this, $value);
+
+        if (
+            isset($this->attributes[$key]) &&
+            !\is_int($this->attributes[$key]) &&
+            !\is_string($this->attributes[$key]) && 
+            !($this->attributes[$key] instanceof \BackedEnum)
+        ) {
+            throw new \RuntimeException(\sprintf(
+                'The mutator for "%s" on model "%s" attempted ' .
+                    'to store an object of type "%s" in the $attributes array. ' .
+                    'Mutators must strictly store primitives (int, string, null) or ' .
+                    '\BackedEnum to prevent memory leaks and PDO binding errors.',
+                $key,
+                static::class,
+                \get_debug_type($this->attributes[$key])
+            ));
+        }
+
+        return $this;
     }
 
     /**

@@ -18,14 +18,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [];
 
     /**
-     * The subscriber classes to register.
-     * Avoid using these because they increase the boot time. Use listeners instead.
-     *
-     * @var array
-     */
-    protected $subscribe = [];
-
-    /**
      * {@inheritdoc}
      */
     public function register()
@@ -45,10 +37,6 @@ class EventServiceProvider extends ServiceProvider
 
         $events->listen($this->getEvents());
         $events->listen($this->getEventsAsObservers());
-
-        foreach ($this->subscribe as $subscriber) {
-            $events->subscribe($subscriber);
-        }
     }
 
     /**

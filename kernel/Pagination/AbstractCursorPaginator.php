@@ -8,7 +8,6 @@ use Exception;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Pivot;
-use MacropaySolutions\Kernel\Http\Resources\Json\JsonResource;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Str;
@@ -213,10 +212,6 @@ abstract class AbstractCursorPaginator implements Htmlable
             ->filter()
             ->flip()
             ->map(function ($_, $parameterName) use ($item) {
-                if ($item instanceof JsonResource) {
-                    $item = $item->resource;
-                }
-
                 if (
                     $item instanceof Model &&
                     !is_null($parameter = $this->getPivotParameterForItem($item, $parameterName))

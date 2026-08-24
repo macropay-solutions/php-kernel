@@ -2,16 +2,17 @@
 
 namespace MacropaySolutions\Kernel\Contracts\Events;
 
+use MacropaySolutions\Kernel\Events\QueuedCallable;
+
 interface Dispatcher
 {
     /**
      * Register an event listener with the dispatcher.
-     *
-     * @param \Closure|string|array $events
-     * @param \Closure|string|array|null $listener
-     * @return void
      */
-    public function listen($events, $listener = null);
+    public function listen(
+        string|array $events,
+        string|array|QueuedCallable|null $listener = null
+    ): void;
 
     /**
      * Determine if a given event has listeners.
@@ -20,14 +21,6 @@ interface Dispatcher
      * @return bool
      */
     public function hasListeners($eventName);
-
-    /**
-     * Register an event subscriber with the dispatcher.
-     *
-     * @param object|string $subscriber
-     * @return void
-     */
-    public function subscribe($subscriber);
 
     /**
      * Dispatch an event until the first non-null response is returned.
@@ -49,34 +42,10 @@ interface Dispatcher
     public function dispatch($event, $payload = [], $halt = false);
 
     /**
-     * Register an event and payload to be fired later.
-     *
-     * @param string $event
-     * @param array $payload
-     * @return void
-     */
-    public function push($event, $payload = []);
-
-    /**
-     * Flush a set of pushed events.
-     *
-     * @param string $event
-     * @return void
-     */
-    public function flush($event);
-
-    /**
      * Remove a set of listeners from the dispatcher.
      *
      * @param string $event
      * @return void
      */
     public function forget($event);
-
-    /**
-     * Forget all the queued listeners.
-     *
-     * @return void
-     */
-    public function forgetPushed();
 }

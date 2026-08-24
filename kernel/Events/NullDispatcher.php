@@ -41,18 +41,6 @@ class NullDispatcher implements DispatcherContract
     }
 
     /**
-     * Don't register an event and payload to be fired later.
-     *
-     * @param string $event
-     * @param array $payload
-     * @return void
-     */
-    public function push($event, $payload = [])
-    {
-        //
-    }
-
-    /**
      * Don't dispatch an event.
      *
      * @param string|object $event
@@ -66,13 +54,11 @@ class NullDispatcher implements DispatcherContract
 
     /**
      * Register an event listener with the dispatcher.
-     *
-     * @param \Closure|string|array $events
-     * @param \Closure|string|array|null $listener
-     * @return void
      */
-    public function listen($events, $listener = null)
-    {
+    public function listen(
+        string|array $events,
+        string|array|QueuedCallable|null $listener = null
+    ): void {
         $this->dispatcher->listen($events, $listener);
     }
 
@@ -88,28 +74,6 @@ class NullDispatcher implements DispatcherContract
     }
 
     /**
-     * Register an event subscriber with the dispatcher.
-     *
-     * @param object|string $subscriber
-     * @return void
-     */
-    public function subscribe($subscriber)
-    {
-        $this->dispatcher->subscribe($subscriber);
-    }
-
-    /**
-     * Flush a set of pushed events.
-     *
-     * @param string $event
-     * @return void
-     */
-    public function flush($event)
-    {
-        $this->dispatcher->flush($event);
-    }
-
-    /**
      * Remove a set of listeners from the dispatcher.
      *
      * @param string $event
@@ -118,16 +82,6 @@ class NullDispatcher implements DispatcherContract
     public function forget($event)
     {
         $this->dispatcher->forget($event);
-    }
-
-    /**
-     * Forget all the queued listeners.
-     *
-     * @return void
-     */
-    public function forgetPushed()
-    {
-        $this->dispatcher->forgetPushed();
     }
 
     /**
