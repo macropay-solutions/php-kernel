@@ -9,6 +9,8 @@ namespace MacropaySolutions\Kernel\Database\Obvious;
  */
 trait SoftDeletes
 {
+    public const DELETED_AT_FORMAT = 'Y-m-d H:i:s';
+
     /**
      * Indicates if the model is currently force deleting.
      *

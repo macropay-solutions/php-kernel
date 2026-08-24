@@ -6,7 +6,6 @@ trait HasTimestamps
 {
     public const CREATED_AT_FORMAT = 'Y-m-d H:i:s';
     public const UPDATED_AT_FORMAT = 'Y-m-d H:i:s';
-    public const DELETED_AT_FORMAT = 'Y-m-d H:i:s';
 
     /**
      * Indicates if the model should be timestamped.
