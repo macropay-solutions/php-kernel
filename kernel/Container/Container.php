@@ -133,13 +133,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     protected $tags = [];
 
     /**
-     * The parameters temporary property to avoid passing them around in many function calls.
-     *
-     * @var array
-     */
-    protected $with = [];
-
-    /**
      * All the registered rebound callbacks.
      *
      * @var array[]
@@ -807,8 +800,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // We're ready to instantiate an instance of the concrete type registered for
         // the binding. This will instantiate the types, as well as resolve any of
         // its "nested" dependencies recursively until all have gotten resolved.
-        $this->with = $parameters;
-        $object = $this->build($abstract);
+        $object = $this->build($abstract, $parameters);
 
         if ($raiseEvents) {
             $this->fireResolvingCallbacks($abstract, $object);
@@ -913,18 +905,14 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     protected function handleObjectInstantiationLogic(mixed $concrete, array $parameters, string $abstract): mixed
     {
         if (static::$circularDependencyMemoryLimit > 0) {
-            $this->with = $parameters;
-
-            return $this->getObject($concrete, $this->isBuildable($concrete, $abstract), $abstract);
+            return $this->getObject($concrete, $this->isBuildable($concrete, $abstract), $abstract, $parameters);
         }
 
         if (!$this->isBuildable($concrete, $abstract)) {
             return $this->make($concrete, $parameters);
         }
 
-        $this->with = $parameters;
-
-        return $this->build($concrete);
+        return $this->build($concrete, $parameters);
     }
 
     /**
@@ -932,23 +920,27 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function getObject(mixed $concrete, bool $isBuildable, string $initialAbstract): mixed
-    {
+    protected function getObject(
+        mixed $concrete,
+        bool $isBuildable,
+        string $initialAbstract,
+        array $parameters = []
+    ): mixed {
         if (($this->monitorResolvingAbstractMap[$initialAbstract]['i'] ??= 0) < 7) {
-            return $this->returnObject($concrete, $isBuildable, $initialAbstract);
+            return $this->returnObject($concrete, $isBuildable, $initialAbstract, $parameters);
         }
 
         if (!isset($this->monitorResolvingAbstractMap[$initialAbstract]['b'])) {
             $this->monitorResolvingAbstractMap[$initialAbstract]['b'] = \memory_get_usage(true);
 
-            return $this->returnObject($concrete, $isBuildable, $initialAbstract);
+            return $this->returnObject($concrete, $isBuildable, $initialAbstract, $parameters);
         }
 
         if (
             static::$circularDependencyMemoryLimit >
                 (\memory_get_usage(true) - $this->monitorResolvingAbstractMap[$initialAbstract]['b'])
         ) {
-            return $this->returnObject($concrete, $isBuildable, $initialAbstract);
+            return $this->returnObject($concrete, $isBuildable, $initialAbstract, $parameters);
         }
 
         throw new CircularDependencyException(
@@ -963,12 +955,16 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function returnObject(mixed $concrete, bool $isBuildable, string $initialAbstract): mixed
-    {
+    protected function returnObject(
+        mixed $concrete,
+        bool $isBuildable,
+        string $initialAbstract,
+        array $parameters = []
+    ): mixed {
         try {
             $this->monitorResolvingAbstractMap[$initialAbstract]['i']++;
 
-            return $isBuildable ? $this->build($concrete) : $this->make($concrete, $this->getLastParameterOverride());
+            return $isBuildable ? $this->build($concrete, $parameters) : $this->make($concrete, $parameters);
         } finally {
             if (0 === --$this->monitorResolvingAbstractMap[$initialAbstract]['i']) {
                 unset($this->monitorResolvingAbstractMap[$initialAbstract]);
@@ -1016,46 +1012,31 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @throws \MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException
      * @throws ReflectionException
      */
-    public function build($concrete): mixed
+    public function build($concrete, array $parameters = []): mixed
     {
-        $lastParameterOverride = $this->getLastParameterOverride();
-
         // If the concrete type is actually a Closure, we will just execute it and
         // hand back the results of the functions, which allows functions to be
         // used as resolvers for more fine-tuned resolution of these objects.
         if ($concrete instanceof Closure) {
-            return $concrete($this, $lastParameterOverride);
+            return $concrete($this, $parameters);
         }
 
-        if (
+        $parameters = (
             [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
                 \ltrim($concrete, '\\'),
                 '__construct'
             )
-        ) {
-            return new $concrete();
-        }
-
-        if (
-            $lastParameterOverride === []
-            || !($isListLastParameterOverride = \array_is_list($lastParameterOverride))
-        ) {
-            return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
+        ) ? [] : ($parameters === [] || !\array_is_list($parameters) ?
+            \array_values(BoundMethod::getConstructDependencies(
                 $this,
                 $concrete,
-                $lastParameterOverride
-            )));
-        }
+                $parameters
+            )) : $parameters);
 
-        $isListLastParameterOverride =
-            $lastParameterOverride !== [] && ($isListLastParameterOverride ?? \array_is_list($lastParameterOverride));
-
-        if ($isListLastParameterOverride) {
-            try {
-                // try to avoid reflection
-                return new $concrete(...$lastParameterOverride);
-            } catch (\Throwable) {
-            }
+        try {
+            // try to avoid reflection
+            return new $concrete(...$parameters);
+        } catch (\Throwable) {
         }
 
         try {
@@ -1087,8 +1068,8 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // new instance of this class, injecting the created dependencies in.
         $instances = $this->resolveDependencies(
             $constructor->getParameters(),
-            $lastParameterOverride,
-            $isListLastParameterOverride
+            $parameters,
+            true
         );
 
         return $reflector->newInstanceArgs($instances);
@@ -1195,18 +1176,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         }
 
         return false;
-    }
-
-    /**
-     * Cut the parameters
-     */
-    protected function getLastParameterOverride(): array
-    {
-        try {
-            return $this->with;
-        } finally {
-            $this->with = [];
-        }
     }
 
     /**
