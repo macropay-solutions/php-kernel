@@ -235,16 +235,14 @@ abstract class Relation implements BuilderContract
 
     /**
      * Touch all the related models for the relationship.
-     *
-     * @return void
      */
-    public function touch()
+    public function touch(): void
     {
         $model = $this->getRelated();
 
         if (!$model::isIgnoringTouch()) {
             $this->rawUpdate([
-                $model->getUpdatedAtColumn() => $model->freshTimestampString(),
+                $model->getUpdatedAtColumn() => \date($model::UPDATED_AT_FORMAT),
             ]);
         }
     }

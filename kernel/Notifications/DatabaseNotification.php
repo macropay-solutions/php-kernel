@@ -7,6 +7,8 @@ use MacropaySolutions\Kernel\Database\Obvious\Model;
 
 class DatabaseNotification extends Model
 {
+    public const READ_AT_FORMAT = 'Y-m-d H:i:s';
+
     /**
      * The "type" of the primary key ID.
      *
@@ -63,7 +65,7 @@ class DatabaseNotification extends Model
     public function markAsRead()
     {
         if (is_null($this->read_at)) {
-            $this->forceFill(['read_at' => $this->freshTimestamp()])->save();
+            $this->forceFill(['read_at' => \date($this::READ_AT_FORMAT)])->save();
         }
     }
 

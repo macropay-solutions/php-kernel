@@ -33,9 +33,6 @@ trait SoftDeletes
      */
     public function initializeSoftDeletes()
     {
-        if (!isset($this->casts[$this->getDeletedAtColumn()])) {
-            $this->casts[$this->getDeletedAtColumn()] = 'datetime';
-        }
     }
 
     /**
@@ -97,9 +94,10 @@ trait SoftDeletes
     {
         $query = $this->setKeysForSaveQuery($this->newModelQuery());
 
-        $time = $this->freshTimestamp();
+        $time = \date(static::DELETED_AT_FORMAT);
 
-        $columns = [$this->getDeletedAtColumn() => $this->fromDateTime($time)];
+        $deletedAtColumn = $this->getDeletedAtColumn();
+        $columns = [$deletedAtColumn => $time];
 
         $this->{$this->getDeletedAtColumn()} = $time;
 

@@ -4,6 +4,10 @@ namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
 trait HasTimestamps
 {
+    public const CREATED_AT_FORMAT = 'Y-m-d H:i:s';
+    public const UPDATED_AT_FORMAT = 'Y-m-d H:i:s';
+    public const DELETED_AT_FORMAT = 'Y-m-d H:i:s';
+
     /**
      * Indicates if the model should be timestamped.
      *
@@ -20,14 +24,11 @@ trait HasTimestamps
 
     /**
      * Update the model's update timestamp.
-     *
-     * @param string|null $attribute
-     * @return bool
      */
-    public function touch($attribute = null)
+    public function touch(?string $attribute = null, ?string $format = null): bool
     {
         if ($attribute) {
-            $this->$attribute = $this->freshTimestamp();
+            $this->$attribute = \date($format ?? $this::UPDATED_AT_FORMAT);
 
             return $this->save();
         }
@@ -59,12 +60,16 @@ trait HasTimestamps
      */
     public function updateTimestamps()
     {
-        $time = $this->freshTimestamp();
+        $time = \date(static::UPDATED_AT_FORMAT);
 
         $updatedAtColumn = $this->getUpdatedAtColumn();
 
-        if (!is_null($updatedAtColumn) && !$this->isDirty($updatedAtColumn)) {
-            $this->setUpdatedAt($time);
+        if (null !== $updatedAtColumn) {
+            if ($this->getAttributeValue($updatedAtColumn) === '') {
+                $this->setUpdatedAt($this->getOriginal($updatedAtColumn));
+            } elseif (!$this->isDirty($updatedAtColumn)) {
+                $this->setUpdatedAt($time);
+            }
         }
 
         $createdAtColumn = $this->getCreatedAtColumn();
@@ -100,26 +105,6 @@ trait HasTimestamps
         $this->{$this->getUpdatedAtColumn()} = $value;
 
         return $this;
-    }
-
-    /**
-     * Get a fresh timestamp for the model.
-     *
-     * @return \MacropaySolutions\Kernel\Support\Carbon
-     */
-    public function freshTimestamp()
-    {
-        return \appDate()->now();
-    }
-
-    /**
-     * Get a fresh timestamp for the model.
-     *
-     * @return string
-     */
-    public function freshTimestampString()
-    {
-        return $this->fromDateTime($this->freshTimestamp());
     }
 
     /**

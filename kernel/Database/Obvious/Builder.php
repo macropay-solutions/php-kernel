@@ -904,8 +904,7 @@ class Builder implements BuilderContract
         // columns are returned as you would expect from these Obvious models.
         if (
             !$this->model->hasGetMutator($column) &&
-            !$this->model->hasCast($column) &&
-            !in_array($column, $this->model->getDates())
+            !$this->model->hasCast($column)
         ) {
             return $results;
         }
@@ -1107,21 +1106,19 @@ class Builder implements BuilderContract
      * @param string|null $column
      * @return int|false
      */
-    public function touch($column = null)
+    public function touch(?string $column = null, ?string $format = null)
     {
-        $time = $this->model->freshTimestamp();
-
         if ($column) {
-            return $this->toBase()->update([$column => $time]);
+            return $this->toBase()->update([$column => \date($format ?? $this->model::UPDATED_AT_FORMAT)]);
         }
 
         $column = $this->model->getUpdatedAtColumn();
 
-        if (!$this->model->usesTimestamps() || is_null($column)) {
+        if (!$this->model->usesTimestamps() || null === $column) {
             return false;
         }
 
-        return $this->toBase()->update([$column => $time]);
+        return $this->toBase()->update([$column => \date($format ?? $this->model::UPDATED_AT_FORMAT)]);
     }
 
     /**
@@ -1168,7 +1165,7 @@ class Builder implements BuilderContract
     {
         if (
             !$this->model->usesTimestamps() ||
-            is_null($this->model->getUpdatedAtColumn())
+            null === $this->model->getUpdatedAtColumn()
         ) {
             return $values;
         }
@@ -1176,7 +1173,7 @@ class Builder implements BuilderContract
         $column = $this->model->getUpdatedAtColumn();
 
         if (!array_key_exists($column, $values)) {
-            $timestamp = $this->model->freshTimestampString();
+            $timestamp = \date($this->model::UPDATED_AT_FORMAT);
 
             if (
                 $this->model->hasSetMutator($column)
@@ -1236,16 +1233,20 @@ class Builder implements BuilderContract
             return $values;
         }
 
-        $timestamp = $this->model->freshTimestampString();
+        $timestamps = [];
 
-        $columns = array_filter([
-            $this->model->getCreatedAtColumn(),
-            $this->model->getUpdatedAtColumn(),
-        ]);
+        if (null !== ($createdAtColumn = $this->model->getCreatedAtColumn())) {
+            $timestamps[$createdAtColumn] = \date($this->model::CREATED_AT_FORMAT);
+        }
 
-        foreach ($columns as $column) {
+        if (null !== ($updatedAtColumn = $this->model->getUpdatedAtColumn())) {
+            $timestamps[$updatedAtColumn] = \date($this->model::UPDATED_AT_FORMAT);
+
+        }
+
+        if ($timestamps !== []) {
             foreach ($values as &$row) {
-                $row = array_merge([$column => $timestamp], $row);
+                $row = \array_merge($timestamps, $row);
             }
         }
 

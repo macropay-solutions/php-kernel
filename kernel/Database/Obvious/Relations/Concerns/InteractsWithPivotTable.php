@@ -418,20 +418,18 @@ trait InteractsWithPivotTable
      */
     protected function addTimestampsToAttachment(array $record, $exists = false)
     {
-        $fresh = $this->parent->freshTimestamp();
+        $pivotModel = null;
 
         if ($this->using) {
             $pivotModel = new $this->using();
-
-            $fresh = $pivotModel->fromDateTime($fresh);
         }
 
         if (!$exists && $this->hasPivotColumn($this->createdAt())) {
-            $record[$this->createdAt()] = $fresh;
+            $record[$this->createdAt()] = \date(($pivotModel ?? $this->parent)::CREATED_AT_FORMAT);
         }
 
         if ($this->hasPivotColumn($this->updatedAt())) {
-            $record[$this->updatedAt()] = $fresh;
+            $record[$this->updatedAt()] = \date(($pivotModel ?? $this->parent)::UPDATED_AT_FORMAT);
         }
 
         return $record;

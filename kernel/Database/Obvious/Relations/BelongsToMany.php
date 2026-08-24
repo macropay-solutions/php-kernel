@@ -1211,7 +1211,7 @@ class BelongsToMany extends Relation
     {
         $values = [];
 
-        foreach (\array_keys($model->getAttributes(true)) as $key) {
+        foreach (\array_keys($model->getAttributes()) as $key) {
             // To get the pivots attributes we will just take any of the attributes which
             // begin with "pivot_" and add those to this arrays, as well as unsetting
             // them from the parent's models since they exist in a different table.
@@ -1265,17 +1265,15 @@ class BelongsToMany extends Relation
      * Touch all the related models for the relationship.
      *
      * E.g.: Touch all roles associated with this user.
-     *
-     * @return void
      */
-    public function touch()
+    public function touch(): void
     {
         if ($this->related->isIgnoringTouch()) {
             return;
         }
 
         $columns = [
-            $this->related->getUpdatedAtColumn() => $this->related->freshTimestampString(),
+            $this->related->getUpdatedAtColumn() => \date($this->related::UPDATED_AT_FORMAT),
         ];
 
         // If we actually have IDs for the relation, we will run the query to update all

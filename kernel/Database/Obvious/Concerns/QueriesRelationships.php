@@ -712,7 +712,7 @@ trait QueriesRelationships
                 $this->selectRaw(
                     sprintf('exists(%s) as %s', $query->toSql(), $this->getQuery()->grammar->wrap($alias)),
                     $query->getBindings()
-                )->withCasts([$alias => 'bool']);
+                );
             } else {
                 $this->selectSub(
                     $function ? $query : $query->limit(1),

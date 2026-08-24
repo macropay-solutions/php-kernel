@@ -1229,9 +1229,9 @@ class Blueprint
      */
     public function timestamps($precision = 0)
     {
-        $this->timestamp('created_at', $precision)->nullable();
+        $this->dateTime('created_at', $precision);
 
-        $this->timestamp('updated_at', $precision)->nullable();
+        $this->dateTime('updated_at', $precision)->nullable();
     }
 
     /**
@@ -1282,7 +1282,7 @@ class Blueprint
      */
     public function softDeletes($column = 'deleted_at', $precision = 0)
     {
-        return $this->timestamp($column, $precision)->nullable();
+        return $this->dateTime($column, $precision)->nullable();
     }
 
     /**

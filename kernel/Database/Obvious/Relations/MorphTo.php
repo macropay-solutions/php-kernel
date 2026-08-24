@@ -271,10 +271,8 @@ class MorphTo extends BelongsTo
 
     /**
      * Touch all the related models for the relationship.
-     *
-     * @return void
      */
-    public function touch()
+    public function touch(): void
     {
         if (!is_null($this->child->{$this->foreignKey})) {
             parent::touch();

@@ -1048,13 +1048,11 @@ abstract class Model implements
             return $this->newQueryWithoutRelationships()->{$method}($column, $amount, $extra);
         }
 
-        $this->{$column} = $this->isClassDeviable($column)
-            ? $this->deviateClassCastableAttribute($method, $column, $amount)
-            : (\extension_loaded('bcmath') ? \bcadd(
+        $this->{$column} = \extension_loaded('bcmath') ? \bcadd(
                 $s1 = (string)$this->{$column},
                 $s2 = (string)($method === 'increment' ? $amount : $amount * -1),
                 \max(\strlen(\strrchr($s1, '.') ?: ''), \strlen(\strrchr($s2, '.') ?: ''))
-            ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1));
+            ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
 
         $this->forceFill($extra);
 
@@ -1236,7 +1234,7 @@ abstract class Model implements
                 so, $this->getDirtyForUpdate() and $this->syncChanges() will call $this->getDirty() which will call
                 getAttributes() */
                 if (!$this->getEventDispatcher()->hasListeners('obvious.updating: ' . $this::class)) {
-                    $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = $dirty;
+                    $this->tmpDirty = $dirty;
                     unset($dirty);
                 }
 
@@ -1248,7 +1246,7 @@ abstract class Model implements
 
                 return false;
             } finally {
-                $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = null;
+                $this->tmpDirty = null;
                 $this->tmpOriginalBeforeAfterEvents = null;
             }
         }
@@ -1337,7 +1335,7 @@ abstract class Model implements
         // update timestamp on the model which are maintained by us for developer
         // convenience. Then we will just continue saving the model instances.
         if ($this->usesTimestamps()) {
-            $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = null;
+            $this->tmpDirty = null;
             $this->updateTimestamps();
         }
 
@@ -1352,7 +1350,7 @@ abstract class Model implements
 
         $this->syncChanges();
 
-        $this->tmpDirtyIfAttributesAreSyncedFromCashedCasts = null;
+        $this->tmpDirty = null;
         $this->tmpOriginalBeforeAfterEvents = $this->attributes;
 
         $this->fireModelEvent('updated', false);
@@ -1522,8 +1520,6 @@ abstract class Model implements
      */
     public function delete()
     {
-        $this->mergeAttributesFromCachedCasts();
-
         if (is_null($this->getKeyName())) {
             throw new LogicException('No primary key defined on model.');
         }
@@ -2632,7 +2628,6 @@ abstract class Model implements
     {
         $this->A = null;
         $this->R = null;
-        $this->mergeAttributesFromCachedCasts();
 
         $this->classCastCache = [];
 

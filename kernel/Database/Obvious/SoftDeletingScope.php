@@ -46,7 +46,7 @@ class SoftDeletingScope implements Scope
             $column = $this->getDeletedAtColumn($builder);
 
             return $builder->update([
-                $column => $builder->getModel()->freshTimestampString(),
+                $column => \date($builder->getModel()::DELETED_AT_FORMAT),
             ]);
         });
     }
