@@ -871,7 +871,7 @@ trait HasAttributes
      * @param array|mixed $attributes
      * @return array
      */
-    public function only($attributes)
+    public function only(mixed $attributes): array
     {
         $results = [];
 
@@ -907,13 +907,10 @@ trait HasAttributes
 
     /**
      * Sync multiple original attribute with their current values.
-     *
-     * @param array|string $attributes
-     * @return $this
      */
-    public function syncOriginalAttributes($attributes)
+    public function syncOriginalAttributes(array|string $attributes): static
     {
-        $attributes = is_array($attributes) ? $attributes : func_get_args();
+        $attributes = \is_array($attributes) ? $attributes : func_get_args();
 
         foreach ($attributes as $attribute) {
             $this->original[$attribute] = $this->getAttributeFromArray($attribute);
@@ -936,22 +933,16 @@ trait HasAttributes
 
     /**
      * Determine if the model or any of the given attribute(s) have been modified.
-     *
-     * @param array|string|null $attributes
-     * @return bool
      */
-    public function isDirty($attributes = null)
+    public function isDirty(array|string|null $attributes = null): bool
     {
         return [] !== $this->getDirty(\is_array($attributes) ? $attributes : \func_get_args());
     }
 
     /**
      * Determine if the model or all the given attribute(s) have remained the same.
-     *
-     * @param array|string|null $attributes
-     * @return bool
      */
-    public function isClean($attributes = null)
+    public function isClean(array|string|null $attributes = null): bool
     {
         return !$this->isDirty(...func_get_args());
     }
@@ -970,11 +961,8 @@ trait HasAttributes
 
     /**
      * Determine if the model or any of the given attribute(s) were changed when the model was last saved.
-     *
-     * @param array|string|null $attributes
-     * @return bool
      */
-    public function wasChanged($attributes = null)
+    public function wasChanged(array|string|null $attributes = null): bool
     {
         return $this->hasChanges(
             $this->getChanges(),
@@ -1012,13 +1000,10 @@ trait HasAttributes
 
     /**
      * Get the attributes that have been changed since the last sync.
-     * @param string|array $attributes
-     * @return array
      */
-    public function getDirty()
+    public function getDirty(string|array $attributes = []): array
     {
-        $args = \func_get_args();
-        $attributes = (array)($args[0] ?? []);
+        $attributes = (array)$attributes;
 
         if (isset($this->tmpDirty)) {
             return [] !== $attributes ?
@@ -1136,15 +1121,12 @@ trait HasAttributes
 
     /**
      * Append attributes to query when building a query.
-     *
-     * @param array|string $attributes
-     * @return $this
      */
-    public function append($attributes)
+    public function append(array|string $attributes): static
     {
-        $this->appends = array_values(
-            array_unique(
-                array_merge($this->appends, is_string($attributes) ? func_get_args() : $attributes)
+        $this->appends = \array_values(
+            \array_unique(
+                \array_merge($this->appends, \is_string($attributes) ? \func_get_args() : $attributes)
             )
         );
 

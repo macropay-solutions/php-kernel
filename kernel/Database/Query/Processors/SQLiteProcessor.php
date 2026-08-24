@@ -5,21 +5,6 @@ namespace MacropaySolutions\Kernel\Database\Query\Processors;
 class SQLiteProcessor extends Processor
 {
     /**
-     * Process the results of a column listing query.
-     *
-     * @param array $results
-     * @return array
-     * @deprecated Will be removed in a future Kernel version.
-     *
-     */
-    public function processColumnListing($results)
-    {
-        return array_map(function ($result) {
-            return ((object)$result)->name;
-        }, $results);
-    }
-
-    /**
      * Process the results of a columns query.
      *
      * @param array $results

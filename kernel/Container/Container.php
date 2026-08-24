@@ -41,11 +41,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public const TAGGED_CACHE_TTL_CAP_SECONDS = 7200;
 
     /**
-     * @deprecated see static::getCachedFileContentsFromMemory(static::RESOLVING_EVENTS_PHP)
-     */
-    protected static array $abstractToTypeOfResolvingCallbacksEventsAsKeys = [];
-
-    /**
      * The current globally available container (if any).
      *
      * @var static
@@ -1965,12 +1960,5 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         }
 
         return null;
-    }
-
-    /**
-     * @deprecated
-     */
-    protected function setPrecompiledAutoWiringClassMethodParametersMap(): void
-    {
     }
 }

@@ -26,15 +26,6 @@ class Message
     protected $message;
 
     /**
-     * CIDs of files embedded in the message.
-     *
-     * @deprecated Will be removed in a future Kernel version.
-     *
-     * @var array
-     */
-    protected $embeddedFiles = [];
-
-    /**
      * Create a new message instance.
      *
      * @param \Symfony\Component\Mime\Email $message

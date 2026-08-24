@@ -41,13 +41,6 @@ class BoundMethod
      */
     protected static ?array $precompiledAutoWiringClassMethodParametersMap = null;
 
-    /**
-     * @deprecated see Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP)
-     */
-    public static function setPrecompiledAutoWiringClassMethodParametersMap(array $map): void
-    {
-    }
-
     public static function getPrecompiledAutoWiringClassMethodParametersMap(): ?array
     {
         return static::$precompiledAutoWiringClassMethodParametersMap;

@@ -27,15 +27,6 @@ class OutputStyle extends SymfonyStyle implements NewLineAware
     protected $newLinesWritten = 1;
 
     /**
-     * If the last output written wrote a new line.
-     *
-     * @var bool
-     *
-     * @deprecated use $newLinesWritten
-     */
-    protected $newLineWritten = false;
-
-    /**
      * Create a new Console OutputStyle instance.
      *
      * @param \Symfony\Component\Console\Input\InputInterface $input
@@ -104,20 +95,6 @@ class OutputStyle extends SymfonyStyle implements NewLineAware
         }
 
         return $this->newLinesWritten;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @deprecated use newLinesWritten
-     */
-    public function newLineWritten()
-    {
-        if ($this->output instanceof static && $this->output->newLineWritten()) {
-            return true;
-        }
-
-        return $this->newLineWritten;
     }
 
     /*

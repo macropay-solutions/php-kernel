@@ -120,17 +120,4 @@ class Processor
     {
         return $results;
     }
-
-    /**
-     * Process the results of a column listing query.
-     *
-     * @param array $results
-     * @return array
-     * @deprecated Will be removed in a future Kernel version.
-     *
-     */
-    public function processColumnListing($results)
-    {
-        return $results;
-    }
 }
