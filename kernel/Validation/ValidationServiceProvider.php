@@ -4,7 +4,6 @@ namespace MacropaySolutions\Kernel\Validation;
 
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Contracts\Validation\UncompromisedVerifier;
-use MacropaySolutions\Kernel\Http\Client\Factory as HttpFactory;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
 class ValidationServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -62,7 +61,7 @@ class ValidationServiceProvider extends ServiceProvider implements DeferrablePro
     protected function registerUncompromisedVerifier()
     {
         $this->app->singleton(UncompromisedVerifier::class, function ($app) {
-            return new NotPwnedVerifier($app[HttpFactory::class]);
+            return new NotPwnedVerifier($app[\GuzzleHttp\Client::class]);
         });
     }
 

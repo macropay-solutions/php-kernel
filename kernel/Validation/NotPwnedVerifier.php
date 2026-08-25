@@ -4,32 +4,25 @@ namespace MacropaySolutions\Kernel\Validation;
 
 use Exception;
 use MacropaySolutions\Kernel\Contracts\Validation\UncompromisedVerifier;
+use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Str;
 
 class NotPwnedVerifier implements UncompromisedVerifier
 {
     /**
      * The HTTP factory instance.
-     *
-     * @var \MacropaySolutions\Kernel\Http\Client\Factory
      */
-    protected $factory;
+    protected \GuzzleHttp\Client $factory;
 
     /**
      * The number of seconds the request can run before timing out.
-     *
-     * @var int
      */
-    protected $timeout;
+    protected int $timeout;
 
     /**
      * Create a new uncompromised verifier.
-     *
-     * @param \MacropaySolutions\Kernel\Http\Client\Factory $factory
-     * @param int|null $timeout
-     * @return void
      */
-    public function __construct($factory, $timeout = null)
+    public function __construct(\GuzzleHttp\Client $factory, ?int $timeout = null)
     {
         $this->factory = $factory;
         $this->timeout = $timeout ?? 30;
@@ -37,11 +30,8 @@ class NotPwnedVerifier implements UncompromisedVerifier
 
     /**
      * Verify that the given data has not been compromised in public breaches.
-     *
-     * @param array $data
-     * @return bool
      */
-    public function verify($data)
+    public function verify(array $data): bool
     {
         $value = $data['value'];
         $threshold = $data['threshold'];
@@ -77,25 +67,25 @@ class NotPwnedVerifier implements UncompromisedVerifier
 
     /**
      * Search by the given hash prefix and returns all occurrences of leaked passwords.
-     *
-     * @param string $hashPrefix
-     * @return \MacropaySolutions\Kernel\Support\Collection
      */
-    protected function search($hashPrefix)
+    protected function search(string $hashPrefix): Collection
     {
         try {
-            $response = $this->factory->withHeaders([
-                'Add-Padding' => true,
-            ])->timeout($this->timeout)->get(
-                'https://api.pwnedpasswords.com/range/' . $hashPrefix
-            );
+            $response = $this->factory->get('https://api.pwnedpasswords.com/range/' . $hashPrefix, [
+                'headers' => [
+                    'Add-Padding' => true,
+                ],
+                'timeout' => $this->timeout,
+            ]);
         } catch (Exception $e) {
             report($e);
         }
 
-        $body = (isset($response) && $response->successful())
-            ? $response->body()
-            : '';
+        $body = '';
+
+        if (isset($response) && \str_starts_with((string)$response->getStatusCode(), '2')) {
+            $body = $response->getBody()->getContents();
+        }
 
         return Str::of($body)->trim()->explode("\n")->filter(function ($line) {
             return str_contains($line, ':');

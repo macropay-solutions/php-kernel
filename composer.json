@@ -97,6 +97,7 @@
         "ext-pcntl": "*",
         "ext-posix": "*",
         "ext-redis": "*",
+        "guzzlehttp/guzzle": "Required to use the NotPwnedVerifier(^7.5).",
         "league/commonmark": "Required for Markdown mailables (^2.6)",
         "macropay-solutions/php-crufd-wizard": "*",
         "macropay-solutions/php-crufd-wizard-decorator": "*",
