@@ -181,11 +181,8 @@ trait CanBeOneOfMany
 
     /**
      * Get the default alias for the one of many inner join clause.
-     *
-     * @param string $relation
-     * @return string
      */
-    protected function getDefaultOneOfManyJoinAlias($relation)
+    protected function getDefaultOneOfManyJoinAlias(string $relation): string
     {
         return $relation == $this->query->getModel()->getTable()
             ? $relation . '_of_many'
@@ -360,21 +357,13 @@ trait CanBeOneOfMany
 
     /**
      * Guess the "hasOne" relationship's name via backtrace.
-     *
-     * @return string
      */
-    protected function guessRelationship()
+    protected function guessRelationship(): string
     {
-        $relation = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3)[2]['function'];
-
-        if (
-            ('' === $relation || \str_contains($relation, '{closure}'))
-            && '' !== (string)$this->getParent()::getSegregatedRelationNameBeingCalled()
-        ) {
-            return $this->getParent()::getSegregatedRelationNameBeingCalled();
-        }
-
-        return $relation;
+        return $this->getParent()::getSegregatedRelationNameBeingCalled() ?? throw new \RuntimeException(
+            $this->getParent()::class . '::getSegregatedRelationNameBeingCalled returned null. ' .
+                'Please declare relation name in the relation definition if you declared and used it as a model method.'
+        );
     }
 
     /**

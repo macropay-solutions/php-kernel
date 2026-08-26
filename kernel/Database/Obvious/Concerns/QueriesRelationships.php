@@ -289,12 +289,12 @@ trait QueriesRelationships
             $model = $this->getModel();
             $model->nowEagerLoadingRelationNameWithNoConstraints = $relation->getRelationName();
 
-            return $model->belongsTo(
+            return (fn() => $this->belongsTo(
                 $type,
                 $relation->getForeignKeyName(),
                 $relation->getOwnerKeyName(),
-                $relation->getRelationName(),
-            );
+                $relation->getRelationName()
+            ))->call($model);
         }, $relation->getRelationName());
 
         $belongsTo->getQuery()->mergeConstraintsFrom($relation->getQuery());

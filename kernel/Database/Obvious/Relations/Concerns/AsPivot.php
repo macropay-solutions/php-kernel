@@ -100,7 +100,7 @@ trait AsPivot
             $this->foreignKey,
             $this->getOriginal(
                 $this->foreignKey,
-                $this->getAttribute($this->foreignKey)
+                $this->getAttributeValue($this->foreignKey)
             )
         );
 
@@ -108,7 +108,7 @@ trait AsPivot
             $this->relatedKey,
             $this->getOriginal(
                 $this->relatedKey,
-                $this->getAttribute($this->relatedKey)
+                $this->getAttributeValue($this->relatedKey)
             )
         );
     }
@@ -156,8 +156,8 @@ trait AsPivot
     protected function getDeleteQuery()
     {
         return $this->newQueryWithoutRelationships()->where([
-            $this->foreignKey => $this->getOriginal($this->foreignKey, $this->getAttribute($this->foreignKey)),
-            $this->relatedKey => $this->getOriginal($this->relatedKey, $this->getAttribute($this->relatedKey)),
+            $this->foreignKey => $this->getOriginal($this->foreignKey, $this->getAttributeValue($this->foreignKey)),
+            $this->relatedKey => $this->getOriginal($this->relatedKey, $this->getAttributeValue($this->relatedKey)),
         ]);
     }
 
@@ -276,9 +276,9 @@ trait AsPivot
         return sprintf(
             '%s:%s:%s:%s',
             $this->foreignKey,
-            $this->getAttribute($this->foreignKey),
+            $this->getAttributeValue($this->foreignKey),
             $this->relatedKey,
-            $this->getAttribute($this->relatedKey)
+            $this->getAttributeValue($this->relatedKey)
         );
     }
 

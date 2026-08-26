@@ -234,12 +234,27 @@ class MorphTo extends BelongsTo
      * @param \MacropaySolutions\Kernel\Database\Obvious\Model|null $model
      * @return \MacropaySolutions\Kernel\Database\Obvious\Model
      */
-    public function associate($model)
+    public function associate(Model|int|string|null $model): Model
     {
+        if (\is_int($model) || \is_string($model)) {
+            throw new \InvalidArgumentException('MorphTo::associate() requires a Model instance or null. ' .
+                'Raw IDs cannot be used because the morph type is unknown.');
+        }
+
         if ($model instanceof Model) {
+            if ('' === (string)$this->relationName) {
+                throw new \RuntimeException('RelationName not defined when associating model ' . $model::class .
+                    ' to ' . $this->getModel()::class);
+            }
+
             $foreignKey = $this->ownerKey && $model->{$this->ownerKey}
                 ? $this->ownerKey
                 : $model->getKeyName();
+        }
+
+        if ('' === (string)$this->relationName) {
+            throw new \RuntimeException('RelationName not defined when associating model {' . $model .
+                '} to ' . $this->getModel()::class);
         }
 
         $this->parent->setAttribute(
@@ -252,21 +267,21 @@ class MorphTo extends BelongsTo
             $model instanceof Model ? $model->getMorphClass() : null
         );
 
-        return $this->parent->setRelation($this->relationName, $model);
+        return $this->parent->setRelation($this->relationName, $model instanceof Model ? $model: null);
     }
 
     /**
      * Dissociate previously associated model from the given parent.
-     *
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Model
      */
-    public function dissociate()
+    public function dissociate(): Model
     {
         $this->parent->setAttribute($this->foreignKey, null);
 
         $this->parent->setAttribute($this->morphType, null);
 
-        return $this->parent->setRelation($this->relationName, null);
+        return '' !== (string)$this->relationName ?
+            $this->parent->setRelation($this->relationName, null) :
+            $this->parent;
     }
 
     /**

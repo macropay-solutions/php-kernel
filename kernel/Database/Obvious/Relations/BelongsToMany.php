@@ -56,11 +56,9 @@ class BelongsToMany extends Relation
     protected $relatedKey;
 
     /**
-     * The "name" of the relationship.
-     *
-     * @var string
+     * The "name" of the relationship.g
      */
-    protected $relationName;
+    protected ?string $relationName = null;
 
     /**
      * The pivot table columns to retrieve.
@@ -167,27 +165,23 @@ class BelongsToMany extends Relation
 
     /**
      * Attempt to resolve the intermediate table name from the given string.
-     *
-     * @param string $table
-     * @return string
      */
-    protected function resolveTableName($table)
+    protected function resolveTableName(string $table): string
     {
-        if (!str_contains($table, '\\') || !class_exists($table)) {
+        if (!\str_contains($table, '\\') || !\class_exists($table)) {
             return $table;
         }
 
-        $model = new $table();
-
-        if (!$model instanceof Model) {
+        if (!\is_subclass_of($table, Model::class)) {
             return $table;
         }
 
-        if (in_array(AsPivot::class, class_uses_recursive($model))) {
+        // uses AsPivot
+        if (\property_exists($table, 'pivotParent')) {
             $this->using($table);
         }
 
-        return $model->getTable();
+        return (new $table())->getTable();
     }
 
     /**
@@ -1236,7 +1230,7 @@ class BelongsToMany extends Relation
             $this->getParent()->touch();
         }
 
-        if ($this->getParent()->touches($this->relationName)) {
+        if (isset($this->relationName) && $this->getParent()->touches($this->relationName)) {
             $this->touch();
         }
     }
@@ -1579,10 +1573,8 @@ class BelongsToMany extends Relation
 
     /**
      * Get the relationship name for the relationship.
-     *
-     * @return string
      */
-    public function getRelationName()
+    public function getRelationName(): ?string
     {
         return $this->relationName;
     }

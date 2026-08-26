@@ -39,10 +39,8 @@ class BelongsTo extends Relation
 
     /**
      * The name of the relationship.
-     *
-     * @var string
      */
-    protected $relationName;
+    protected ?string $relationName = null;
 
     /**
      * Create a new belongs to relationship instance.
@@ -51,7 +49,7 @@ class BelongsTo extends Relation
      * @param \MacropaySolutions\Kernel\Database\Obvious\Model $child
      * @param string $foreignKey
      * @param string $ownerKey
-     * @param string $relationName
+     * @param string|null $relationName
      * @return void
      */
     public function __construct(Builder $query, Model $child, $foreignKey, $ownerKey, $relationName)
@@ -194,35 +192,44 @@ class BelongsTo extends Relation
 
     /**
      * Associate the model instance to the given parent.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model|int|string|null $model
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Model
      */
-    public function associate($model)
+    public function associate(Model|int|string|null $model): Model
     {
-        $ownerKey = $model instanceof Model ? $model->getAttribute($this->ownerKey) : $model;
+        $ownerKey = $model instanceof Model ? $model->getAttributeValue($this->ownerKey) : $model;
 
         $this->child->setAttribute($this->foreignKey, $ownerKey);
 
         if ($model instanceof Model) {
+            if ('' === (string)$this->relationName) {
+                throw new \RuntimeException('RelationName not defined when associating model ' . $model::class .
+                    ' to ' . $this->getModel()::class);
+            }
+
             $this->child->setRelation($this->relationName, $model);
-        } else {
-            $this->child->unsetRelation($this->relationName);
+
+            return $this->child;
         }
+
+        if ('' === (string)$this->relationName) {
+            throw new \RuntimeException('RelationName not defined when associating model {' . $model .
+                '} to ' . $this->getModel()::class);
+        }
+
+        $this->child->unsetRelation($this->relationName);
 
         return $this->child;
     }
 
     /**
      * Dissociate previously associated model from the given parent.
-     *
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Model
      */
-    public function dissociate()
+    public function dissociate(): Model
     {
         $this->child->setAttribute($this->foreignKey, null);
 
-        return $this->child->setRelation($this->relationName, null);
+        return '' !== (string)$this->relationName ?
+            $this->child->setRelation($this->relationName, null) :
+            $this->child;
     }
 
     /**
@@ -387,10 +394,8 @@ class BelongsTo extends Relation
 
     /**
      * Get the name of the relationship.
-     *
-     * @return string
      */
-    public function getRelationName()
+    public function getRelationName(): ?string
     {
         return $this->relationName;
     }
