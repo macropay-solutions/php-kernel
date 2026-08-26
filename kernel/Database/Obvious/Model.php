@@ -800,26 +800,6 @@ abstract class Model implements
     }
 
     /**
-     * Eager load relationships on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @return $this
-     */
-    public function loadMorph($relation, $relations)
-    {
-        if (!$val = $this->getRelationValue($relation)) {
-            return $this;
-        }
-
-        $className = get_class($val);
-
-        $val->load($relations[$className] ?? []);
-
-        return $this;
-    }
-
-    /**
      * Eager load relations on the model if they are not already eager loaded.
      *
      * @param array|string $relations
@@ -919,92 +899,6 @@ abstract class Model implements
     public function loadExists($relations)
     {
         return $this->loadAggregate($relations, '*', 'exists');
-    }
-
-    /**
-     * Eager load relationship column aggregation on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @param string $column
-     * @param string|null $function
-     * @return $this
-     */
-    public function loadMorphAggregate($relation, $relations, $column, $function = null)
-    {
-        if (!$val = $this->getRelationValue($relation)) {
-            return $this;
-        }
-
-        $className = get_class($val);
-
-        $val->loadAggregate($relations[$className] ?? [], $column, $function);
-
-        return $this;
-    }
-
-    /**
-     * Eager load relationship counts on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @return $this
-     */
-    public function loadMorphCount($relation, $relations)
-    {
-        return $this->loadMorphAggregate($relation, $relations, '*', 'count');
-    }
-
-    /**
-     * Eager load relationship max column values on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @param string $column
-     * @return $this
-     */
-    public function loadMorphMax($relation, $relations, $column)
-    {
-        return $this->loadMorphAggregate($relation, $relations, $column, 'max');
-    }
-
-    /**
-     * Eager load relationship min column values on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @param string $column
-     * @return $this
-     */
-    public function loadMorphMin($relation, $relations, $column)
-    {
-        return $this->loadMorphAggregate($relation, $relations, $column, 'min');
-    }
-
-    /**
-     * Eager load relationship column summations on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @param string $column
-     * @return $this
-     */
-    public function loadMorphSum($relation, $relations, $column)
-    {
-        return $this->loadMorphAggregate($relation, $relations, $column, 'sum');
-    }
-
-    /**
-     * Eager load relationship average column values on the polymorphic relation of a model.
-     *
-     * @param string $relation
-     * @param array $relations
-     * @param string $column
-     * @return $this
-     */
-    public function loadMorphAvg($relation, $relations, $column)
-    {
-        return $this->loadMorphAggregate($relation, $relations, $column, 'avg');
     }
 
     /**

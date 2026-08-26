@@ -5,7 +5,6 @@ namespace MacropaySolutions\Kernel\Database\Obvious\Factories;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\BelongsToMany;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\HasOneOrMany;
-use MacropaySolutions\Kernel\Database\Obvious\Relations\MorphOneOrMany;
 
 class Relationship
 {
@@ -46,12 +45,7 @@ class Relationship
     {
         $relationship = $parent->{$this->relationship}();
 
-        if ($relationship instanceof MorphOneOrMany) {
-            $this->factory->state([
-                $relationship->getMorphType() => $relationship->getMorphClass(),
-                $relationship->getForeignKeyName() => $relationship->getParentKey(),
-            ])->create([], $parent);
-        } elseif ($relationship instanceof HasOneOrMany) {
+        if ($relationship instanceof HasOneOrMany) {
             $this->factory->state([
                 $relationship->getForeignKeyName() => $relationship->getParentKey(),
             ])->create([], $parent);

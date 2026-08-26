@@ -250,40 +250,6 @@ class Collection extends BaseCollection implements QueueableCollection
     }
 
     /**
-     * Load a set of relationships onto the mixed relationship collection.
-     *
-     * @param string $relation
-     * @param array<array-key, (callable(\MacropaySolutions\Kernel\Database\Obvious\Builder): mixed)|string> $relations
-     * @return $this
-     */
-    public function loadMorph($relation, $relations)
-    {
-        $this->pluck($relation)
-            ->filter()
-            ->groupBy(fn($model) => get_class($model))
-            ->each(fn($models, $className) => static::make($models)->load($relations[$className] ?? []));
-
-        return $this;
-    }
-
-    /**
-     * Load a set of relationship counts onto the mixed relationship collection.
-     *
-     * @param string $relation
-     * @param array<array-key, (callable(\MacropaySolutions\Kernel\Database\Obvious\Builder): mixed)|string> $relations
-     * @return $this
-     */
-    public function loadMorphCount($relation, $relations)
-    {
-        $this->pluck($relation)
-            ->filter()
-            ->groupBy(fn($model) => get_class($model))
-            ->each(fn($models, $className) => static::make($models)->loadCount($relations[$className] ?? []));
-
-        return $this;
-    }
-
-    /**
      * Determine if a key exists in the collection.
      *
      * @param (callable(TModel, TKey): bool)|TModel|string|int $key

@@ -42,13 +42,6 @@ class Builder
     public static $defaultStringLength = 255;
 
     /**
-     * The default relationship morph key type.
-     *
-     * @var string
-     */
-    public static $defaultMorphKeyType = 'int';
-
-    /**
      * Indicates whether Doctrine DBAL usage will be prevented if possible when dropping, renaming,
      * and modifying columns.
      *
@@ -77,43 +70,6 @@ class Builder
     public static function defaultStringLength($length)
     {
         static::$defaultStringLength = $length;
-    }
-
-    /**
-     * Set the default morph key type for migrations.
-     *
-     * @param string $type
-     * @return void
-     *
-     * @throws \InvalidArgumentException
-     */
-    public static function defaultMorphKeyType(string $type)
-    {
-        if (!in_array($type, ['int', 'uuid', 'ulid'])) {
-            throw new InvalidArgumentException("Morph key type must be 'int', 'uuid', or 'ulid'.");
-        }
-
-        static::$defaultMorphKeyType = $type;
-    }
-
-    /**
-     * Set the default morph key type for migrations to UUIDs.
-     *
-     * @return void
-     */
-    public static function morphUsingUuids()
-    {
-        static::defaultMorphKeyType('uuid');
-    }
-
-    /**
-     * Set the default morph key type for migrations to ULIDs.
-     *
-     * @return void
-     */
-    public static function morphUsingUlids()
-    {
-        static::defaultMorphKeyType('ulid');
     }
 
     /**

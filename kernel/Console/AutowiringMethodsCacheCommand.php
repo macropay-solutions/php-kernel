@@ -5,7 +5,6 @@ namespace MacropaySolutions\Kernel\Console;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use MacropaySolutions\Kernel\Queue\CallQueuedHandler;
-use MacropaySolutions\Kernel\Routing\Router;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 use Symfony\Component\Console\Attribute\AsCommand;
 
@@ -246,11 +245,6 @@ class AutowiringMethodsCacheCommand extends Command
                 \MacropaySolutions\Kernel\Database\Obvious\Relations\HasOne::class,
                 \MacropaySolutions\Kernel\Database\Obvious\Relations\HasOneOrMany::class,
                 \MacropaySolutions\Kernel\Database\Obvious\Relations\HasOneThrough::class,
-                \MacropaySolutions\Kernel\Database\Obvious\Relations\MorphMany::class,
-                \MacropaySolutions\Kernel\Database\Obvious\Relations\MorphOne::class,
-                \MacropaySolutions\Kernel\Database\Obvious\Relations\MorphOneOrMany::class,
-                \MacropaySolutions\Kernel\Database\Obvious\Relations\MorphTo::class,
-                \MacropaySolutions\Kernel\Database\Obvious\Relations\MorphToMany::class,
                 \MacropaySolutions\RestWizard\Obvious\CustomRelations\HasManySelfThroughSelf::class,
                 \MacropaySolutions\RestWizard\Obvious\CustomRelations\HasManyThrough2LinkTables::class,
                 \MacropaySolutions\RestWizard\Obvious\CustomRelations\HasManyThrough3LinkTables::class,

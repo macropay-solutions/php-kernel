@@ -3,7 +3,6 @@
 namespace MacropaySolutions\Kernel\Database\Obvious\Factories;
 
 use MacropaySolutions\Kernel\Database\Obvious\Model;
-use MacropaySolutions\Kernel\Database\Obvious\Relations\MorphTo;
 
 class BelongsToRelationship
 {
@@ -51,11 +50,7 @@ class BelongsToRelationship
     {
         $relationship = $model->{$this->relationship}();
 
-        return $relationship instanceof MorphTo ? [
-            $relationship->getMorphType() => $this->factory instanceof Factory ? $this->factory->newModel(
-            )->getMorphClass() : $this->factory->getMorphClass(),
-            $relationship->getForeignKeyName() => $this->resolver($relationship->getOwnerKeyName()),
-        ] : [
+        return [
             $relationship->getForeignKeyName() => $this->resolver($relationship->getOwnerKeyName()),
         ];
     }

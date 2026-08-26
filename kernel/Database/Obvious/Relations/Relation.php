@@ -55,20 +55,6 @@ abstract class Relation implements BuilderContract
     protected static $constraints = true;
 
     /**
-     * An array to map class names to their morph names in the database.
-     *
-     * @var array
-     */
-    public static $morphMap = [];
-
-    /**
-     * Prevents morph relationships without a morph map.
-     *
-     * @var bool
-     */
-    protected static $requireMorphMap = false;
-
-    /**
      * The count of self joins.
      *
      * @var int
@@ -449,88 +435,6 @@ abstract class Relation implements BuilderContract
         && in_array($model->getKeyType(), ['int', 'integer'])
             ? 'whereIntegerInRaw'
             : 'whereIn';
-    }
-
-    /**
-     * Prevent polymorphic relationships from being used without model mappings.
-     *
-     * @param bool $requireMorphMap
-     * @return void
-     */
-    public static function requireMorphMap($requireMorphMap = true)
-    {
-        static::$requireMorphMap = $requireMorphMap;
-    }
-
-    /**
-     * Determine if polymorphic relationships require explicit model mapping.
-     *
-     * @return bool
-     */
-    public static function requiresMorphMap()
-    {
-        return static::$requireMorphMap;
-    }
-
-    /**
-     * Define the morph map for polymorphic relations and require all morphed models to be explicitly mapped.
-     *
-     * @param array $map
-     * @param bool $merge
-     * @return array
-     */
-    public static function enforceMorphMap(array $map, $merge = true)
-    {
-        static::requireMorphMap();
-
-        return static::morphMap($map, $merge);
-    }
-
-    /**
-     * Set or get the morph map for polymorphic relations.
-     *
-     * @param array|null $map
-     * @param bool $merge
-     * @return array
-     */
-    public static function morphMap(?array $map = null, $merge = true)
-    {
-        $map = static::buildMorphMapFromModels($map);
-
-        if (is_array($map)) {
-            static::$morphMap = $merge && static::$morphMap
-                ? $map + static::$morphMap : $map;
-        }
-
-        return static::$morphMap;
-    }
-
-    /**
-     * Builds a table-keyed array from model class names.
-     *
-     * @param string[]|null $models
-     * @return array|null
-     */
-    protected static function buildMorphMapFromModels(?array $models = null)
-    {
-        if (is_null($models) || !array_is_list($models)) {
-            return $models;
-        }
-
-        return array_combine(array_map(function ($model) {
-            return (new $model())->getTable();
-        }, $models), $models);
-    }
-
-    /**
-     * Get the model associated with a custom polymorphic type.
-     *
-     * @param string $alias
-     * @return string|null
-     */
-    public static function getMorphedModel($alias)
-    {
-        return static::$morphMap[$alias] ?? null;
     }
 
     /**
