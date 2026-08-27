@@ -106,7 +106,7 @@ trait SoftDeletes
         if ($this->usesTimestamps() && !is_null($this->getUpdatedAtColumn())) {
             $this->{$this->getUpdatedAtColumn()} = $time;
 
-            $columns[$this->getUpdatedAtColumn()] = $this->fromDateTime($time);
+            $columns[$this->getUpdatedAtColumn()] = $time;
         }
 
         $query->update($columns);

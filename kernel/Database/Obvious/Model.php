@@ -51,6 +51,17 @@ abstract class Model implements
     use Concerns\GuardsAttributes;
     use ForwardsCalls;
 
+    protected const IGNORE_ON_SERIALIZE = [
+        'relations',
+        'A',
+        'R',
+        'a',
+        'r',
+        'tmpDirty',
+        'tmpOriginalBeforeAfterEvents',
+        'nowEagerLoadingRelationNameWithNoConstraints'
+    ];
+
     /**
      * The connection name for the model.
      *
@@ -269,7 +280,7 @@ abstract class Model implements
 
         $this->initializeTraits();
 
-        $this->original = $this->classCastCache !== [] ? $this->getAttributes() : $this->attributes;
+        $this->original = $this->attributes;
 
         if ([] === $attributes) {
             return;
@@ -2394,7 +2405,6 @@ abstract class Model implements
         unset(
             $this->attributes[$offset],
             $this->relations[$offset],
-            $this->classCastCache[$offset]
         );
     }
 
@@ -2514,31 +2524,119 @@ abstract class Model implements
     }
 
     /**
-     * Prepare the object for serialization.
-     *
-     * @return array
+     * Freeze the model into a pure primitive array (No Eloquent state bloat)
      */
-    public function __sleep()
+    public function __serialize(): array
     {
-        $this->A = null;
-        $this->R = null;
+        $serializeData = [
+            'relations' => [],
+        ];
 
-        $this->classCastCache = [];
+        foreach ($this->getRelations() as $relationName => $relationData) {
+            if ($relationData instanceof Collection) {
+                $serializeData['relations'][$relationName] = [
+                    'type' => 'collection',
+                    'class' => $relationData->first() ? $relationData->first()::class : null,
+                    'data' => $relationData->map(fn($model) => $model->__serialize())->all(),
+                ];
+                continue;
+            }
 
-        return array_keys(get_object_vars($this));
+            if ($relationData instanceof Model) {
+                $serializeData['relations'][$relationName] = [
+                    'type' => 'model',
+                    'class' => $relationData::class,
+                    'data' => $relationData->__serialize(),
+                ];
+                continue;
+            }
+
+            if ($relationData === null) {
+                $serializeData['relations'][$relationName] = null;
+            }
+        }
+
+        foreach(\get_object_vars($this) as $key => $val) {
+            if (\in_array($key, self::IGNORE_ON_SERIALIZE, true) || static::containsObject($val, 0)) {
+                continue;
+            }
+
+            $serializeData[$key] = $val;
+        }
+
+        return $serializeData;
     }
 
     /**
-     * When a model is being unserialized, check if it needs to be booted.
-     *
-     * @return void
+     * Thaw the primitive array back into an active Eloquent Model
      */
-    public function __wakeup()
+    public function __unserialize(array $data): void
     {
-        $this->A = null;
-        $this->R = null;
+
+        foreach($data as $key => $val) {
+            if ($key !== 'relations') {
+                $this->{$key} = $val;
+
+                continue;
+            }
+
+            foreach ($val as $relationName => $relationMeta) {
+                if ($relationMeta === null) {
+                    $this->setRelation($relationName, null);
+                    continue;
+                }
+
+                if ($relationMeta['type'] === 'collection') {
+                    if ('' !== (string)$relationMeta['class']) {
+                        $models = \array_map(
+                            function($serializedData) use ($relationMeta) {
+                                $model = new $relationMeta['class']();
+                                $model->__unserialize($serializedData);
+
+                                return $model;
+                            },
+                            $relationMeta['data']
+                        );
+                        $this->setRelation($relationName, \di(Collection::class, [$models]));
+                        continue;
+                    }
+
+                    $this->setRelation($relationName, \di(Collection::class));
+                    continue;
+                }
+
+                if ($relationMeta['type'] === 'model' && $relationMeta['class']) {
+                    // Fix 3: __unserialize returns void, so we must instantiate first
+                    $model = new $relationMeta['class']();
+                    $model->__unserialize($relationMeta['data']);
+
+                    $this->setRelation($relationName, $model);
+                }
+            }
+        }
+
         $this->bootIfNotBooted();
 
         $this->initializeTraits();
+    }
+
+    /**
+     * Recursively check if a value is or contains an object.
+     */
+    protected static function containsObject(mixed $val, int $depth = 0): bool
+    {
+        if ($depth > 20 || \is_object($val)) {
+            return true;
+        }
+
+        if (\is_array($val)) {
+            foreach ($val as $item) {
+                if (static::containsObject($item, $depth + 1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
