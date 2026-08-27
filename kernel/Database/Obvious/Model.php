@@ -2557,7 +2557,7 @@ abstract class Model implements
         }
 
         foreach(\get_object_vars($this) as $key => $val) {
-            if (\in_array($key, self::IGNORE_ON_SERIALIZE, true) || static::containsObject($val, 0)) {
+            if (\in_array($key, static::IGNORE_ON_SERIALIZE, true) || static::containsObject($val, 0)) {
                 continue;
             }
 
@@ -2606,7 +2606,6 @@ abstract class Model implements
                 }
 
                 if ($relationMeta['type'] === 'model' && $relationMeta['class']) {
-                    // Fix 3: __unserialize returns void, so we must instantiate first
                     $model = new $relationMeta['class']();
                     $model->__unserialize($relationMeta['data']);
 
