@@ -11,9 +11,7 @@ use MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException;
 use MacropaySolutions\Kernel\Contracts\Container\Container as ContainerContract;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesConfiguration;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesRoutes;
-use ReflectionClass;
 use ReflectionException;
-use ReflectionParameter;
 use TypeError;
 
 class Container implements ArrayAccess, ContainerContract, CachesConfiguration, CachesRoutes
@@ -1005,20 +1003,29 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Instantiate a concrete instance of the given type.
      *
-     * @param \Closure|string $concrete
-     * @return mixed
-     *
      * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
      * @throws \MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException
      * @throws ReflectionException
      */
-    public function build($concrete, array $parameters = []): mixed
+    public function build(\Closure|string $concrete, array $parameters = []): mixed
     {
         // If the concrete type is actually a Closure, we will just execute it and
         // hand back the results of the functions, which allows functions to be
         // used as resolvers for more fine-tuned resolution of these objects.
         if ($concrete instanceof Closure) {
             return $concrete($this, $parameters);
+        }
+
+        if (!\class_exists($concrete)) {
+            if (\interface_exists($concrete)) {
+                throw new BindingResolutionException('Target interface [' . $concrete . '] is not instantiable.');
+            }
+
+            if (\trait_exists($concrete)) {
+                throw new BindingResolutionException('Target trait [' . $concrete . '] is not instantiable.');
+            }
+
+            throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.');
         }
 
         $parameters = (
@@ -1033,249 +1040,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
                 $parameters
             )) : $parameters);
 
-        try {
-            // try to avoid reflection
-            return new $concrete(...$parameters);
-        } catch (\Throwable) {
-        }
-
-        try {
-            $reflector = new ReflectionClass($concrete);
-        } catch (ReflectionException $e) {
-            throw new BindingResolutionException("Target class [$concrete] does not exist.", 0, $e);
-        }
-
-        // If the type is not instantiable, the developer is attempting to resolve
-        // an abstract type such as an Interface or Abstract Class and there is
-        // no binding registered for the abstractions so we need to bail out.
-        if (!$reflector->isInstantiable()) {
-            $this->notInstantiable($concrete);
-        }
-
         BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
 
-        $constructor = $reflector->getConstructor();
-
-        // If there are no constructors, that means there are no dependencies then
-        // we can just resolve the instances of the objects right away, without
-        // resolving any other types or dependencies out of these containers.
-        if (null === $constructor) {
-            return new $concrete();
-        }
-
-        // Once we have all the constructor's parameters we can create each of the
-        // dependency instances and then use the reflection instances to make a
-        // new instance of this class, injecting the created dependencies in.
-        $instances = $this->resolveDependencies(
-            $constructor->getParameters(),
-            $parameters,
-            true
-        );
-
-        return $reflector->newInstanceArgs($instances);
-    }
-
-    /**
-     * Resolve all the dependencies from the ReflectionParameters.
-     *
-     * @param \ReflectionParameter[] $dependencies
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     */
-    protected function resolveDependencies(
-        array $dependencies,
-        array $lastParameterOverride,
-        bool $isListLastParameterOverride
-    ): array {
-        $results = [];
-
-        foreach ($dependencies as $indexKey => $dependency) {
-            // If the dependency has an override for this particular build we will use
-            // that instead as the value. Otherwise, we will continue with this run
-            // of resolutions and let reflection attempt to determine the result.
-            if (
-                [] !== $lastParameterOverride
-                && $this->addParameterOverrideFromNotEmptyParameters(
-                    $dependency,
-                    $indexKey,
-                    $lastParameterOverride,
-                    $isListLastParameterOverride,
-                    $results
-                )
-            ) {
-                continue;
-            }
-
-            // If the class is null, it means the dependency is a string or some other
-            // primitive type which we can not resolve since it is not a class and
-            // we will just bomb out with an error since we have no-where to go.
-            $result = !($type = $dependency->getType()) instanceof \ReflectionNamedType || $type->isBuiltin()
-                ? $this->resolvePrimitive($dependency)
-                : $this->resolveClass($dependency);
-
-            if ($dependency->isVariadic()) {
-                $results = array_merge($results, $result);
-            } else {
-                $results[] = $result;
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Get a parameter override for a dependency or throw.
-     * @throws \Throwable
-     * @see addParameterOverrideFromNotEmptyParameters
-     */
-    protected function getParameterOverride(
-        ReflectionParameter $dependency,
-        int $indexKey,
-        array $lastParameterOverride,
-        bool $isListLastParameterOverride
-    ): mixed {
-        if (!$dependency->isVariadic() && $isListLastParameterOverride) {
-            if (\array_key_exists($indexKey, $lastParameterOverride)) {
-                return $lastParameterOverride[$indexKey];
-            }
-
-            throw new Exception();
-        }
-
-        if (\array_key_exists($dependency->name, $lastParameterOverride)) {
-            return $lastParameterOverride[$dependency->name];
-        }
-
-        throw new Exception();
-    }
-
-    /**
-     * Add a parameter override for a dependency
-     */
-    protected function addParameterOverrideFromNotEmptyParameters(
-        ReflectionParameter $dependency,
-        int $indexKey,
-        array $lastParameterOverride,
-        bool $isListLastParameterOverride,
-        array &$results,
-    ): bool {
-        if ($isListLastParameterOverride && !$dependency->isVariadic()) {
-            if (\array_key_exists($indexKey, $lastParameterOverride)) {
-                $results[] = $lastParameterOverride[$indexKey];
-
-                return true;
-            }
-
-            return false;
-        }
-
-        if (\array_key_exists($dependency->name, $lastParameterOverride)) {
-            $results[] = $lastParameterOverride[$dependency->name];
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Resolve a non-class hinted primitive dependency.
-     *
-     * @param \ReflectionParameter $parameter
-     * @return mixed
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     */
-    protected function resolvePrimitive(ReflectionParameter $parameter)
-    {
-        if ($parameter->isDefaultValueAvailable()) {
-            return $parameter->getDefaultValue();
-        }
-
-        if ($parameter->isVariadic()) {
-            return [];
-        }
-
-        $this->unresolvablePrimitive($parameter);
-    }
-
-    /**
-     * Resolve a class based dependency from the container.
-     *
-     * @param \ReflectionParameter $parameter
-     * @return mixed
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     */
-    protected function resolveClass(ReflectionParameter $parameter)
-    {
-        if (
-            static::DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING
-            && $parameter->isDefaultValueAvailable()
-            && \is_string($class = Util::getParameterClassName($parameter))
-            && !$this->bound($class)
-        ) {
-            return $parameter->getDefaultValue();
-        }
-
-        try {
-            return $parameter->isVariadic()
-                ? $this->resolveVariadicClass($parameter)
-                : $this->make((string)($class ?? Util::getParameterClassName($parameter)));
-        } catch (BindingResolutionException $e) {
-            // If we can not resolve the class instance, we will check to see if the value
-            // is optional, and if it is we will return the optional parameter value as
-            // the value of the dependency, similarly to how we do this with scalars.
-            if ($parameter->isDefaultValueAvailable()) {
-                return $parameter->getDefaultValue();
-            }
-
-            if ($parameter->isVariadic()) {
-                return [];
-            }
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Resolve a class based variadic dependency from the container.
-     *
-     * @param \ReflectionParameter $parameter
-     * @return mixed
-     */
-    protected function resolveVariadicClass(ReflectionParameter $parameter)
-    {
-        return $this->make((string)Util::getParameterClassName($parameter));
-    }
-
-    /**
-     * Throw an exception that the concrete is not instantiable.
-     *
-     * @param string $concrete
-     * @return void
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     */
-    protected function notInstantiable($concrete)
-    {
-        throw new BindingResolutionException('Target [' . $concrete . '] is not instantiable.');
-    }
-
-    /**
-     * Throw an exception for an unresolvable primitive.
-     *
-     * @param \ReflectionParameter $parameter
-     * @return void
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     */
-    protected function unresolvablePrimitive(ReflectionParameter $parameter)
-    {
-        $message = 'Unresolvable dependency resolving [$parameter] in class ' .
-            $parameter->getDeclaringClass()->getName();
-
-        throw new BindingResolutionException($message);
+        return new $concrete(...$parameters);
     }
 
     /**

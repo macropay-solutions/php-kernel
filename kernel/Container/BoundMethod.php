@@ -46,6 +46,9 @@ class BoundMethod
         return static::$precompiledAutoWiringClassMethodParametersMap;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public static function getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
         string $class,
         string $method
@@ -73,7 +76,7 @@ class BoundMethod
     /**
      * Call the given Closure / class@method and inject its dependencies.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @param callable|array|string $callback
      * @param array $parameters
      * @param string|null $defaultMethod
@@ -111,7 +114,7 @@ class BoundMethod
      * @throws BindingResolutionException
      */
     public static function getConstructDependencies(
-        \MacropaySolutions\Kernel\Container\Container $container,
+        Container $container,
         string $classFqn,
         array $assocArrayParameters = []
     ): array {
@@ -121,7 +124,7 @@ class BoundMethod
     /**
      * Call a string reference to a class using Class@method syntax.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @param string $target
      * @param array $parameters
      * @param string|null $defaultMethod
@@ -153,7 +156,7 @@ class BoundMethod
     /**
      * Call a method that has been bound to the container.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @param callable $callback
      * @param mixed $default
      * @return mixed
@@ -192,7 +195,7 @@ class BoundMethod
     /**
      * Get all dependencies for a given method.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @param callable|string $callback
      * @param array $parameters
      * @return array
@@ -274,23 +277,6 @@ class BoundMethod
         return static::$classesFqnsToCacheForAutowire;
     }
 
-    /**
-     * Get the proper reflection instance for the given callback.
-     *
-     * @param callable|string $callback
-     * @return \ReflectionFunctionAbstract
-     *
-     * @throws \ReflectionException
-     */
-    protected static function getCallReflector($callback)
-    {
-        $callback = static::getPreparedCallback($callback);
-
-        return is_array($callback)
-            ? new ReflectionMethod($callback[0], $callback[1])
-            : new ReflectionFunction($callback);
-    }
-
     protected static function getPreparedCallback(object|string|array $callback): \Closure|string|array
     {
         if (is_string($callback) && str_contains($callback, '::')) {
@@ -316,7 +302,7 @@ class BoundMethod
      *   ]
      */
     protected static function addDependencyWithoutReflectionForCallParameter(
-        \MacropaySolutions\Kernel\Container\Container $container,
+        Container $container,
         array &$parameters,
         array &$dependencies,
         string $name,
@@ -387,7 +373,7 @@ class BoundMethod
     /**
      * Get the dependency for the given call parameter.
      *
-     * @param \MacropaySolutions\Kernel\Container\Container $container
+     * @param Container $container
      * @param \ReflectionParameter $parameter
      * @param array $parameters
      * @param array $dependencies
