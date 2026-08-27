@@ -55,7 +55,7 @@ class BoundMethod
                 string $class,
                 string $method
             ): array {
-                if (!\in_array($method, \get_class_methods($class) ?? [], true)) {
+                if (!\class_exists($class) || !\in_array($method, \get_class_methods($class) ?? [], true)) {
                     return [];
                 }
 

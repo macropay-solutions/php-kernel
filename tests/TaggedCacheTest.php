@@ -1,6 +1,6 @@
 <?php
 
-namespace MacropaySolutions\KernelDev\Tests\Cache;
+namespace MacropaySolutions\KernelDev\Tests;
 
 use MacropaySolutions\Kernel\Cache\ArrayStore;
 use MacropaySolutions\Kernel\Cache\NullStore;
