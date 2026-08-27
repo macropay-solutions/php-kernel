@@ -30,6 +30,7 @@ use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 /**
  * @property-read ?object a manages attributes only. DO NOT STORE THIS IN EXTERNAL VARIABLES!
  * @property-read ?object r manages relations only. DO NOT STORE THIS IN EXTERNAL VARIABLES!
+ *  DO NOT ADD PROPERTY HOOKS IN THIS CLASS TO ALLOW OBJECT RECONSTRUCTION AFTER DESERIALIZATION!
  */
 abstract class Model implements
     Arrayable,
