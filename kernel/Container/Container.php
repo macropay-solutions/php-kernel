@@ -1009,9 +1009,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function build(\Closure|string $concrete, array $parameters = []): mixed
     {
-        // If the concrete type is actually a Closure, we will just execute it and
-        // hand back the results of the functions, which allows functions to be
-        // used as resolvers for more fine-tuned resolution of these objects.
         if ($concrete instanceof Closure) {
             return $concrete($this, $parameters);
         }
@@ -1028,19 +1025,25 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.');
         }
 
-        $parameters = (
+        BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
+
+        if (
             [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
                 \ltrim($concrete, '\\'),
                 '__construct'
             )
-        ) ? [] : ($parameters === [] || !\array_is_list($parameters) ?
-            \array_values(BoundMethod::getConstructDependencies(
+        ) {
+            return new $concrete();
+        }
+
+        if ($parameters === [] || !\array_is_list($parameters)) {
+            return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
                 $this,
                 $concrete,
                 $parameters
-            )) : $parameters);
+            )));
+        }
 
-        BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
 
         return new $concrete(...$parameters);
     }

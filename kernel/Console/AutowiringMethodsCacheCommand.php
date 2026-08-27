@@ -284,8 +284,11 @@ class AutowiringMethodsCacheCommand extends Command
                 \MacropaySolutions\Kernel\Auth\Listeners\SendEmailVerificationNotification::class,
             ] as $class
         ) {
-            if (\class_exists($class)) {
-                $map[$class] = []; // __construct is implicit
+            try {
+                if (\class_exists($class) && (new \ReflectionClass($class))->isInstantiable()) {
+                    $map[$class] = []; // __construct is implicit
+                }
+            } catch (\Throwable) {
             }
         }
 
@@ -293,43 +296,62 @@ class AutowiringMethodsCacheCommand extends Command
             $map[$provider::class] = ['boot'];
         }
 
-        if ($this->app instanceof \MacropaySolutions\Framework\Application) {
-            $globalMiddleware = ($frameworkReflector = new \ReflectionClass($this->app))
-                ->getProperty('middleware')
-                ->getValue($this->app);
+        $globalMiddleware = ($frameworkReflector = new \ReflectionClass($this->app))
+            ->getProperty('middleware')
+            ->getValue($this->app);
 
-            foreach ($globalMiddleware as $middleware) {
-                if (\is_string($middleware) && \class_exists($middleware)) {
+        foreach ($globalMiddleware as $middleware) {
+            try {
+                if (
+                    \is_string($middleware)
+                    && \class_exists($middleware)
+                    && (new \ReflectionClass($middleware))->isInstantiable()
+                ) {
                     $class = \ltrim($middleware, '\\');
                     $map[$class] = \array_unique(\array_merge($map[$class] ?? [], ['handle']));
                 }
+            } catch (\Throwable) {
             }
+        }
 
-            $routeMiddleware = $frameworkReflector->getProperty('routeMiddleware')->getValue($this->app);
+        $routeMiddleware = $frameworkReflector->getProperty('routeMiddleware')->getValue($this->app);
 
-            foreach ($this->app->router->getAllRoutes() as $route) {
-                if (isset($route['action']['middleware'])) {
-                    foreach ((array)$route['action']['middleware'] as $middleware) {
-                        // Strip parameters (e.g. 'auth:api' -> 'auth')
-                        $name = \strtok($middleware, ':');
+        foreach ($this->app->router->getAllRoutes() as $route) {
+            if (isset($route['action']['middleware'])) {
+                foreach ((array)$route['action']['middleware'] as $middleware) {
+                    // Strip parameters (e.g. 'auth:api' -> 'auth')
+                    $name = \strtok($middleware, ':');
 
-                        $resolved = $routeMiddleware[$name] ?? $name;
+                    $resolved = $routeMiddleware[$name] ?? $name;
 
-                        foreach ((array) $resolved as $class) {
-                            if (\is_string($class) && \class_exists($class)) {
+                    foreach ((array) $resolved as $class) {
+                        try {
+                            if (
+                                \is_string($class)
+                                && \class_exists($class)
+                                && (new \ReflectionClass($class))->isInstantiable()
+                            ) {
                                 $class = \ltrim($class, '\\');
                                 $map[$class] = \array_unique(\array_merge($map[$class] ?? [], ['handle']));
                             }
+                        } catch (\Throwable) {
                         }
                     }
                 }
+            }
 
-                if (isset($route['action']['uses'])) {
-                    $parts = \explode('@', $route['action']['uses']);
-                    $controller = \reset($parts);
-                    $method = \next($parts);
+            if (isset($route['action']['uses'])) {
+                $parts = \explode('@', $route['action']['uses']);
+                $controller = \reset($parts);
+                $method = \next($parts);
 
-                    if (\is_string($controller) && $controller !== 'Closure' && \class_exists($controller)) {
+                try {
+                if (
+                    \is_string($controller)
+                    && $controller !== 'Closure'
+                    && \class_exists($controller)
+                    && (new \ReflectionClass($controller))->isInstantiable()
+                ) {
                         if (!\is_string($method) || $method === '') {
                             $method = '__invoke';
                         }
@@ -337,6 +359,7 @@ class AutowiringMethodsCacheCommand extends Command
                         $map[$controller = \ltrim($controller, '\\')] =
                             \array_unique(\array_merge($map[$controller] ?? [], [$method]));
                     }
+                } catch (\Throwable) {
                 }
             }
         }

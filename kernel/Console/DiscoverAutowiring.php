@@ -109,19 +109,24 @@ class DiscoverAutowiring
                     static::classFromFile($splFileInfo, $basePath) :
                     \ltrim($splFileInfo, '\\');
                 $missingMethods = \array_diff_key($methods, $classMethodMap[$classFqn] ?? []);
+
                 if ([] === $missingMethods) {
                     continue;
                 }
+
                 try {
                     $reflectionClass = new ReflectionClass($classFqn);
                 } catch (\Throwable) {
                     continue;
                 }
+
                 if (!$reflectionClass->isInstantiable()) {
                     continue;
                 }
+
                 $classMethodMap[$classFqn]['__construct'] ??= [];
                 $all = isset($methods['*']);
+
                 foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                     if (
                         !isset($missingMethods[$methodName = $method->getName()])
@@ -138,6 +143,7 @@ class DiscoverAutowiring
                             self::getParameterDetails($reflectionParameter);
                     }
                 }
+
                 /** avoid polluting cache with dead strings */
                 if (isset($bindings[$classFqn]) || isset($bindings[$app->getAlias($classFqn)])) {
                     unset($classMethodMap[$classFqn]['__construct']);
