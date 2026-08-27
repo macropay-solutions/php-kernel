@@ -1044,7 +1044,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             )));
         }
 
-
         return new $concrete(...$parameters);
     }
 
