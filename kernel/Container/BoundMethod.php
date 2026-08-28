@@ -54,7 +54,7 @@ class BoundMethod
         string $method
     ): array {
         return Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP)[$class][$method] ??
-            (static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ??= (function (
+            (static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ??= (static function (
                 string $class,
                 string $method
             ): array {

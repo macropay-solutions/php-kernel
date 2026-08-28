@@ -1036,15 +1036,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             return new $concrete();
         }
 
-        if ($parameters === [] || !\array_is_list($parameters)) {
-            return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
-                $this,
-                $concrete,
-                $parameters
-            )));
+        if ($parameters !== [] && \array_is_list($parameters)) {
+            return new $concrete(...$parameters);
         }
 
-        return new $concrete(...$parameters);
+        return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
+            $this,
+            $concrete,
+            $parameters
+        )));
     }
 
     /**
