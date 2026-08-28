@@ -102,9 +102,11 @@ class BoundMethod
             }
         }
 
-        return static::callBoundMethod($container, $callback, function () use ($container, $callback, $parameters) {
-            return $callback(...array_values(static::getMethodDependencies($container, $callback, $parameters)));
-        });
+        return static::callBoundMethod(
+            $container,
+            $callback,
+            static fn() => $callback(...array_values(static::getMethodDependencies($container, $callback, $parameters)))
+        );
     }
 
     /**

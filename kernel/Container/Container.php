@@ -311,7 +311,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     {
 //        $this->bindings = [
 //            \MacropaySolutions\Kernel\Http\Request::class => [
-//                'concrete' => function (
+//                'concrete' => static function (
 //                     \MacropaySolutions\Kernel\Contracts\Container\Container $container,
 //                     array $parameters = []
 //                ): \MacropaySolutions\Kernel\Http\Request {
@@ -335,7 +335,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function getClosure($abstract, $concrete)
     {
-        return function ($container, $parameters = []) use ($abstract, $concrete) {
+        return static function ($container, $parameters = []) use ($abstract, $concrete) {
             if ($abstract == $concrete) {
                 return $container->build($concrete);
             }
@@ -648,7 +648,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function refresh($abstract, $target, $method)
     {
-        return $this->rebinding($abstract, function ($app, $instance) use ($target, $method) {
+        return $this->rebinding($abstract, static function ($app, $instance) use ($target, $method) {
             $target->{$method}($instance);
         });
     }
@@ -1497,7 +1497,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function offsetSet($offset, $value): void
     {
-        $this->bind($offset, $value instanceof Closure ? $value : fn() => $value);
+        $this->bind($offset, $value instanceof Closure ? $value : static fn() => $value);
     }
 
     /**
