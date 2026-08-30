@@ -938,24 +938,23 @@ abstract class Model implements
             return $this->newQueryWithoutRelationships()->{$method}($column, $amount, $extra);
         }
 
-        $this->{$column} = \extension_loaded('bcmath') ? \bcadd(
+        $this->{$column} = \bcadd(
             $s1 = (string)$this->{$column},
             $s2 = (string)(
             $method === 'increment'
                 ? $amount
                 : \bcmul(
-                (string)$amount,
-                '-1',
-                \max(0, \strlen((string)\strrchr((string)$amount, '.')) - 1)
-            )
+                    (string)$amount,
+                    '-1',
+                    $p = \max(0, \strlen((string)\strrchr((string)$amount, '.')) - 1)
+                )
             ),
             \max(
                 0,
                 \strlen((string)\strrchr($s1, '.')) - 1,
-                \strlen((string)\strrchr($s2, '.')) - 1
+                $p ?? \strlen((string)\strrchr($s2, '.')) - 1
             )
-        ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
-
+        );
 
         $this->forceFill($extra);
 
