@@ -939,12 +939,23 @@ abstract class Model implements
         }
 
         $this->{$column} = \extension_loaded('bcmath') ? \bcadd(
-                $s1 = (string)$this->{$column},
-                $s2 = (string)($method === 'increment' ?
-                    $amount :
-                    \bcmul((string)$amount, '-1', \strlen((string)\strrchr((string)$amount, '.')))),
-                \max(\strlen(\strrchr($s1, '.') ?: ''), \strlen((string)\strrchr($s2, '.') ?: ''))
-            ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
+            $s1 = (string)$this->{$column},
+            $s2 = (string)(
+            $method === 'increment'
+                ? $amount
+                : \bcmul(
+                (string)$amount,
+                '-1',
+                \max(0, \strlen((string)\strrchr((string) $amount, '.')) - 1)
+            )
+            ),
+            \max(
+                0,
+                \strlen((string)\strrchr($s1, '.')) - 1,
+                \strlen((string)\strrchr($s2, '.')) - 1
+            )
+        ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
+
 
         $this->forceFill($extra);
 
