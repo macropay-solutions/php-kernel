@@ -942,7 +942,7 @@ abstract class Model implements
                 $s1 = (string)$this->{$column},
                 $s2 = (string)($method === 'increment' ?
                     $amount :
-                    \bcmul((string)$amount, '-1', \strlen((string)\strrchr($amount, '.')))),
+                    \bcmul((string)$amount, '-1', \strlen((string)\strrchr((string)$amount, '.')))),
                 \max(\strlen(\strrchr($s1, '.') ?: ''), \strlen((string)\strrchr($s2, '.') ?: ''))
             ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
 
