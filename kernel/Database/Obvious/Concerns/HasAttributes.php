@@ -430,11 +430,8 @@ trait HasAttributes
     /**
      * Get an attribute from the $attributes array without transformation
      * @see static::getAttributeValue
-     *
-     * @param string $key
-     * @return mixed
      */
-    protected function getAttributeFromArray($key)
+    public function getAttributeFromArray(string $key): mixed
     {
         return $this->attributes[$key] ?? null;
     }

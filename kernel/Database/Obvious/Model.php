@@ -915,40 +915,24 @@ abstract class Model implements
 
     /**
      * Increment a column's value by a given amount.
-     *
-     * @param string $column
-     * @param float|int $amount
-     * @param array $extra
-     * @return int
      */
-    protected function increment($column, $amount = 1, array $extra = [])
+    public function increment(string $column, float|int|string $amount = 1, array $extra = []): int
     {
         return $this->incrementOrDecrement($column, $amount, $extra, 'increment');
     }
 
     /**
      * Decrement a column's value by a given amount.
-     *
-     * @param string $column
-     * @param float|int $amount
-     * @param array $extra
-     * @return int
      */
-    protected function decrement($column, $amount = 1, array $extra = [])
+    public function decrement(string $column, float|int|string $amount = 1, array $extra = []): int
     {
         return $this->incrementOrDecrement($column, $amount, $extra, 'decrement');
     }
 
     /**
      * Run the increment or decrement method on the model.
-     *
-     * @param string $column
-     * @param float|int $amount
-     * @param array $extra
-     * @param string $method
-     * @return int
      */
-    protected function incrementOrDecrement($column, $amount, $extra, $method)
+    protected function incrementOrDecrement(string $column, float|int|string $amount, array $extra, string $method): int
     {
         if (!$this->exists) {
             return $this->newQueryWithoutRelationships()->{$method}($column, $amount, $extra);
@@ -956,7 +940,9 @@ abstract class Model implements
 
         $this->{$column} = \extension_loaded('bcmath') ? \bcadd(
                 $s1 = (string)$this->{$column},
-                $s2 = (string)($method === 'increment' ? $amount : $amount * -1),
+                $s2 = (string)($method === 'increment' ?
+                    $amount :
+                    \bcmul((string)$amount, '-1', \strlen(\strrchr($amount, '.')))),
                 \max(\strlen(\strrchr($s1, '.') ?: ''), \strlen(\strrchr($s2, '.') ?: ''))
             ) : $this->{$column} + ($method === 'increment' ? $amount : $amount * -1);
 
@@ -1030,13 +1016,8 @@ abstract class Model implements
 
     /**
      * Increment a column's value by a given amount without raising any events.
-     *
-     * @param string $column
-     * @param float|int $amount
-     * @param array $extra
-     * @return int
      */
-    protected function incrementQuietly($column, $amount = 1, array $extra = [])
+    public function incrementQuietly(string $column, float|int|string $amount = 1, array $extra = []): int
     {
         return static::withoutEvents(function () use ($column, $amount, $extra) {
             return $this->incrementOrDecrement($column, $amount, $extra, 'increment');
@@ -1045,13 +1026,8 @@ abstract class Model implements
 
     /**
      * Decrement a column's value by a given amount without raising any events.
-     *
-     * @param string $column
-     * @param float|int $amount
-     * @param array $extra
-     * @return int
      */
-    protected function decrementQuietly($column, $amount = 1, array $extra = [])
+    public function decrementQuietly(string $column, float|int|string $amount = 1, array $extra = []): int
     {
         return static::withoutEvents(function () use ($column, $amount, $extra) {
             return $this->incrementOrDecrement($column, $amount, $extra, 'decrement');
@@ -2443,30 +2419,6 @@ abstract class Model implements
     {
         if ($this->isRelationInSegregatedRelationsMap($method, false)) {
             return $this->callSegregatedRelation($method, $parameters);
-        }
-
-        $lowerMethod = \strtolower($method);
-
-        if (
-            \in_array(
-                $lowerMethod,
-                ['increment', 'decrement', 'incrementquietly', 'decrementquietly', 'getattributefromarray'],
-                true
-            )
-        ) {
-            return $this->$method(...$parameters);
-        }
-
-        if (\in_array($lowerMethod, ['incrementeach', 'decrementeach'], true)) {
-            /** \MacropaySolutions\RestWizard\Models\BaseModel::incrementBulk can be used instead */
-            throw new \BadMethodCallException(\sprintf(
-                'Call to unscoped method %s::%s(). Use $model->newQuery()->getQuery()->%s()' .
-                    ' for unscoped or $model->newQuery()->%s() for scoped behavior.',
-                static::class,
-                $method,
-                $method,
-                $method,
-            ));
         }
 
         throw new \BadMethodCallException(
