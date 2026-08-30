@@ -946,7 +946,7 @@ abstract class Model implements
                 : \bcmul(
                 (string)$amount,
                 '-1',
-                \max(0, \strlen((string)\strrchr((string) $amount, '.')) - 1)
+                \max(0, \strlen((string)\strrchr((string)$amount, '.')) - 1)
             )
             ),
             \max(
