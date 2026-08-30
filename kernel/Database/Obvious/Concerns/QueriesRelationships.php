@@ -2,13 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
-use BadMethodCallException;
 use Closure;
-use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
-use MacropaySolutions\Kernel\Database\Obvious\Collection;
-use MacropaySolutions\Kernel\Database\Obvious\RelationNotFoundException;
-use MacropaySolutions\Kernel\Database\Obvious\Relations\BelongsTo;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Relation;
 use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
 use MacropaySolutions\Kernel\Database\Query\Expression;
@@ -254,67 +249,6 @@ trait QueriesRelationships
                 $query->where($column, $operator, $value);
             }
         });
-    }
-
-    /**
-     * Add a "belongs to" relationship where clause to the query.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model|Collection<\MacropaySolutions\Kernel\Database\Obvious\Model> $related
-     * @param string|null $relationshipName
-     * @param string $boolean
-     * @return $this
-     *
-     * @throws \MacropaySolutions\Kernel\Database\Obvious\RelationNotFoundException
-     */
-    public function whereBelongsTo($related, $relationshipName = null, $boolean = 'and')
-    {
-        if (!$related instanceof Collection) {
-            $relatedCollection = $related->newCollection([$related]);
-        } else {
-            $relatedCollection = $related;
-
-            $related = $relatedCollection->first();
-        }
-
-        if ($relatedCollection->isEmpty()) {
-            throw new InvalidArgumentException('Collection given to whereBelongsTo method may not be empty.');
-        }
-
-        if ($relationshipName === null) {
-            $relationshipName = Str::camel(class_basename($related));
-        }
-
-        try {
-            $relationship = $this->model->callSegregatedRelation($relationshipName);
-        } catch (BadMethodCallException) {
-            throw RelationNotFoundException::make($this->model, $relationshipName);
-        }
-
-        if (!$relationship instanceof BelongsTo) {
-            throw RelationNotFoundException::make($this->model, $relationshipName, BelongsTo::class);
-        }
-
-        $this->whereIn(
-            $relationship->getQualifiedForeignKeyName(),
-            $relatedCollection->pluck($relationship->getOwnerKeyName())->toArray(),
-            $boolean,
-        );
-
-        return $this;
-    }
-
-    /**
-     * Add an "BelongsTo" relationship with an "or where" clause to the query.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $related
-     * @param string|null $relationshipName
-     * @return $this
-     *
-     * @throws \RuntimeException
-     */
-    public function orWhereBelongsTo($related, $relationshipName = null)
-    {
-        return $this->whereBelongsTo($related, $relationshipName, 'or');
     }
 
     /**

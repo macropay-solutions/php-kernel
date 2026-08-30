@@ -2122,69 +2122,6 @@ class Builder implements BuilderContract
     }
 
     /**
-     * Handles dynamic "where" clauses to the query.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return $this
-     */
-    public function dynamicWhere($method, $parameters)
-    {
-        $finder = substr($method, 5);
-
-        $segments = preg_split(
-            '/(And|Or)(?=[A-Z])/',
-            $finder,
-            -1,
-            PREG_SPLIT_DELIM_CAPTURE
-        );
-
-        // The connector variable will determine which connector will be used for the
-        // query condition. We will change it as we come across new boolean values
-        // in the dynamic method strings, which could contain a number of these.
-        $connector = 'and';
-
-        $index = 0;
-
-        foreach ($segments as $segment) {
-            // If the segment is not a boolean connector, we can assume it is a column's name
-            // and we will add it to the query as a new constraint as a where clause, then
-            // we can keep iterating through the dynamic method string's segments again.
-            if ($segment !== 'And' && $segment !== 'Or') {
-                $this->addDynamic($segment, $connector, $parameters, $index);
-
-                $index++;
-            } else {
-                // Otherwise, we will store the connector so we know how the next where clause we
-                // find in the query should be connected to the previous ones, meaning we will
-                // have the proper boolean connector to connect the next where clause found.
-                $connector = $segment;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add a single dynamic where clause statement to the query.
-     *
-     * @param string $segment
-     * @param string $connector
-     * @param array $parameters
-     * @param int $index
-     * @return void
-     */
-    protected function addDynamic($segment, $connector, $parameters, $index)
-    {
-        // Once we have parsed out the columns and formatted the boolean operators we
-        // are ready to add it to this query as a where clause just like any other
-        // clause on the query. Then we'll increment the parameter index values.
-        $bool = strtolower($connector);
-
-        $this->where(Str::snake($segment), '=', $parameters[$index], $bool);
-    }
-
-    /**
      * Add a "where fulltext" clause to the query.
      *
      * @param string|string[] $columns
@@ -4268,10 +4205,6 @@ class Builder implements BuilderContract
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);
-        }
-
-        if (str_starts_with($method, 'where')) {
-            return $this->dynamicWhere($method, $parameters);
         }
 
         static::throwBadMethodCallException($method);

@@ -24,8 +24,6 @@ use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
  * @property-read HigherOrderBuilderProxy $orWhere
  * @property-read HigherOrderBuilderProxy $whereNot
  * @property-read HigherOrderBuilderProxy $orWhereNot
- *
- * @mixin \MacropaySolutions\Kernel\Database\Query\Builder
  */
 class Builder implements BuilderContract
 {

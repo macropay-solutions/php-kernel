@@ -2469,34 +2469,9 @@ abstract class Model implements
             ));
         }
 
-        if (
-            Str::startsWith($method, 'through') &&
-            $this->isRelationInSegregatedRelationsMap(
-                $relationMethod = Str::of($method)->after('through')->lcfirst()->toString()
-            )
-        ) {
-            return $this->through($relationMethod);
-        }
-
-        if (!$this->exists) {
-            return $this->forwardCallTo($this->newQuery(), $method, $parameters);
-        }
-
         throw new \BadMethodCallException(
             \sprintf('Call to undefined method %s::%s().', static::class, $method)
         );
-    }
-
-    /**
-     * Handle dynamic static method calls into the model.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     */
-    public static function __callStatic($method, $parameters)
-    {
-        return (new static())->$method(...$parameters);
     }
 
     /**
