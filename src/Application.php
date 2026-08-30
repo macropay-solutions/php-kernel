@@ -254,14 +254,6 @@ class Application extends Container implements ApplicationContract
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function registerDeferredProvider($provider, $service = null): void
-    {
-        $this->register($provider);
-    }
-
     public function isBooted(): bool
     {
         return $this->booted;
@@ -1342,30 +1334,9 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritDoc
      */
-    public function registerConfiguredProviders(): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function resolveProvider($provider)
     {
         return new $provider($this);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function booting($callback): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function booted($callback): void
-    {
     }
 
     /**
@@ -1392,13 +1363,6 @@ class Application extends Container implements ApplicationContract
     public function hasBeenBootstrapped(): bool
     {
         return $this->hasBeenBootstrapped;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function loadDeferredProviders(): void
-    {
     }
 
     /**

@@ -29,15 +29,6 @@ trait SoftDeletes
     }
 
     /**
-     * Initialize the soft deleting trait for an instance.
-     *
-     * @return void
-     */
-    public function initializeSoftDeletes()
-    {
-    }
-
-    /**
      * Force a hard delete on a soft deleted model.
      *
      * @return bool|null

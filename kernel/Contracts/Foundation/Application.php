@@ -121,13 +121,6 @@ interface Application extends Container
     public function isDownForMaintenance();
 
     /**
-     * Register all the configured providers.
-     *
-     * @return void
-     */
-    public function registerConfiguredProviders();
-
-    /**
      * Register a service provider with the application.
      *
      * @param \MacropaySolutions\Kernel\Support\ServiceProvider|string $provider
@@ -135,15 +128,6 @@ interface Application extends Container
      * @return \MacropaySolutions\Kernel\Support\ServiceProvider
      */
     public function register($provider, $force = false);
-
-    /**
-     * Register a deferred provider and service.
-     *
-     * @param string $provider
-     * @param string|null $service
-     * @return void
-     */
-    public function registerDeferredProvider($provider, $service = null);
 
     /**
      * Resolve a service provider instance from the class name.
@@ -159,22 +143,6 @@ interface Application extends Container
      * @return void
      */
     public function boot();
-
-    /**
-     * Register a new boot listener.
-     *
-     * @param callable $callback
-     * @return void
-     */
-    public function booting($callback);
-
-    /**
-     * Register a new "booted" listener.
-     *
-     * @param callable $callback
-     * @return void
-     */
-    public function booted($callback);
 
     /**
      * Run the given array of bootstrap classes.
@@ -214,13 +182,6 @@ interface Application extends Container
      * @return bool
      */
     public function hasBeenBootstrapped();
-
-    /**
-     * Load and boot all the remaining deferred providers.
-     *
-     * @return void
-     */
-    public function loadDeferredProviders();
 
     /**
      * Set the current application locale.
