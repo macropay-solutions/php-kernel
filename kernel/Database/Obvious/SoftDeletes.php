@@ -9,8 +9,8 @@ use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
  * @method static Builder|QueryBuilder onlyTrashed()
  * @method static Builder|QueryBuilder withoutTrashed()
  * @method static int restore()
- * @method static Model|Builder restoreOrCreate(array $attributes = [], array $values = [])
- * @method static Model|Builder createOrRestore(array $attributes = [], array $values = [])
+ * @method static Model restoreOrCreate(array $attributes = [], array $values = [])
+ * @method static Model createOrRestore(array $attributes = [], array $values = [])
  */
 trait SoftDeletes
 {
