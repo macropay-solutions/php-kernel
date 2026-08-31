@@ -2,6 +2,8 @@
 
 namespace MacropaySolutions\Kernel\Support;
 
+use InvalidArgumentException;
+
 /**
  * ProcessUtils is a bunch of utility methods.
  *
@@ -11,12 +13,13 @@ class ProcessUtils
 {
     /**
      * Escapes a string to be used as a shell argument.
-     *
-     * @param string $argument
-     * @return string
      */
-    public static function escapeArgument($argument)
+    public static function escapeArgument(string $argument): string
     {
+        if (\str_contains($argument, "\0")) {
+            throw new InvalidArgumentException('NUL bytes are not allowed in shell arguments.');
+        }
+
         // Fix for PHP bug #43784 escapeshellarg removes % from given string
         // Fix for PHP bug #49446 escapeshellarg doesn't work on Windows
         // @see https://bugs.php.net/bug.php?id=43784

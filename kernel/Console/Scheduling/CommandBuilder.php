@@ -50,7 +50,9 @@ class CommandBuilder
 
         $redirect = $event->shouldAppendOutput ? ' >> ' : ' > ';
 
-        $finished = Application::formatCommandString('schedule:finish') . ' "' . $event->mutexName() . '"';
+        $finished = Application::formatCommandString('schedule:finish') . ' ' . ProcessUtils::escapeArgument(
+            $event->mutexName()
+        );
 
         if (windows_os()) {
             return 'start /b cmd /v:on /c "(' . $event->command . ' & ' . $finished . ' ^!ERRORLEVEL^!)' . $redirect .
@@ -73,6 +75,12 @@ class CommandBuilder
      */
     protected function ensureCorrectUser(Event $event, $command)
     {
-        return $event->user && !windows_os() ? 'sudo -u ' . $event->user . ' -- sh -c \'' . $command . '\'' : $command;
+        if ('' === (string)$event->user || windows_os()) {
+            return $command;
+        }
+
+        return 'sudo -u ' . ProcessUtils::escapeArgument($event->user) . ' -- sh -c ' . ProcessUtils::escapeArgument(
+            $command
+        );
     }
 }

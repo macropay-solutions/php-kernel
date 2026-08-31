@@ -54,10 +54,8 @@ class Event
 
     /**
      * The user the command should run as.
-     *
-     * @var string|null
      */
-    public $user;
+    public ?string $user = null;
 
     /**
      * The list of environments the command should run under.
@@ -117,10 +115,8 @@ class Event
 
     /**
      * The location that output should be sent to.
-     *
-     * @var string
      */
-    public $output = '/dev/null';
+    public string $output = '/dev/null';
 
     /**
      * Indicates whether output should be appended.
@@ -199,10 +195,8 @@ class Event
 
     /**
      * Get the default output depending on the OS.
-     *
-     * @return string
      */
-    public function getDefaultOutput()
+    public function getDefaultOutput(): string
     {
         return (DIRECTORY_SEPARATOR === '\\') ? 'NUL' : '/dev/null';
     }
@@ -443,12 +437,8 @@ class Event
 
     /**
      * Send the output of the command to a given location.
-     *
-     * @param string $location
-     * @param bool $append
-     * @return $this
      */
-    public function sendOutputTo($location, $append = false)
+    public function sendOutputTo(string $location, bool $append = false): static
     {
         $this->output = $location;
 
@@ -525,7 +515,7 @@ class Event
      */
     protected function ensureOutputIsBeingCaptured()
     {
-        if (is_null($this->output) || $this->output == $this->getDefaultOutput()) {
+        if ($this->output === '' || $this->output == $this->getDefaultOutput()) {
             $this->sendOutputTo(storage_path('logs/schedule-' . sha1($this->mutexName()) . '.log'));
         }
     }
@@ -986,10 +976,8 @@ class Event
 
     /**
      * Get the mutex name for the scheduled command.
-     *
-     * @return string
      */
-    public function mutexName()
+    public function mutexName(): string
     {
         $mutexNameResolver = $this->mutexNameResolver;
 

@@ -92,20 +92,16 @@ class Application extends SymfonyApplication implements ApplicationContract
 
     /**
      * Determine the proper PHP executable.
-     *
-     * @return string
      */
-    public static function phpBinary()
+    public static function phpBinary(): string
     {
         return ProcessUtils::escapeArgument((new PhpExecutableFinder())->find(false));
     }
 
     /**
      * Determine the proper run executable.
-     *
-     * @return string
      */
-    public static function runBinary()
+    public static function runBinary(): string
     {
         return ProcessUtils::escapeArgument( 'run');
     }
