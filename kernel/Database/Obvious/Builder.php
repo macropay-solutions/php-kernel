@@ -58,18 +58,20 @@ class Builder implements BuilderContract
 
     /**
      * All the globally registered builder macros.
+     * @var array<string, callable|array{c: callable}>
      */
     protected static array $macros = [];
 
     /**
-     * All the locally registered builder macros.
+     * All the locally registered builder extensions.
+     * @var array<string, callable>
      */
-    protected array $localMacros = [];
+    protected array $extensions = [];
 
     /**
      * A replacement for the typical delete function.
      *
-     * @var \Closure
+     * @var callable
      */
     protected $onDelete;
 
@@ -1306,11 +1308,8 @@ class Builder implements BuilderContract
 
     /**
      * Register a replacement for the default delete function.
-     *
-     * @param \Closure $callback
-     * @return void
      */
-    public function onDelete(Closure $callback)
+    public function onDelete(callable $callback): void
     {
         $this->onDelete = $callback;
     }
@@ -1906,36 +1905,19 @@ class Builder implements BuilderContract
     }
 
     /**
-     * Get the given macro by name.
-     *
-     * @param string $name
-     * @return \Closure
+     * Get the given extension by name.
      */
-    public function getMacro($name)
+    public function getExtension(string $name): callable
     {
-        return Arr::get($this->localMacros, $name);
+        return Arr::get($this->extensions, $name);
     }
 
     /**
-     * Checks if a macro is registered.
-     *
-     * @param string $name
-     * @return bool
+     * Checks if an extension is registered.
      */
-    public function hasMacro($name)
+    public function hasExtension(string $name): bool
     {
-        return isset($this->localMacros[$name]);
-    }
-
-    /**
-     * Get the given global macro by name.
-     *
-     * @param string $name
-     * @return \Closure
-     */
-    public static function getGlobalMacro($name)
-    {
-        return Arr::get(static::$macros, $name);
+        return isset($this->extensions[$name]);
     }
 
     /**
@@ -1983,9 +1965,9 @@ class Builder implements BuilderContract
         throw new Exception("Property [{$key}] does not exist on the Obvious builder instance.");
     }
 
-    public function addLocalMacro(string $macro, \Closure $callback): void
+    public function addExtension(string $name, callable $callback): void
     {
-        $this->localMacros[$macro] = $callback;
+        $this->extensions[$name] = $callback;
     }
 
     /**
@@ -1998,17 +1980,17 @@ class Builder implements BuilderContract
      */
     public function __call($method, $parameters)
     {
-        if ($this->hasMacro($method)) {
-            array_unshift($parameters, $this);
+        if ($this->hasExtension($method)) {
+            \array_unshift($parameters, $this);
 
-            return $this->localMacros[$method](...$parameters);
-        }
-
-        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
-            self::macro($method, static::$macros[$method]['c']());
+            return $this->extensions[$method](...$parameters);
         }
 
         if (static::hasGlobalMacro($method)) {
+            if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
+                self::macro($method, static::$macros[$method]['c']());
+            }
+
             $callable = static::$macros[$method];
 
             if ($callable instanceof Closure) {
@@ -2028,7 +2010,7 @@ class Builder implements BuilderContract
     /**
      * Register a custom macro.
      */
-    private static function macro(string $name, callable|object $macro): void
+    private static function macro(string $name, callable $macro): void
     {
         if (!$macro instanceof Closure) {
             static::$macros[$name] = $macro;
@@ -2055,12 +2037,12 @@ class Builder implements BuilderContract
      */
     public static function __callStatic($method, $parameters)
     {
-        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
-            self::macro($method, static::$macros[$method]['c']());
-        }
-
         if (!static::hasGlobalMacro($method)) {
             static::throwBadMethodCallException($method);
+        }
+
+        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
+            self::macro($method, static::$macros[$method]['c']());
         }
 
         return static::$macros[$method](...$parameters);

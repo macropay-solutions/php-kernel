@@ -10,12 +10,12 @@ class SoftDeletingScope implements Scope
      * @var string[]
      */
     protected $extensions = [
-        'Restore',
-        'RestoreOrCreate',
-        'CreateOrRestore',
-        'WithTrashed',
-        'WithoutTrashed',
-        'OnlyTrashed',
+        'restore',
+        'restoreOrCreate',
+        'createOrRestore',
+        'withTrashed',
+        'withoutTrashed',
+        'onlyTrashed',
     ];
 
     /**
@@ -39,16 +39,22 @@ class SoftDeletingScope implements Scope
     public function extend(Builder $builder)
     {
         foreach ($this->extensions as $extension) {
-            $this->{"add{$extension}"}($builder);
+            $builder->addExtension($extension, [$this, $extension]);
         }
 
-        $builder->onDelete(function (Builder $builder) {
-            $column = $this->getDeletedAtColumn($builder);
+        $builder->onDelete([$this, 'performDelete']);
+    }
 
-            return $builder->update([
-                $column => \date($builder->getModel()::DELETED_AT_FORMAT),
-            ]);
-        });
+    /**
+     * Perform the soft delete for the builder.
+     */
+    public function performDelete(Builder $builder): int
+    {
+        $column = $this->getDeletedAtColumn($builder);
+
+        return $builder->update([
+            $column => \date($builder->getModel()::DELETED_AT_FORMAT),
+        ]);
     }
 
     /**
@@ -67,106 +73,76 @@ class SoftDeletingScope implements Scope
     }
 
     /**
-     * Add the restore extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
+     * Restore a soft-deleted model instance.
      */
-    protected function addRestore(Builder $builder)
+    public function restore(Builder $builder): int
     {
-        $builder->addLocalMacro('restore', function (Builder $builder) {
-            $builder->withTrashed();
+        $builder->withTrashed();
 
-            return $builder->update([$builder->getModel()->getDeletedAtColumn() => null]);
+        return $builder->update([$builder->getModel()->getDeletedAtColumn() => null]);
+    }
+
+    /**
+     * Restore or create a model instance.
+     */
+    public function restoreOrCreate(Builder $builder, array $attributes = [], array $values = []): Model
+    {
+        $builder->withTrashed();
+
+        return tap($builder->firstOrCreate($attributes, $values), function ($instance) {
+            $instance->restore();
         });
     }
 
     /**
-     * Add the restore-or-create extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
+     * Create or restore a model instance.
      */
-    protected function addRestoreOrCreate(Builder $builder)
+    public function createOrRestore(Builder $builder, array $attributes = [], array $values = []): Model
     {
-        $builder->addLocalMacro('restoreOrCreate', function (Builder $builder, array $attributes = [], array $values = []) {
-            $builder->withTrashed();
+        $builder->withTrashed();
 
-            return tap($builder->firstOrCreate($attributes, $values), function ($instance) {
-                $instance->restore();
-            });
+        return tap($builder->createOrFirst($attributes, $values), function ($instance) {
+            $instance->restore();
         });
     }
 
     /**
-     * Add the create-or-restore extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
+     * Include soft-deleted records in the results.
      */
-    protected function addCreateOrRestore(Builder $builder)
+    public function withTrashed(Builder $builder, bool $withTrashed = true): Builder
     {
-        $builder->addLocalMacro('createOrRestore', function (Builder $builder, array $attributes = [], array $values = []) {
-            $builder->withTrashed();
+        if (!$withTrashed) {
+            return $builder->withoutTrashed();
+        }
 
-            return tap($builder->createOrFirst($attributes, $values), function ($instance) {
-                $instance->restore();
-            });
-        });
+        return $builder->withoutGlobalScope($this);
     }
 
     /**
-     * Add the with-trashed extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
+     * Exclude soft-deleted records from the results.
      */
-    protected function addWithTrashed(Builder $builder)
+    public function withoutTrashed(Builder $builder): Builder
     {
-        $builder->addLocalMacro('withTrashed', function (Builder $builder, $withTrashed = true) {
-            if (!$withTrashed) {
-                return $builder->withoutTrashed();
-            }
+        $model = $builder->getModel();
 
-            return $builder->withoutGlobalScope($this);
-        });
+        $builder->withoutGlobalScope($this)->whereNull(
+            $model->getQualifiedDeletedAtColumn()
+        );
+
+        return $builder;
     }
 
     /**
-     * Add the without-trashed extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
+     * Return only soft-deleted records.
      */
-    protected function addWithoutTrashed(Builder $builder)
+    public function onlyTrashed(Builder $builder): Builder
     {
-        $builder->addLocalMacro('withoutTrashed', function (Builder $builder) {
-            $model = $builder->getModel();
+        $model = $builder->getModel();
 
-            $builder->withoutGlobalScope($this)->whereNull(
-                $model->getQualifiedDeletedAtColumn()
-            );
+        $builder->withoutGlobalScope($this)->whereNotNull(
+            $model->getQualifiedDeletedAtColumn()
+        );
 
-            return $builder;
-        });
-    }
-
-    /**
-     * Add the only-trashed extension to the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return void
-     */
-    protected function addOnlyTrashed(Builder $builder)
-    {
-        $builder->addLocalMacro('onlyTrashed', function (Builder $builder) {
-            $model = $builder->getModel();
-
-            $builder->withoutGlobalScope($this)->whereNotNull(
-                $model->getQualifiedDeletedAtColumn()
-            );
-
-            return $builder;
-        });
+        return $builder;
     }
 }

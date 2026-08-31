@@ -314,7 +314,7 @@ trait CanBeOneOfMany
             && (
                 \str_contains(\strtolower($method), 'where')
                 || \in_array($method, ['scope', 'scopes'], true)
-                || $this->oneOfManySubQuery->hasMacro($method)
+                || $this->oneOfManySubQuery->hasExtension($method)
             )
         ) {
             $this->forwardDecoratedCallTo($this->oneOfManySubQuery, $method, $parameters);
