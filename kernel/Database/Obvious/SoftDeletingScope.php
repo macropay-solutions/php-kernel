@@ -59,11 +59,8 @@ class SoftDeletingScope implements Scope
 
     /**
      * Get the "deleted at" column for the builder.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $builder
-     * @return string
      */
-    protected function getDeletedAtColumn(Builder $builder)
+    protected function getDeletedAtColumn(Builder $builder): string
     {
         if (count((array)$builder->getQuery()->joins) > 0) {
             return $builder->getModel()->getQualifiedDeletedAtColumn();

@@ -2,12 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious;
 
-use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
-
 /**
- * @method static Builder|QueryBuilder withTrashed(bool $withTrashed = true)
- * @method static Builder|QueryBuilder onlyTrashed()
- * @method static Builder|QueryBuilder withoutTrashed()
+ * @method static Builder withTrashed(bool $withTrashed = true)
+ * @method static Builder onlyTrashed()
+ * @method static Builder withoutTrashed()
  * @method static int restore()
  * @method static Model restoreOrCreate(array $attributes = [], array $values = [])
  * @method static Model createOrRestore(array $attributes = [], array $values = [])
@@ -227,10 +225,8 @@ trait SoftDeletes
 
     /**
      * Get the name of the "deleted at" column.
-     *
-     * @return string
      */
-    public function getDeletedAtColumn()
+    public function getDeletedAtColumn(): string
     {
         return defined(static::class . '::DELETED_AT') ? static::DELETED_AT : 'deleted_at';
     }
