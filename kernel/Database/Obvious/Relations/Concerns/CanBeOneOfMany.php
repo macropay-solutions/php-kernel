@@ -313,7 +313,7 @@ trait CanBeOneOfMany
             && $return === $this
             && (
                 \str_contains(\strtolower($method), 'where')
-                || $this->oneOfManySubQuery->hasNamedScope($method)
+                || \in_array($method, ['scope', 'scopes'], true)
                 || $this->oneOfManySubQuery->hasMacro($method)
             )
         ) {

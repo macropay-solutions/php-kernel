@@ -1634,26 +1634,11 @@ abstract class Model implements
     }
 
     /**
-     * Determine if the model has a given scope.
-     *
-     * @param string $scope
-     * @return bool
+     * Override this when needed
      */
-    public function hasNamedScope($scope)
+    public static function segregatedScopesMap(): array
     {
-        return method_exists($this, 'scope' . ucfirst($scope));
-    }
-
-    /**
-     * Apply the given named scope if possible.
-     *
-     * @param string $scope
-     * @param array $parameters
-     * @return mixed
-     */
-    public function callNamedScope($scope, array $parameters = [])
-    {
-        return $this->{'scope' . ucfirst($scope)}(...$parameters);
+        return [];
     }
 
     /**

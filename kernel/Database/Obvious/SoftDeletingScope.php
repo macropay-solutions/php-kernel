@@ -74,7 +74,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addRestore(Builder $builder)
     {
-        $builder->macro('restore', function (Builder $builder) {
+        $builder->addLocalMacro('restore', function (Builder $builder) {
             $builder->withTrashed();
 
             return $builder->update([$builder->getModel()->getDeletedAtColumn() => null]);
@@ -89,7 +89,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addRestoreOrCreate(Builder $builder)
     {
-        $builder->macro('restoreOrCreate', function (Builder $builder, array $attributes = [], array $values = []) {
+        $builder->addLocalMacro('restoreOrCreate', function (Builder $builder, array $attributes = [], array $values = []) {
             $builder->withTrashed();
 
             return tap($builder->firstOrCreate($attributes, $values), function ($instance) {
@@ -106,7 +106,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addCreateOrRestore(Builder $builder)
     {
-        $builder->macro('createOrRestore', function (Builder $builder, array $attributes = [], array $values = []) {
+        $builder->addLocalMacro('createOrRestore', function (Builder $builder, array $attributes = [], array $values = []) {
             $builder->withTrashed();
 
             return tap($builder->createOrFirst($attributes, $values), function ($instance) {
@@ -123,7 +123,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addWithTrashed(Builder $builder)
     {
-        $builder->macro('withTrashed', function (Builder $builder, $withTrashed = true) {
+        $builder->addLocalMacro('withTrashed', function (Builder $builder, $withTrashed = true) {
             if (!$withTrashed) {
                 return $builder->withoutTrashed();
             }
@@ -140,7 +140,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addWithoutTrashed(Builder $builder)
     {
-        $builder->macro('withoutTrashed', function (Builder $builder) {
+        $builder->addLocalMacro('withoutTrashed', function (Builder $builder) {
             $model = $builder->getModel();
 
             $builder->withoutGlobalScope($this)->whereNull(
@@ -159,7 +159,7 @@ class SoftDeletingScope implements Scope
      */
     protected function addOnlyTrashed(Builder $builder)
     {
-        $builder->macro('onlyTrashed', function (Builder $builder) {
+        $builder->addLocalMacro('onlyTrashed', function (Builder $builder) {
             $model = $builder->getModel();
 
             $builder->withoutGlobalScope($this)->whereNotNull(

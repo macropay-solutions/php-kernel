@@ -24,6 +24,8 @@ use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
  * @property-read HigherOrderBuilderProxy $orWhere
  * @property-read HigherOrderBuilderProxy $whereNot
  * @property-read HigherOrderBuilderProxy $orWhereNot
+ *
+ * @mixin QueryBuilder
  */
 class Builder implements BuilderContract
 {
@@ -1314,23 +1316,9 @@ class Builder implements BuilderContract
     }
 
     /**
-     * Determine if the given model has a scope.
-     *
-     * @param string $scope
-     * @return bool
-     */
-    public function hasNamedScope($scope)
-    {
-        return $this->model && $this->model->hasNamedScope($scope);
-    }
-
-    /**
      * Call the given local model scopes.
-     *
-     * @param array|string $scopes
-     * @return static|mixed
      */
-    public function scopes($scopes)
+    public function scopes(array|string $scopes): static
     {
         $builder = $this;
 
@@ -1352,6 +1340,14 @@ class Builder implements BuilderContract
         }
 
         return $builder;
+    }
+
+    /**
+     * Call the given local model scope.
+     */
+    public function scope(string $scope, mixed ...$parameters): static
+    {
+        return $this->callNamedScope($scope, $parameters);
     }
 
     /**
@@ -1430,7 +1426,7 @@ class Builder implements BuilderContract
     protected function callNamedScope($scope, array $parameters = [])
     {
         return $this->callScope(function (...$parameters) use ($scope) {
-            return $this->model->callNamedScope($scope, $parameters);
+            return $this->model::segregatedScopesMap()[$scope](...$parameters);
         }, $parameters);
     }
 
@@ -1987,6 +1983,11 @@ class Builder implements BuilderContract
         throw new Exception("Property [{$key}] does not exist on the Obvious builder instance.");
     }
 
+    public function addLocalMacro(string $macro, \Closure $callback): void
+    {
+        $this->localMacros[$macro] = $callback;
+    }
+
     /**
      * Dynamically handle calls into the query instance.
      *
@@ -1997,12 +1998,6 @@ class Builder implements BuilderContract
      */
     public function __call($method, $parameters)
     {
-        if ($method === 'macro') {
-            $this->localMacros[$parameters[0]] = $parameters[1];
-
-            return;
-        }
-
         if ($this->hasMacro($method)) {
             array_unshift($parameters, $this);
 
@@ -2021,10 +2016,6 @@ class Builder implements BuilderContract
             }
 
             return $callable(...$parameters);
-        }
-
-        if ($this->hasNamedScope($method)) {
-            return $this->callNamedScope($method, $parameters);
         }
 
         if (in_array(strtolower($method), $this->passthru)) {
