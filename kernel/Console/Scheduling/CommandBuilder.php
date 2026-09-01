@@ -68,12 +68,8 @@ class CommandBuilder
 
     /**
      * Finalize the event's command syntax with the correct user.
-     *
-     * @param \MacropaySolutions\Kernel\Console\Scheduling\Event $event
-     * @param string $command
-     * @return string
      */
-    protected function ensureCorrectUser(Event $event, $command)
+    protected function ensureCorrectUser(Event $event, string $command): string
     {
         if ('' === (string)$event->user || windows_os()) {
             return $command;

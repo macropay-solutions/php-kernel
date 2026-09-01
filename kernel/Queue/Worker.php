@@ -1057,7 +1057,7 @@ class Worker
                 $arguments[$k] = ProcessUtils::escapeArgument($argument);
             }
 
-            unset($argument);
+            unset($argument, $k);
 
             $command = Application::phpBinary() . ' ' . Application::runBinary() . ' ' . \implode(' ', $arguments);
 
