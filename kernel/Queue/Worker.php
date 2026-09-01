@@ -1020,7 +1020,7 @@ class Worker
                             'rawBody' => $job->getRawBody(),
                             'jobId' => $job->getJobId(),
                         ],
-                    Carbon::now()->addMinutes(2)
+                    120
                 );
             } catch (\Throwable $e) {
                 try {
