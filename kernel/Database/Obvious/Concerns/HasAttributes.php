@@ -190,14 +190,10 @@ trait HasAttributes
      */
     protected function addMutatedAttributesToArray(array $attributes, array $mutatedAttributes)
     {
-        foreach ($mutatedAttributes as $key) {
-            // We want to spin through all the mutated attributes for this model and call
-            // the mutator for the attribute. We cache off every mutated attributes so
-            // we don't have to constantly check on attributes that actually change.
-            if (!array_key_exists($key, $attributes)) {
-                continue;
-            }
-
+        // We want to spin through all the mutated attributes for this model and call
+        // the mutator for the attribute. We cache off every mutated attribute so
+        // we don't have to constantly check on attributes that actually change.
+        foreach (\array_intersect($mutatedAttributes, \array_keys($attributes)) as $key) {
             // Next, we will call the mutator for this attribute so that we can get these
             // mutated attribute's actual values. After we finish mutating each of the
             // attributes we will return this final array of the mutated attributes.
@@ -212,32 +208,19 @@ trait HasAttributes
 
     /**
      * Add the casted attributes to the attributes array.
-     *
-     * @param array $attributes
-     * @param array $mutatedAttributes
-     * @return array
      */
-    protected function addCastAttributesToArray(array $attributes, array $mutatedAttributes)
+    protected function addCastAttributesToArray(array $attributes, array $mutatedAttributes): array
     {
-        foreach ($this->getCasts() as $key => $value) {
-            if (
-                !array_key_exists($key, $attributes) ||
-                in_array($key, $mutatedAttributes)
-            ) {
-                continue;
-            }
+        foreach (
+            \array_diff_key(
+                \array_intersect_key($this->getCasts(), $attributes),
+                \array_flip($mutatedAttributes)
+            ) as $key => $value
+        ) {
+            $attributes[$key] = $this->castAttribute($key, $attributes[$key]);
 
-            $attributes[$key] = $this->castAttribute(
-                $key,
-                $attributes[$key]
-            );
-
-            if ($this->isEnumCastable($key) && (!($attributes[$key] ?? null) instanceof Arrayable)) {
+            if ($this->isEnumCastable($key)) {
                 $attributes[$key] = isset($attributes[$key]) ? $this->getStorableEnumValue($attributes[$key]) : null;
-            }
-
-            if ($attributes[$key] instanceof Arrayable) {
-                $attributes[$key] = $attributes[$key]->toArray();
             }
         }
 
@@ -546,22 +529,14 @@ trait HasAttributes
 
     /**
      * Cast an attribute to a native PHP type.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    protected function castAttribute($key, $value)
+    protected function castAttribute(string $key, mixed $value): mixed
     {
         $castType = $this->getCastType($key);
 
-        if ($value === null && in_array($castType, static::$primitiveCastTypes)) {
-            return $value;
-        }
-
         return match ($castType) {
-            'int' => (int)$value,
-            'string' => (string)$value,
+            'int' => $value === null ? null : (int)$value,
+            'string' => $value === null ? null : (string)$value,
             default => $this->isEnumCastable($key)
                 ? $this->getEnumCastableAttributeValue($key, $value)
                 : throw new InvalidCastException($this, $key, $castType),
@@ -959,13 +934,7 @@ trait HasAttributes
         // Here we will spin through every attribute and see if this is in the array of
         // dirty attributes. If it is, we will return true and if we make it through
         // all the attributes for the entire array we will return false at end.
-        foreach (Arr::wrap($attributes) as $attribute) {
-            if (array_key_exists($attribute, $changes)) {
-                return true;
-            }
-        }
-
-        return false;
+        return \array_intersect_key(\array_flip(Arr::wrap($attributes)), $changes) !== [];
     }
 
     /**
@@ -1026,13 +995,10 @@ trait HasAttributes
 
     /**
      * Determine if the new and old values for a given key are equivalent.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function originalIsEquivalent($key)
+    public function originalIsEquivalent(string $key): bool
     {
-        if (!array_key_exists($key, $this->original)) {
+        if (!\array_key_exists($key, $this->original)) {
             return false;
         }
 
@@ -1076,9 +1042,9 @@ trait HasAttributes
         if ($this->hasCast($key)) {
             if (
                 static::preventsAccessingMissingAttributes() &&
-                !array_key_exists($key, $this->attributes) &&
+                !\array_key_exists($key, $this->attributes) &&
                 ($this->isEnumCastable($key) ||
-                    in_array($this->getCastType($key), static::$primitiveCastTypes))
+                    \in_array($this->getCastType($key), static::$primitiveCastTypes, true))
             ) {
                 $this->throwMissingAttributeExceptionIfApplicable($key);
             }
@@ -1128,21 +1094,16 @@ trait HasAttributes
 
     /**
      * Return whether the accessor attribute has been appended.
-     *
-     * @param string $attribute
-     * @return bool
      */
-    public function hasAppended($attribute)
+    public function hasAppended(string $attribute): bool
     {
-        return in_array($attribute, $this->appends);
+        return \in_array($attribute, $this->appends, true);
     }
 
     /**
      * Get the mutated attributes for a given instance.
-     *
-     * @return array
      */
-    public function getMutatedAttributes()
+    public function getMutatedAttributes(): array
     {
         if (!isset(static::$mutatorCache[static::class])) {
             static::cacheMutatedAttributes($this);
@@ -1153,11 +1114,8 @@ trait HasAttributes
 
     /**
      * Extract and cache all the mutated attributes of a class.
-     *
-     * @param object|string $classOrInstance
-     * @return void
      */
-    public static function cacheMutatedAttributes($classOrInstance)
+    public static function cacheMutatedAttributes(object|string $classOrInstance): void
     {
         $instance = \is_object($classOrInstance) ? $classOrInstance : new $classOrInstance();
 

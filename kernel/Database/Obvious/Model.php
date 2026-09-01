@@ -380,7 +380,7 @@ abstract class Model implements
         foreach (class_uses_recursive($class) as $trait) {
             $method = 'boot' . class_basename($trait);
 
-            if (method_exists($class, $method) && !in_array($method, $booted)) {
+            if (\method_exists($class, $method) && !\in_array($method, $booted, true)) {
                 forward_static_call([$class, $method]);
 
                 $booted[] = $method;
@@ -2462,6 +2462,7 @@ abstract class Model implements
                     'class' => $relationData->first() ? $relationData->first()::class : null,
                     'data' => $relationData->map(fn($model) => $model->__serialize())->all(),
                 ];
+
                 continue;
             }
 
@@ -2471,6 +2472,7 @@ abstract class Model implements
                     'class' => $relationData::class,
                     'data' => $relationData->__serialize(),
                 ];
+
                 continue;
             }
 
@@ -2479,8 +2481,8 @@ abstract class Model implements
             }
         }
 
-        foreach(\get_object_vars($this) as $key => $val) {
-            if (\in_array($key, static::IGNORE_ON_SERIALIZE, true) || static::containsObject($val, 0)) {
+        foreach(\array_diff_key(\get_object_vars($this), \array_flip(static::IGNORE_ON_SERIALIZE)) as $key => $val) {
+            if (static::containsObject($val, 0)) {
                 continue;
             }
 
@@ -2506,6 +2508,7 @@ abstract class Model implements
             foreach ($val as $relationName => $relationMeta) {
                 if ($relationMeta === null) {
                     $this->setRelation($relationName, null);
+
                     continue;
                 }
 
@@ -2521,10 +2524,12 @@ abstract class Model implements
                             $relationMeta['data']
                         );
                         $this->setRelation($relationName, \di(Collection::class, [$models]));
+
                         continue;
                     }
 
                     $this->setRelation($relationName, \di(Collection::class));
+
                     continue;
                 }
 
