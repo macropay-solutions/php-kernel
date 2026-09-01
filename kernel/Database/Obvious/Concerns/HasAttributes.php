@@ -227,32 +227,10 @@ trait HasAttributes
                 continue;
             }
 
-            // Here we will cast the attribute. Then, if the cast is a date or datetime cast
-            // then we will serialize the date for the array. This will convert the dates
-            // to strings based on the date format specified for these Obvious models.
             $attributes[$key] = $this->castAttribute(
                 $key,
                 $attributes[$key]
             );
-
-            // If the attribute cast was a date or a datetime, we will serialize the date as
-            // a string. This allows the developers to customize how dates are serialized
-            // into an array without affecting how they are persisted into the storage.
-            if (
-                isset($attributes[$key]) && in_array(
-                    $value,
-                    ['date', 'datetime', 'immutable_date', 'immutable_datetime']
-                )
-            ) {
-                $attributes[$key] = $this->serializeDate($attributes[$key]);
-            }
-
-            if (
-                isset($attributes[$key]) && ($this->isCustomDateTimeCast($value) ||
-                    $this->isImmutableCustomDateTimeCast($value))
-            ) {
-                $attributes[$key] = $attributes[$key]->format(explode(':', $value, 2)[1]);
-            }
 
             if ($this->isEnumCastable($key) && (!($attributes[$key] ?? null) instanceof Arrayable)) {
                 $attributes[$key] = isset($attributes[$key]) ? $this->getStorableEnumValue($attributes[$key]) : null;
@@ -580,11 +558,6 @@ trait HasAttributes
         if ($value === null && in_array($castType, static::$primitiveCastTypes)) {
             return $value;
         }
-
-        // If the key is one of the encrypted castable types, we'll first decrypt
-        // the value and update the cast type so we may leverage the following
-        // logic for casting this value to any additionally specified types.
-        $castType = $this->getCastType($key);
 
         return match ($castType) {
             'int' => (int)$value,
