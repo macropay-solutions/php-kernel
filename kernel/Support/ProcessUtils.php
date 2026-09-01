@@ -62,17 +62,13 @@ class ProcessUtils
             return $escapedArgument;
         }
 
-        return "'" . str_replace("'", "'\\''", $argument) . "'";
+        return "'" . \str_replace("'", "'\\''", $argument) . "'";
     }
 
     /**
      * Is the given string surrounded by the given character?
-     *
-     * @param string $arg
-     * @param string $char
-     * @return bool
      */
-    protected static function isSurroundedBy($arg, $char)
+    protected static function isSurroundedBy(string $arg, string $char): bool
     {
         $strlen = \strlen($arg);
 
