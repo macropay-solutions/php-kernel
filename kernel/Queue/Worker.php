@@ -1031,48 +1031,50 @@ class Worker
                 return;
             }
 
-            $encodedError = \json_encode(
+            $error = \json_encode(
                 $error,
                 JSON_PARTIAL_OUTPUT_ON_ERROR
             );
 
-            if (false === $encodedError) {
-                $encodedError = '{}';
+            if (false === $error) {
+                $error = '{}';
             }
 
             $arguments = [
                 'queue:fail-job',
                 (string)$key,
-                \base64_encode($encodedError),
+                \base64_encode($error),
                 $connectionName,
                 '--name=' . $options->name,
                 '--queue=' . $queue,
             ];
 
-            foreach ($arguments as &$argument) {
+            foreach ($arguments as $k => $argument) {
                 if (\str_contains($argument, "\0")) {
                     return;
                 }
 
-                $argument = ProcessUtils::escapeArgument($argument);
+                $arguments[$k] = ProcessUtils::escapeArgument($argument);
             }
 
             unset($argument);
 
             $command = Application::phpBinary() . ' ' . Application::runBinary() . ' ' . \implode(' ', $arguments);
 
+            unset($arguments);
+
             if (\str_contains((string)$output, "\0")) {
                 return;
             }
 
-            $escapedOutput = ProcessUtils::escapeArgument((string)$output);
+            $output = ProcessUtils::escapeArgument((string)$output);
 
             if (windows_os()) {
                 \pclose(\popen(
                     'start "" /b '
                     . $command
                     . ' >> '
-                    . $escapedOutput
+                    . $output
                     . ' 2>&1',
                     'r'
                 ));
@@ -1083,7 +1085,7 @@ class Worker
             \pclose(\popen(
                 $command
                 . ' >> '
-                . $escapedOutput
+                . $output
                 . ' 2>&1 &',
                 'r'
             ));
