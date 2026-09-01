@@ -987,7 +987,7 @@ class Worker
     ): void {
         $config = \app('config');
         $output = $config->get(
-            'logging.channels.' . $config->get('logging.default')  . '.send_bg_commands_output_to',
+            'logging.channels.' . $config->get('logging.default') . '.send_bg_commands_output_to',
             (DIRECTORY_SEPARATOR === '\\') ? 'NUL' : '/dev/null'
         );
         $emergencyMemory = \str_repeat('x', 1048576 * $config->get('queue.emergency_memory', 1));
