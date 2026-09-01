@@ -32,20 +32,27 @@ class ProcessUtils
             $escapedArgument = '';
             $quote = false;
 
-            foreach (preg_split('/(")/', $argument, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $part) {
+            foreach (\preg_split('/(")/', $argument, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE) as $part) {
                 if ($part === '"') {
                     $escapedArgument .= '\\"';
-                } elseif (self::isSurroundedBy($part, '%')) {
-                    // Avoid environment variable expansion
-                    $escapedArgument .= '^%"' . substr($part, 1, -1) . '"^%';
-                } else {
-                    // escape trailing backslash
-                    if (str_ends_with($part, '\\')) {
-                        $part .= '\\';
-                    }
-                    $quote = true;
-                    $escapedArgument .= $part;
+
+                    continue;
                 }
+
+                if (self::isSurroundedBy($part, '%')) {
+                    // Avoid environment variable expansion
+                    $escapedArgument .= '^%"' . \substr($part, 1, -1) . '"^%';
+
+                    continue;
+                }
+
+                // escape trailing backslash
+                if (\str_ends_with($part, '\\')) {
+                    $part .= '\\';
+                }
+
+                $quote = true;
+                $escapedArgument .= $part;
             }
 
             if ($quote) {
@@ -67,6 +74,8 @@ class ProcessUtils
      */
     protected static function isSurroundedBy($arg, $char)
     {
-        return strlen($arg) > 2 && $char === $arg[0] && $char === $arg[strlen($arg) - 1];
+        $strlen = \strlen($arg);
+
+        return $strlen > 2 && $char === $arg[0] && $char === $arg[$strlen - 1];
     }
 }
