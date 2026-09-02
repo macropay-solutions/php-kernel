@@ -194,7 +194,7 @@ trait HasRelationships
     /**
      * Create a new model instance for a related model.
      */
-    protected function newRelatedInstance(string $class): static
+    protected function newRelatedInstance(string $class): Model
     {
         return tap(new $class(), function ($instance) {
             if (!$instance->getConnectionName()) {

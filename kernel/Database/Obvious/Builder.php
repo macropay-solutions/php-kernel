@@ -742,7 +742,7 @@ class Builder implements BuilderContract
      */
     public function getModels($columns = ['*'])
     {
-        return $this->model->hydrate(
+        return $this->model->newQuery()->hydrate(
             $this->query->get($columns)->all()
         )->all();
     }
