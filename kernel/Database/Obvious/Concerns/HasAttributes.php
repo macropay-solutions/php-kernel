@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
-use BackedEnum;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Database\LazyLoadingViolationException;
 use MacropaySolutions\Kernel\Database\Obvious\InvalidCastException;
@@ -217,10 +216,12 @@ trait HasAttributes
                 \array_flip($mutatedAttributes)
             ) as $key => $value
         ) {
-            $attributes[$key] = $this->castAttribute($key, $attributes[$key]);
+            if (null !== $attributes[$key]) {
+                $attributes[$key] = $this->castAttribute($key, $attributes[$key]);
 
-            if ($this->isEnumCastable($key)) {
-                $attributes[$key] = isset($attributes[$key]) ? $this->getStorableEnumValue($attributes[$key]) : null;
+                if ($this->isEnumCastable($key)) {
+                    $attributes[$key] = $attributes[$key]->value;
+                }
             }
         }
 
@@ -516,11 +517,8 @@ trait HasAttributes
 
     /**
      * Merge new casts with existing casts on the model.
-     *
-     * @param array $casts
-     * @return $this
      */
-    public function mergeCasts($casts)
+    public function mergeCasts(array $casts): static
     {
         $this->casts = array_merge($this->casts, $casts);
 
@@ -562,7 +560,7 @@ trait HasAttributes
             return $value;
         }
 
-        return $this->getEnumCaseFromValue($castType, $value);
+        return $castType::from($value);
     }
 
     /**
@@ -660,42 +658,13 @@ trait HasAttributes
             return;
         }
 
-        if (\is_object($value)) {
-            $this->attributes[$key] = $this->getStorableEnumValue($value);
+        if ($value instanceof \BackedEnum) {
+            $this->attributes[$key] = $value->value;
 
             return;
         }
 
-        $this->attributes[$key] = $this->getStorableEnumValue(
-            $this->getEnumCaseFromValue($enumClass, $value)
-        );
-    }
-
-    /**
-     * Get an enum case instance from a given class and value.
-     *
-     * @param string $enumClass
-     * @param string|int $value
-     * @return \UnitEnum|\BackedEnum
-     */
-    protected function getEnumCaseFromValue($enumClass, $value)
-    {
-        return is_subclass_of($enumClass, BackedEnum::class)
-            ? $enumClass::from($value)
-            : constant($enumClass . '::' . $value);
-    }
-
-    /**
-     * Get the storable value from the given enum.
-     *
-     * @param \UnitEnum|\BackedEnum $value
-     * @return string|int
-     */
-    protected function getStorableEnumValue($value)
-    {
-        return $value instanceof BackedEnum
-            ? $value->value
-            : $value->name;
+        $this->attributes[$key] = $enumClass::from($value)->value;
     }
 
     /**
@@ -1117,10 +1086,12 @@ trait HasAttributes
      */
     public static function cacheMutatedAttributes(object|string $classOrInstance): void
     {
-        $instance = \is_object($classOrInstance) ? $classOrInstance : new $classOrInstance();
+        if (\is_string($classOrInstance)) {
+            $classOrInstance = new $classOrInstance();
+        }
 
-        static::$mutatorCache[$instance::class] = \array_keys(
-            \array_filter($instance->thisSegregatedAccessorsDefinitionMap())
+        static::$mutatorCache[$classOrInstance::class] = \array_keys(
+            \array_filter($classOrInstance->thisSegregatedAccessorsDefinitionMap())
         );
     }
 
