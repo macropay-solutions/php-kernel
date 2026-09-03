@@ -254,12 +254,12 @@ abstract class Model implements
     /**
      * Cache for a (manages attributes/columns)
      */
-    private ?object $A = null;
+    protected ?object $A = null;
 
     /**
      * Cache for r (manages relations)
      */
-    private ?object $R = null;
+    protected ?object $R = null;
 
     /**
      * Create a new Obvious model instance.
@@ -2247,7 +2247,7 @@ abstract class Model implements
      */
     public function __get($key)
     {
-        if ($key === 'r' || $key === 'R') {
+        if ($key === 'r') {
             return $this->R ??= new class (\WeakReference::create($this)) {
                 public function __construct(protected \WeakReference $ownerRef)
                 {
@@ -2280,7 +2280,7 @@ abstract class Model implements
             };
         }
 
-        if ($key === 'a' || $key === 'A') {
+        if ($key === 'a') {
             return $this->A ??= new class (\WeakReference::create($this)) {
                 public function __construct(protected \WeakReference $ownerRef)
                 {
