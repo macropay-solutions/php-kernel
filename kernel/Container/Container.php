@@ -1434,7 +1434,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Set the shared instance of the container.
      */
-    public static function setInstance(?ContainerContract $container = null): static|ContainerContract
+    public static function setInstance(?ContainerContract $container = null): null|static|ContainerContract
     {
         return static::$instance = $container;
     }
