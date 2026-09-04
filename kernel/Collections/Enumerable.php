@@ -1241,7 +1241,7 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * @param bool $escape
      * @return $this
      */
-    public function escapeWhenCastingToString($escape = true);
+    public function escapeWhenCastingToString(bool $escape = true): static;
 
     /**
      * Add a method to the list of proxied methods.
