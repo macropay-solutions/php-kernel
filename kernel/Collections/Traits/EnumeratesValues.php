@@ -60,10 +60,8 @@ trait EnumeratesValues
 
     /**
      * Indicates that the object's string representation should be escaped when __toString is invoked.
-     *
-     * @var bool
      */
-    protected $escapeWhenCastingToString = false;
+    protected bool $escapeWhenCastingToString = false;
 
     /**
      * The methods that can be proxied.
@@ -925,9 +923,9 @@ trait EnumeratesValues
     /**
      * Get the collection of items as a plain array.
      *
-     * @return array<TKey, mixed>
+     * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->map(fn($value) => $value instanceof Arrayable ? $value->toArray() : $value)->all();
     }
@@ -958,7 +956,7 @@ trait EnumeratesValues
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0)
+    public function toJson(int $options = 0): string
     {
         return json_encode($this->jsonSerialize(), $options);
     }
@@ -988,11 +986,8 @@ trait EnumeratesValues
 
     /**
      * Indicate that the model's string representation should be escaped when __toString is invoked.
-     *
-     * @param bool $escape
-     * @return $this
      */
-    public function escapeWhenCastingToString($escape = true)
+    public function escapeWhenCastingToString(bool $escape = true): static
     {
         $this->escapeWhenCastingToString = $escape;
 

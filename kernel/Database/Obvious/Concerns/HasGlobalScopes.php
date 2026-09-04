@@ -12,14 +12,12 @@ trait HasGlobalScopes
     /**
      * Register a new global scope on the model.
      *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Scope|\Closure|string $scope
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Scope|\Closure|null $implementation
-     * @return mixed
-     *
      * @throws \InvalidArgumentException
      */
-    public static function addGlobalScope($scope, $implementation = null)
-    {
+    public static function addGlobalScope(
+        Scope|\Closure|string $scope,
+        Scope|\Closure|null $implementation = null
+    ): mixed {
         if (is_string($scope) && ($implementation instanceof Closure || $implementation instanceof Scope)) {
             return static::$globalScopes[static::class][$scope] = $implementation;
         } elseif ($scope instanceof Closure) {
@@ -38,77 +36,63 @@ trait HasGlobalScopes
 
     /**
      * Register multiple global scopes on the model.
-     *
-     * @param array $scopes
-     * @return void
      */
-    public static function addGlobalScopes(array $scopes)
+    public static function addGlobalScopes(array $scopes): void
     {
         foreach ($scopes as $key => $scope) {
-            if (is_string($key)) {
+            if (\is_string($key)) {
                 static::addGlobalScope($key, $scope);
-            } else {
-                static::addGlobalScope($scope);
+
+                continue;
             }
+
+            static::addGlobalScope($scope);
         }
     }
 
     /**
      * Determine if a model has a global scope.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Scope|string $scope
-     * @return bool
      */
-    public static function hasGlobalScope($scope)
+    public static function hasGlobalScope(Scope|string $scope): bool
     {
-        return !is_null(static::getGlobalScope($scope));
+        return null !== static::getGlobalScope($scope);
     }
 
     /**
      * Get a global scope registered with the model.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Scope|string $scope
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Scope|\Closure|null
      */
-    public static function getGlobalScope($scope)
+    public static function getGlobalScope(Scope|string $scope): Scope|\Closure|null
     {
-        if (is_string($scope)) {
+        if (\is_string($scope)) {
             return Arr::get(static::$globalScopes, static::class . '.' . $scope);
         }
 
         return Arr::get(
             static::$globalScopes,
-            static::class . '.' . get_class($scope)
+            static::class . '.' . $scope::class
         );
     }
 
     /**
      * Get all the global scopes that are currently registered.
-     *
-     * @return array
      */
-    public static function getAllGlobalScopes()
+    public static function getAllGlobalScopes(): array
     {
         return static::$globalScopes;
     }
 
     /**
      * Set the current global scopes.
-     *
-     * @param array $scopes
-     * @return void
      */
-    public static function setAllGlobalScopes($scopes)
+    public static function setAllGlobalScopes(array $scopes): void
     {
         static::$globalScopes = $scopes;
     }
 
     /**
      * Get the global scopes for this class instance.
-     *
-     * @return array
      */
-    public function getGlobalScopes()
+    public function getGlobalScopes(): array
     {
         return Arr::get(static::$globalScopes, static::class, []);
     }

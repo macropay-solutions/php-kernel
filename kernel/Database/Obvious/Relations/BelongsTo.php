@@ -293,7 +293,7 @@ class BelongsTo extends Relation
      */
     protected function relationHasIncrementingId()
     {
-        return $this->related->getIncrementing() &&
+        return $this->related->incrementing &&
             in_array($this->related->getKeyType(), ['int', 'integer']);
     }
 

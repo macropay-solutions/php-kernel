@@ -40,8 +40,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * The current globally available container (if any).
-     *
-     * @var static
      */
     protected static $instance;
 
@@ -1427,25 +1425,16 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Get the globally available instance of the container.
-     *
-     * @return static
      */
-    public static function getInstance()
+    public static function getInstance(): static
     {
-        if (!isset(static::$instance)) {
-            static::$instance = new static();
-        }
-
-        return static::$instance;
+        return static::$instance ??= new static();
     }
 
     /**
      * Set the shared instance of the container.
-     *
-     * @param \MacropaySolutions\Kernel\Contracts\Container\Container|null $container
-     * @return \MacropaySolutions\Kernel\Contracts\Container\Container|static
      */
-    public static function setInstance(?ContainerContract $container = null)
+    public static function setInstance(?ContainerContract $container = null): static|ContainerContract
     {
         return static::$instance = $container;
     }

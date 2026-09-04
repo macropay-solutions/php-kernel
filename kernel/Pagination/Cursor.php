@@ -88,7 +88,7 @@ class Cursor implements Arrayable
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return array_merge($this->parameters, [
             '_pointsToNextItems' => $this->pointsToNextItems,

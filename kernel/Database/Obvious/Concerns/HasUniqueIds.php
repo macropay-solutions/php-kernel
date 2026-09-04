@@ -6,51 +6,33 @@ trait HasUniqueIds
 {
     /**
      * Indicates if the model uses unique ids.
-     *
-     * @var bool
      */
-    public $usesUniqueIds = false;
-
-    /**
-     * Determine if the model uses unique ids.
-     *
-     * @return bool
-     */
-    public function usesUniqueIds()
-    {
-        return $this->usesUniqueIds;
-    }
+    public bool $usesUniqueIds = false;
 
     /**
      * Generate unique keys for the model.
-     *
-     * @return void
      */
-    public function setUniqueIds()
+    public function setUniqueIds(): void
     {
         foreach ($this->uniqueIds() as $column) {
-            if (empty($this->{$column})) {
-                $this->{$column} = $this->newUniqueId();
+            if ('' === (string)$this->getAttributeValue($column)) {
+                $this->setAttribute($column, $this->newUniqueId());
             }
         }
     }
 
     /**
      * Generate a new key for the model.
-     *
-     * @return string
      */
-    public function newUniqueId()
+    public function newUniqueId(): string
     {
-        return null;
+        return '';
     }
 
     /**
      * Get the columns that should receive a unique identifier.
-     *
-     * @return array
      */
-    public function uniqueIds()
+    public function uniqueIds(): array
     {
         return [];
     }

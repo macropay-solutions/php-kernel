@@ -2,16 +2,11 @@
 
 namespace MacropaySolutions\Kernel\Broadcasting\Broadcasters;
 
-use Closure;
-use Exception;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster as BroadcasterContract;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\HasBroadcastChannel;
-use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
+use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Support\Arr;
-use MacropaySolutions\Kernel\Support\Reflector;
-use ReflectionClass;
-use ReflectionFunction;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 abstract class Broadcaster implements BroadcasterContract
@@ -41,26 +36,18 @@ abstract class Broadcaster implements BroadcasterContract
      * Resolve the authenticated user payload for the incoming connection request.
      *
      * See: https://pusher.com/docs/channels/library_auth_reference/auth-signatures/#user-authentication.
-     *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
-     * @return array|null
      */
-    public function resolveAuthenticatedUser($request)
+    public function resolveAuthenticatedUser(Request $request): ?array
     {
-        if ($this->authenticatedUserCallback) {
-            return $this->authenticatedUserCallback->__invoke($request);
-        }
+        return $this->authenticatedUserCallback?->__invoke($request);
     }
 
     /**
      * Register the user retrieval callback used to authenticate connections.
      *
      * See: https://pusher.com/docs/channels/library_auth_reference/auth-signatures/#user-authentication.
-     *
-     * @param \Closure $callback
-     * @return void
      */
-    public function resolveAuthenticatedUserUsing(Closure $callback)
+    public function resolveAuthenticatedUserUsing(\Closure $callback): void
     {
         $this->authenticatedUserCallback = $callback;
     }
@@ -91,20 +78,16 @@ abstract class Broadcaster implements BroadcasterContract
     /**
      * Authenticate the incoming request for a given channel.
      *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
-     * @param string $channel
-     * @return mixed
-     *
      * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
      */
-    protected function verifyUserCanAccessChannel($request, $channel)
+    protected function verifyUserCanAccessChannel(Request $request, string $channel): mixed
     {
         foreach ($this->channels as $pattern => $callback) {
             if (!$this->channelNameMatchesPattern($channel, $pattern)) {
                 continue;
             }
 
-            $parameters = $this->extractAuthParameters($pattern, $channel, $callback);
+            $parameters = $this->extractAuthParameters($pattern, $channel);
 
             $handler = $this->normalizeChannelHandlerToCallable($callback);
 
@@ -122,59 +105,12 @@ abstract class Broadcaster implements BroadcasterContract
 
     /**
      * Extract the parameters from the given pattern and channel.
-     *
-     * @param string $pattern
-     * @param string $channel
-     * @param callable|string $callback
-     * @return array
      */
-    protected function extractAuthParameters($pattern, $channel, $callback)
+    protected function extractAuthParameters(string $pattern, string $channel): array
     {
-        $callbackParameters = $this->extractParameters($callback);
-
         return collect($this->extractChannelKeys($pattern, $channel))->reject(function ($value, $key) {
             return is_numeric($key);
-        })->map(function ($value, $key) use ($callbackParameters) {
-            return $this->resolveBinding($key, $value, $callbackParameters);
         })->values()->all();
-    }
-
-    /**
-     * Extracts the parameters out of what the user passed to handle the channel authentication.
-     *
-     * @param callable|string $callback
-     * @return \ReflectionParameter[]
-     *
-     * @throws \Exception
-     */
-    protected function extractParameters($callback)
-    {
-        if (is_callable($callback)) {
-            return (new ReflectionFunction($callback))->getParameters();
-        } elseif (is_string($callback)) {
-            return $this->extractParametersFromClass($callback);
-        }
-
-        throw new Exception('Given channel handler is an unknown type.');
-    }
-
-    /**
-     * Extracts the parameters out of a class channel's "join" method.
-     *
-     * @param string $callback
-     * @return \ReflectionParameter[]
-     *
-     * @throws \Exception
-     */
-    protected function extractParametersFromClass($callback)
-    {
-        $reflection = new ReflectionClass($callback);
-
-        if (!$reflection->hasMethod('join')) {
-            throw new Exception('Class based channel must define a "join" method.');
-        }
-
-        return $reflection->getMethod('join')->getParameters();
     }
 
     /**
@@ -189,79 +125,6 @@ abstract class Broadcaster implements BroadcasterContract
         preg_match('/^' . preg_replace('/\{(.*?)\}/', '(?<$1>[^\.]+)', $pattern) . '/', $channel, $keys);
 
         return $keys;
-    }
-
-    /**
-     * Resolve the given parameter binding.
-     *
-     * @param string $key
-     * @param string $value
-     * @param array $callbackParameters
-     * @return mixed
-     */
-    protected function resolveBinding($key, $value, $callbackParameters)
-    {
-        $newValue = $this->resolveExplicitBindingIfPossible($key, $value);
-
-        return $newValue === $value ? $this->resolveImplicitBindingIfPossible(
-            $key,
-            $value,
-            $callbackParameters
-        ) : $newValue;
-    }
-
-    /**
-     * Resolve an explicit parameter binding if applicable.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function resolveExplicitBindingIfPossible($key, $value)
-    {
-        return $value;
-    }
-
-    /**
-     * Resolve an implicit parameter binding if applicable.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @param array $callbackParameters
-     * @return mixed
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-     */
-    protected function resolveImplicitBindingIfPossible($key, $value, $callbackParameters)
-    {
-        foreach ($callbackParameters as $parameter) {
-            if (!$this->isImplicitlyBindable($key, $parameter)) {
-                continue;
-            }
-
-            $className = Reflector::getParameterClassName($parameter);
-
-            if (is_null($model = (new $className())->resolveRouteBinding($value))) {
-                throw new AccessDeniedHttpException();
-            }
-
-            return $model;
-        }
-
-        return $value;
-    }
-
-    /**
-     * Determine if a given key and parameter is implicitly bindable.
-     *
-     * @param string $key
-     * @param \ReflectionParameter $parameter
-     * @return bool
-     */
-    protected function isImplicitlyBindable($key, $parameter)
-    {
-        return $parameter->getName() === $key &&
-            Reflector::isParameterSubclassOf($parameter, UrlRoutable::class);
     }
 
     /**

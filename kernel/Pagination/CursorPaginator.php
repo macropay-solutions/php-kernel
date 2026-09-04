@@ -143,7 +143,7 @@ class CursorPaginator extends AbstractCursorPaginator implements
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'data' => $this->items->toArray(),
@@ -172,7 +172,7 @@ class CursorPaginator extends AbstractCursorPaginator implements
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0)
+    public function toJson(int $options = 0): string
     {
         return json_encode($this->jsonSerialize(), $options);
     }

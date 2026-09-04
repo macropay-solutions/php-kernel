@@ -973,7 +973,7 @@ class Blueprint
 
         $column = $column ?: $model->getForeignKey();
 
-        if ($model->getKeyType() === 'int' && $model->getIncrementing()) {
+        if ($model->getKeyType() === 'int' && $model->incrementing) {
             return $this->foreignId($column);
         }
 

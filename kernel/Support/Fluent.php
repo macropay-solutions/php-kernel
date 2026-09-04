@@ -67,9 +67,9 @@ class Fluent implements Arrayable, ArrayAccess, Jsonable, JsonSerializable
     /**
      * Convert the fluent instance to an array.
      *
-     * @return array<TKey, TValue>
+     * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->attributes;
     }
@@ -90,7 +90,7 @@ class Fluent implements Arrayable, ArrayAccess, Jsonable, JsonSerializable
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0)
+    public function toJson(int $options = 0): string
     {
         return json_encode($this->jsonSerialize(), $options);
     }

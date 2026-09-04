@@ -1201,9 +1201,9 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
     /**
      * Get the collection of items as a plain array.
      *
-     * @return array<TKey, mixed>
+     * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 
     /**
      * Convert the object into something JSON serializable.
@@ -1218,7 +1218,7 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0);
+    public function toJson(int $options = 0): string;
 
     /**
      * Get a CachingIterator instance.

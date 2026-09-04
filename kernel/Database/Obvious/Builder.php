@@ -1208,7 +1208,7 @@ class Builder implements BuilderContract
      */
     protected function addUniqueIdsToUpsertValues(array $values)
     {
-        if (!$this->model->usesUniqueIds()) {
+        if (!$this->model->usesUniqueIds) {
             return $values;
         }
 
@@ -1282,13 +1282,11 @@ class Builder implements BuilderContract
 
     /**
      * Delete records from the database.
-     *
-     * @return mixed
      */
-    public function delete()
+    public function delete(): int
     {
         if (isset($this->onDelete)) {
-            return call_user_func($this->onDelete, $this);
+            return (int)(($this->onDelete)($this));
         }
 
         return $this->toBase()->delete();

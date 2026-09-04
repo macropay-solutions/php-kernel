@@ -13,24 +13,18 @@ trait HasAttributes
 {
     /**
      * The model's attributes.
-     *
-     * @var array
      */
-    protected $attributes = [];
+    protected array $attributes = [];
 
     /**
      * The model attribute's original state.
-     *
-     * @var array
      */
-    protected $original = [];
+    protected array $original = [];
 
     /**
      * The changed model attributes.
-     *
-     * @var array
      */
-    protected $changes = [];
+    protected array $changes = [];
 
     /**
      * Temporary cache to avoid multiple getDirty calls
@@ -62,17 +56,15 @@ trait HasAttributes
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array
      */
-    protected $casts = [];
+    protected array $casts = [];
 
     /**
      * The built-in, primitive cast types supported by Obvious.
      *
      * @var string[]
      */
-    protected static $primitiveCastTypes = [
+    protected static array $primitiveCastTypes = [
         'int',
         'string',
     ];
@@ -82,21 +74,17 @@ trait HasAttributes
      *
      * @var array
      */
-    protected $appends = [];
+    protected array $appends = [];
 
     /**
      * Indicates whether attributes are snake cased on arrays.
-     *
-     * @var bool
      */
-    public static $snakeAttributes = true;
+    public static bool $snakeAttributes = false;
 
     /**
      * The cache of the mutated attributes for each class.
-     *
-     * @var array
      */
-    protected static $mutatorCache = [];
+    protected static array $mutatorCache = [];
 
     /**
      * Prevent updates
@@ -147,10 +135,8 @@ trait HasAttributes
 
     /**
      * Convert the model's attributes to an array.
-     *
-     * @return array
      */
-    public function attributesToArray()
+    public function attributesToArray(): array
     {
         // If an attribute is a date, we will cast it to a string after converting it
         // to a DateTime / Carbon instance. This is so we will get some consistent
@@ -182,12 +168,8 @@ trait HasAttributes
 
     /**
      * Add the mutated attributes to the attributes array.
-     *
-     * @param array $attributes
-     * @param array $mutatedAttributes
-     * @return array
      */
-    protected function addMutatedAttributesToArray(array $attributes, array $mutatedAttributes)
+    protected function addMutatedAttributesToArray(array $attributes, array $mutatedAttributes): array
     {
         // We want to spin through all the mutated attributes for this model and call
         // the mutator for the attribute. We cache off every mutated attribute so
@@ -230,36 +212,28 @@ trait HasAttributes
 
     /**
      * Get an attribute array of all arrayable attributes.
-     *
-     * @return array
      */
-    protected function getArrayableAttributes()
+    protected function getArrayableAttributes(): array
     {
         return $this->getArrayableItems($this->getAttributes());
     }
 
     /**
      * Get all the appendable values that are arrayable.
-     *
-     * @return array
      */
-    protected function getArrayableAppends()
+    protected function getArrayableAppends(): array
     {
-        if (!count($this->appends)) {
+        if ([] === $this->appends) {
             return [];
         }
 
-        return $this->getArrayableItems(
-            array_combine($this->appends, $this->appends)
-        );
+        return $this->getArrayableItems(\array_combine($this->appends, $this->appends));
     }
 
     /**
      * Get the model's relationships in array form.
-     *
-     * @return array
      */
-    public function relationsToArray()
+    public function relationsToArray(): array
     {
         $attributes = [];
 
@@ -298,28 +272,23 @@ trait HasAttributes
 
     /**
      * Get an attribute array of all arrayable relations.
-     *
-     * @return array
      */
-    protected function getArrayableRelations()
+    protected function getArrayableRelations(): array
     {
         return $this->getArrayableItems($this->relations);
     }
 
     /**
      * Get an attribute array of all arrayable values.
-     *
-     * @param array $values
-     * @return array
      */
-    protected function getArrayableItems(array $values)
+    protected function getArrayableItems(array $values): array
     {
-        if (count($this->getVisible()) > 0) {
-            $values = array_intersect_key($values, array_flip($this->getVisible()));
+        if ([] !== $this->visible) {
+            $values = array_intersect_key($values, array_flip($this->visible));
         }
 
-        if (count($this->getHidden()) > 0) {
-            $values = array_diff_key($values, array_flip($this->getHidden()));
+        if ([] !== $this->hidden) {
+            $values = \array_diff_key($values, \array_flip($this->hidden));
         }
 
         return $values;
@@ -331,12 +300,8 @@ trait HasAttributes
      * @param string $key
      * @return mixed
      */
-    public function getAttribute($key)
+    public function getAttribute(string $key): mixed
     {
-        if (!$key) {
-            return;
-        }
-
         // If the attribute exists in the attribute array or has a "get" mutator we will
         // get the attribute's value. Otherwise, we will proceed as if the developers
         // are asking for a relationship's value. This covers both types of values.
@@ -356,12 +321,9 @@ trait HasAttributes
     /**
      * Either throw a missing attribute exception or return null depending on Obvious's configuration.
      *
-     * @param string $key
-     * @return null
-     *
      * @throws \MacropaySolutions\Kernel\Database\Obvious\MissingAttributeException
      */
-    protected function throwMissingAttributeExceptionIfApplicable($key)
+    protected function throwMissingAttributeExceptionIfApplicable(string $key): null
     {
         if (
             $this->exists &&
@@ -369,7 +331,7 @@ trait HasAttributes
             static::preventsAccessingMissingAttributes()
         ) {
             if (isset(static::$missingAttributeViolationCallback)) {
-                return call_user_func(static::$missingAttributeViolationCallback, $this, $key);
+                return (static::$missingAttributeViolationCallback)($this, $key);
             }
 
             throw new MissingAttributeException($this, $key);
@@ -380,11 +342,8 @@ trait HasAttributes
 
     /**
      * Get a plain attribute (not a relationship).
-     *
-     * @param string $key
-     * @return mixed
      */
-    public function getAttributeValue($key)
+    public function getAttributeValue(string $key): mixed
     {
         return $this->transformModelValue($key, $this->getAttributeFromArray($key));
     }
@@ -400,11 +359,8 @@ trait HasAttributes
 
     /**
      * Get a relationship.
-     *
-     * @param string $key
-     * @return mixed
      */
-    public function getRelationValue($key)
+    public function getRelationValue(string $key): mixed
     {
         // If the key already exists in the relationships array, it just means the
         // relationship has already been loaded, so we'll just return it out of
@@ -425,29 +381,23 @@ trait HasAttributes
 
     /**
      * Determine if the given key is a relationship method on the model.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function isRelation($key)
+    public function isRelation(string $key): bool
     {
         return $this->isRelationInSegregatedRelationsMap($key);
     }
 
     /**
      * Handle a lazy loading violation.
-     *
-     * @param string $key
-     * @return mixed
      */
-    protected function handleLazyLoadingViolation($key)
+    protected function handleLazyLoadingViolation(string $key): mixed
     {
         if (isset(static::$lazyLoadingViolationCallback)) {
-            return call_user_func(static::$lazyLoadingViolationCallback, $this, $key);
+            return (static::$lazyLoadingViolationCallback)($this, $key);
         }
 
         if (!$this->exists || $this->wasRecentlyCreated) {
-            return;
+            return null;
         }
 
         throw new LazyLoadingViolationException($this, $key);
@@ -456,12 +406,9 @@ trait HasAttributes
     /**
      * Get a relationship value from the segregated Closures.
      *
-     * @param string $method
-     * @return mixed
-     *
      * @throws \LogicException
      */
-    protected function getRelationshipFromMethod($method)
+    protected function getRelationshipFromMethod(string $method): mixed
     {
         return tap($this->callSegregatedRelation($method)->getResults(), function ($results) use ($method): void {
             $this->setRelation($method, $results);
@@ -470,11 +417,8 @@ trait HasAttributes
 
     /**
      * Determine if a get mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function hasGetMutator($key)
+    public function hasGetMutator(string $key): bool
     {
         return $this->resolveSegregatedAccessorClosure($key) instanceof \Closure;
     }
@@ -543,12 +487,8 @@ trait HasAttributes
 
     /**
      * Cast the given attribute to an enum.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    protected function getEnumCastableAttributeValue($key, $value)
+    protected function getEnumCastableAttributeValue(string $key, mixed $value): mixed
     {
         if ($value === null) {
             return null;
@@ -565,11 +505,8 @@ trait HasAttributes
 
     /**
      * Get the type of cast for a model attribute.
-     *
-     * @param string $key
-     * @return string
      */
-    protected function getCastType($key)
+    protected function getCastType(string $key): string
     {
         $castType = $this->getCasts()[$key];
 
@@ -582,12 +519,8 @@ trait HasAttributes
 
     /**
      * Set a given attribute on the model.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    public function setAttribute($key, $value)
+    public function setAttribute(string $key, mixed $value): static
     {
         // First we will check for the presence of a mutator for the set operation
         // which simply lets the developers tweak the attribute as it is set on
@@ -609,11 +542,8 @@ trait HasAttributes
 
     /**
      * Determine if a set mutator exists for an attribute.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function hasSetMutator($key)
+    public function hasSetMutator(string $key): bool
     {
         return $this->resolveSegregatedMutatorClosure($key) instanceof \Closure;
     }
@@ -734,11 +664,9 @@ trait HasAttributes
     /**
      * Get the model's original attribute values.
      *
-     * @param string|null $key
-     * @param mixed $default
      * @return mixed|array
      */
-    public function getOriginal($key = null, $default = null)
+    public function getOriginal(?string $key = null, mixed $default = null): mixed
     {
         return (new static())->setRawAttributes(
             $this->original,
@@ -748,12 +676,9 @@ trait HasAttributes
 
     /**
      * Get the model's original attribute values.
-     *
-     * @param string|null $key
-     * @param mixed $default
      * @return mixed|array
      */
-    protected function getOriginalWithoutRewindingModel($key = null, $default = null)
+    protected function getOriginalWithoutRewindingModel(?string $key = null, mixed $default = null): mixed
     {
         if ($key) {
             return $this->transformModelValue(
@@ -770,11 +695,9 @@ trait HasAttributes
     /**
      * Get the model's raw original attribute values.
      *
-     * @param string|null $key
-     * @param mixed $default
      * @return mixed|array
      */
-    public function getRawOriginal($key = null, $default = null)
+    public function getRawOriginal(?string $key = null, mixed $default = null): mixed
     {
         return Arr::get($this->original, $key, $default);
     }
@@ -783,7 +706,6 @@ trait HasAttributes
      * Get a subset of the model's attributes.
      *
      * @param array|mixed $attributes
-     * @return array
      */
     public function only(mixed $attributes): array
     {
@@ -798,10 +720,8 @@ trait HasAttributes
 
     /**
      * Sync the original attributes with the current.
-     *
-     * @return $this
      */
-    public function syncOriginal()
+    public function syncOriginal(): static
     {
         $this->original = $this->getAttributes();
 
@@ -810,11 +730,8 @@ trait HasAttributes
 
     /**
      * Sync a single original attribute with its current value.
-     *
-     * @param string $attribute
-     * @return $this
      */
-    public function syncOriginalAttribute($attribute)
+    public function syncOriginalAttribute(string $attribute): static
     {
         return $this->syncOriginalAttributes($attribute);
     }
@@ -835,10 +752,8 @@ trait HasAttributes
 
     /**
      * Sync the changed attributes.
-     *
-     * @return $this
      */
-    public function syncChanges()
+    public function syncChanges(): static
     {
         $this->changes = $this->getDirty();
 
@@ -863,10 +778,8 @@ trait HasAttributes
 
     /**
      * Discard attribute changes and reset the attributes to their original state.
-     *
-     * @return $this
      */
-    public function discardChanges()
+    public function discardChanges(): static
     {
         [$this->attributes, $this->changes] = [$this->original, []];
 
@@ -886,18 +799,14 @@ trait HasAttributes
 
     /**
      * Determine if any of the given attributes were changed when the model was last saved.
-     *
-     * @param array $changes
-     * @param array|string|null $attributes
-     * @return bool
      */
-    protected function hasChanges($changes, $attributes = null)
+    protected function hasChanges(array $changes, array|string|null $attributes = null): bool
     {
         // If no specific attributes were provided, we will just see if the dirty array
         // already contains any attributes. If it does we will just return that this
         // count is greater than zero. Else, we need to check specific attributes.
         if (empty($attributes)) {
-            return count($changes) > 0;
+            return [] !== $changes;
         }
 
         // Here we will spin through every attribute and see if this is in the array of
@@ -944,20 +853,16 @@ trait HasAttributes
 
     /**
      * Get the attributes that have been changed since the last sync for an update operation.
-     *
-     * @return array
      */
-    protected function getDirtyForUpdate()
+    protected function getDirtyForUpdate(): array
     {
         return $this->getDirty();
     }
 
     /**
      * Get the attributes that were changed when the model was last saved.
-     *
-     * @return array
      */
-    public function getChanges()
+    public function getChanges(): array
     {
         return $this->changes;
     }
@@ -986,17 +891,15 @@ trait HasAttributes
             return $this->castAttribute($key, $attribute) === $this->castAttribute($key, $original);
         }
 
-        return is_numeric($attribute) && is_numeric($original) && strcmp((string)$attribute, (string)$original) === 0;
+        return \is_numeric($attribute)
+            && \is_numeric($original)
+            && \strcmp((string)$attribute, (string)$original) === 0;
     }
 
     /**
      * Transform a raw model value using mutators, casts, etc.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return mixed
      */
-    protected function transformModelValue($key, $value)
+    protected function transformModelValue(string $key, mixed $value): mixed
     {
         // If the attribute has a get mutator, we will call that then return what
         // it returns as the value, which is useful for transforming values on
@@ -1040,21 +943,16 @@ trait HasAttributes
 
     /**
      * Get the accessors that are being appended to model arrays.
-     *
-     * @return array
      */
-    public function getAppends()
+    public function getAppends(): array
     {
         return $this->appends;
     }
 
     /**
      * Set the accessors to append to model arrays.
-     *
-     * @param array $appends
-     * @return $this
      */
-    public function setAppends(array $appends)
+    public function setAppends(array $appends): static
     {
         $this->appends = $appends;
 

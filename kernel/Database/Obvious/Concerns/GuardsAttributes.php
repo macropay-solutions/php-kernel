@@ -9,35 +9,33 @@ trait GuardsAttributes
      *
      * @var array<int, string>
      */
-    protected $fillable = [];
+    protected array $fillable = [];
 
     /**
      * The attributes that aren't mass assignable.
      *
      * @var array<string>
      */
-    protected $guarded = ['*'];
+    protected array $guarded = ['*'];
 
     /**
      * Indicates if all mass assignment is enabled.
-     *
-     * @var bool
      */
-    protected static $unguarded = false;
+    protected static bool $unguarded = false;
 
     /**
      * The actual columns that exist on the database and can be guarded.
      *
      * @var array<class-string,list<string>>
- */
-    protected static $guardableColumns = [];
+    */
+    protected static array $guardableColumns = [];
 
     /**
      * Get the fillable attributes for the model.
      *
      * @return array<string>
      */
-    public function getFillable()
+    public function getFillable(): array
     {
         return $this->fillable;
     }
@@ -45,10 +43,9 @@ trait GuardsAttributes
     /**
      * Set the fillable attributes for the model.
      *
-     * @param array<string> $fillable
-     * @return $this
+     * @param array<int, string> $fillable
      */
-    public function fillable(array $fillable)
+    public function fillable(array $fillable): static
     {
         $this->fillable = $fillable;
 
@@ -58,10 +55,9 @@ trait GuardsAttributes
     /**
      * Merge new fillable attributes with existing fillable attributes on the model.
      *
-     * @param array<string> $fillable
-     * @return $this
+     * @param array<int, string> $fillable
      */
-    public function mergeFillable(array $fillable)
+    public function mergeFillable(array $fillable): static
     {
         $this->fillable = array_values(array_unique(array_merge($this->fillable, $fillable)));
 
@@ -73,7 +69,7 @@ trait GuardsAttributes
      *
      * @return array<string>
      */
-    public function getGuarded()
+    public function getGuarded(): array
     {
         return self::$unguarded === true
             ? []
@@ -84,9 +80,8 @@ trait GuardsAttributes
      * Set the guarded attributes for the model.
      *
      * @param array<string> $guarded
-     * @return $this
      */
-    public function guard(array $guarded)
+    public function guard(array $guarded): static
     {
         $this->guarded = $guarded;
 
@@ -97,9 +92,8 @@ trait GuardsAttributes
      * Merge new guarded attributes with existing guarded attributes on the model.
      *
      * @param array<string> $guarded
-     * @return $this
      */
-    public function mergeGuarded(array $guarded)
+    public function mergeGuarded(array $guarded): static
     {
         $this->guarded = array_values(array_unique(array_merge($this->guarded, $guarded)));
 
@@ -108,42 +102,32 @@ trait GuardsAttributes
 
     /**
      * Disable all mass assignable restrictions.
-     *
-     * @param bool $state
-     * @return void
      */
-    public static function unguard($state = true)
+    public static function unguard(bool $state = true): void
     {
         static::$unguarded = $state;
     }
 
     /**
      * Enable the mass assignment restrictions.
-     *
-     * @return void
      */
-    public static function reguard()
+    public static function reguard(): void
     {
         static::$unguarded = false;
     }
 
     /**
      * Determine if the current state is "unguarded".
-     *
-     * @return bool
      */
-    public static function isUnguarded()
+    public static function isUnguarded(): bool
     {
         return static::$unguarded;
     }
 
     /**
      * Run the given callable while being unguarded.
-     *
-     * @param callable $callback
-     * @return mixed
      */
-    public static function unguarded(callable $callback)
+    public static function unguarded(callable $callback): mixed
     {
         if (static::$unguarded) {
             return $callback();
@@ -160,11 +144,8 @@ trait GuardsAttributes
 
     /**
      * Determine if the given attribute may be mass assigned.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function isFillable($key)
+    public function isFillable(string $key): bool
     {
         if (static::$unguarded) {
             return true;
@@ -191,13 +172,10 @@ trait GuardsAttributes
 
     /**
      * Determine if the given key is guarded.
-     *
-     * @param string $key
-     * @return bool
      */
-    public function isGuarded($key)
+    public function isGuarded(string $key): bool
     {
-        if (empty($guarded = $this->getGuarded())) {
+        if ([] === ($guarded = $this->getGuarded())) {
             return false;
         }
 
@@ -208,11 +186,8 @@ trait GuardsAttributes
 
     /**
      * Determine if the given column is a valid, guardable column.
-     *
-     * @param string $key
-     * @return bool
      */
-    protected function isGuardableColumn($key)
+    protected function isGuardableColumn(string $key): bool
     {
         if (!isset(static::$guardableColumns[static::class])) {
             $columns = $this->getConnection()
@@ -226,26 +201,21 @@ trait GuardsAttributes
             static::$guardableColumns[static::class] = $columns;
         }
 
-        return in_array($key, static::$guardableColumns[static::class]);
+        return \in_array($key, static::$guardableColumns[static::class], true);
     }
 
     /**
      * Determine if the model is totally guarded.
-     *
-     * @return bool
      */
-    public function totallyGuarded()
+    public function totallyGuarded(): bool
     {
         return [] === $this->getFillable() && $this->getGuarded() == ['*'];
     }
 
     /**
      * Get the fillable attributes of a given array.
-     *
-     * @param array $attributes
-     * @return array
      */
-    protected function fillableFromArray(array $attributes)
+    protected function fillableFromArray(array $attributes): array
     {
         if ([] !== $this->getFillable() && !static::$unguarded) {
             return array_intersect_key($attributes, array_flip($this->getFillable()));

@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Events\NullDispatcher;
+use MacropaySolutions\Kernel\Events\QueuedCallable;
 use MacropaySolutions\Kernel\Support\Arr;
 
 trait HasEvents
@@ -19,32 +20,25 @@ trait HasEvents
      * The event map for the model.
      *
      * Allows for object-based events for native Obvious events.
-     *
-     * @var array
      */
-    protected $dispatchesEvents = [];
+    protected array $dispatchesEvents = [];
 
     /**
      * User exposed observable events.
      *
      * These are extra user-defined events observers may subscribe to.
-     *
-     * @var array
      */
-    protected $observables = [];
+    protected array $observables = [];
 
     /**
      * Register observers with the model.
      *
-     * @param object|array|string $classes
-     * @return void
-     *
      * @throws \RuntimeException
      */
-    public static function observe($classes)
+    public static function observe(object|array|string $classes): void
     {
         if (
-            Container::eventsAsObserversAreCached()
+            Container::getInstance()->eventsAsObserversAreCached()
             && !Container::getInstance()->isBooted()
         ) {
             return;
@@ -60,12 +54,9 @@ trait HasEvents
     /**
      * Register a single observer with the model.
      *
-     * @param object|string $class
-     * @return void
-     *
      * @throws \RuntimeException
      */
-    protected function registerObserver($class)
+    protected function registerObserver(object|string $class): void
     {
         $className = $this->resolveObserverClassName($class);
 
@@ -80,18 +71,15 @@ trait HasEvents
     /**
      * Resolve the observer's class name from an object or string.
      *
-     * @param object|string $class
-     * @return string
-     *
      * @throws \InvalidArgumentException
      */
-    private function resolveObserverClassName($class)
+    private function resolveObserverClassName(object|string $class): string
     {
         if (is_object($class)) {
-            return get_class($class);
+            return $class::class;
         }
 
-        if (class_exists($class)) {
+        if (\class_exists($class)) {
             return $class;
         }
 
@@ -100,10 +88,8 @@ trait HasEvents
 
     /**
      * Get the observable event names.
-     *
-     * @return array
      */
-    public function getObservableEvents()
+    public function getObservableEvents(): array
     {
         return array_merge(
             [
@@ -128,11 +114,8 @@ trait HasEvents
 
     /**
      * Set the observable event names.
-     *
-     * @param array $observables
-     * @return $this
      */
-    public function setObservableEvents(array $observables)
+    public function setObservableEvents(array $observables): static
     {
         $this->observables = $observables;
 
@@ -143,14 +126,13 @@ trait HasEvents
      * Add an observable event name.
      *
      * @param array|mixed $observables
-     * @return void
      */
-    public function addObservableEvents($observables)
+    public function addObservableEvents(mixed $observables): void
     {
-        $this->observables = array_unique(
-            array_merge(
+        $this->observables = \array_unique(
+            \array_merge(
                 $this->observables,
-                is_array($observables) ? $observables : func_get_args()
+                \is_array($observables) ? $observables : \func_get_args()
             )
         );
     }
@@ -159,36 +141,27 @@ trait HasEvents
      * Remove an observable event name.
      *
      * @param array|mixed $observables
-     * @return void
      */
-    public function removeObservableEvents($observables)
+    public function removeObservableEvents(mixed $observables): void
     {
-        $this->observables = array_diff(
+        $this->observables = \array_diff(
             $this->observables,
-            is_array($observables) ? $observables : func_get_args()
+            \is_array($observables) ? $observables : \func_get_args()
         );
     }
 
     /**
      * Register a model event with the dispatcher.
-     *
-     * @param string $event
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    protected static function registerModelEvent($event, $callback)
+    protected static function registerModelEvent(string $event, QueuedCallable|string|array $callback): void
     {
         static::getEventDispatcher()->listen('obvious.' . $event . ': ' . static::class, $callback);
     }
 
     /**
      * Fire the given event for the model.
-     *
-     * @param string $event
-     * @param bool $halt
-     * @return mixed
      */
-    protected function fireModelEvent($event, $halt = true)
+    protected function fireModelEvent(string $event, bool $halt = true): mixed
     {
         // First, we will get the proper method to call on the event dispatcher, and then we
         // will attempt to fire a custom, object based event for the given event. If that
@@ -211,15 +184,12 @@ trait HasEvents
 
     /**
      * Fire a custom model event for the given event.
-     *
-     * @param string $event
-     * @param string $method
      * @return mixed|null
      */
-    protected function fireCustomModelEvent($event, $method)
+    protected function fireCustomModelEvent(string $event, string $method): mixed
     {
         if (!isset($this->dispatchesEvents[$event])) {
-            return;
+            return null;
         }
 
         $result = static::getEventDispatcher()->$method(new $this->dispatchesEvents[$event]($this));
@@ -227,19 +197,18 @@ trait HasEvents
         if (!is_null($result)) {
             return $result;
         }
+
+        return null;
     }
 
     /**
      * Filter the model event results.
-     *
-     * @param mixed $result
-     * @return mixed
      */
-    protected function filterModelEventResults($result)
+    protected function filterModelEventResults(mixed $result): mixed
     {
-        if (is_array($result)) {
-            $result = array_filter($result, function ($response) {
-                return !is_null($response);
+        if (\is_array($result)) {
+            $result = \array_filter($result, function ($response) {
+                return null !== $response;
             });
         }
 
@@ -248,120 +217,88 @@ trait HasEvents
 
     /**
      * Register a retrieved model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function retrieved($callback)
+    public static function retrieved(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('retrieved', $callback);
     }
 
     /**
      * Register a saving model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function saving($callback)
+    public static function saving(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('saving', $callback);
     }
 
     /**
      * Register a saved model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function saved($callback)
+    public static function saved(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('saved', $callback);
     }
 
     /**
      * Register an updating model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function updating($callback)
+    public static function updating(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('updating', $callback);
     }
 
     /**
      * Register an updated model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function updated($callback)
+    public static function updated(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('updated', $callback);
     }
 
     /**
      * Register a creating model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function creating($callback)
+    public static function creating(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('creating', $callback);
     }
 
     /**
      * Register a created model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function created($callback)
+    public static function created(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('created', $callback);
     }
 
     /**
      * Register a replicating model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function replicating($callback)
+    public static function replicating(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('replicating', $callback);
     }
 
     /**
      * Register a deleting model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function deleting($callback)
+    public static function deleting(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('deleting', $callback);
     }
 
     /**
      * Register a deleted model event with the dispatcher.
-     *
-     * @param \MacropaySolutions\Kernel\Events\QueuedCallable|string|array $callback
-     * @return void
      */
-    public static function deleted($callback)
+    public static function deleted(QueuedCallable|string|array $callback): void
     {
         static::registerModelEvent('deleted', $callback);
     }
 
     /**
      * Remove all the event listeners for the model.
-     *
-     * @return void
      */
-    public static function flushEventListeners()
+    public static function flushEventListeners(): void
     {
         if (!isset(self::$dispatcher)) {
             return;
@@ -396,34 +333,25 @@ trait HasEvents
 
     /**
      * Unset the event dispatcher for models.
-     *
-     * @return void
      */
-    public static function unsetEventDispatcher()
+    public static function unsetEventDispatcher(): void
     {
         self::$dispatcher = null;
     }
 
     /**
      * Execute a callback without firing any model events for any model type.
-     *
-     * @param callable $callback
-     * @return mixed
      */
-    public static function withoutEvents(callable $callback)
+    public static function withoutEvents(callable $callback): mixed
     {
         $dispatcher = static::getEventDispatcher();
 
-        if ($dispatcher) {
-            static::setEventDispatcher(new NullDispatcher($dispatcher));
-        }
+        static::setEventDispatcher(new NullDispatcher($dispatcher));
 
         try {
             return $callback();
         } finally {
-            if ($dispatcher) {
-                static::setEventDispatcher($dispatcher);
-            }
+            static::setEventDispatcher($dispatcher);
         }
     }
 }

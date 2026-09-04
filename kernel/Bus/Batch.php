@@ -502,7 +502,7 @@ class Batch implements Arrayable, JsonSerializable
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,

@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Concerns;
 
-use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 use MacropaySolutions\Kernel\Support\Str;
 
 trait HasUlids
@@ -35,29 +34,6 @@ trait HasUlids
     public function newUniqueId()
     {
         return strtolower((string)Str::ulid());
-    }
-
-    /**
-     * Retrieve the model for a bound value.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model|\MacropaySolutions\Kernel\Database\Obvious\Relations\Relation $query
-     * @param mixed $value
-     * @param string|null $field
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Relations\Relation
-     *
-     * @throws \MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException
-     */
-    public function resolveRouteBindingQuery($query, $value, $field = null)
-    {
-        if ($field && in_array($field, $this->uniqueIds()) && !Str::isUlid($value)) {
-            throw (new ModelNotFoundException())->setModel(static::class, $value);
-        }
-
-        if (!$field && in_array($this->getRouteKeyName(), $this->uniqueIds()) && !Str::isUlid($value)) {
-            throw (new ModelNotFoundException())->setModel(static::class, $value);
-        }
-
-        return parent::resolveRouteBindingQuery($query, $value, $field);
     }
 
     /**

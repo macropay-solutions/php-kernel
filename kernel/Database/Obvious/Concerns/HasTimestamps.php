@@ -9,17 +9,13 @@ trait HasTimestamps
 
     /**
      * Indicates if the model should be timestamped.
-     *
-     * @var bool
      */
-    public $timestamps = true;
+    public bool $timestamps = true;
 
     /**
      * The list of models classes that have timestamps temporarily disabled.
-     *
-     * @var array
      */
-    protected static $ignoreTimestampsOn = [];
+    protected static array $ignoreTimestampsOn = [];
 
     /**
      * Update the model's update timestamp.
@@ -43,21 +39,16 @@ trait HasTimestamps
 
     /**
      * Update the model's update timestamp without raising any events.
-     *
-     * @param string|null $attribute
-     * @return bool
      */
-    public function touchQuietly($attribute = null)
+    public function touchQuietly(?string $attribute = null): bool
     {
         return static::withoutEvents(fn() => $this->touch($attribute));
     }
 
     /**
-     * Update the creation and update timestamps.
-     *
-     * @return $this
+     * Update the creation and update timestamps.s
      */
-    public function updateTimestamps()
+    public function updateTimestamps(): static
     {
         $time = \date(static::UPDATED_AT_FORMAT);
 
@@ -82,116 +73,90 @@ trait HasTimestamps
 
     /**
      * Set the value of the "created at" attribute.
-     *
-     * @param mixed $value
-     * @return $this
      */
-    public function setCreatedAt($value)
+    public function setCreatedAt(mixed $value): static
     {
-        $this->{$this->getCreatedAtColumn()} = $value;
+        $this->setAttribute($this->getCreatedAtColumn(), $value);
 
         return $this;
     }
 
     /**
      * Set the value of the "updated at" attribute.
-     *
-     * @param mixed $value
-     * @return $this
      */
-    public function setUpdatedAt($value)
+    public function setUpdatedAt(mixed $value): static
     {
-        $this->{$this->getUpdatedAtColumn()} = $value;
+        $this->setAttribute($this->getUpdatedAtColumn(), $value);
 
         return $this;
     }
 
     /**
      * Determine if the model uses timestamps.
-     *
-     * @return bool
      */
-    public function usesTimestamps()
+    public function usesTimestamps(): bool
     {
         return $this->timestamps && !static::isIgnoringTimestamps($this::class);
     }
 
     /**
      * Get the name of the "created at" column.
-     *
-     * @return string|null
      */
-    public function getCreatedAtColumn()
+    public function getCreatedAtColumn(): ?string
     {
         return static::CREATED_AT;
     }
 
     /**
      * Get the name of the "updated at" column.
-     *
-     * @return string|null
      */
-    public function getUpdatedAtColumn()
+    public function getUpdatedAtColumn(): ?string
     {
         return static::UPDATED_AT;
     }
 
     /**
      * Get the fully qualified "created at" column.
-     *
-     * @return string|null
      */
-    public function getQualifiedCreatedAtColumn()
+    public function getQualifiedCreatedAtColumn(): string
     {
-        return $this->qualifyColumn($this->getCreatedAtColumn());
+        return $this->qualifyColumn((string)$this->getCreatedAtColumn());
     }
 
     /**
      * Get the fully qualified "updated at" column.
-     *
-     * @return string|null
      */
-    public function getQualifiedUpdatedAtColumn()
+    public function getQualifiedUpdatedAtColumn(): string
     {
-        return $this->qualifyColumn($this->getUpdatedAtColumn());
+        return $this->qualifyColumn((string)$this->getUpdatedAtColumn());
     }
 
     /**
      * Disable timestamps for the current class during the given callback scope.
-     *
-     * @param callable $callback
-     * @return mixed
      */
-    public static function withoutTimestamps(callable $callback)
+    public static function withoutTimestamps(callable $callback): mixed
     {
         return static::withoutTimestampsOn([static::class], $callback);
     }
 
     /**
      * Disable timestamps for the given model classes during the given callback scope.
-     *
-     * @param array $models
-     * @param callable $callback
-     * @return mixed
      */
-    public static function withoutTimestampsOn($models, $callback)
+    public static function withoutTimestampsOn(array $models, callable $callback): mixed
     {
-        static::$ignoreTimestampsOn = array_values(array_merge(static::$ignoreTimestampsOn, $models));
+        static::$ignoreTimestampsOn = \array_values(\array_merge(static::$ignoreTimestampsOn, $models));
 
         try {
             return $callback();
         } finally {
-            static::$ignoreTimestampsOn = array_values(array_diff(static::$ignoreTimestampsOn, $models));
+            static::$ignoreTimestampsOn = \array_values(\array_diff(static::$ignoreTimestampsOn, $models));
         }
     }
 
     /**
      * Determine if the given model is ignoring timestamps / touches.
-     *
-     * @param string|null $class
-     * @return bool
      */
-    public static function isIgnoringTimestamps($class = null)
+    public static function isIgnoringTimestamps(?string $class = null): bool
     {
         $class ??= static::class;
 

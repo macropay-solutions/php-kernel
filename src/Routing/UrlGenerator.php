@@ -2,10 +2,9 @@
 
 namespace MacropaySolutions\Framework\Routing;
 
-use MacropaySolutions\Kernel\Contracts\Routing\UrlRoutable;
+use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Framework\Application;
 
 class UrlGenerator
 {
@@ -296,17 +295,9 @@ class UrlGenerator
      * @param mixed|array $parameters
      * @return array
      */
-    public function formatParameters($parameters)
+    public function formatParameters(mixed $parameters): array
     {
-        $parameters = Arr::wrap($parameters);
-
-        foreach ($parameters as $key => $parameter) {
-            if ($parameter instanceof UrlRoutable) {
-                $parameters[$key] = $parameter->getRouteKey();
-            }
-        }
-
-        return $parameters;
+        return Arr::wrap($parameters);
     }
 
     /**

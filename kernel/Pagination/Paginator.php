@@ -145,7 +145,7 @@ class Paginator extends AbstractPaginator implements
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'current_page' => $this->currentPage(),
@@ -176,7 +176,7 @@ class Paginator extends AbstractPaginator implements
      * @param int $options
      * @return string
      */
-    public function toJson($options = 0)
+    public function toJson(int $options = 0): string
     {
         return json_encode($this->jsonSerialize(), $options);
     }
