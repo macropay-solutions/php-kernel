@@ -284,13 +284,8 @@ class SqlServerGrammar extends Grammar
 
     /**
      * Compile a delete statement without joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $where
-     * @return string
      */
-    protected function compileDeleteWithoutJoins(Builder $query, $table, $where)
+    protected function compileDeleteWithoutJoins(Builder $query, string $table, string $where): string
     {
         $sql = parent::compileDeleteWithoutJoins($query, $table, $where);
 
@@ -386,14 +381,8 @@ class SqlServerGrammar extends Grammar
 
     /**
      * Compile an update statement with joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $columns
-     * @param string $where
-     * @return string
      */
-    protected function compileUpdateWithJoins(Builder $query, $table, $columns, $where)
+    protected function compileUpdateWithJoins(Builder $query, string $table, string $columns, string $where): string
     {
         $alias = last(explode(' as ', $table));
 

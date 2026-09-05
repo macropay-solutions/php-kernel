@@ -304,26 +304,24 @@ class MySqlGrammar extends Grammar
 
     /**
      * Compile an update statement without joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $columns
-     * @param string $where
-     * @return string
      */
-    protected function compileUpdateWithoutJoins(Builder $query, $table, $columns, $where)
+    protected function compileUpdateWithoutJoins(Builder $query, string $table, string $columns, string $where): string
     {
         $sql = parent::compileUpdateWithoutJoins($query, $table, $columns, $where);
 
-        if (!empty($query->orders)) {
-            $sql .= ' ' . $this->compileOrders($query, $query->orders);
-        }
+        return $this->handleSortAnDLimit($query, $sql);
+    }
 
-        if (isset($query->limit)) {
-            $sql .= ' ' . $this->compileLimit($query, $query->limit);
-        }
+    /**
+     * Compile an update statement with joins into SQL.
+     *
+     * Adds ORDER BY and LIMIT if present. Standard MySQL will throw a syntax error.
+     */
+    protected function compileUpdateWithJoins(Builder $query, string $table, string $columns, string $where): string
+    {
+        $sql = parent::compileUpdateWithJoins($query, $table, $columns, $where);
 
-        return $sql;
+        return $this->handleSortAnDLimit($query, $sql);
     }
 
     /**
@@ -347,29 +345,27 @@ class MySqlGrammar extends Grammar
     }
 
     /**
-     * Compile a delete query that does not use joins.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $where
-     * @return string
+     * Compile a delete statement without joins into SQL.
      */
-    protected function compileDeleteWithoutJoins(Builder $query, $table, $where)
+    protected function compileDeleteWithoutJoins(Builder $query, string $table, string $where): string
     {
         $sql = parent::compileDeleteWithoutJoins($query, $table, $where);
 
-        // When using MySQL, delete statements may contain order by statements and limits
-        // so we will compile both of those here. Once we have finished compiling this
-        // we will return the completed SQL statement so it will be executed for us.
-        if (!empty($query->orders)) {
-            $sql .= ' ' . $this->compileOrders($query, $query->orders);
-        }
+        return $this->handleSortAnDLimit($query, $sql);
+    }
 
-        if (isset($query->limit)) {
-            $sql .= ' ' . $this->compileLimit($query, $query->limit);
-        }
+    /**
+     * Compile a delete statement with joins into SQL.
+     *
+     * Adds ORDER BY and LIMIT if present, for platforms that allow them (e.g., PlanetScale/Vitess).
+     *
+     * Standard MySQL does not support ORDER BY or LIMIT with joined deletes and will throw a syntax error.
+     */
+    protected function compileDeleteWithJoins(Builder $query, string $table, string $where): string
+    {
+        $sql = parent::compileDeleteWithJoins($query, $table, $where);
 
-        return $sql;
+        return $this->handleSortAnDLimit($query, $sql);
     }
 
     /**
@@ -407,5 +403,18 @@ class MySqlGrammar extends Grammar
         [$field, $path] = $this->wrapJsonFieldAndPath($value);
 
         return 'json_extract(' . $field . $path . ')';
+    }
+
+    protected function handleSortAnDLimit(Builder $query, string $sql): string
+    {
+        if ([] !== ($query->orders ?? [])) {
+            $sql .= ' ' . $this->compileOrders($query, $query->orders);
+        }
+
+        if (isset($query->limit)) {
+            $sql .= ' ' . $this->compileLimit($query, $query->limit);
+        }
+
+        return $sql;
     }
 }

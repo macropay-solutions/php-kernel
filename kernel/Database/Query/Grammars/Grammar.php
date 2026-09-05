@@ -1168,28 +1168,16 @@ class Grammar extends BaseGrammar
 
     /**
      * Compile an update statement without joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $columns
-     * @param string $where
-     * @return string
      */
-    protected function compileUpdateWithoutJoins(Builder $query, $table, $columns, $where)
+    protected function compileUpdateWithoutJoins(Builder $query, string $table, string $columns, string $where): string
     {
         return "update {$table} set {$columns} {$where}";
     }
 
     /**
      * Compile an update statement with joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $columns
-     * @param string $where
-     * @return string
      */
-    protected function compileUpdateWithJoins(Builder $query, $table, $columns, $where)
+    protected function compileUpdateWithJoins(Builder $query, string $table, string $columns, string $where): string
     {
         $joins = $this->compileJoins($query, $query->joins);
 
@@ -1249,26 +1237,16 @@ class Grammar extends BaseGrammar
 
     /**
      * Compile a delete statement without joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $where
-     * @return string
      */
-    protected function compileDeleteWithoutJoins(Builder $query, $table, $where)
+    protected function compileDeleteWithoutJoins(Builder $query, string $table, string $where): string
     {
         return "delete from {$table} {$where}";
     }
 
     /**
      * Compile a delete statement with joins into SQL.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Query\Builder $query
-     * @param string $table
-     * @param string $where
-     * @return string
      */
-    protected function compileDeleteWithJoins(Builder $query, $table, $where)
+    protected function compileDeleteWithJoins(Builder $query, string $table, string $where): string
     {
         $alias = last(explode(' as ', $table));
 

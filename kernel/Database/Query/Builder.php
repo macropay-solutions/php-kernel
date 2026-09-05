@@ -142,17 +142,13 @@ class Builder implements BuilderContract
 
     /**
      * The orderings for the query.
-     *
-     * @var array
      */
-    public $orders;
+    public ?array $orders = null;
 
     /**
      * The maximum number of records to return.
-     *
-     * @var int
      */
-    public $limit;
+    public ?int $limit = null;
 
     /**
      * The number of records to skip.
