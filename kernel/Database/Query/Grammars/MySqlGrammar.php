@@ -309,7 +309,7 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileUpdateWithoutJoins($query, $table, $columns, $where);
 
-        return $this->handleSortAnDLimit($query, $sql);
+        return $this->handleSortAndLimit($query, $sql);
     }
 
     /**
@@ -321,7 +321,7 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileUpdateWithJoins($query, $table, $columns, $where);
 
-        return $this->handleSortAnDLimit($query, $sql);
+        return $this->handleSortAndLimit($query, $sql);
     }
 
     /**
@@ -351,7 +351,7 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileDeleteWithoutJoins($query, $table, $where);
 
-        return $this->handleSortAnDLimit($query, $sql);
+        return $this->handleSortAndLimit($query, $sql);
     }
 
     /**
@@ -365,7 +365,7 @@ class MySqlGrammar extends Grammar
     {
         $sql = parent::compileDeleteWithJoins($query, $table, $where);
 
-        return $this->handleSortAnDLimit($query, $sql);
+        return $this->handleSortAndLimit($query, $sql);
     }
 
     /**
@@ -405,7 +405,7 @@ class MySqlGrammar extends Grammar
         return 'json_extract(' . $field . $path . ')';
     }
 
-    protected function handleSortAnDLimit(Builder $query, string $sql): string
+    protected function handleSortAndLimit(Builder $query, string $sql): string
     {
         if ([] !== ($query->orders ?? [])) {
             $sql .= ' ' . $this->compileOrders($query, $query->orders);
