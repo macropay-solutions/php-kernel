@@ -109,12 +109,12 @@ class MonitorCommand extends DatabaseInspectionCommand
     {
         $this->newLine();
 
-        $this->components->twoColumnDetail('<fg=gray>Database name</>', '<fg=gray>Connections</>');
+        $this->twoColumnDetail('<fg=gray>Database name</>', '<fg=gray>Connections</>');
 
         $databases->each(function ($database) {
             $status = '[' . $database['connections'] . '] ' . $database['status'];
 
-            $this->components->twoColumnDetail($database['database'], $status);
+            $this->twoColumnDetail($database['database'], $status);
         });
 
         $this->newLine();

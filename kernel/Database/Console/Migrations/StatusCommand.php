@@ -70,11 +70,11 @@ class StatusCommand extends BaseCommand
             if (count($migrations) > 0) {
                 $this->newLine();
 
-                $this->components->twoColumnDetail('<fg=gray>Migration name</>', '<fg=gray>Batch / Status</>');
+                $this->twoColumnDetail('<fg=gray>Migration name</>', '<fg=gray>Batch / Status</>');
 
                 $migrations
                     ->each(
-                        fn($migration) => $this->components->twoColumnDetail($migration[0], $migration[1])
+                        fn($migration) => $this->twoColumnDetail($migration[0], $migration[1])
                     );
 
                 $this->newLine();

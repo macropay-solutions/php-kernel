@@ -72,7 +72,7 @@ class PruneCommand extends Command
                 $this->info(sprintf('Pruning [%s] records.', $event->model));
             }
 
-            $this->components->twoColumnDetail($event->model, "{$event->count} records");
+            $this->twoColumnDetail($event->model, "{$event->count} records");
         });
 
         $events->dispatch(new ModelPruningStarting($models->all()));

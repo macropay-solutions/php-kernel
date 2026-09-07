@@ -335,4 +335,53 @@ class Command extends SymfonyCommand implements Macroable
     {
         $this->app = $app;
     }
+
+    /**
+     * Output a two-column detail row natively.
+     */
+    public function twoColumnDetail(string $first, ?string $second = null): void
+    {
+        $this->line(\sprintf('%s : %s', $first, $second ?? ''));
+    }
+
+    /**
+     * Output a bulleted list natively.
+     */
+    public function bulletList(array $elements, $verbosity = null): void
+    {
+        foreach ($elements as $element) {
+            $this->line('  - ' . $element, null, $verbosity);
+        }
+    }
+
+    /**
+     * Execute a task and output the result natively.
+     */
+    public function task(string $title, ?callable $task = null, $verbosity = null): void
+    {
+        $this->output->write($title . '... ', false, $verbosity ??
+            \Symfony\Component\Console\Output\OutputInterface::VERBOSITY_NORMAL);
+
+        if ($task === null) {
+            $this->output->writeln('<info>DONE</info>');
+
+            return;
+        }
+
+        try {
+            $result = $task();
+
+            if ($result === false) {
+                $this->output->writeln('<error>FAIL</error>');
+
+                return;
+            }
+
+            $this->output->writeln('<info>DONE</info>');
+        } catch (\Throwable $e) {
+            $this->output->writeln('<error>FAIL</error>');
+
+            throw $e;
+        }
+    }
 }
