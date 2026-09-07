@@ -11,6 +11,8 @@ use Symfony\Component\Finder\Finder;
 
 abstract class GeneratorCommand extends Command implements PromptsForMissingInput
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleGeneratorCommand;
+
     /**
      * The filesystem instance.
      *

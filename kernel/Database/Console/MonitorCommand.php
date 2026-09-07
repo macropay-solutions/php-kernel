@@ -11,6 +11,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'db:monitor')]
 class MonitorCommand extends DatabaseInspectionCommand
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMonitorCommand;
+
     /**
      * The name and signature of the console command.
      *

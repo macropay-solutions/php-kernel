@@ -11,6 +11,8 @@ use Predis\Command\Argument\ArrayableArgument;
  */
 class PredisConnection extends Connection implements ConnectionContract
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelRedisConnectionsPredisConnection;
+
     /**
      * The Predis client.
      *

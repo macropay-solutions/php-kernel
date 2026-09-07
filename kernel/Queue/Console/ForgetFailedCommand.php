@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:forget')]
 class ForgetFailedCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleForgetFailedCommand;
+
     /**
      * The console command signature.
      *

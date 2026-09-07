@@ -7,12 +7,13 @@ use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter;
 use MacropaySolutions\Kernel\Queue\Events\JobRetryRequested;
 use MacropaySolutions\Kernel\Support\Arr;
-use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'queue:retry')]
 class RetryCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleRetryCommand;
+
     /**
      * The console command signature.
      *

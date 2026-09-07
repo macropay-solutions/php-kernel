@@ -11,6 +11,8 @@ use Symfony\Component\Finder\SplFileInfo;
 #[AsCommand(name: 'view:cache')]
 class ViewCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleViewCacheCommand;
+
     /**
      * The name and signature of the console command.
      *

@@ -9,6 +9,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'schedule:interrupt')]
 class ScheduleInterruptCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingScheduleInterruptCommand;
+
     /**
      * The console command name.
      *

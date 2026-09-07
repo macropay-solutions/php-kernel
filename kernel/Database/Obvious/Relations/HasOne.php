@@ -13,6 +13,8 @@ use MacropaySolutions\Kernel\Database\Query\JoinClause;
 
 class HasOne extends HasOneOrMany implements SupportsPartialRelations
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasOne;
+
     use ComparesRelatedModels;
     use CanBeOneOfMany;
     use SupportsDefaultModels;

@@ -10,6 +10,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:listen')]
 class ListenCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleListenCommand;
+
     /**
      * The console command name.
      *

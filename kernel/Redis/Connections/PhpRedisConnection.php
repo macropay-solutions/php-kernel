@@ -11,6 +11,8 @@ use RedisException;
  */
 class PhpRedisConnection extends Connection implements ConnectionContract
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelRedisConnectionsPhpRedisConnection;
+
     use PacksPhpRedisValues;
 
     /**

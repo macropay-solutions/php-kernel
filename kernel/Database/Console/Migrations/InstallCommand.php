@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class InstallCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsInstallCommand;
+
     /**
      * The console command name.
      *

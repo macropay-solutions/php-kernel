@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand(name: 'queue:clear')]
 class ClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleClearCommand;
+
     use ConfirmableTrait;
 
     /**

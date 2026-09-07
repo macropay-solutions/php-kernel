@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\SupportsDefault
 
 class HasOneThrough extends HasManyThrough
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasOneThrough;
+
     use InteractsWithDictionary;
     use SupportsDefaultModels;
 

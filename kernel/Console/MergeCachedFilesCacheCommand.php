@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'merge-cached-files:cache')]
 class MergeCachedFilesCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleMergeCachedFilesCacheCommand;
+
     /**
      * The console command name.
      *

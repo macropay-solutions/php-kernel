@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'auth:clear-resets')]
 class ClearResetsCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelAuthConsoleClearResetsCommand;
+
     /**
      * The name and signature of the console command.
      *

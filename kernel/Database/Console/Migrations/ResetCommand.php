@@ -9,6 +9,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ResetCommand extends BaseCommand
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsResetCommand;
+
     use ConfirmableTrait;
     use Prohibitable;
 

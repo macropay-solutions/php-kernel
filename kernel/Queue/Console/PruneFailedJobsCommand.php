@@ -10,6 +10,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:prune-failed')]
 class PruneFailedJobsCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsolePruneFailedJobsCommand;
+
     /**
      * The console command signature.
      *

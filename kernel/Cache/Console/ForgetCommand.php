@@ -9,6 +9,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'cache:forget')]
 class ForgetCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelCacheConsoleForgetCommand;
+
     /**
      * The console command name.
      *

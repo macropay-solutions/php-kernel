@@ -12,6 +12,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:prune-batches')]
 class PruneBatchesCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsolePruneBatchesCommand;
+
     /**
      * The console command signature.
      *

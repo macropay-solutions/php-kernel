@@ -20,6 +20,8 @@ use function MacropaySolutions\Prompts\confirm;
 
 abstract class DatabaseInspectionCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleDatabaseInspectionCommand;
+
     /**
      * A map of database column types.
      *

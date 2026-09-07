@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Console\Command;
 
 class ScheduleClearCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingScheduleClearCacheCommand;
+
     /**
      * The console command name.
      *

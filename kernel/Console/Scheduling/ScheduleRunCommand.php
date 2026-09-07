@@ -19,6 +19,8 @@ use Throwable;
 #[AsCommand(name: 'schedule:run')]
 class ScheduleRunCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingScheduleRunCommand;
+
     /**
      * The console command name.
      *

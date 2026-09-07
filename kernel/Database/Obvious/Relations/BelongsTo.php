@@ -12,6 +12,8 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\SupportsDefault
 
 class BelongsTo extends Relation
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsBelongsTo;
+
     use ComparesRelatedModels;
     use InteractsWithDictionary;
     use SupportsDefaultModels;

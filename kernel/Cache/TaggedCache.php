@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Contracts\Cache\Store;
 
 class TaggedCache extends Repository
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelCacheTaggedCache;
+
     use RetrievesMultipleKeys;
 
     /**

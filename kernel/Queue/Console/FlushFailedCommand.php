@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:flush')]
 class FlushFailedCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleFlushFailedCommand;
+
     /**
      * The console command name.
      *

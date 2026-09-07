@@ -15,6 +15,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class HasManyThrough extends Relation
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasManyThrough;
+
     use InteractsWithDictionary;
 
     /**

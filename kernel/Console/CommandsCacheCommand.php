@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'commands:cache')]
 class CommandsCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleCommandsCacheCommand;
+
     /**
      * The console command name.
      *

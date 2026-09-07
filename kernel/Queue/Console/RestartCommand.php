@@ -10,6 +10,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:restart')]
 class RestartCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleRestartCommand;
+
     use InteractsWithTime;
 
     /**

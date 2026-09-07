@@ -10,6 +10,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:retry-batch')]
 class RetryBatchCommand extends Command implements Isolatable
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleRetryBatchCommand;
+
     /**
      * The console command signature.
      *

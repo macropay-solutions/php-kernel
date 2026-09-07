@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 
 class AwsS3V3Adapter extends FilesystemAdapter
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelFilesystemAwsS3V3Adapter;
+
     use Conditionable;
 
     /**

@@ -17,6 +17,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class BelongsToMany extends Relation
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsBelongsToMany;
+
     use InteractsWithDictionary;
     use InteractsWithPivotTable;
 

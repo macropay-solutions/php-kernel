@@ -8,6 +8,8 @@ use Symfony\Component\Console\Terminal;
 
 class FailJobCommand extends WorkCommand
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleFailJobCommand;
+
     /**
      * The console command name.
      *

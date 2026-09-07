@@ -12,6 +12,8 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'schedule:work')]
 class ScheduleWorkCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingScheduleWorkCommand;
+
     /**
      * The name and signature of the console command.
      *

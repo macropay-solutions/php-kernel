@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class StatusCommand extends BaseCommand
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsStatusCommand;
+
     /**
      * The console command name.
      *

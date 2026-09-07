@@ -9,6 +9,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'view:clear')]
 class ViewClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleViewClearCommand;
+
     /**
      * The console command name.
      *

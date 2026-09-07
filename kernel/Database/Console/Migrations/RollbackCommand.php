@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class RollbackCommand extends BaseCommand
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsRollbackCommand;
+
     use ConfirmableTrait;
 
     /**

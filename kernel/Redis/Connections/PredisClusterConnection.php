@@ -7,6 +7,8 @@ use Predis\Command\ServerFlushDatabase;
 
 class PredisClusterConnection extends PredisConnection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelRedisConnectionsPredisClusterConnection;
+
     /**
      * Flush the selected Redis database on all cluster nodes.
      *

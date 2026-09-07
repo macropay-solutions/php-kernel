@@ -9,6 +9,8 @@ use UnexpectedValueException;
 
 class DbCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleDbCommand;
+
     /**
      * The name and signature of the console command.
      *

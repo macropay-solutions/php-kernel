@@ -16,6 +16,8 @@ use function MacropaySolutions\Prompts\confirm;
 
 class MigrateCommand extends BaseCommand implements Isolatable
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsMigrateCommand;
+
     use ConfirmableTrait;
 
     /**

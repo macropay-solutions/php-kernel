@@ -13,6 +13,8 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class PostgresConnection extends Connection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabasePostgresConnection;
+
     /**
      * Escape a binary value for safe SQL embedding.
      *

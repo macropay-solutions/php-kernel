@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class FreshCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsFreshCommand;
+
     use ConfirmableTrait;
     use Prohibitable;
 

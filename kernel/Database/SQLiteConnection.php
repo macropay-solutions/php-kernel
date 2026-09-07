@@ -13,6 +13,8 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class SQLiteConnection extends Connection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSQLiteConnection;
+
     /**
      * Create a new database connection instance.
      *

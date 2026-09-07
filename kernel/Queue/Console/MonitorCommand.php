@@ -12,6 +12,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:monitor')]
 class MonitorCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleMonitorCommand;
+
     /**
      * The console command name.
      *

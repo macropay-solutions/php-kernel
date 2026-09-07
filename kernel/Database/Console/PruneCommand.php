@@ -16,6 +16,8 @@ use Symfony\Component\Finder\Finder;
 
 class PruneCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsolePruneCommand;
+
     /**
      * The console command name.
      *

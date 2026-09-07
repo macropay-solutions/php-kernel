@@ -8,6 +8,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'autowiring:clear')]
 class AutowiringMethodsClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleAutowiringMethodsClearCommand;
+
     /**
      * The console command name.
      *

@@ -4,6 +4,8 @@ namespace MacropaySolutions\Kernel\Redis\Connections;
 
 class PhpRedisClusterConnection extends PhpRedisConnection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelRedisConnectionsPhpRedisClusterConnection;
+
     /**
      * Flush the selected Redis database on all master nodes.
      *

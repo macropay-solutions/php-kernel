@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Console\Command;
 
 class BaseCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsBaseCommand;
+
     /**
      * Get all the migration paths.
      *

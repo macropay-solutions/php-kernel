@@ -8,6 +8,8 @@ use SessionHandlerInterface;
 
 class EncryptedStore extends Store
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSessionEncryptedStore;
+
     /**
      * The encrypter instance.
      *

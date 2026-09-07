@@ -15,6 +15,8 @@ use Throwable;
 
 class SqlServerConnection extends Connection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSqlServerConnection;
+
     /**
      * Execute a Closure within a transaction.
      *

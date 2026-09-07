@@ -11,6 +11,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'autowiring:cache')]
 class AutowiringMethodsCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleAutowiringMethodsCacheCommand;
+
     /**
      * The console command name.
      *

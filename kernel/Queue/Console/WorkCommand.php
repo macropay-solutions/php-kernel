@@ -19,6 +19,8 @@ use Symfony\Component\Console\Terminal;
 #[AsCommand(name: 'queue:work')]
 class WorkCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleWorkCommand;
+
     /**
      * The console command name.
      *

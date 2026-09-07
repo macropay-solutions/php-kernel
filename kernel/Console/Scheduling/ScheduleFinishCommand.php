@@ -10,6 +10,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'schedule:finish')]
 class ScheduleFinishCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingScheduleFinishCommand;
+
     /**
      * The console command name.
      *

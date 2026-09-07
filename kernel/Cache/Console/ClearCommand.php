@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand(name: 'cache:clear')]
 class ClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelCacheConsoleClearCommand;
+
     /**
      * The console command name.
      *

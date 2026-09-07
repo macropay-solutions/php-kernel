@@ -11,6 +11,8 @@ use Throwable;
 
 class CallbackEvent extends Event
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingCallbackEvent;
+
     /**
      * The callback to call.
      *

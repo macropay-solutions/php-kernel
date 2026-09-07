@@ -9,6 +9,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'queue:failed')]
 class ListFailedCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleListFailedCommand;
+
     /**
      * The console command name.
      *

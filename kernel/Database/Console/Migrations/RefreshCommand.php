@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 class RefreshCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleMigrationsRefreshCommand;
+
     use ConfirmableTrait;
     use Prohibitable;
 

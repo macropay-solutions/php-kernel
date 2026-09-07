@@ -7,6 +7,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name: 'event:cache')]
 class EventCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleEventCacheCommand;
+
     /**
      * The name and signature of the console command.
      *

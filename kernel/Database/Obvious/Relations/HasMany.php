@@ -7,6 +7,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class HasMany extends HasOneOrMany
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasMany;
+
     /**
      * Convert the relationship to a "has one" relationship.
      *

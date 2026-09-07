@@ -10,6 +10,8 @@ use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
 
 abstract class HasOneOrMany extends Relation
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasOneOrMany;
+
     use InteractsWithDictionary;
 
     /**

@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\InputOption;
 #[AsCommand(name: 'db:seed')]
 class SeedCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConsoleSeedsSeedCommand;
+
     use ConfirmableTrait;
     use Prohibitable;
 
