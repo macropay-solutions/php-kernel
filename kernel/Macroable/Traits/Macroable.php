@@ -20,7 +20,7 @@ trait Macroable
     public static function deferredMacro(string $name, array $callableMethod): void
     {
         if (\method_exists(static::class, $name)) {
-            throw new \LogicException('Method already exists: . ' . $name);
+            throw new \LogicException('Method already exists: ' . $name);
         }
 
         if (Container::getInstance()->isBooted()) {
@@ -39,7 +39,7 @@ trait Macroable
     /**
      * Traverse the inheritance tree to find the class that registered the macro.
      */
-    protected static function resolveMacro(string $name): null|callable|array
+    protected static function resolveMacro(string $name): null|array
     {
         $class = static::class;
 
@@ -64,7 +64,7 @@ trait Macroable
             );
         }
 
-        if (\is_array($macro) && isset($macro['c']) && \is_callable($macro['c'])) {
+        if (isset($macro['c']) && \is_callable($macro['c'])) {
             return $macro['c']();
         }
 

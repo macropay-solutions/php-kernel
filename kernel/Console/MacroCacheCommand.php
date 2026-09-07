@@ -55,9 +55,8 @@ class MacroCacheCommand extends Command
 
         foreach (\array_keys(\array_diff_key($classMap, [$macroableInterface => true])) as $class) {
             if (
-                !\str_starts_with($class, 'MacropaySolutions')
-                || \str_starts_with($class, 'MacropaySolutions\\KernelDev\\')
-                || \str_contains($class, '\\Tests\\')
+                !\str_starts_with($class, 'MacropaySolutions\\Kernel\\')
+                && !\str_starts_with($class, 'MacropaySolutions\\Framework\\')
             ) {
                 continue;
             }
@@ -66,15 +65,14 @@ class MacroCacheCommand extends Command
                 if (!\is_subclass_of($class, $macroableInterface)) {
                     continue;
                 }
+            } catch (\Throwable) {
+                continue;
+            }
 
+            try {
                 $reflector = new \ReflectionClass($class);
             } catch (\ReflectionException $e) {
                 $this->components->warn("Failed to reflect class {$class}: {$e->getMessage()}");
-                $skipped++;
-
-                continue;
-            } catch (\Throwable $e) {
-                $this->components->error("Unexpected error reflecting {$class}: {$e->getMessage()}");
                 $skipped++;
 
                 continue;
@@ -123,41 +121,31 @@ class MacroCacheCommand extends Command
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function compileTrait(string $class, array $macros, string $cacheDir): void
     {
         $shortTraitName = \str_replace('\\', '', $class);
         $methods = [];
-        $macroSkipped = 0;
 
         foreach ($macros as $name => $macro) {
             if (!\is_string($name)) {
-                $this->components->warn("Macro name must be a string in {$class}");
-                $macroSkipped++;
-
-                continue;
+                throw new \Exception("Macro name must be a string in {$class}");
             }
 
             if (!\preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name)) {
-                $this->components->warn(
+                throw new \Exception(
                     "Invalid macro name '{$name}' in {$class}: must match /^[A-Za-z_][A-Za-z0-9_]*$/"
                 );
-                $macroSkipped++;
-
-                continue;
             }
 
             if (!\is_array($macro) || !isset($macro['c'])) {
-                $this->components->warn("Macro '{$name}' in {$class} must be an array with key 'c'");
-                $macroSkipped++;
-
-                continue;
+                throw new \Exception("Macro '{$name}' in {$class} must be an array with key 'c'");
             }
 
             if (!\is_callable($macro['c'])) {
-                $this->components->warn("Macro '{$name}' in {$class} has non-callable value for key 'c'");
-                $macroSkipped++;
-
-                continue;
+                throw new \Exception("Macro '{$name}' in {$class} has non-callable value for key 'c'");
             }
 
             $factory = $macro['c'];
@@ -165,26 +153,14 @@ class MacroCacheCommand extends Command
             try {
                 $factoryExport = \var_export($factory, true);
             } catch (\Throwable $e) {
-                $this->components->warn("Cannot export factory for macro '{$name}' in {$class}: {$e->getMessage()}");
-                $macroSkipped++;
-
-                continue;
+                throw new \Exception("Cannot export factory for macro '{$name}' in {$class}: {$e->getMessage()}");
             }
-
-            $isStatic = false;
-            $returnsReference = false;
-            $signature = '...$parameters';
-            $callArgs = '...$parameters';
-            $returnType = '';
 
             try {
                 $closure = $factory();
 
                 if (!$closure instanceof \Closure) {
-                    $this->components->warn("Macro '{$name}' in {$class} factory did not return a Closure");
-                    $macroSkipped++;
-
-                    continue;
+                    throw new \Exception("Macro '{$name}' in {$class} factory did not return a Closure");
                 }
 
                 $rf = new \ReflectionFunction($closure);
@@ -198,11 +174,11 @@ class MacroCacheCommand extends Command
                 $returnType = $extracted['returnType'];
                 $returnsReference = $extracted['returnsReference'];
             } catch (\ReflectionException $e) {
-                $this->components->warn("Cannot extract signature for macro '{$name}' in " .
-                    "{$class}: {$e->getMessage()}. Falling back to variadic signature.");
+                throw new \Exception("Cannot extract signature for macro '{$name}' in " .
+                    "{$class}: {$e->getMessage()}.");
             } catch (\Throwable $e) {
-                $this->components->warn("Unexpected error processing macro '{$name}' in {$class}: " .
-                    "{$e->getMessage()}. Falling back to variadic signature.");
+                throw new \Exception("Unexpected error processing macro '{$name}' in {$class}: " .
+                    "{$e->getMessage()}.");
             }
 
             $reference = $returnsReference ? '&' : '';
@@ -226,14 +202,8 @@ PHP;
 PHP;
         }
 
-        if ($macroSkipped > 0) {
-            $this->components->warn("Skipped {$macroSkipped} macros in {$class}");
-        }
-
         if ([] === $methods) {
-            $this->components->warn("No valid macros found for {$class}");
-
-            return;
+            throw new \Exception("No valid macros found for {$class}");
         }
 
         $methodsCode = \implode("\n\n", $methods);
