@@ -186,7 +186,7 @@ class CallbackEvent extends Event
      *
      * @return string
      */
-    public function mutexName()
+    public function mutexName(): string
     {
         return 'framework/schedule-' . sha1($this->description ?? '');
     }
