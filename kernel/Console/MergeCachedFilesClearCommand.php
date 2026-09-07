@@ -45,6 +45,6 @@ class MergeCachedFilesClearCommand extends Command
 
         $this->app::setBootstrapCacheFiles($this->app->bootstrapPath('cache'));
 
-        $this->components->info('merge-cached-files cache cleared successfully.');
+        $this->info('merge-cached-files cache cleared successfully.');
     }
 }

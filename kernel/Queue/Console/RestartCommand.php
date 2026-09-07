@@ -57,6 +57,6 @@ class RestartCommand extends Command
     {
         $this->cache->forever('kernel:queue:restart', $this->currentTime());
 
-        $this->components->info('Broadcasting queue restart signal.');
+        $this->info('Broadcasting queue restart signal.');
     }
 }

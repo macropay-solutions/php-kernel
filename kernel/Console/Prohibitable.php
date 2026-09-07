@@ -27,7 +27,7 @@ trait Prohibitable
         }
 
         if (!$quiet) {
-            $this->components->warn('This command is prohibited from running in this environment.');
+            $this->warn('This command is prohibited from running in this environment.');
         }
 
         return true;

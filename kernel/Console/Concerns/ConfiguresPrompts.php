@@ -33,25 +33,25 @@ trait ConfiguresPrompts
         Prompt::fallbackWhen(windows_os() || $this->app->runningUnitTests());
 
         TextPrompt::fallbackUsing(fn(TextPrompt $prompt) => $this->promptUntilValid(
-            fn() => $this->components->ask($prompt->label, $prompt->default ?: null) ?? '',
+            fn() => $this->ask($prompt->label, $prompt->default ?: null) ?? '',
             $prompt->required,
             $prompt->validate
         ));
 
         PasswordPrompt::fallbackUsing(fn(PasswordPrompt $prompt) => $this->promptUntilValid(
-            fn() => $this->components->secret($prompt->label) ?? '',
+            fn() => $this->secret($prompt->label) ?? '',
             $prompt->required,
             $prompt->validate
         ));
 
         ConfirmPrompt::fallbackUsing(fn(ConfirmPrompt $prompt) => $this->promptUntilValid(
-            fn() => $this->components->confirm($prompt->label, $prompt->default),
+            fn() => $this->confirm($prompt->label, $prompt->default),
             $prompt->required,
             $prompt->validate
         ));
 
         SelectPrompt::fallbackUsing(fn(SelectPrompt $prompt) => $this->promptUntilValid(
-            fn() => $this->components->choice($prompt->label, $prompt->options, $prompt->default),
+            fn() => $this->choice($prompt->label, $prompt->options, $prompt->default),
             false,
             $prompt->validate
         ));
@@ -59,7 +59,7 @@ trait ConfiguresPrompts
         MultiSelectPrompt::fallbackUsing(function (MultiSelectPrompt $prompt) {
             if ($prompt->default !== []) {
                 return $this->promptUntilValid(
-                    fn() => $this->components->choice(
+                    fn() => $this->choice(
                         $prompt->label,
                         $prompt->options,
                         implode(',', $prompt->default),
@@ -72,7 +72,7 @@ trait ConfiguresPrompts
 
             return $this->promptUntilValid(
                 fn() => collect(
-                    $this->components->choice(
+                    $this->choice(
                         $prompt->label,
                         ['' => 'None', ...$prompt->options],
                         'None',
@@ -87,7 +87,7 @@ trait ConfiguresPrompts
         });
 
         SuggestPrompt::fallbackUsing(fn(SuggestPrompt $prompt) => $this->promptUntilValid(
-            fn() => $this->components->askWithCompletion(
+            fn() => $this->askWithCompletion(
                 $prompt->label,
                 $prompt->options,
                 $prompt->default ?: null
@@ -98,11 +98,11 @@ trait ConfiguresPrompts
 
         SearchPrompt::fallbackUsing(fn(SearchPrompt $prompt) => $this->promptUntilValid(
             function () use ($prompt) {
-                $query = $this->components->ask($prompt->label);
+                $query = $this->ask($prompt->label);
 
                 $options = ($prompt->options)($query);
 
-                return $this->components->choice($prompt->label, $options);
+                return $this->choice($prompt->label, $options);
             },
             false,
             $prompt->validate
@@ -110,14 +110,14 @@ trait ConfiguresPrompts
 
         MultiSearchPrompt::fallbackUsing(fn(MultiSearchPrompt $prompt) => $this->promptUntilValid(
             function () use ($prompt) {
-                $query = $this->components->ask($prompt->label);
+                $query = $this->ask($prompt->label);
 
                 $options = ($prompt->options)($query);
 
                 if ($prompt->required === false) {
                     if (array_is_list($options)) {
                         return collect(
-                            $this->components->choice($prompt->label, ['None', ...$options], 'None', multiple: true)
+                            $this->choice($prompt->label, ['None', ...$options], 'None', multiple: true)
                         )
                             ->reject('None')
                             ->values()
@@ -125,14 +125,14 @@ trait ConfiguresPrompts
                     }
 
                     return collect(
-                        $this->components->choice($prompt->label, ['' => 'None', ...$options], '', multiple: true)
+                        $this->choice($prompt->label, ['' => 'None', ...$options], '', multiple: true)
                     )
                         ->reject('')
                         ->values()
                         ->all();
                 }
 
-                return $this->components->choice($prompt->label, $options, multiple: true);
+                return $this->choice($prompt->label, $options, multiple: true);
             },
             $prompt->required,
             $prompt->validate
@@ -153,7 +153,7 @@ trait ConfiguresPrompts
             $result = $prompt();
 
             if ($required && ($result === '' || $result === [] || $result === false)) {
-                $this->components->error(is_string($required) ? $required : 'Required.');
+                $this->error(is_string($required) ? $required : 'Required.');
 
                 if ($this->app->runningUnitTests()) {
                     throw new PromptValidationException();
@@ -166,7 +166,7 @@ trait ConfiguresPrompts
                 $error = $validate($result);
 
                 if (is_string($error) && strlen($error) > 0) {
-                    $this->components->error($error);
+                    $this->error($error);
 
                     if ($this->app->runningUnitTests()) {
                         throw new PromptValidationException();

@@ -64,7 +64,7 @@ class SeedCommand extends Command
             return 1;
         }
 
-        $this->components->info('Seeding database.');
+        $this->info('Seeding database.');
 
         $previousConnection = $this->resolver->getDefaultConnection();
 

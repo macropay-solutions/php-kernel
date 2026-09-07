@@ -45,6 +45,6 @@ class CommandsClearCommand extends Command
 
         $this->app::setBootstrapCacheFiles($this->app->bootstrapPath('cache'));
 
-        $this->components->info('Commands cache cleared successfully.');
+        $this->info('Commands cache cleared successfully.');
     }
 }

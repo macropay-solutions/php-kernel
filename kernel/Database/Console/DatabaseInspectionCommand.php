@@ -253,7 +253,7 @@ abstract class DatabaseInspectionCommand extends Command
             try {
                 $process->setTty(true);
             } catch (RuntimeException $e) {
-                $this->components->warn($e->getMessage());
+                $this->warn($e->getMessage());
             }
         }
 

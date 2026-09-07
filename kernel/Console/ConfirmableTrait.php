@@ -26,12 +26,12 @@ trait ConfirmableTrait
                 return true;
             }
 
-            $this->components->alert($warning);
+            $this->alert($warning);
 
             $confirmed = confirm('Are you sure you want to run this command?', default: false);
 
             if (!$confirmed) {
-                $this->components->warn('Command cancelled.');
+                $this->warn('Command cancelled.');
 
                 return false;
             }

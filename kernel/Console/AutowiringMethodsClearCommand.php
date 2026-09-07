@@ -46,6 +46,6 @@ class AutowiringMethodsClearCommand extends Command
 
         $this->app::setBootstrapCacheFiles($this->app->bootstrapPath('cache'));
 
-        $this->components->info('Autowiring cache cleared successfully.');
+        $this->info('Autowiring cache cleared successfully.');
     }
 }

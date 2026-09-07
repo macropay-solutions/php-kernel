@@ -45,7 +45,7 @@ class CommandsCacheCommand extends Command
     {
         if ($this->app->commandsAreCached()) {
             if ($this->option('is-retry')) {
-                $this->components->error('Commands cache failed.');
+                $this->error('Commands cache failed.');
 
                 return;
             }
@@ -56,12 +56,12 @@ class CommandsCacheCommand extends Command
             \clearstatcache();
 
             if (\file_exists($this->app->getCachedCommandsPath())) {
-                $this->components->info('Commands cached successfully.');
+                $this->info('Commands cached successfully.');
 
                 return;
             }
 
-            $this->components->error('Commands cache failed.');
+            $this->error('Commands cache failed.');
 
             return;
         }
@@ -74,6 +74,6 @@ class CommandsCacheCommand extends Command
             ) . ';'
         );
 
-        $this->components->info('Commands cached successfully.');
+        $this->info('Commands cached successfully.');
     }
 }

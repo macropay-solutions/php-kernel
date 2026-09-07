@@ -43,6 +43,6 @@ class MacroClearCommand extends Command
     {
         $this->files->deleteDirectory($this->app->bootstrapPath('cache/traitables'));
 
-        $this->components->info('Macro traits cache cleared successfully.');
+        $this->info('Macro traits cache cleared successfully.');
     }
 }

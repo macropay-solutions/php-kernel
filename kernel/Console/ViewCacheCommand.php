@@ -39,14 +39,14 @@ class ViewCacheCommand extends Command
         $this->paths()->each(function ($path) {
             $prefix = $this->output->isVeryVerbose() ? '<fg=yellow;options=bold>DIR</> ' : '';
 
-            $this->components->task($prefix . $path, null, OutputInterface::VERBOSITY_VERBOSE);
+            $this->task($prefix . $path, null, OutputInterface::VERBOSITY_VERBOSE);
 
             $this->compileViews($this->templateFilesIn([$path]));
         });
 
         $this->newLine();
 
-        $this->components->info('Template templates cached successfully.');
+        $this->info('Template templates cached successfully.');
     }
 
     /**
@@ -60,7 +60,7 @@ class ViewCacheCommand extends Command
         $compiler = $this->app['view']->getEngineResolver()->resolve('template')->getCompiler();
 
         $views->map(function (SplFileInfo $file) use ($compiler) {
-            $this->components->task(
+            $this->task(
                 '    ' . $file->getRelativePathname(),
                 null,
                 OutputInterface::VERBOSITY_VERY_VERBOSE

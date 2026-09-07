@@ -74,7 +74,7 @@ class ClearCommand extends Command
         $this->flushFacades();
 
         if (!$successful) {
-            $this->components->error('Failed to clear cache. Make sure you have the appropriate permissions.');
+            $this->error('Failed to clear cache. Make sure you have the appropriate permissions.');
 
             return;
         }
@@ -84,7 +84,7 @@ class ClearCommand extends Command
             [$this->argument('store'), $this->tags()]
         );
 
-        $this->components->info('Application cache cleared successfully.');
+        $this->info('Application cache cleared successfully.');
     }
 
     /**

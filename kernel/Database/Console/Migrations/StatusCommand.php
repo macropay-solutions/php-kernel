@@ -53,7 +53,7 @@ class StatusCommand extends BaseCommand
     {
         return $this->migrator->usingConnection($this->option('database'), function () {
             if (!$this->migrator->repositoryExists()) {
-                $this->components->error('Migration table not found.');
+                $this->error('Migration table not found.');
 
                 return 1;
             }
@@ -70,18 +70,18 @@ class StatusCommand extends BaseCommand
             if (count($migrations) > 0) {
                 $this->newLine();
 
-                $this->components->twoColumnDetail('<fg=gray>Migration name</>', '<fg=gray>Batch / Status</>');
+                $this->twoColumnDetail('<fg=gray>Migration name</>', '<fg=gray>Batch / Status</>');
 
                 $migrations
                     ->each(
-                        fn($migration) => $this->components->twoColumnDetail($migration[0], $migration[1])
+                        fn($migration) => $this->twoColumnDetail($migration[0], $migration[1])
                     );
 
                 $this->newLine();
             } elseif ($this->option('pending')) {
-                $this->components->info('No pending migrations');
+                $this->info('No pending migrations');
             } else {
-                $this->components->info('No migrations found');
+                $this->info('No migrations found');
             }
         });
     }

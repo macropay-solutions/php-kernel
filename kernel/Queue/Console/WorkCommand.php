@@ -115,7 +115,7 @@ class WorkCommand extends Command
         $queue = $this->getQueue($connection);
 
         if (Terminal::hasSttyAvailable()) {
-            $this->components->info(
+            $this->info(
                 sprintf('Processing jobs from the [%s] %s.', $queue, str('queue')->plural(explode(',', $queue)))
             );
         }

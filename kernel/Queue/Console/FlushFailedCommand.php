@@ -34,13 +34,13 @@ class FlushFailedCommand extends Command
         $this->app['queue.failer']->flush($this->option('hours'));
 
         if ($this->option('hours')) {
-            $this->components->info(
+            $this->info(
                 "All jobs that failed more than {$this->option('hours')} hours ago have been deleted successfully."
             );
 
             return;
         }
 
-        $this->components->info('All failed jobs deleted successfully.');
+        $this->info('All failed jobs deleted successfully.');
     }
 }

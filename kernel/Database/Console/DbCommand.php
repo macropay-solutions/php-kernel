@@ -37,7 +37,7 @@ class DbCommand extends Command
         $connection = $this->getConnection();
 
         if (!isset($connection['host']) && $connection['driver'] !== 'sqlite') {
-            $this->components->error('No host specified for this database connection.');
+            $this->error('No host specified for this database connection.');
             $this->line(
                 '  Use the <options=bold>[--read]</> and <options=bold>[--write]</> ' .
                 'options to specify a read or write connection.'

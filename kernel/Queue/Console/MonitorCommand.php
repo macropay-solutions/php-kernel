@@ -110,13 +110,13 @@ class MonitorCommand extends Command
     {
         $this->newLine();
 
-        $this->components->twoColumnDetail('<fg=gray>Queue name</>', '<fg=gray>Size / Status</>');
+        $this->twoColumnDetail('<fg=gray>Queue name</>', '<fg=gray>Size / Status</>');
 
         $queues->each(function ($queue) {
             $name = '[' . $queue['connection'] . '] ' . $queue['queue'];
             $status = '[' . $queue['size'] . '] ' . $queue['status'];
 
-            $this->components->twoColumnDetail($name, $status);
+            $this->twoColumnDetail($name, $status);
         });
 
         $this->newLine();

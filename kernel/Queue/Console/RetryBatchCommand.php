@@ -36,19 +36,19 @@ class RetryBatchCommand extends Command implements Isolatable
         $batch = $this->app[BatchRepository::class]->find($id = $this->argument('id'));
 
         if (!$batch) {
-            $this->components->error("Unable to find a batch with ID [{$id}].");
+            $this->error("Unable to find a batch with ID [{$id}].");
 
             return 1;
         } elseif (empty($batch->failedJobIds)) {
-            $this->components->error('The given batch does not contain any failed jobs.');
+            $this->error('The given batch does not contain any failed jobs.');
 
             return 1;
         }
 
-        $this->components->info("Pushing failed queue jobs of the batch [$id] back onto the queue.");
+        $this->info("Pushing failed queue jobs of the batch [$id] back onto the queue.");
 
         foreach ($batch->failedJobIds as $failedJobId) {
-            $this->components->task(
+            $this->task(
                 $failedJobId,
                 fn(): bool => $this->callSilent('queue:retry', ['id' => $failedJobId]) == 0
             );

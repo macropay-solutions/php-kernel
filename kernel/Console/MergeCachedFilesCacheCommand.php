@@ -48,7 +48,7 @@ class MergeCachedFilesCacheCommand extends Command
             '<?php return ' . \var_export($this->getMap(), true) . ';'
         );
 
-        $this->components->info('merge-cached-files cached successfully.');
+        $this->info('merge-cached-files cached successfully.');
     }
 
     private function getMap(): array

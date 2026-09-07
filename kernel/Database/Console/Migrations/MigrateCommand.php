@@ -116,9 +116,9 @@ class MigrateCommand extends BaseCommand implements Isolatable
     protected function prepareDatabase()
     {
         if (!$this->repositoryExists()) {
-            $this->components->info('Preparing database.');
+            $this->info('Preparing database.');
 
-            $this->components->task('Creating migration table', function () {
+            $this->task('Creating migration table', function () {
                 return $this->callSilent('migrate:install', array_filter([
                         '--database' => $this->option('database'),
                     ])) == 0;
@@ -178,7 +178,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
             return false;
         }
 
-        $this->components->warn('The SQLite database does not exist: ' . $path);
+        $this->warn('The SQLite database does not exist: ' . $path);
 
         if (!confirm('Would you like to create it?', default: false)) {
             return false;
@@ -207,7 +207,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
         }
 
         if (!$this->option('force') && !$this->option('no-interaction')) {
-            $this->components->warn(
+            $this->warn(
                 "The database '{$connection->getDatabaseName()}' does not exist on the '{$connection->getName()}' connection."
             );
 
@@ -256,9 +256,9 @@ class MigrateCommand extends BaseCommand implements Isolatable
             return;
         }
 
-        $this->components->info('Loading stored database schemas.');
+        $this->info('Loading stored database schemas.');
 
-        $this->components->task($path, function () use ($connection, $path) {
+        $this->task($path, function () use ($connection, $path) {
             // Since the schema file will create the "migrations" table and reload it to its
             // proper state, we need to delete it here so we don't get an error that this
             // table already exists when the stored database schema file gets executed.

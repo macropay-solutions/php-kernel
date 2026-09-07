@@ -72,7 +72,7 @@ class MacroCacheCommand extends Command
             try {
                 $reflector = new \ReflectionClass($class);
             } catch (\ReflectionException $e) {
-                $this->components->warn("Failed to reflect class {$class}: {$e->getMessage()}");
+                $this->warn("Failed to reflect class {$class}: {$e->getMessage()}");
                 $skipped++;
 
                 continue;
@@ -89,12 +89,12 @@ class MacroCacheCommand extends Command
             try {
                 $macros = $reflector->getStaticPropertyValue('macros', []);
             } catch (\ReflectionException $e) {
-                $this->components->warn("Cannot access macros property on {$class}: {$e->getMessage()}");
+                $this->warn("Cannot access macros property on {$class}: {$e->getMessage()}");
                 $skipped++;
 
                 continue;
             } catch (\Throwable $e) {
-                $this->components->error("Unexpected error accessing macros on {$class}: {$e->getMessage()}");
+                $this->error("Unexpected error accessing macros on {$class}: {$e->getMessage()}");
                 $skipped++;
 
                 continue;
@@ -109,15 +109,15 @@ class MacroCacheCommand extends Command
 
                 $count++;
             } catch (\Throwable $e) {
-                $this->components->error("Failed to compile trait for {$class}: {$e->getMessage()}");
+                $this->error("Failed to compile trait for {$class}: {$e->getMessage()}");
                 $skipped++;
             }
         }
 
-        $this->components->info("Macro traits compiled successfully for {$count} classes.");
+        $this->info("Macro traits compiled successfully for {$count} classes.");
 
         if ($skipped > 0) {
-            $this->components->warn("Skipped {$skipped} classes due to errors.");
+            $this->warn("Skipped {$skipped} classes due to errors.");
         }
     }
 

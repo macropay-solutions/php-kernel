@@ -54,6 +54,6 @@ class ScheduleInterruptCommand extends Command
     {
         $this->cache->put('kernel:schedule:interrupt', true, \appDate()->now()->endOfMinute());
 
-        $this->components->info('Broadcasting schedule interrupt signal.');
+        $this->info('Broadcasting schedule interrupt signal.');
     }
 }

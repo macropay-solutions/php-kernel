@@ -48,7 +48,7 @@ class PruneCommand extends Command
         $models = $this->models();
 
         if ($models->isEmpty()) {
-            $this->components->info('No prunable models found.');
+            $this->info('No prunable models found.');
 
             return;
         }
@@ -69,10 +69,10 @@ class PruneCommand extends Command
 
                 $this->newLine();
 
-                $this->components->info(sprintf('Pruning [%s] records.', $event->model));
+                $this->info(sprintf('Pruning [%s] records.', $event->model));
             }
 
-            $this->components->twoColumnDetail($event->model, "{$event->count} records");
+            $this->twoColumnDetail($event->model, "{$event->count} records");
         });
 
         $events->dispatch(new ModelPruningStarting($models->all()));
@@ -105,7 +105,7 @@ class PruneCommand extends Command
             : 0;
 
         if ($total == 0) {
-            $this->components->info("No prunable [$model] records found.");
+            $this->info("No prunable [$model] records found.");
         }
     }
 
@@ -193,9 +193,9 @@ class PruneCommand extends Command
             })->count();
 
         if ($count === 0) {
-            $this->components->info("No prunable [$model] records found.");
+            $this->info("No prunable [$model] records found.");
         } else {
-            $this->components->info("{$count} [{$model}] records will be pruned.");
+            $this->info("{$count} [{$model}] records will be pruned.");
         }
     }
 }

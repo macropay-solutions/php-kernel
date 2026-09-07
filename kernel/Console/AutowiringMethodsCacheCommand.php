@@ -72,7 +72,7 @@ class AutowiringMethodsCacheCommand extends Command
             );
         }
 
-        $this->components->info('Autowiring cached successfully.');
+        $this->info('Autowiring cached successfully.');
     }
 
     protected function getMap(): array

@@ -142,7 +142,7 @@ class ScheduleRunCommand extends Command
         }
 
         if (!$this->eventsRan) {
-            $this->components->info('No scheduled commands are ready to run.');
+            $this->info('No scheduled commands are ready to run.');
         } else {
             $this->newLine();
         }
@@ -159,7 +159,7 @@ class ScheduleRunCommand extends Command
         if ($this->schedule->serverShouldRun($event, $this->startedAt)) {
             $this->runEvent($event);
         } else {
-            $this->components->info(
+            $this->info(
                 sprintf(
                     'Skipping [%s], as command already run on another server.',
                     $event->getSummaryForDisplay()
@@ -189,7 +189,7 @@ class ScheduleRunCommand extends Command
             $event->runInBackground ? ' in background' : '',
         );
 
-        $this->components->task($description, function () use ($event) {
+        $this->task($description, function () use ($event) {
             $this->dispatcher->dispatch(new ScheduledTaskStarting($event));
 
             $start = microtime(true);
@@ -215,7 +215,7 @@ class ScheduleRunCommand extends Command
         });
 
         if (!$event instanceof CallbackEvent) {
-            $this->components->bulletList([
+            $this->bulletList([
                 $event->getSummaryForDisplay(),
             ]);
         }

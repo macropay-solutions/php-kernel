@@ -58,6 +58,6 @@ class EventClearCommand extends Command
 
         $this->app::setBootstrapCacheFiles($this->app->bootstrapPath('cache'));
 
-        $this->components->info('Cached events cleared successfully.');
+        $this->info('Cached events cleared successfully.');
     }
 }

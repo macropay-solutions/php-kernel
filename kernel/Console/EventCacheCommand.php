@@ -42,7 +42,7 @@ class EventCacheCommand extends Command
             '<?php return ' . var_export($this->getEventsAsObservers(), true) . ';'
         );
 
-        $this->components->info('Events cached successfully.');
+        $this->info('Events cached successfully.');
     }
 
     /**
