@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns;
 
+use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Support\Str;
 
@@ -86,11 +87,8 @@ trait AsPivot
 
     /**
      * Set the keys for a select query.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $query
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
-    protected function setKeysForSelectQuery($query)
+    protected function setKeysForSelectQuery(Builder $query): Builder
     {
         if (isset($this->attributes[$this->getKeyName()])) {
             return parent::setKeysForSelectQuery($query);
