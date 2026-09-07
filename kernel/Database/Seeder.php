@@ -4,7 +4,6 @@ namespace MacropaySolutions\Kernel\Database;
 
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Console\Command;
-use MacropaySolutions\Kernel\Console\View\Components\TwoColumnDetail;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Database\Console\Seeds\WithoutModelEvents;
 use MacropaySolutions\Kernel\Support\Arr;
@@ -50,10 +49,7 @@ abstract class Seeder
             $name = get_class($seeder);
 
             if ($silent === false && isset($this->command)) {
-                with(new TwoColumnDetail($this->command->getOutput()))->render(
-                    $name,
-                    '<fg=yellow;options=bold>RUNNING</>'
-                );
+                $this->command->getOutput()->writeln(sprintf('%s : %s', $name, '<fg=yellow;options=bold>RUNNING</>'));
             }
 
             $startTime = microtime(true);
@@ -63,10 +59,7 @@ abstract class Seeder
             if ($silent === false && isset($this->command)) {
                 $runTime = number_format((microtime(true) - $startTime) * 1000);
 
-                with(new TwoColumnDetail($this->command->getOutput()))->render(
-                    $name,
-                    "<fg=gray>$runTime ms</> <fg=green;options=bold>DONE</>"
-                );
+                $this->command->getOutput()->writeln(sprintf('%s : %s', $name, "<fg=gray>$runTime ms</> <fg=green;options=bold>DONE</>"));
 
                 $this->command->getOutput()->writeln('');
             }

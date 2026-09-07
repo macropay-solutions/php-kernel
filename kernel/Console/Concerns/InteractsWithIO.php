@@ -16,15 +16,6 @@ use Symfony\Component\Console\Question\Question;
 trait InteractsWithIO
 {
     /**
-     * The console components factory.
-     *
-     * @var \MacropaySolutions\Kernel\Console\View\Components\Factory
-     *
-     * @internal This property is not meant to be used or overwritten outside the framework.
-     */
-    protected $components;
-
-    /**
      * The input interface implementation.
      *
      * @var \Symfony\Component\Console\Input\InputInterface
@@ -449,15 +440,5 @@ trait InteractsWithIO
     public function getOutput()
     {
         return $this->output;
-    }
-
-    /**
-     * Get the output component factory implementation.
-     *
-     * @return \MacropaySolutions\Kernel\Console\View\Components\Factory
-     */
-    public function outputComponents()
-    {
-        return $this->components;
     }
 }

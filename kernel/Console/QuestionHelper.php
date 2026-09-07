@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Console;
 
-use MacropaySolutions\Kernel\Console\View\Components\TwoColumnDetail;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -67,7 +66,7 @@ class QuestionHelper extends SymfonyQuestionHelper
 
         if ($question instanceof ChoiceQuestion) {
             foreach ($question->getChoices() as $key => $value) {
-                with(new TwoColumnDetail($output))->render($value, $key);
+                $output->writeln(sprintf('  %s : %s', $value, $key));
             }
         }
 

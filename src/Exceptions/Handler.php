@@ -5,8 +5,6 @@ namespace MacropaySolutions\Framework\Exceptions;
 use Exception;
 use MacropaySolutions\Kernel\Auth\Access\AuthorizationException;
 use MacropaySolutions\Kernel\Auth\AuthenticationException;
-use MacropaySolutions\Kernel\Console\View\Components\BulletList;
-use MacropaySolutions\Kernel\Console\View\Components\Error;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Support\Responsable;
 use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
@@ -257,13 +255,17 @@ class Handler implements ExceptionHandler
             if (!empty($alternatives = $e->getAlternatives())) {
                 $message .= '. Did you mean one of these?';
 
-                with(new Error($output))->render($message);
-                with(new BulletList($output))->render($e->getAlternatives());
+                $output->writeln('<error>' . $message . '</error>');
+                foreach ($e->getAlternatives() as $alternative) {
+                    $output->writeln('  - ' . $alternative);
+                }
 
                 $output->writeln('');
-            } else {
-                with(new Error($output))->render($message);
+
+                return;
             }
+
+            $output->writeln('<error>' . $message . '</error>');
 
             return;
         }

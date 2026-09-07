@@ -4,11 +4,6 @@ namespace MacropaySolutions\Kernel\Database\Migrations;
 
 use Closure;
 use Doctrine\DBAL\Schema\SchemaException;
-use MacropaySolutions\Kernel\Console\View\Components\BulletList;
-use MacropaySolutions\Kernel\Console\View\Components\Error;
-use MacropaySolutions\Kernel\Console\View\Components\Info;
-use MacropaySolutions\Kernel\Console\View\Components\Task;
-use MacropaySolutions\Kernel\Console\View\Components\TwoColumnDetail;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Database\ConnectionResolverInterface as Resolver;
 use MacropaySolutions\Kernel\Database\Events\MigrationEnded;
@@ -168,7 +163,7 @@ class Migrator
         if (count($migrations) === 0) {
             $this->fireMigrationEvent(new NoPendingMigrations('up'));
 
-            $this->write(Info::class, 'Nothing to migrate');
+            $this->write('info', 'Nothing to migrate');
 
             return;
         }
@@ -184,7 +179,7 @@ class Migrator
 
         $this->fireMigrationEvent(new MigrationsStarted('up'));
 
-        $this->write(Info::class, 'Running migrations.');
+        $this->write('info', 'Running migrations.');
 
         // Once we have the array of migrations, we will spin through them and run the
         // migrations "up" so the changes are made to the databases. We'll then log
@@ -227,7 +222,7 @@ class Migrator
             return;
         }
 
-        $this->write(Task::class, $name, fn() => $this->runMigration($migration, 'up'));
+        $this->write('task', $name, fn() => $this->runMigration($migration, 'up'));
 
         // Once we have run a migrations class, we will log that it was run in this
         // repository so that we don't try to run it next time we do a migration
@@ -252,7 +247,7 @@ class Migrator
         if (count($migrations) === 0) {
             $this->fireMigrationEvent(new NoPendingMigrations('down'));
 
-            $this->write(Info::class, 'Nothing to rollback.');
+            $this->write('info', 'Nothing to rollback.');
 
             return [];
         }
@@ -299,7 +294,7 @@ class Migrator
 
         $this->fireMigrationEvent(new MigrationsStarted('down'));
 
-        $this->write(Info::class, 'Rolling back migrations.');
+        $this->write('info', 'Rolling back migrations.');
 
         // Next we will run through all the migrations and call the "down" method
         // which will reverse each migration in order. This getLast method on the
@@ -309,7 +304,7 @@ class Migrator
 
             if (!$file = Arr::get($files, $migration->migration)) {
                 $this->write(
-                    TwoColumnDetail::class,
+                    'twoColumnDetail',
                     $migration->migration,
                     '<fg=yellow;options=bold>Migration not found</>'
                 );
@@ -346,7 +341,7 @@ class Migrator
         $migrations = array_reverse($this->repository->getRan());
 
         if (count($migrations) === 0) {
-            $this->write(Info::class, 'Nothing to rollback.');
+            $this->write('info', 'Nothing to rollback.');
 
             return [];
         }
@@ -405,7 +400,7 @@ class Migrator
             return;
         }
 
-        $this->write(Task::class, $name, fn() => $this->runMigration($instance, 'down'));
+        $this->write('task', $name, fn() => $this->runMigration($instance, 'down'));
 
         // Once we have successfully run the migration "down" we will remove it from
         // the migration repository so it will be considered to have not been run
@@ -460,16 +455,16 @@ class Migrator
                 $name = $this->getMigrationName($reflectionClass->getFileName());
             }
 
-            $this->write(TwoColumnDetail::class, $name);
+            $this->write('twoColumnDetail', $name);
 
-            $this->write(BulletList::class, collect($this->getQueries($migration, $method))->map(function ($query) {
+            $this->write('bulletList', collect($this->getQueries($migration, $method))->map(function ($query) {
                 return $query['query'];
             }));
         } catch (SchemaException) {
             $name = get_class($migration);
 
             $this->write(
-                Error::class,
+                'error',
                 sprintf(
                     '[%s] failed to dump queries. This may be due to changing database columns using Doctrine, which is not supported while pretending to run migrations.',
                     $name,
@@ -791,21 +786,52 @@ class Migrator
     /**
      * Write to the console's output.
      *
-     * @param string $component
      * @param array<int, string>|string ...$arguments
-     * @return void
      */
-    protected function write($component, ...$arguments)
+    protected function write(string $component, ...$arguments): void
     {
-        if ($this->output && class_exists($component)) {
-            (new $component($this->output))->render(...$arguments);
-        } else {
+        if (!$this->output) {
             foreach ($arguments as $argument) {
                 if (is_callable($argument)) {
                     $argument();
                 }
             }
+
+            return;
         }
+
+        match ($component) {
+            'info' => $this->output->writeln('<info>' . ($arguments[0] ?? '') . '</info>'),
+            'error' => $this->output->writeln('<error>' . ($arguments[0] ?? '') . '</error>'),
+            'twoColumnDetail' => $this->output->writeln(\sprintf('%s : %s', $arguments[0] ?? '', $arguments[1] ?? '')),
+            'bulletList' => (function () use ($arguments) {
+                $items = match (true) {
+                    is_array($arguments[0] ?? null) => $arguments[0],
+                    $arguments[0] instanceof \Traversable => \iterator_to_array($arguments[0]),
+                    default => (array)($arguments[0] ?? []),
+                };
+
+                foreach ($items as $element) {
+                    $this->output->writeln('  - ' . $element);
+                }
+            })(),
+            'task' => (function () use ($arguments) {
+                $this->output->write(($arguments[0] ?? '') . '... ');
+
+                try {
+                    if (isset($arguments[1]) && \is_callable($arguments[1])) {
+                        $arguments[1]();
+                    }
+
+                    $this->output->writeln('<info>DONE</info>');
+                } catch (\Throwable $e) {
+                    $this->output->writeln('<error>FAIL</error>');
+
+                    throw $e;
+                }
+            })(),
+            default => null,
+        };
     }
 
     /**

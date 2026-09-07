@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Console;
 
-use MacropaySolutions\Kernel\Console\View\Components\Factory;
 use MacropaySolutions\Kernel\Contracts\Console\Isolatable;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -209,8 +208,6 @@ class Command extends SymfonyCommand implements Macroable
             OutputStyle::class,
             ['input' => $input, 'output' => $output]
         );
-
-        $this->components = $this->app->make(Factory::class, ['output' => $this->output]);
 
         $this->configurePrompts($input);
 
