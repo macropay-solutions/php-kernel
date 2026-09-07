@@ -64,7 +64,11 @@ trait Macroable
             );
         }
 
-        return \is_array($macro) && isset($macro['c']) ? $macro['c']() : $macro;
+        if (\is_array($macro) && isset($macro['c'])) {
+            return $macro['c']();
+        }
+
+        throw new \RuntimeException(\sprintf('Invalid macro %s::%s.', static::class, $method));
     }
 
     /**
