@@ -11,15 +11,13 @@ class Pivot extends Model
 
     /**
      * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
      */
-    public $incrementing = false;
+    public bool $incrementing = false;
 
     /**
      * The attributes that aren't mass assignable.
      *
      * @var array<string>|bool
      */
-    protected $guarded = [];
+    protected array $guarded = [];
 }
