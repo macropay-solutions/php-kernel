@@ -31,14 +31,8 @@ trait AsPivot
 
     /**
      * Create a new pivot model instance.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $parent
-     * @param array $attributes
-     * @param string $table
-     * @param bool $exists
-     * @return static
      */
-    public static function fromAttributes(Model $parent, $attributes, $table, $exists = false)
+    public static function fromAttributes(Model $parent, array $attributes, string $table, bool $exists = false): static
     {
         $instance = new static();
 
@@ -64,15 +58,13 @@ trait AsPivot
 
     /**
      * Create a new pivot model from raw values returned from a query.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Model $parent
-     * @param array $attributes
-     * @param string $table
-     * @param bool $exists
-     * @return static
      */
-    public static function fromRawAttributes(Model $parent, $attributes, $table, $exists = false)
-    {
+    public static function fromRawAttributes(
+        Model $parent,
+        array $attributes,
+        string $table,
+        bool $exists = false
+    ): static {
         $instance = static::fromAttributes($parent, [], $table, $exists);
 
         $instance->timestamps = $instance->hasTimestampAttributes($attributes);
@@ -113,33 +105,28 @@ trait AsPivot
 
     /**
      * Set the keys for a save update query.
-     *
-     * @param \MacropaySolutions\Kernel\Database\Obvious\Builder $query
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
-    protected function setKeysForSaveQuery($query)
+    protected function setKeysForSaveQuery(Builder $query): Builder
     {
         return $this->setKeysForSelectQuery($query);
     }
 
     /**
      * Delete the pivot model record from the database.
-     *
-     * @return int
      */
-    public function delete()
+    public function delete(): bool
     {
         if (isset($this->attributes[$this->getKeyName()])) {
-            return (int)parent::delete();
+            return parent::delete();
         }
 
         if ($this->fireModelEvent('deleting') === false) {
-            return 0;
+            return false;
         }
 
         $this->touchOwners();
 
-        return tap($this->getDeleteQuery()->delete(), function () {
+        return (bool)tap($this->getDeleteQuery()->delete(), function () {
             $this->exists = false;
 
             $this->fireModelEvent('deleted', false);
@@ -148,10 +135,8 @@ trait AsPivot
 
     /**
      * Get the query builder for a delete operation on the pivot.
-     *
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
-    protected function getDeleteQuery()
+    protected function getDeleteQuery(): Builder
     {
         return $this->newQueryWithoutRelationships()->where([
             $this->foreignKey => $this->getOriginal($this->foreignKey, $this->getAttributeValue($this->foreignKey)),
@@ -161,10 +146,8 @@ trait AsPivot
 
     /**
      * Get the table associated with the model.
-     *
-     * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         if (!isset($this->table)) {
             $this->setTable(
@@ -181,42 +164,32 @@ trait AsPivot
 
     /**
      * Get the foreign key column name.
-     *
-     * @return string
      */
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return $this->foreignKey;
     }
 
     /**
      * Get the "related key" column name.
-     *
-     * @return string
      */
-    public function getRelatedKey()
+    public function getRelatedKey(): string
     {
         return $this->relatedKey;
     }
 
     /**
      * Get the "related key" column name.
-     *
-     * @return string
      */
-    public function getOtherKey()
+    public function getOtherKey(): string
     {
         return $this->getRelatedKey();
     }
 
     /**
      * Set the key names for the pivot model instance.
-     *
-     * @param string $foreignKey
-     * @param string $relatedKey
-     * @return $this
      */
-    public function setPivotKeys($foreignKey, $relatedKey)
+    public function setPivotKeys(string $foreignKey, string $relatedKey): static
     {
         $this->foreignKey = $foreignKey;
 
@@ -227,21 +200,16 @@ trait AsPivot
 
     /**
      * Determine if the pivot model or given attributes has timestamp attributes.
-     *
-     * @param array|null $attributes
-     * @return bool
      */
-    public function hasTimestampAttributes($attributes = null)
+    public function hasTimestampAttributes(?array $attributes = null): bool
     {
         return array_key_exists($this->getCreatedAtColumn(), $attributes ?? $this->attributes);
     }
 
     /**
      * Get the name of the "created at" column.
-     *
-     * @return string
      */
-    public function getCreatedAtColumn()
+    public function getCreatedAtColumn(): string
     {
         return $this->pivotParent
             ? $this->pivotParent->getCreatedAtColumn()
@@ -250,10 +218,8 @@ trait AsPivot
 
     /**
      * Get the name of the "updated at" column.
-     *
-     * @return string
      */
-    public function getUpdatedAtColumn()
+    public function getUpdatedAtColumn(): string
     {
         return $this->pivotParent
             ? $this->pivotParent->getUpdatedAtColumn()
@@ -262,10 +228,8 @@ trait AsPivot
 
     /**
      * Get the queueable identity for the entity.
-     *
-     * @return mixed
      */
-    public function getQueueableId()
+    public function getQueueableId(): mixed
     {
         if (isset($this->attributes[$this->getKeyName()])) {
             return $this->getKey();
@@ -284,9 +248,8 @@ trait AsPivot
      * Get a new query to restore one or more models by their queueable IDs.
      *
      * @param int[]|string[]|string $ids
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
-    public function newQueryForRestoration($ids)
+    public function newQueryForRestoration(array|int $ids): Builder
     {
         if (is_array($ids)) {
             return $this->newQueryForCollectionRestoration($ids);
@@ -307,9 +270,8 @@ trait AsPivot
      * Get a new query to restore multiple models by their queueable IDs.
      *
      * @param int[]|string[] $ids
-     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
      */
-    protected function newQueryForCollectionRestoration(array $ids)
+    protected function newQueryForCollectionRestoration(array $ids): Builder
     {
         $ids = array_values($ids);
 
@@ -333,10 +295,8 @@ trait AsPivot
 
     /**
      * Unset all the loaded relations for the instance.
-     *
-     * @return $this
      */
-    public function unsetRelations()
+    public function unsetRelations(): static
     {
         $this->pivotParent = null;
         $this->relations = [];
