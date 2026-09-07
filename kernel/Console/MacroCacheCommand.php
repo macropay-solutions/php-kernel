@@ -52,6 +52,14 @@ class MacroCacheCommand extends Command
         $count = 0;
 
         foreach (\array_keys(\array_diff_key($classMap, [$macroableInterface => true])) as $class) {
+            if (
+                !\str_starts_with($class, 'MacropaySolutions')
+                || \str_starts_with($class, 'MacropaySolutions\\KernelDev\\')
+                || \str_contains($class, '\\Tests\\')
+            ) {
+                continue;
+            }
+
             try {
                 if (!\is_subclass_of($class, $macroableInterface)) {
                     continue;
