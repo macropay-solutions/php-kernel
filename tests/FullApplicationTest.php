@@ -782,6 +782,36 @@ class FullApplicationTest extends TestCase
         $this->assertTrue($terminated);
     }
 
+    /** @test */
+    public function every_macroable_child_has_its_own_dedicated_trait()
+    {
+        $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;
+
+        // Using a reflection/class finder utility of your choice to get all classes
+        $classes = \get_declared_classes(); // Or use a static class map parser
+
+        foreach ($classes as $class) {
+            if (!\str_starts_with($class, 'MacropaySolutions\\Kernel\\')) {
+                continue;
+            }
+
+            $reflector = new \ReflectionClass($class);
+
+            if ($reflector->implementsInterface($macroableInterface)) {
+                $expectedTrait = 'MacropaySolutions\\Framework\\Traitables\\' . \str_replace('\\', '', $class);
+
+                // Strictly assert the class uses its own specific trait, not just inherited it
+                $traits = $reflector->getTraitNames();
+
+                $this->assertContains(
+                    $expectedTrait,
+                    $traits,
+                    "Class [{$class}] extends a Macroable parent but is missing its dedicated trait."
+                );
+            }
+        }
+    }
+
     public function testTerminationTests()
     {
         $app = new FrameworkTestApplication();

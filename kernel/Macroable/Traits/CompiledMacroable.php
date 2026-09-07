@@ -1,6 +1,6 @@
 <?php
 
-namespace MacropaySolutions\Kernel\Macroable\Traits;
+namespace MacropaySolutions\Kernel\Support\Traits;
 
 trait CompiledMacroable
 {

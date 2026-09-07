@@ -2027,13 +2027,9 @@ class Builder implements BuilderContract
     /**
      * Dynamically handle calls into the query instance.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     *
      * @throws \BadMethodCallException
      */
-    public static function __callStatic($method, $parameters)
+    public static function __callStatic(string $method, array $parameters): mixed
     {
         if (!static::hasGlobalMacro($method)) {
             static::throwBadMethodCallException($method);

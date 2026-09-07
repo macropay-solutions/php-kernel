@@ -13,25 +13,6 @@ trait Macroable
     protected static array $macros = [];
 
     /**
-     * Register a custom macro.
-     */
-    private static function macro(string $name, callable|object $macro): void
-    {
-        if (!$macro instanceof Closure) {
-            static::$macros[$name] = $macro;
-
-            return;
-        }
-
-        try {
-            static::$macros[$name] = $macro->bindTo(null, static::class) ?? $macro;
-        } catch (\Throwable) {
-            // Keep original closure if locked by php if inside a nonstatic closure already (db transaction closure)
-            static::$macros[$name] = $macro;
-        }
-    }
-
-    /**
      * Register a custom deferred macro.
      * $callableMethod must be array callable that resolves to a static method and returns the macro closure.
      */
@@ -45,11 +26,42 @@ trait Macroable
     }
 
     /**
-     * Checks if macro is registered.
+     * Traverse the inheritance tree to find the class that registered the macro.
+     */
+    protected static function resolveMacro(string $name): null|callable|array
+    {
+        $class = static::class;
+
+        while ($class !== false) {
+            if (isset($class::$macros[$name])) {
+                return $class::$macros[$name];
+            }
+
+            $class = \get_parent_class($class);
+        }
+
+        return null;
+    }
+
+    protected static function getMacro(string $method): callable
+    {
+        $macro = static::resolveMacro($method);
+
+        if (null === $macro) {
+            throw new BadMethodCallException(
+                \sprintf('Method %s::%s does not exist.', static::class, $method)
+            );
+        }
+
+        return \is_array($macro) && isset($macro['c']) ? $macro['c']() : $macro;
+    }
+
+    /**
+     * Checks if macro is registered on this class or any parent class.
      */
     public static function hasMacro(string $name): bool
     {
-        return isset(static::$macros[$name]);
+        return static::resolveMacro($name) !== null;
     }
 
     /**
@@ -61,7 +73,7 @@ trait Macroable
     }
 
     /**
-     * Dynamically handle calls to the class.
+     * Dynamically handle static calls to the class.
      *
      * @param string $method
      * @param array $parameters
@@ -69,23 +81,9 @@ trait Macroable
      *
      * @throws \BadMethodCallException
      */
-    public static function __callStatic($method, $parameters)
+    public static function __callStatic(string $method, array $parameters): mixed
     {
-        if (!static::hasMacro($method)) {
-            throw new BadMethodCallException(
-                sprintf(
-                    'Method %s::%s does not exist.',
-                    static::class,
-                    $method
-                )
-            );
-        }
-
-        if (isset(static::$macros[$method]['c'])) {
-            self::macro($method, static::$macros[$method]['c']());
-        }
-
-        return static::$macros[$method](...$parameters);
+        return self::getMacro($method)(...$parameters);
     }
 
     /**
@@ -99,21 +97,7 @@ trait Macroable
      */
     public function __call(string $method, array $parameters): mixed
     {
-        if (!static::hasMacro($method)) {
-            throw new BadMethodCallException(
-                sprintf(
-                    'Method %s::%s does not exist.',
-                    static::class,
-                    $method
-                )
-            );
-        }
-
-        if (isset(static::$macros[$method]['c'])) {
-            self::macro($method, static::$macros[$method]['c']());
-        }
-
-        $macro = static::$macros[$method];
+        $macro = self::getMacro($method);
 
         if ($macro instanceof Closure) {
             return $macro->call($this, ...$parameters);

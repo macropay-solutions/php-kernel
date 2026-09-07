@@ -192,11 +192,8 @@ class Manager
     /**
      * Dynamically pass methods to the default connection.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public static function __callStatic($method, $parameters)
+    public static function __callStatic(string $method, array $parameters): mixed
     {
         return static::connection()->$method(...$parameters);
     }

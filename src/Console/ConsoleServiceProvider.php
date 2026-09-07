@@ -11,6 +11,8 @@ use MacropaySolutions\Kernel\Console\CommandsCacheCommand;
 use MacropaySolutions\Kernel\Console\CommandsClearCommand;
 use MacropaySolutions\Kernel\Console\EventCacheCommand;
 use MacropaySolutions\Kernel\Console\EventClearCommand;
+use MacropaySolutions\Kernel\Console\MacroCacheCommand;
+use MacropaySolutions\Kernel\Console\MacroClearCommand;
 use MacropaySolutions\Kernel\Console\MergeCachedFilesCacheCommand;
 use MacropaySolutions\Kernel\Console\MergeCachedFilesClearCommand;
 use MacropaySolutions\Kernel\Console\Scheduling\ScheduleFinishCommand;
@@ -63,6 +65,8 @@ class ConsoleServiceProvider extends ServiceProvider
         'CommandsCache' => 'command.commands.cache',
         'CommandsClear' => 'command.commands.clear',
         'ClearResets' => 'command.auth.resets.clear',
+        'MacroCache' => 'command.macro.cache',
+        'MacroClear' => 'command.macro.clear',
         'MergeCachedFilesCache' => 'command.merge-cached-files.cache',
         'MergeCachedFilesClear' => 'command.merge-cached-files.clear',
         'Migrate' => 'command.migrate',
@@ -149,6 +153,20 @@ class ConsoleServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.autowiring.clear', function ($app): AutowiringMethodsClearCommand {
             return new AutowiringMethodsClearCommand($app['files']);
+        });
+    }
+
+    protected function registerMacroCacheCommand(): void
+    {
+        $this->app->singleton('command.macro.cache', function ($app): MacroCacheCommand {
+            return new MacroCacheCommand($app['files']);
+        });
+    }
+
+    protected function registerMacroClearCommand(): void
+    {
+        $this->app->singleton('command.macro.clear', function ($app): MacroClearCommand {
+            return new MacroClearCommand($app['files']);
         });
     }
 
