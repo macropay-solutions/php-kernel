@@ -15,17 +15,21 @@ trait Macroable
 
     /**
      * Register a custom deferred macro.
-     * $callableMethod must be array callable that resolves to a static method and returns the macro closure.
+     * $callableMethod must be an array callable that resolves to a static method and returns the macro closure.
      */
     public static function deferredMacro(string $name, array $callableMethod): void
     {
+        if (\method_exists(static::class, $name)) {
+            throw new \LogicException('Method already exists: . ' . $name);
+        }
+
         if (Container::getInstance()->isBooted()) {
             throw new \LogicException(
                 'Deferred macros must be registered before the application has booted.'
             );
         }
 
-        if (!\is_callable($callableMethod)) {
+        if (!\is_callable($callableMethod) || !\is_string($callableMethod[0])) {
             throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
         }
 
