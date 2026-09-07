@@ -787,15 +787,24 @@ class FullApplicationTest extends TestCase
     {
         $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;
 
-        // Using a reflection/class finder utility of your choice to get all classes
-        $classes = \get_declared_classes(); // Or use a static class map parser
+        $app = new Application();
+        $classMap = require $app->basePath('vendor/composer/autoload_classmap.php');
+        $classes = \array_keys($classMap);
 
         foreach ($classes as $class) {
             if (!\str_starts_with($class, 'MacropaySolutions\\Kernel\\')) {
                 continue;
             }
 
-            $reflector = new \ReflectionClass($class);
+            try {
+                $reflector = new \ReflectionClass($class);
+            } catch (\Throwable) {
+                continue;
+            }
+
+            if ($reflector->isInterface() || $reflector->isTrait()) {
+                continue;
+            }
 
             if ($reflector->implementsInterface($macroableInterface)) {
                 $expectedTrait = 'MacropaySolutions\\Framework\\Traitables\\' . \str_replace('\\', '', $class);

@@ -10,6 +10,8 @@ use MacropaySolutions\Kernel\Support\Fluent;
 
 class PostgresGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaGrammarsPostgresGrammar;
+
     /**
      * If this Grammar supports schema changes wrapped in a transaction.
      *

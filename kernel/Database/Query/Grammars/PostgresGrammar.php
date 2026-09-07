@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class PostgresGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryGrammarsPostgresGrammar;
+
     /**
      * All the available clause operators.
      *

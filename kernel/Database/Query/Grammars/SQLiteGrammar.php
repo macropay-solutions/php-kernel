@@ -8,6 +8,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class SQLiteGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryGrammarsSQLiteGrammar;
+
     /**
      * All the available clause operators.
      *

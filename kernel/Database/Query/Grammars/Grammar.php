@@ -13,6 +13,7 @@ use RuntimeException;
 
 class Grammar extends BaseGrammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryGrammarsGrammar;
     use CompilesJsonPaths;
 
     /**

@@ -16,6 +16,7 @@ use RuntimeException;
 
 abstract class Grammar extends BaseGrammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaGrammarsGrammar;
     use CompilesJsonPaths;
 
     /**

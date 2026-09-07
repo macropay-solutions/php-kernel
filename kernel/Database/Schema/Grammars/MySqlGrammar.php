@@ -10,6 +10,8 @@ use RuntimeException;
 
 class MySqlGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaGrammarsMySqlGrammar;
+
     /**
      * The possible column modifiers.
      *

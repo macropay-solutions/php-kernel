@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class SqlServerGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryGrammarsSqlServerGrammar;
+
     /**
      * All the available clause operators.
      *

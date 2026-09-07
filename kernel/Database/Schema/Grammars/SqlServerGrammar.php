@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Support\Fluent;
 
 class SqlServerGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaGrammarsSqlServerGrammar;
+
     /**
      * If this Grammar supports schema changes wrapped in a transaction.
      *

@@ -12,6 +12,8 @@ use RuntimeException;
 
 class SQLiteGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaGrammarsSQLiteGrammar;
+
     /**
      * The possible column modifiers.
      *

@@ -8,6 +8,8 @@ use MacropaySolutions\Kernel\Support\Str;
 
 class MySqlGrammar extends Grammar
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryGrammarsMySqlGrammar;
+
     /**
      * The grammar specific operators.
      *
