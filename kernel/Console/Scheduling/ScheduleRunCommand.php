@@ -189,7 +189,7 @@ class ScheduleRunCommand extends Command
             $event->runInBackground ? ' in background' : '',
         );
 
-        $this->task($description, function () use ($event) {
+        $this->components->task($description, function () use ($event) {
             $this->dispatcher->dispatch(new ScheduledTaskStarting($event));
 
             $start = microtime(true);
@@ -215,7 +215,7 @@ class ScheduleRunCommand extends Command
         });
 
         if (!$event instanceof CallbackEvent) {
-            $this->bulletList([
+            $this->components->bulletList([
                 $event->getSummaryForDisplay(),
             ]);
         }

@@ -48,7 +48,7 @@ class RetryBatchCommand extends Command implements Isolatable
         $this->info("Pushing failed queue jobs of the batch [$id] back onto the queue.");
 
         foreach ($batch->failedJobIds as $failedJobId) {
-            $this->task(
+            $this->components->task(
                 $failedJobId,
                 fn(): bool => $this->callSilent('queue:retry', ['id' => $failedJobId]) == 0
             );

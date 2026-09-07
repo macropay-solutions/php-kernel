@@ -118,7 +118,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
         if (!$this->repositoryExists()) {
             $this->info('Preparing database.');
 
-            $this->task('Creating migration table', function () {
+            $this->components->task('Creating migration table', function () {
                 return $this->callSilent('migrate:install', array_filter([
                         '--database' => $this->option('database'),
                     ])) == 0;
@@ -258,7 +258,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
 
         $this->info('Loading stored database schemas.');
 
-        $this->task($path, function () use ($connection, $path) {
+        $this->components->task($path, function () use ($connection, $path) {
             // Since the schema file will create the "migrations" table and reload it to its
             // proper state, we need to delete it here so we don't get an error that this
             // table already exists when the stored database schema file gets executed.

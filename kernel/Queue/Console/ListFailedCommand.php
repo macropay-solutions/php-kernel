@@ -118,7 +118,7 @@ class ListFailedCommand extends Command
     protected function displayFailedJobs(array $jobs)
     {
         collect($jobs)->each(
-            fn($job) => $this->twoColumnDetail(
+            fn($job) => $this->components->twoColumnDetail(
                 sprintf('<fg=gray>%s</> %s</>', $job[4], $job[0]),
                 sprintf('<fg=gray>%s@%s</> %s', $job[1], $job[2], $job[3])
             ),

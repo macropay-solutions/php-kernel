@@ -182,6 +182,7 @@ class MacroCacheCommand extends Command
             }
 
             $reference = $returnsReference ? '&' : '';
+            $boundCallArgs = $callArgs === '' ? '$this' : '$this, ' . $callArgs;
 
             if ($isStatic) {
                 $methods[] = <<<PHP
@@ -197,7 +198,7 @@ PHP;
             $methods[] = <<<PHP
     public function {$reference}{$name}({$signature}){$returnType}
     {
-        return ({$factoryExport})()->call(\$this, {$callArgs});
+        return ({$factoryExport})()->call({$boundCallArgs});
     }
 PHP;
         }

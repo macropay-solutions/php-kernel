@@ -52,7 +52,7 @@ class RetryCommand extends Command
             } else {
                 $this->app['events']->dispatch(new JobRetryRequested($job));
 
-                $this->task($id, fn() => $this->retryJob($job));
+                $this->components->task($id, fn() => $this->retryJob($job));
 
                 $this->app['queue.failer']->forget($id);
             }
