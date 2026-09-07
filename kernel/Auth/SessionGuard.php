@@ -21,17 +21,18 @@ use MacropaySolutions\Kernel\Contracts\Session\Session;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Timebox;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class SessionGuard implements
     StatefulGuard,
-    SupportsBasicAuth
+    SupportsBasicAuth,
+    Macroable
 {
     use GuardHelpers;
-    use Macroable;
+    use MacroableDummy;
 
     public const REMEMBER_ = 'remember_';
 

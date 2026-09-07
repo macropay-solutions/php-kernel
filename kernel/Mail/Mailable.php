@@ -18,19 +18,19 @@ use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Support\Traits\Localizable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\KernelDev\Testing\Constraints\SeeInOrder;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Symfony\Component\Mailer\Header\MetadataHeader;
 use Symfony\Component\Mailer\Header\TagHeader;
 use Symfony\Component\Mime\Address;
 
-class Mailable implements MailableContract, Renderable
+class Mailable implements MailableContract, Renderable, Macroable
 {
     use Conditionable;
     use ForwardsCalls;
     use Localizable;
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -1842,13 +1842,9 @@ class Mailable implements MailableContract, Renderable
     /**
      * Dynamically bind parameters to the message.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return $this
-     *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

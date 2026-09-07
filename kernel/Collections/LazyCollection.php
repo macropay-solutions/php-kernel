@@ -11,7 +11,7 @@ use IteratorAggregate;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\CanBeEscapedWhenCastToString;
 use MacropaySolutions\Kernel\Support\Traits\EnumeratesValues;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use stdClass;
 use Traversable;
 
@@ -22,13 +22,13 @@ use Traversable;
  *
  * @implements \MacropaySolutions\Kernel\Support\Enumerable<TKey, TValue>
  */
-class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable
+class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroable
 {
     /**
      * @use \MacropaySolutions\Kernel\Support\Traits\EnumeratesValues<TKey, TValue>
      */
     use EnumeratesValues;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The source from which to generate items.

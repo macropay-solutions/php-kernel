@@ -206,7 +206,7 @@ class DateFactory
      *
      * @throws \RuntimeException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         $defaultClassName = static::DEFAULT_CLASS_NAME;
 

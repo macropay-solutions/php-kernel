@@ -7,11 +7,11 @@ use InvalidArgumentException;
 use LogicException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Database\Connection;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class Builder
+class Builder implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The database connection instance.

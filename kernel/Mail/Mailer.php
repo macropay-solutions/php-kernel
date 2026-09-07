@@ -16,14 +16,14 @@ use MacropaySolutions\Kernel\Mail\Events\MessageSending;
 use MacropaySolutions\Kernel\Mail\Events\MessageSent;
 use MacropaySolutions\Kernel\Mail\Mailables\Address;
 use MacropaySolutions\Kernel\Support\HtmlString;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Email;
 
-class Mailer implements MailerContract, MailQueueContract
+class Mailer implements MailerContract, MailQueueContract, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The name that is configured for the mailer.

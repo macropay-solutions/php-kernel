@@ -5,12 +5,12 @@ namespace MacropaySolutions\Kernel\Auth;
 use MacropaySolutions\Kernel\Contracts\Auth\Guard;
 use MacropaySolutions\Kernel\Contracts\Auth\UserProvider;
 use MacropaySolutions\Kernel\Http\Request;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class RequestGuard implements Guard
+class RequestGuard implements Guard, Macroable
 {
     use GuardHelpers;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The guard callback.

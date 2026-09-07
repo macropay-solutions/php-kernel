@@ -306,7 +306,7 @@ class Logger implements LoggerInterface
      * @param array $parameters
      * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         return $this->logger->{$method}(...$parameters);
     }

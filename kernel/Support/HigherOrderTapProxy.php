@@ -29,7 +29,7 @@ class HigherOrderTapProxy
      * @param array $parameters
      * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         $this->target->{$method}(...$parameters);
 

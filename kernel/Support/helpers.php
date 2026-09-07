@@ -274,7 +274,7 @@ if (!function_exists('str')) {
     {
         if (func_num_args() === 0) {
             return new class {
-                public function __call($method, $parameters)
+                public function __call(string $method, array $parameters): mixed
                 {
                     return Str::$method(...$parameters);
                 }

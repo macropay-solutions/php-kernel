@@ -8,15 +8,15 @@ use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Contracts\Support\Renderable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
-class Response extends SymfonyResponse
+class Response extends SymfonyResponse implements Macroable
 {
     use ResponseTrait;
-    use Macroable {
-        Macroable::__call as macroCall;
+    use MacroableDummy {
+        __call as macroCall;
     }
 
     /**

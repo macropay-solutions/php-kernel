@@ -3,12 +3,12 @@
 namespace MacropaySolutions\Kernel\Database;
 
 use MacropaySolutions\Kernel\Contracts\Database\Query\Expression;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 
-abstract class Grammar
+abstract class Grammar implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The connection used for escaping values.

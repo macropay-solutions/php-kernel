@@ -12,15 +12,15 @@ use MacropaySolutions\Kernel\Contracts\Mail\Mailer;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Reflector;
 use MacropaySolutions\Kernel\Support\Stringable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Process\Process;
 use Throwable;
 
-class Event
+class Event implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
     use ManagesFrequencies;
     use ReflectsClosures;
 

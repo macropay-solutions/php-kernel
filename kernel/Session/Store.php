@@ -7,14 +7,14 @@ use MacropaySolutions\Kernel\Contracts\Session\Session;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\MessageBag;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\ViewErrorBag;
 use SessionHandlerInterface;
 use stdClass;
 
-class Store implements Session
+class Store implements Session, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The session ID.

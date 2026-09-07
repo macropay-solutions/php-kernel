@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\CanBeEscapedWhenCastToString;
 use MacropaySolutions\Kernel\Support\Traits\EnumeratesValues;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use stdClass;
 use Traversable;
 
@@ -20,13 +20,13 @@ use Traversable;
  * @implements \ArrayAccess<TKey, TValue>
  * @implements \MacropaySolutions\Kernel\Support\Enumerable<TKey, TValue>
  */
-class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerable
+class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerable, Macroable
 {
     /**
      * @use \MacropaySolutions\Kernel\Support\Traits\EnumeratesValues<TKey, TValue>
      */
     use EnumeratesValues;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The items contained in the collection.

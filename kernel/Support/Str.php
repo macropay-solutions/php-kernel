@@ -9,7 +9,7 @@ use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\Extension\InlinesOnly\InlinesOnlyExtension;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use League\CommonMark\MarkdownConverter;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Ramsey\Uuid\Codec\TimestampFirstCombCodec;
 use Ramsey\Uuid\Generator\CombGenerator;
 use Ramsey\Uuid\Uuid;
@@ -19,9 +19,9 @@ use Throwable;
 use Traversable;
 use voku\helper\ASCII;
 
-class Str
+class Str implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The cache of snake-cased words.

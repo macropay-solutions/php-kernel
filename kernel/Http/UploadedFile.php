@@ -6,14 +6,14 @@ use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Filesystem\Factory as FilesystemFactory;
 use MacropaySolutions\Kernel\Contracts\Filesystem\FileNotFoundException;
 use MacropaySolutions\Kernel\Support\Arr;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\KernelDev\Http\Testing\FileFactory;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
-class UploadedFile extends SymfonyUploadedFile
+class UploadedFile extends SymfonyUploadedFile implements Macroable
 {
     use FileHelpers;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * Begin creating a new file fake.

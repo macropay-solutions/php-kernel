@@ -8,12 +8,12 @@ use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\View\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Support\Arr;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\View\Engines\EngineResolver;
 
-class Factory implements FactoryContract
+class Factory implements FactoryContract, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
     use Concerns\ManagesComponents;
     use Concerns\ManagesEvents;
     use Concerns\ManagesFragments;

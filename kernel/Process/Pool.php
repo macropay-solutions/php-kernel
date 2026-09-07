@@ -113,7 +113,7 @@ class Pool
      * @param array $parameters
      * @return \MacropaySolutions\Kernel\Process\PendingProcess
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         return tap($this->factory->{$method}(...$parameters), function ($pendingProcess) {
             $this->pendingProcesses[] = $pendingProcess;

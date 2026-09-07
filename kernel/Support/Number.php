@@ -2,13 +2,13 @@
 
 namespace MacropaySolutions\Kernel\Support;
 
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use NumberFormatter;
 use RuntimeException;
 
-class Number
+class Number implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The current default locale.

@@ -10,13 +10,13 @@ use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-abstract class Relation implements BuilderContract
+abstract class Relation implements BuilderContract, Macroable
 {
     use ForwardsCalls;
-    use Macroable {
-        Macroable::__call as macroCall;
+    use MacroableDummy {
+        __call as macroCall;
     }
 
     /**
@@ -439,12 +439,8 @@ abstract class Relation implements BuilderContract
 
     /**
      * Handle dynamic method calls to the relationship.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

@@ -4,12 +4,12 @@ namespace MacropaySolutions\Kernel\Process;
 
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Process\ProcessResult as ProcessResultContract;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 
-class Factory
+class Factory implements Macroable
 {
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -313,12 +313,8 @@ class Factory
 
     /**
      * Dynamically proxy methods to a new pending process instance.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

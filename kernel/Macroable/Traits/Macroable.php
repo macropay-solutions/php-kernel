@@ -46,11 +46,8 @@ trait Macroable
 
     /**
      * Checks if macro is registered.
-     *
-     * @param string $name
-     * @return bool
      */
-    public static function hasMacro($name)
+    public static function hasMacro(string $name): bool
     {
         return isset(static::$macros[$name]);
     }
@@ -100,7 +97,7 @@ trait Macroable
      *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (!static::hasMacro($method)) {
             throw new BadMethodCallException(

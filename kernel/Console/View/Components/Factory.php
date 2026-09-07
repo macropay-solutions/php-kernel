@@ -47,7 +47,7 @@ class Factory
      *
      * @throws \InvalidArgumentException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         $component = '\MacropaySolutions\Kernel\Console\View\Components\\' . ucfirst($method);
 

@@ -22,18 +22,18 @@ use MacropaySolutions\Kernel\Database\Query\Processors\Processor;
 use MacropaySolutions\Kernel\Database\Schema\Builder as SchemaBuilder;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use PDO;
 use PDOStatement;
 use RuntimeException;
 
-class Connection implements ConnectionInterface
+class Connection implements ConnectionInterface, Macroable
 {
     use DetectsConcurrencyErrors;
     use DetectsLostConnections;
     use Concerns\ManagesTransactions;
     use InteractsWithTime;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The active PDO connection.

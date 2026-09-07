@@ -5,13 +5,13 @@ namespace MacropaySolutions\Framework\Http;
 use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ResponseFactory
+class ResponseFactory implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * Return a new response from the application.

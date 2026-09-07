@@ -4,11 +4,11 @@ namespace MacropaySolutions\Kernel\Support;
 
 use ArrayAccess;
 use ArrayObject;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class Optional implements ArrayAccess
+class Optional implements ArrayAccess, Macroable
 {
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -113,12 +113,8 @@ class Optional implements ArrayAccess
 
     /**
      * Dynamically pass a method to the underlying object.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

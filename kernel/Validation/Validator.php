@@ -1734,7 +1734,7 @@ class Validator implements ValidatorContract
      *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         $rule = Str::snake(substr($method, 8));
 

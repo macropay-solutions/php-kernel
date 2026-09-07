@@ -4,13 +4,13 @@ namespace MacropaySolutions\Kernel\Support;
 
 use Carbon\CarbonInterval;
 use DateInterval;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 use RuntimeException;
 
-class Sleep
+class Sleep implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The fake sleep callbacks.

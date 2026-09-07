@@ -3,7 +3,7 @@
 namespace MacropaySolutions\Kernel\Validation;
 
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Validation\Rules\Can;
 use MacropaySolutions\Kernel\Validation\Rules\Dimensions;
 use MacropaySolutions\Kernel\Validation\Rules\Enum;
@@ -17,9 +17,9 @@ use MacropaySolutions\Kernel\Validation\Rules\ProhibitedIf;
 use MacropaySolutions\Kernel\Validation\Rules\RequiredIf;
 use MacropaySolutions\Kernel\Validation\Rules\Unique;
 
-class Rule
+class Rule implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * Get a can constraint builder instance.

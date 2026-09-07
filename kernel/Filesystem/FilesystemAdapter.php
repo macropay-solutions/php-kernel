@@ -29,7 +29,7 @@ use MacropaySolutions\Kernel\Http\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException;
@@ -38,10 +38,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 /**
  * @mixin \League\Flysystem\FilesystemOperator
  */
-class FilesystemAdapter implements CloudFilesystemContract
+class FilesystemAdapter implements CloudFilesystemContract, Macroable
 {
     use Conditionable;
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -984,13 +984,9 @@ class FilesystemAdapter implements CloudFilesystemContract
     /**
      * Pass dynamic methods call onto Flysystem.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

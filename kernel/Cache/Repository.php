@@ -15,15 +15,15 @@ use MacropaySolutions\Kernel\Contracts\Cache\Store;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Cache\Store
  */
-class Repository implements ArrayAccess, CacheContract
+class Repository implements ArrayAccess, CacheContract, Macroable
 {
     use InteractsWithTime;
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -696,12 +696,8 @@ class Repository implements ArrayAccess, CacheContract
 
     /**
      * Handle dynamic calls into macros or pass missing methods to the store.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

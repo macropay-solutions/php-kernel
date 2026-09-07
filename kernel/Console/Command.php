@@ -4,14 +4,14 @@ namespace MacropaySolutions\Kernel\Console;
 
 use MacropaySolutions\Kernel\Console\View\Components\Factory;
 use MacropaySolutions\Kernel\Contracts\Console\Isolatable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Command extends SymfonyCommand
+class Command extends SymfonyCommand implements Macroable
 {
     use Concerns\CallsCommands;
     use Concerns\ConfiguresPrompts;
@@ -19,7 +19,7 @@ class Command extends SymfonyCommand
     use Concerns\InteractsWithIO;
     use Concerns\InteractsWithSignals;
     use Concerns\PromptsForMissingInput;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The Kernel application instance.

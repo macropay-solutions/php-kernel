@@ -439,7 +439,7 @@ class Message
      * @param array $parameters
      * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         return $this->forwardDecoratedCallTo($this->message, $method, $parameters);
     }

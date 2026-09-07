@@ -5,13 +5,13 @@ namespace MacropaySolutions\Kernel\Cookie;
 use MacropaySolutions\Kernel\Contracts\Cookie\QueueingFactory as JarContract;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\HttpFoundation\Cookie;
 
-class CookieJar implements JarContract
+class CookieJar implements JarContract, Macroable
 {
     use InteractsWithTime;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The default path (if specified).

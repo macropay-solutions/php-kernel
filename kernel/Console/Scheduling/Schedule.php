@@ -13,12 +13,12 @@ use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Support\ProcessUtils;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 
-class Schedule
+class Schedule implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     public const SUNDAY = 0;
 

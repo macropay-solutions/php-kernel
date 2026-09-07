@@ -1976,7 +1976,7 @@ class Builder implements BuilderContract
      * @return mixed
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if ($this->hasExtension($method)) {
             \array_unshift($parameters, $this);

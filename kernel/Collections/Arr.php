@@ -5,11 +5,11 @@ namespace MacropaySolutions\Kernel\Support;
 use ArgumentCountError;
 use ArrayAccess;
 use InvalidArgumentException;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class Arr
+class Arr implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * Determine whether the given value is array accessible.

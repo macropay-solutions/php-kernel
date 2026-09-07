@@ -7,17 +7,17 @@ use FilesystemIterator;
 use MacropaySolutions\Kernel\Contracts\Filesystem\FileNotFoundException;
 use MacropaySolutions\Kernel\Support\LazyCollection;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 use SplFileObject;
 use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Mime\MimeTypes;
 
-class Filesystem
+class Filesystem implements Macroable
 {
     use Conditionable;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * Determine if a file or directory exists.

@@ -12,13 +12,13 @@ use MacropaySolutions\Kernel\Contracts\View\Engine;
 use MacropaySolutions\Kernel\Contracts\View\View as ViewContract;
 use MacropaySolutions\Kernel\Support\MessageBag;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\ViewErrorBag;
 use Throwable;
 
-class View implements ArrayAccess, Htmlable, ViewContract
+class View implements ArrayAccess, Htmlable, ViewContract, Macroable
 {
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -465,13 +465,9 @@ class View implements ArrayAccess, Htmlable, ViewContract
     /**
      * Dynamically bind parameters to the view.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return \MacropaySolutions\Kernel\View\View
-     *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

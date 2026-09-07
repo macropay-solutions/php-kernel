@@ -9,12 +9,12 @@ use MacropaySolutions\Kernel\Contracts\Translation\Translator as TranslatorContr
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\NamespacedItemResolver;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 
-class Translator extends NamespacedItemResolver implements TranslatorContract
+class Translator extends NamespacedItemResolver implements TranslatorContract, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
     use ReflectsClosures;
 
     /**

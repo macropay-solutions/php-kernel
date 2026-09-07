@@ -15,7 +15,7 @@ use MacropaySolutions\Kernel\Support\Enumerable;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Throwable;
 
 /**
@@ -23,11 +23,11 @@ use Throwable;
  *
  * @method $this trashed()
  */
-abstract class Factory
+abstract class Factory implements Macroable
 {
     use Conditionable;
     use ForwardsCalls;
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -917,12 +917,8 @@ abstract class Factory
 
     /**
      * Proxy dynamic factory methods onto their proper methods.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

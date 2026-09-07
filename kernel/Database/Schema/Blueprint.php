@@ -10,11 +10,11 @@ use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\Schema\Grammars\Grammar;
 use MacropaySolutions\Kernel\Database\SQLiteConnection;
 use MacropaySolutions\Kernel\Support\Fluent;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class Blueprint
+class Blueprint implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The table the blueprint describes.

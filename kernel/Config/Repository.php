@@ -5,11 +5,11 @@ namespace MacropaySolutions\Kernel\Config;
 use ArrayAccess;
 use MacropaySolutions\Kernel\Contracts\Config\Repository as ConfigContract;
 use MacropaySolutions\Kernel\Support\Arr;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class Repository implements ArrayAccess, ConfigContract
+class Repository implements ArrayAccess, ConfigContract, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * All the configuration items.

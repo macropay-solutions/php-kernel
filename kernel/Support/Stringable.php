@@ -6,14 +6,14 @@ use ArrayAccess;
 use Closure;
 use JsonSerializable;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\Tappable;
 use Symfony\Component\VarDumper\VarDumper;
 
-class Stringable implements JsonSerializable, ArrayAccess
+class Stringable implements JsonSerializable, ArrayAccess, Macroable
 {
     use Conditionable;
-    use Macroable;
+    use MacroableDummy;
     use Tappable;
 
     /**

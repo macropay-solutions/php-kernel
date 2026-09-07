@@ -9,16 +9,16 @@ use MacropaySolutions\Kernel\Database\Events\ConnectionEstablished;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\ConfigurationUrlParser;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use PDO;
 use RuntimeException;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Database\Connection
  */
-class DatabaseManager implements ConnectionResolverInterface
+class DatabaseManager implements ConnectionResolverInterface, Macroable
 {
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -500,12 +500,8 @@ class DatabaseManager implements ConnectionResolverInterface
 
     /**
      * Dynamically pass methods to the default connection.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

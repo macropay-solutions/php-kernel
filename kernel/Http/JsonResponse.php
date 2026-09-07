@@ -6,14 +6,14 @@ use InvalidArgumentException;
 use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
-class JsonResponse extends BaseJsonResponse
+class JsonResponse extends BaseJsonResponse implements Macroable
 {
     use ResponseTrait;
-    use Macroable {
-        Macroable::__call as macroCall;
+    use MacroableDummy {
+        __call as macroCall;
     }
 
     /**

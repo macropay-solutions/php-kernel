@@ -23,17 +23,16 @@ use MacropaySolutions\Kernel\Pagination\Paginator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\LazyCollection;
-use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 
-class Builder implements BuilderContract
+class Builder implements BuilderContract, Macroable
 {
     use BuildsQueries;
     use ExplainsQueries;
     use ForwardsCalls;
-    use Macroable {
+    use MacroableDummy {
         __call as macroCall;
     }
 
@@ -4191,13 +4190,9 @@ class Builder implements BuilderContract
     /**
      * Handle dynamic method calls into the method.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);

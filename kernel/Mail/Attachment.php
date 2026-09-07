@@ -5,12 +5,12 @@ namespace MacropaySolutions\Kernel\Mail;
 use Closure;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Filesystem\Factory as FilesystemFactory;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
 
-class Attachment
+class Attachment implements Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The attached file's filename.

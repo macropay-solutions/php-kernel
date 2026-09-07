@@ -9,12 +9,12 @@ use MacropaySolutions\Kernel\Contracts\Validation\ValidatorAwareRule;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-class File implements Rule, DataAwareRule, ValidatorAwareRule
+class File implements Rule, DataAwareRule, ValidatorAwareRule, Macroable
 {
     use Conditionable;
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The MIME types that the given file should match. This array may also contain file extensions.

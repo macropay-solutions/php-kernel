@@ -16,12 +16,12 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use ReflectionClass;
 
-class Dispatcher implements DispatcherContract
+class Dispatcher implements DispatcherContract, Macroable
 {
-    use Macroable;
+    use MacroableDummy;
 
     /**
      * The IoC container instance.

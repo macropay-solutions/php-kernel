@@ -7,17 +7,17 @@ use MacropaySolutions\Kernel\Session\Store as SessionStore;
 use MacropaySolutions\Kernel\Support\MessageBag;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
-use MacropaySolutions\Kernel\Support\Traits\Macroable;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\ViewErrorBag;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse as BaseRedirectResponse;
 
-class RedirectResponse extends BaseRedirectResponse
+class RedirectResponse extends BaseRedirectResponse implements Macroable
 {
     use ForwardsCalls;
     use ResponseTrait;
-    use Macroable {
-        Macroable::__call as macroCall;
+    use MacroableDummy {
+        __call as macroCall;
     }
 
     /**
@@ -242,13 +242,9 @@ class RedirectResponse extends BaseRedirectResponse
     /**
      * Dynamically bind flash data in the session.
      *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     *
      * @throws \BadMethodCallException
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);
