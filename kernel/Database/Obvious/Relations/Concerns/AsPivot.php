@@ -10,24 +10,18 @@ trait AsPivot
 {
     /**
      * The parent model of the relationship.
-     *
-     * @var \MacropaySolutions\Kernel\Database\Obvious\Model
      */
-    public $pivotParent;
+    public ?Model $pivotParent;
 
     /**
      * The name of the foreign key column.
-     *
-     * @var string
      */
-    protected $foreignKey;
+    protected string $foreignKey;
 
     /**
      * The name of the "other key" column.
-     *
-     * @var string
      */
-    protected $relatedKey;
+    protected string $relatedKey;
 
     /**
      * Create a new pivot model instance.

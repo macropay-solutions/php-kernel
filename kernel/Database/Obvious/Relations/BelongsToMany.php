@@ -9,7 +9,6 @@ use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
-use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\AsPivot;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\InteractsWithDictionary;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns\InteractsWithPivotTable;
 use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
