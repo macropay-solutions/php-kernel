@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 class Response extends SymfonyResponse implements Macroable
 {
     use ResponseTrait;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpResponse {
         __call as macroCall;
     }
 

@@ -9,7 +9,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 class Arr implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportArr;
 
     /**
      * Determine whether the given value is array accessible.

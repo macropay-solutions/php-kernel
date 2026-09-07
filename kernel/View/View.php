@@ -18,7 +18,7 @@ use Throwable;
 
 class View implements ArrayAccess, Htmlable, ViewContract, Macroable
 {
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelViewView {
         __call as macroCall;
     }
 

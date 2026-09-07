@@ -10,7 +10,7 @@ use RuntimeException;
 
 class Attachment implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelMailAttachment;
 
     /**
      * The attached file's filename.

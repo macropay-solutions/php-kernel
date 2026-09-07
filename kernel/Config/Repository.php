@@ -9,7 +9,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 class Repository implements ArrayAccess, ConfigContract, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConfigRepository;
 
     /**
      * All the configuration items.

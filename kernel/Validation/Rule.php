@@ -19,7 +19,7 @@ use MacropaySolutions\Kernel\Validation\Rules\Unique;
 
 class Rule implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelValidationRule;
 
     /**
      * Get a can constraint builder instance.

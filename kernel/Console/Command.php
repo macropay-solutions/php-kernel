@@ -19,7 +19,7 @@ class Command extends SymfonyCommand implements Macroable
     use Concerns\InteractsWithIO;
     use Concerns\InteractsWithSignals;
     use Concerns\PromptsForMissingInput;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleCommand;
 
     /**
      * The Kernel application instance.

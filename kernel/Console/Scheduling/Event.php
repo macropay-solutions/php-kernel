@@ -20,7 +20,7 @@ use Throwable;
 
 class Event implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingEvent;
     use ManagesFrequencies;
     use ReflectsClosures;
 

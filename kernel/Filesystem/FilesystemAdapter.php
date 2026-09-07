@@ -41,7 +41,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class FilesystemAdapter implements CloudFilesystemContract, Macroable
 {
     use Conditionable;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelFilesystemFilesystemAdapter {
         __call as macroCall;
     }
 

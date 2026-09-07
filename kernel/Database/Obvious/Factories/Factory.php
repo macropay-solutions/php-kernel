@@ -27,7 +27,7 @@ abstract class Factory implements Macroable
 {
     use Conditionable;
     use ForwardsCalls;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousFactoriesFactory {
         __call as macroCall;
     }
 

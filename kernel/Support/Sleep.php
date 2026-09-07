@@ -10,7 +10,7 @@ use RuntimeException;
 
 class Sleep implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportSleep;
 
     /**
      * The fake sleep callbacks.

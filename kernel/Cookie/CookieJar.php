@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 class CookieJar implements JarContract, Macroable
 {
     use InteractsWithTime;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelCookieCookieJar;
 
     /**
      * The default path (if specified).

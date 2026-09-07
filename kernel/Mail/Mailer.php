@@ -23,7 +23,7 @@ use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerContract, MailQueueContract, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelMailMailer;
 
     /**
      * The name that is configured for the mailer.

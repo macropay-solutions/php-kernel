@@ -21,7 +21,7 @@ use ReflectionClass;
 
 class Dispatcher implements DispatcherContract, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelEventsDispatcher;
 
     /**
      * The IoC container instance.

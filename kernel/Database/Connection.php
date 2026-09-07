@@ -33,7 +33,7 @@ class Connection implements ConnectionInterface, Macroable
     use DetectsLostConnections;
     use Concerns\ManagesTransactions;
     use InteractsWithTime;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseConnection;
 
     /**
      * The active PDO connection.

@@ -11,7 +11,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 abstract class Connection implements Macroable
 {
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelRedisConnectionsConnection {
         __call as macroCall;
     }
 

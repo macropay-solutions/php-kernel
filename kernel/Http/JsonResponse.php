@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 class JsonResponse extends BaseJsonResponse implements Macroable
 {
     use ResponseTrait;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpJsonResponse {
         __call as macroCall;
     }
 

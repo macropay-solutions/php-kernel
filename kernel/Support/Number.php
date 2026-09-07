@@ -8,7 +8,7 @@ use RuntimeException;
 
 class Number implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportNumber;
 
     /**
      * The current default locale.

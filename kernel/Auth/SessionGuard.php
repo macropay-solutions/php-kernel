@@ -32,7 +32,7 @@ class SessionGuard implements
     Macroable
 {
     use GuardHelpers;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelAuthSessionGuard;
 
     public const REMEMBER_ = 'remember_';
 

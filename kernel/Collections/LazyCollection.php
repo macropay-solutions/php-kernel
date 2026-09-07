@@ -28,7 +28,7 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
      * @use \MacropaySolutions\Kernel\Support\Traits\EnumeratesValues<TKey, TValue>
      */
     use EnumeratesValues;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportLazyCollection;
 
     /**
      * The source from which to generate items.

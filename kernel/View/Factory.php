@@ -13,7 +13,7 @@ use MacropaySolutions\Kernel\View\Engines\EngineResolver;
 
 class Factory implements FactoryContract, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelViewFactory;
     use Concerns\ManagesComponents;
     use Concerns\ManagesEvents;
     use Concerns\ManagesFragments;

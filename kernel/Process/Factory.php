@@ -9,7 +9,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 class Factory implements Macroable
 {
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelProcessFactory {
         __call as macroCall;
     }
 

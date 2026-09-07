@@ -8,7 +8,7 @@ use RuntimeException;
 
 abstract class Grammar implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseGrammar;
 
     /**
      * The connection used for escaping values.

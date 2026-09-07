@@ -14,7 +14,7 @@ use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 
 class Translator extends NamespacedItemResolver implements TranslatorContract, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelTranslationTranslator;
     use ReflectsClosures;
 
     /**

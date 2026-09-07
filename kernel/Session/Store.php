@@ -14,7 +14,7 @@ use stdClass;
 
 class Store implements Session, Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSessionStore;
 
     /**
      * The session ID.

@@ -18,7 +18,7 @@ use RuntimeException;
  */
 class DatabaseManager implements ConnectionResolverInterface, Macroable
 {
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseDatabaseManager {
         __call as macroCall;
     }
 

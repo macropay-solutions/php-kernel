@@ -32,7 +32,7 @@ class Builder implements BuilderContract, Macroable
     use BuildsQueries;
     use ExplainsQueries;
     use ForwardsCalls;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryBuilder {
         __call as macroCall;
     }
 

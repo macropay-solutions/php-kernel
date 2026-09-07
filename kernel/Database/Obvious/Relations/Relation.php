@@ -15,7 +15,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 abstract class Relation implements BuilderContract, Macroable
 {
     use ForwardsCalls;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsRelation {
         __call as macroCall;
     }
 

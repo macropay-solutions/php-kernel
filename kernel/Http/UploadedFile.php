@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 class UploadedFile extends SymfonyUploadedFile implements Macroable
 {
     use FileHelpers;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpUploadedFile;
 
     /**
      * Begin creating a new file fake.

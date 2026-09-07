@@ -14,7 +14,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 class Blueprint implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaBlueprint;
 
     /**
      * The table the blueprint describes.

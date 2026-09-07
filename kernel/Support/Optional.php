@@ -8,7 +8,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 class Optional implements ArrayAccess, Macroable
 {
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportOptional {
         __call as macroCall;
     }
 

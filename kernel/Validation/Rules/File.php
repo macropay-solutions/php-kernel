@@ -14,7 +14,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 class File implements Rule, DataAwareRule, ValidatorAwareRule, Macroable
 {
     use Conditionable;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelValidationRulesFile;
 
     /**
      * The MIME types that the given file should match. This array may also contain file extensions.

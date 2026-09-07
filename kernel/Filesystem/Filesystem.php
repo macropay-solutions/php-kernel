@@ -17,7 +17,7 @@ use Symfony\Component\Mime\MimeTypes;
 class Filesystem implements Macroable
 {
     use Conditionable;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelFilesystemFilesystem;
 
     /**
      * Determine if a file or directory exists.

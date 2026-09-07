@@ -16,7 +16,7 @@ class RedirectResponse extends BaseRedirectResponse implements Macroable
 {
     use ForwardsCalls;
     use ResponseTrait;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpRedirectResponse {
         __call as macroCall;
     }
 

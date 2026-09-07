@@ -13,7 +13,7 @@ use Symfony\Component\VarDumper\VarDumper;
 class Stringable implements JsonSerializable, ArrayAccess, Macroable
 {
     use Conditionable;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportStringable;
     use Tappable;
 
     /**

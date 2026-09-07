@@ -30,7 +30,7 @@ class Mailable implements MailableContract, Renderable, Macroable
     use Conditionable;
     use ForwardsCalls;
     use Localizable;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelMailMailable {
         __call as macroCall;
     }
 

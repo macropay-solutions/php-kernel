@@ -10,7 +10,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 class RequestGuard implements Guard, Macroable
 {
     use GuardHelpers;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelAuthRequestGuard;
 
     /**
      * The guard callback.

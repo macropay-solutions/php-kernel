@@ -11,7 +11,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
 class Builder implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaBuilder;
 
     /**
      * The database connection instance.

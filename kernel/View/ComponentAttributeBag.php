@@ -17,7 +17,7 @@ use Traversable;
 class ComponentAttributeBag implements ArrayAccess, IteratorAggregate, JsonSerializable, Htmlable, Macroable
 {
     use Conditionable;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelViewComponentAttributeBag;
 
     /**
      * The raw array of attributes.

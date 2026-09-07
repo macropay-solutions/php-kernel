@@ -26,7 +26,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      * @use \MacropaySolutions\Kernel\Support\Traits\EnumeratesValues<TKey, TValue>
      */
     use EnumeratesValues;
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportCollection;
 
     /**
      * The items contained in the collection.

@@ -21,7 +21,7 @@ use voku\helper\ASCII;
 
 class Str implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelSupportStr;
 
     /**
      * The cache of snake-cased words.

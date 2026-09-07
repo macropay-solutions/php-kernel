@@ -18,7 +18,7 @@ use RuntimeException;
 
 class Schedule implements Macroable
 {
-    use MacroableDummy;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleSchedulingSchedule;
 
     public const SUNDAY = 0;
 

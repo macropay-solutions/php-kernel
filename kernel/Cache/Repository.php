@@ -23,7 +23,7 @@ use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 class Repository implements ArrayAccess, CacheContract, Macroable
 {
     use InteractsWithTime;
-    use MacroableDummy {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelCacheRepository {
         __call as macroCall;
     }
 
