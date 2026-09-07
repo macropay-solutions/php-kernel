@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Database\Obvious\Relations;
 
+use MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasOne;
 use MacropaySolutions\Kernel\Contracts\Database\Obvious\SupportsPartialRelations;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
@@ -13,10 +14,12 @@ use MacropaySolutions\Kernel\Database\Query\JoinClause;
 
 class HasOne extends HasOneOrMany implements SupportsPartialRelations
 {
-    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousRelationsHasOne;
+    use MacropaySolutionsKernelDatabaseObviousRelationsHasOne;
 
     use ComparesRelatedModels;
-    use CanBeOneOfMany;
+    use CanBeOneOfMany {
+        CanBeOneOfMany::__call insteadof MacropaySolutionsKernelDatabaseObviousRelationsHasOne;
+    }
     use SupportsDefaultModels;
 
     /**
