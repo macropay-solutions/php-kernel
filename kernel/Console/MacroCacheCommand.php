@@ -52,13 +52,13 @@ class MacroCacheCommand extends Command
         $count = 0;
 
         foreach (\array_keys(\array_diff_key($classMap, [$macroableInterface => true])) as $class) {
-            if (!\is_subclass_of($class, $macroableInterface)) {
-                continue;
-            }
-
             try {
+                if (!\is_subclass_of($class, $macroableInterface)) {
+                    continue;
+                }
+
                 $reflector = new \ReflectionClass($class);
-            } catch (\ReflectionException) {
+            } catch (\Throwable) {
                 continue;
             }
 
