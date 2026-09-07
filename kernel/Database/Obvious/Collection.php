@@ -18,6 +18,7 @@ use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
  */
 class Collection extends BaseCollection implements QueueableCollection
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousCollection;
     use InteractsWithDictionary;
 
     /**
