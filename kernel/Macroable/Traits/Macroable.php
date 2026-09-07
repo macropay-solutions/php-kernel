@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Support\Traits;
 
 use BadMethodCallException;
 use Closure;
+use MacropaySolutions\Kernel\Container\Container;
 
 trait Macroable
 {
@@ -18,6 +19,12 @@ trait Macroable
      */
     public static function deferredMacro(string $name, array $callableMethod): void
     {
+        if (Container::getInstance()->isBooted()) {
+            throw new \LogicException(
+                'Deferred macros must be registered before the application has booted.'
+            );
+        }
+
         if (!\is_callable($callableMethod)) {
             throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
         }
