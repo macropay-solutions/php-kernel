@@ -64,7 +64,7 @@ trait Macroable
             );
         }
 
-        if (\is_array($macro) && isset($macro['c'])) {
+        if (\is_array($macro) && isset($macro['c']) && \is_callable($macro['c'])) {
             return $macro['c']();
         }
 

@@ -97,7 +97,7 @@ class MacroCacheCommand extends Command
         $methods = [];
 
         foreach ($macros as $name => $macro) {
-            if (!\is_array($macro) || !isset($macro['c'])) {
+            if (!\is_array($macro) || !isset($macro['c']) || !\is_callable($macro['c'])) {
                 continue;
             }
 
