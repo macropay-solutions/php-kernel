@@ -12,6 +12,7 @@ use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Finder\Finder;
 
 class FullApplicationTest extends TestCase
 {
@@ -788,11 +789,31 @@ class FullApplicationTest extends TestCase
         $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;
 
         $app = new Application();
-        $classMap = require $app->basePath('vendor/composer/autoload_classmap.php');
-        $classes = \array_keys($classMap);
+
+        $finder = new Finder();
+        $finder->files()->in([$app->basePath('kernel'), $app->basePath('src')])->name('*.php');
+
+        $classes = [];
+
+        foreach ($finder as $file) {
+            $cleanContent = \php_strip_whitespace($file->getRealPath());
+
+            if (!\preg_match('/namespace\s+([^;]+);/', $cleanContent, $nsMatches)) {
+                continue;
+            }
+
+            if (!\preg_match('/(?:class|interface|trait|enum)\s+([a-zA-Z0-9_]+)/', $cleanContent, $classMatches)) {
+                continue;
+            }
+
+            $classes[] = trim($nsMatches[1]) . '\\' . trim($classMatches[1]);
+        }
 
         foreach ($classes as $class) {
-            if (!\str_starts_with($class, 'MacropaySolutions\\Kernel\\')) {
+            if (
+                !\str_starts_with($class, 'MacropaySolutions\\Kernel\\')
+                && !\str_starts_with($class, 'MacropaySolutions\\Framework\\')
+            ) {
                 continue;
             }
 

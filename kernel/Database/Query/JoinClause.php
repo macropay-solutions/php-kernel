@@ -6,6 +6,8 @@ use Closure;
 
 class JoinClause extends Builder
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryJoinClause;
+
     /**
      * The type of join being performed.
      *
