@@ -15,6 +15,7 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Relation;
 use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
 use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
 use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Pagination\Paginator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
@@ -27,10 +28,13 @@ use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
  *
  * @mixin QueryBuilder
  */
-class Builder implements BuilderContract
+class Builder implements BuilderContract, Macroable
 {
     use BuildsQueries;
     use ForwardsCalls;
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseObviousBuilder {
+        __call as macroCall;
+    }
     use QueriesRelationships {
         BuildsQueries::sole as baseSole;
     }
@@ -55,12 +59,6 @@ class Builder implements BuilderContract
      * @var array
      */
     protected $eagerLoad = [];
-
-    /**
-     * All the globally registered builder macros.
-     * @var array<string, callable|array{c: callable}>
-     */
-    protected static array $macros = [];
 
     /**
      * All the locally registered builder extensions.
@@ -1919,30 +1917,6 @@ class Builder implements BuilderContract
     }
 
     /**
-     * Register a custom deferred global macro.
-     * $callableMethod must be an array callable that resolves to a static method and returns the macro closure.
-     */
-    public static function deferredMacro(string $name, array $callableMethod): void
-    {
-        if ( !\is_callable($callableMethod)) {
-            throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
-        }
-
-        static::$macros[$name] = ['c' => $callableMethod];
-    }
-
-    /**
-     * Checks if a global macro is registered.
-     *
-     * @param string $name
-     * @return bool
-     */
-    public static function hasGlobalMacro($name)
-    {
-        return isset(static::$macros[$name]);
-    }
-
-    /**
      * Dynamically access builder proxies.
      *
      * @param string $key
@@ -1984,18 +1958,8 @@ class Builder implements BuilderContract
             return $this->extensions[$method](...$parameters);
         }
 
-        if (static::hasGlobalMacro($method)) {
-            if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
-                self::macro($method, static::$macros[$method]['c']());
-            }
-
-            $callable = static::$macros[$method];
-
-            if ($callable instanceof Closure) {
-                $callable = $callable->bindTo($this, static::class);
-            }
-
-            return $callable(...$parameters);
+        if (static::hasMacro($method)) {
+            return $this->macroCall($method, $parameters);
         }
 
         if (in_array(strtolower($method), $this->passthru)) {
@@ -2003,43 +1967,6 @@ class Builder implements BuilderContract
         }
 
         return $this->forwardDecoratedCallTo($this->query, $method, $parameters);
-    }
-
-    /**
-     * Register a custom macro.
-     */
-    private static function macro(string $name, callable $macro): void
-    {
-        if (!$macro instanceof Closure) {
-            static::$macros[$name] = $macro;
-
-            return;
-        }
-
-        try {
-            static::$macros[$name] = $macro->bindTo(null, static::class) ?? $macro;
-        } catch (\Throwable) {
-            // Keep original closure if locked by php if inside a nonstatic closure already (db transaction closure)
-            static::$macros[$name] = $macro;
-        }
-    }
-
-    /**
-     * Dynamically handle calls into the query instance.
-     *
-     * @throws \BadMethodCallException
-     */
-    public static function __callStatic(string $method, array $parameters): mixed
-    {
-        if (!static::hasGlobalMacro($method)) {
-            static::throwBadMethodCallException($method);
-        }
-
-        if (\is_array(static::$macros[$method]) && isset(static::$macros[$method]['c'])) {
-            self::macro($method, static::$macros[$method]['c']());
-        }
-
-        return static::$macros[$method](...$parameters);
     }
 
     /**
