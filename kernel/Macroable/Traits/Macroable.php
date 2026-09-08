@@ -16,36 +16,38 @@ trait Macroable
     /**
      * Register a custom deferred macro.
      * $callableMethod must be an array callable that resolves to a static method and returns the macro closure.
+     * @see CompiledMacroable::deferredMacro()
+     * @see \MacropaySolutions\Kernel\Console\MacroCacheCommand::handle()
      */
-    public static function deferredMacro(string $name, array $callableMethod): void
+    public static function deferredMacro(string $method, array $callableMethod): void
     {
-        if (\method_exists(static::class, $name)) {
-            throw new \LogicException('Method already exists: ' . $name);
-        }
-
         if (Container::getInstance()->isBooted()) {
             throw new \LogicException(
                 'Deferred macros must be registered before the application has booted.'
             );
         }
 
-        if (!\is_callable($callableMethod) || !\is_string($callableMethod[0])) {
-            throw new \RuntimeException('deferredMacro requires an array callable in [Class, method] format');
+        if (\method_exists(static::class, $method) || null !== static::getMacro($method)) {
+            throw new \LogicException('Method already exists: ' . $method);
         }
 
-        static::$macros[$name] = ['c' => $callableMethod];
+        if (!\is_string($callableMethod[0] ?? null) || !\is_callable($callableMethod)) {
+            throw new \RuntimeException('deferredMacro requires an array callable in [Class::class, method] format');
+        }
+
+        static::$macros[$method] = $callableMethod;
     }
 
     /**
      * Traverse the inheritance tree to find the class that registered the macro.
      */
-    protected static function resolveMacro(string $name): null|array
+    protected static function resolveMacro(string $method): null|array
     {
         $class = static::class;
 
         while ($class !== false) {
-            if (isset($class::$macros[$name])) {
-                return $class::$macros[$name];
+            if (isset($class::$macros[$method])) {
+                return $class::$macros[$method];
             }
 
             $class = \get_parent_class($class);
@@ -64,19 +66,15 @@ trait Macroable
             );
         }
 
-        if (isset($macro['c']) && \is_callable($macro['c'])) {
-            return $macro['c']();
-        }
-
-        throw new \RuntimeException(\sprintf('Invalid macro %s::%s.', static::class, $method));
+        return $macro();
     }
 
     /**
      * Checks if macro is registered on this class or any parent class.
      */
-    public static function hasMacro(string $name): bool
+    public static function hasMacro(string $method): bool
     {
-        return static::resolveMacro($name) !== null;
+        return static::resolveMacro($method) !== null;
     }
 
     /**

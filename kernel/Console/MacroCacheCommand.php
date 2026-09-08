@@ -129,7 +129,7 @@ class MacroCacheCommand extends Command
         $shortTraitName = \str_replace('\\', '', $class);
         $methods = [];
 
-        foreach ($macros as $name => $macro) {
+        foreach ($macros as $name => $factory) {
             if (!\is_string($name)) {
                 throw new \Exception("Macro name must be a string in {$class}");
             }
@@ -140,15 +140,10 @@ class MacroCacheCommand extends Command
                 );
             }
 
-            if (!\is_array($macro) || !isset($macro['c'])) {
-                throw new \Exception("Macro '{$name}' in {$class} must be an array with key 'c'");
+            if (!\is_array($factory) || !\is_string($factory[0]) || !\is_callable($factory)) {
+                throw new \Exception("Macro '{$name}' in {$class} has non-callable value");
             }
 
-            if (!\is_callable($macro['c'])) {
-                throw new \Exception("Macro '{$name}' in {$class} has non-callable value for key 'c'");
-            }
-
-            $factory = $macro['c'];
 
             try {
                 $factoryExport = \var_export($factory, true);

@@ -5,31 +5,19 @@ namespace MacropaySolutions\Kernel\Support\Traits;
 trait CompiledMacroable
 {
     /**
-     * The registered string macros.
-     */
-    protected static array $macros = [];
-
-    /**
-     * Register a custom macro.
-     */
-    private static function macro(string $name, callable|object $macro): void
-    {
-    }
-
-    /**
      * Register a custom deferred macro.
-     * $callableMethod must be array callable that resolves to a static method and returns the macro closure.
+     * $callableMethod must be an array callable that resolves to a static method and returns the macro closure.
      */
-    public static function deferredMacro(string $name, array $callableMethod): void
+    public static function deferredMacro(string $method, array $callableMethod): void
     {
     }
 
     /**
      * Checks if macro is registered.
      */
-    public static function hasMacro(string $name): bool
+    public static function hasMacro(string $method): bool
     {
-        return \method_exists(static::class, $name);
+        return \method_exists(static::class, $method);
     }
 
     /**
