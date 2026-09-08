@@ -27,7 +27,7 @@ trait Macroable
             );
         }
 
-        if (\method_exists(static::class, $method) || null !== static::getMacro($method)) {
+        if (\method_exists(static::class, $method) || null !== static::resolveMacro($method)) {
             throw new \LogicException('Method already exists: ' . $method);
         }
 
