@@ -17,7 +17,7 @@ trait CompiledMacroable
      */
     public static function hasMacro(string $method): bool
     {
-        return \method_exists(static::class, $method);
+        return false;
     }
 
     /**
@@ -29,6 +29,6 @@ trait CompiledMacroable
 
     public function __call(string $method, array $parameters): mixed
     {
-        return null;
+        throw new \BadMethodCallException('Method ' . $method . ' does not exist.');
     }
 }
