@@ -2,13 +2,19 @@
 
 namespace MacropaySolutions\Kernel\Mail;
 
+use InvalidArgumentException;
+use JsonSerializable;
+use LogicException;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
+use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\RawMessage;
 
 /**
  * @mixin \Symfony\Component\Mailer\SentMessage
  */
-class SentMessage
+class SentMessage implements JsonSerializable
 {
     use ForwardsCalls;
 
@@ -21,12 +27,42 @@ class SentMessage
 
     /**
      * Create a new SentMessage instance.
-     *
-     * @param \Symfony\Component\Mailer\SentMessage $sentMessage
-     * @return void
      */
-    public function __construct(SymfonySentMessage $sentMessage)
+    public function __construct(SymfonySentMessage|array $sentMessage)
     {
+        if (\is_array($sentMessage)) {
+            if (
+                !isset($sentMessage['raw'], $sentMessage['sender'], $sentMessage['recipients']) ||
+                !\is_string($sentMessage['raw']) ||
+                (!\is_string($sentMessage['sender']) && !$sentMessage['sender'] instanceof Address) ||
+                !\is_array($sentMessage['recipients'])
+            ) {
+                throw new InvalidArgumentException('A serialized sent message must contain valid raw, sender, and recipients.');
+            }
+
+            $recipients = [];
+
+            foreach ($sentMessage['recipients'] as $recipient) {
+                if (!\is_string($recipient) && !$recipient instanceof Address) {
+                    throw new InvalidArgumentException('Recipient must be a string or Address instance.');
+                }
+
+                $recipients[] = Address::create($recipient);
+            }
+
+            if ([] === $recipients) {
+                throw new InvalidArgumentException('A serialized sent message must contain at least one recipient.');
+            }
+
+            $sender = Address::create($sentMessage['sender']);
+            $rawMessage = new RawMessage($sentMessage['raw']);
+            $envelope = new Envelope($sender, $recipients);
+
+            $this->sentMessage = new SymfonySentMessage($rawMessage, $envelope);
+
+            return;
+        }
+
         $this->sentMessage = $sentMessage;
     }
 
@@ -53,18 +89,39 @@ class SentMessage
     }
 
     /**
+    * Convert the sent message to a storable JSON array representation.
+    */
+    public function toArray(): array
+    {
+        $original = $this->sentMessage->getOriginalMessage();
+        $envelope = $this->sentMessage->getEnvelope();
+
+        return [
+            'raw' => $original->toString(),
+            'sender' => $envelope->getSender()->toString(),
+            'recipients' => \array_map(
+                fn (Address $a) => $a->toString(),
+                $envelope->getRecipients()
+            ),
+        ];
+    }
+
+    /**
+     * Specify data which should be serialized to JSON.
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
+    }
+
+    /**
      * Get the serializable representation of the object.
      *
      * @return array
      */
     public function __serialize()
     {
-        $hasAttachments = collect($this->sentMessage->getOriginalMessage()->getAttachments())->isNotEmpty();
-
-        return [
-            'hasAttachments' => $hasAttachments,
-            'sentMessage' => $hasAttachments ? base64_encode(serialize($this->sentMessage)) : $this->sentMessage,
-        ];
+        throw new LogicException('SentMessage instances cannot be serialized using native PHP serialize().');
     }
 
     /**
@@ -75,8 +132,6 @@ class SentMessage
      */
     public function __unserialize(array $data)
     {
-        $hasAttachments = ($data['hasAttachments'] ?? false) === true;
-
-        $this->sentMessage = $hasAttachments ? unserialize(base64_decode($data['sentMessage'])) : $data['sentMessage'];
+        throw new LogicException('SentMessage instances cannot be unserialized using native PHP unserialize().');
     }
 }

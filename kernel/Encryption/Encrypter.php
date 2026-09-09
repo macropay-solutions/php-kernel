@@ -176,11 +176,23 @@ class Encrypter implements EncrypterContract, StringEncrypter
     {
         $payload = $this->getJsonPayload($payload);
 
-        $iv = base64_decode($payload['iv']);
+        $iv = \base64_decode($payload['iv'], true);
 
-        $this->ensureTagIsValid(
-            $tag = empty($payload['tag']) ? null : base64_decode($payload['tag'])
-        );
+        if ($iv === false) {
+            throw new DecryptException('The payload IV is invalid Base64.');
+        }
+
+        $tag = null;
+
+        if ('' !== ($payload['tag'] ?? '')) {
+            $tag = \base64_decode((string)$payload['tag'], true);
+
+            if ($tag === false) {
+                throw new DecryptException('The payload MAC tag is invalid Base64.');
+            }
+        }
+
+        $this->ensureTagIsValid($tag);
 
         // Here we will decrypt the value. If we are able to successfully decrypt it
         // we will then unserialize it and return it out to the caller. If we are
@@ -195,7 +207,7 @@ class Encrypter implements EncrypterContract, StringEncrypter
                 $tag ?? ''
             )
         ) {
-            return $unserialize ? \unserialize($decrypted) : $decrypted;
+            return $unserialize ? \unserialize($decrypted, ['allowed_classes' => false]) : $decrypted;
         }
 
         foreach ($this->previousKeysCiphersMap as $key => $cipher) {
@@ -209,7 +221,7 @@ class Encrypter implements EncrypterContract, StringEncrypter
                     $tag ?? ''
                 )
             ) {
-                return $unserialize ? \unserialize($decrypted) : $decrypted;
+                return $unserialize ? \unserialize($decrypted, ['allowed_classes' => false]) : $decrypted;
             }
         }
 
@@ -256,7 +268,13 @@ class Encrypter implements EncrypterContract, StringEncrypter
             throw new DecryptException('The payload is invalid.');
         }
 
-        $payload = json_decode(base64_decode($payload), true);
+        $decoded = \base64_decode((string)$payload, true);
+
+        if ($decoded === false) {
+            throw new DecryptException('The payload is invalid Base64.');
+        }
+
+        $payload = \json_decode($decoded, true);
 
         // If the payload is not valid JSON or does not have the proper keys set we will
         // assume it is invalid and bail out of the routine since we will not be able
@@ -294,7 +312,13 @@ class Encrypter implements EncrypterContract, StringEncrypter
             return false;
         }
 
-        return strlen(base64_decode($payload['iv'], true)) === openssl_cipher_iv_length(strtolower($this->cipher));
+        $iv = \base64_decode($payload['iv'], true);
+
+        if ($iv === false) {
+            return false;
+        }
+
+        return \strlen($iv) === \openssl_cipher_iv_length(\strtolower($this->cipher));
     }
 
     /**

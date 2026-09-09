@@ -1259,13 +1259,16 @@ class Stringable implements JsonSerializable, ArrayAccess, Macroable
 
     /**
      * Decode the Base64 encoded string.
-     *
-     * @param bool $strict
-     * @return static
      */
-    public function fromBase64($strict = false)
+    public function fromBase64(bool $strict = true): static
     {
-        return new static(base64_decode($this->value, $strict));
+        $decoded = \base64_decode($this->value, $strict);
+
+        if ($decoded === false) {
+            throw new \InvalidArgumentException('Invalid Base64 payload.');
+        }
+
+        return new static($decoded);
     }
 
     /**

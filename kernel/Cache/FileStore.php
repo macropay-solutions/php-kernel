@@ -328,7 +328,7 @@ class FileStore implements Store, LockProvider
         }
 
         try {
-            $data = unserialize(substr($contents, 10));
+            $data = \unserialize(\substr($contents, 10), ['allowed_classes' => false]);
         } catch (Exception) {
             $this->forget($key);
 

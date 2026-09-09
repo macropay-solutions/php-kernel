@@ -152,7 +152,7 @@ class DatabaseStore implements LockProvider, Store
      */
     public function add($key, $value, $seconds)
     {
-        if (!is_null($this->get($key))) {
+        if (null !== $this->get($key)) {
             return false;
         }
 
@@ -428,9 +428,13 @@ class DatabaseStore implements LockProvider, Store
     protected function unserialize($value)
     {
         if ($this->connection instanceof PostgresConnection && !Str::contains($value, [':', ';'])) {
-            $value = base64_decode($value);
+            $decoded = \base64_decode($value, true);
+
+            if ($decoded !== false) {
+                $value = $decoded;
+            }
         }
 
-        return unserialize($value);
+        return \unserialize($value, ['allowed_classes' => false]);
     }
 }

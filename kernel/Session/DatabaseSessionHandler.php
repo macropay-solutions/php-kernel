@@ -105,7 +105,13 @@ class DatabaseSessionHandler implements ExistenceAwareInterface, SessionHandlerI
         if (isset($session->payload)) {
             $this->exists = true;
 
-            return base64_decode($session->payload);
+            $decoded = \base64_decode($session->payload, true);
+
+            if ($decoded === false) {
+                throw new \UnexpectedValueException('Invalid Base64 session payload.');
+            }
+
+            return $decoded;
         }
 
         return '';

@@ -84,7 +84,11 @@ class PasswordBrokerManager implements FactoryContract
         $key = $this->app['config']['app.key'];
 
         if (str_starts_with($key, 'base64:')) {
-            $key = base64_decode(substr($key, 7));
+            $key = \base64_decode(\substr($key, 7), true);
+
+            if ($key === false) {
+                throw new \RuntimeException('App key is invalid Base64.');
+            }
         }
 
         $connection = $config['connection'] ?? null;

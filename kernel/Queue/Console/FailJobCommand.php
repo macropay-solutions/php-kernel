@@ -48,7 +48,13 @@ class FailJobCommand extends WorkCommand
     {
         try {
             $this->key = $this->argument('key');
-            $this->error = \base64_decode($this->argument('error'));
+            $decoded = \base64_decode($this->argument('error'), true);
+
+            if ($decoded === false) {
+                throw new \InvalidArgumentException('Invalid Base64 error payload.');
+            }
+
+            $this->error = $decoded;
         } catch (\Throwable $e) {
             $this->output->writeln($e->getMessage());
 

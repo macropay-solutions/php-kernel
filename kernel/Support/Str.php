@@ -1678,14 +1678,12 @@ class Str implements Macroable
 
     /**
      * Decode the given Base64 encoded string.
-     *
-     * @param string $string
-     * @param bool $strict
-     * @return string|false
      */
-    public static function fromBase64($string, $strict = false)
+    public static function fromBase64(string $string, bool $strict = true): ?string
     {
-        return base64_decode($string, $strict);
+        $decoded = \base64_decode($string, $strict);
+
+        return $decoded === false ? null : $decoded;
     }
 
     /**

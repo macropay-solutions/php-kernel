@@ -353,7 +353,11 @@ class DatabaseBatchRepository implements PrunableBatchRepository
             $this->connection instanceof PostgresConnection &&
             !Str::contains($serialized, ['{', '['])
         ) {
-            $serialized = base64_decode($serialized);
+            $decoded = \base64_decode($serialized, true);
+
+            if ($decoded !== false) {
+                $serialized = $decoded;
+            }
         }
 
         try {

@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Mail\Events;
 
 use Exception;
+use LogicException;
 use MacropaySolutions\Kernel\Mail\SentMessage;
 
 /**
@@ -26,46 +27,27 @@ class MessageSent
 
     /**
      * Create a new event instance.
-     *
-     * @param \MacropaySolutions\Kernel\Mail\SentMessage $message
-     * @param array $data
-     * @return void
      */
-    public function __construct(SentMessage $message, array $data = [])
+    public function __construct(SentMessage|array $sent, array $data = [])
     {
-        $this->sent = $message;
+        $this->sent = \is_array($sent) ? new SentMessage($sent) : $sent;
         $this->data = $data;
     }
 
     /**
-     * Get the serializable representation of the object.
-     *
-     * @return array
+     * Prevent native PHP serialization.
      */
-    public function __serialize()
+    public function __serialize(): array
     {
-        $hasAttachments = collect($this->message->getAttachments())->isNotEmpty();
-
-        return [
-            'sent' => $this->sent,
-            'data' => $hasAttachments ? base64_encode(serialize($this->data)) : $this->data,
-            'hasAttachments' => $hasAttachments,
-        ];
+        throw new LogicException('MessageSent events cannot be serialized using native PHP serialize().');
     }
 
     /**
-     * Marshal the object from its serialized data.
-     *
-     * @param array $data
-     * @return void
+     * Prevent native PHP unserialization.
      */
-    public function __unserialize(array $data)
+    public function __unserialize(array $data): void
     {
-        $this->sent = $data['sent'];
-
-        $this->data = (($data['hasAttachments'] ?? false) === true)
-            ? unserialize(base64_decode($data['data']))
-            : $data['data'];
+        throw new LogicException('MessageSent events cannot be unserialized using native PHP unserialize().');
     }
 
     /**

@@ -47,7 +47,13 @@ class EncryptionServiceProvider extends ServiceProvider implements DeferrablePro
     protected function parseKey(array $config)
     {
         if (Str::startsWith($key = $this->key($config), $prefix = 'base64:')) {
-            $key = base64_decode(Str::after($key, $prefix));
+            $decoded = \base64_decode(Str::after($key, $prefix), true);
+
+            if ($decoded === false) {
+                throw new MissingAppKeyException('The application key is invalid Base64.');
+            }
+
+            return $decoded;
         }
 
         return $key;

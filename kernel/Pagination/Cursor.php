@@ -107,17 +107,20 @@ class Cursor implements Arrayable
 
     /**
      * Get a cursor instance from the encoded string representation.
-     *
-     * @param string|null $encodedString
-     * @return static|null
      */
-    public static function fromEncoded($encodedString)
+    public static function fromEncoded(?string $encodedString): ?static
     {
         if (!is_string($encodedString)) {
             return null;
         }
 
-        $parameters = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $encodedString)), true);
+        $decoded = \base64_decode(\str_replace(['-', '_'], ['+', '/'], $encodedString), true);
+
+        if ($decoded === false) {
+            return null;
+        }
+
+        $parameters = \json_decode($decoded, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             return null;

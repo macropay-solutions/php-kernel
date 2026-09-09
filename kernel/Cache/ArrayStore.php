@@ -66,7 +66,7 @@ class ArrayStore extends TaggableStore implements LockProvider
             return;
         }
 
-        return $this->serializesValues ? unserialize($item['value']) : $item['value'];
+        return $this->serializesValues ? \unserialize($item['value'], ['allowed_classes' => false]) : $item['value'];
     }
 
     /**

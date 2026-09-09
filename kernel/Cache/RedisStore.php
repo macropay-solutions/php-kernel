@@ -409,6 +409,6 @@ class RedisStore extends TaggableStore implements LockProvider
      */
     protected function unserialize($value)
     {
-        return is_numeric($value) ? $value : unserialize($value);
+        return \is_numeric($value) ? $value : \unserialize($value, ['allowed_classes' => false]);
     }
 }

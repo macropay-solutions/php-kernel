@@ -114,7 +114,7 @@ class Store implements Session, Macroable
             if ($this->serialization === 'json') {
                 $data = json_decode($this->prepareForUnserialize($data), true);
             } else {
-                $data = @unserialize($this->prepareForUnserialize($data));
+                $data = @\unserialize($this->prepareForUnserialize($data), ['allowed_classes' => false]);
             }
 
             if ($data !== false && is_array($data)) {
