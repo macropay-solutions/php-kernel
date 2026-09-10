@@ -3,7 +3,6 @@
 namespace MacropaySolutions\Kernel\View;
 
 use ArrayAccess;
-use BadMethodCallException;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Contracts\Support\MessageProvider;
@@ -11,16 +10,13 @@ use MacropaySolutions\Kernel\Contracts\Support\Renderable;
 use MacropaySolutions\Kernel\Contracts\View\Engine;
 use MacropaySolutions\Kernel\Contracts\View\View as ViewContract;
 use MacropaySolutions\Kernel\Support\MessageBag;
-use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\ViewErrorBag;
 use Throwable;
 
 class View implements ArrayAccess, Htmlable, ViewContract, Macroable
 {
-    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelViewView {
-        __call as macroCall;
-    }
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelViewView;
 
     /**
      * The view factory instance.
@@ -460,30 +456,6 @@ class View implements ArrayAccess, Htmlable, ViewContract, Macroable
     public function __unset($key)
     {
         unset($this->data[$key]);
-    }
-
-    /**
-     * Dynamically bind parameters to the view.
-     *
-     * @throws \BadMethodCallException
-     */
-    public function __call(string $method, array $parameters): mixed
-    {
-        if (static::hasMacro($method)) {
-            return $this->macroCall($method, $parameters);
-        }
-
-        if (!str_starts_with($method, 'with')) {
-            throw new BadMethodCallException(
-                sprintf(
-                    'Method %s::%s does not exist.',
-                    static::class,
-                    $method
-                )
-            );
-        }
-
-        return $this->with(Str::camel(substr($method, 4)), $parameters[0]);
     }
 
     /**
