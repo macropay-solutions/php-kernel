@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Unit\Mail;
+
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
@@ -138,7 +140,7 @@ class MailEventSecurityTest extends TestCase
         $this->app->singleton('mailer', function () {
             return new class {
                 public function to($address) { return $this; }
-                public function queue($mailable) { \app('queue')->push($mailable); }
+                public function queue($mailable) { \app('queue')->push(new SendQueuedMailable($mailable)); }
             };
         });
 
