@@ -185,7 +185,9 @@ class MailEventSecurityTest extends TestCase
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
-        $dispatcher->listen(MessageSent::class, SampleQueuedListener::class);
+
+        // Pass as a valid array callable so the Dispatcher detects ShouldQueue and passes validation
+        $dispatcher->listen(MessageSent::class, [new SampleQueuedListener(), 'handle']);
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSent events cannot be queued. They do not support JSON serialization.');
@@ -211,7 +213,9 @@ class MailEventSecurityTest extends TestCase
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
-        $dispatcher->listen(MessageSending::class, SampleQueuedListener::class);
+
+        // Pass as a valid array callable so the Dispatcher detects ShouldQueue and passes validation
+        $dispatcher->listen(MessageSending::class, [new SampleQueuedListener(), 'handle']);
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSending events cannot be queued. They do not support JSON serialization.');
