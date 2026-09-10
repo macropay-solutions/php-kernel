@@ -181,40 +181,45 @@ class Encrypter implements EncrypterContract, StringEncrypter
             $candidates[] = [$key, $cipher ?? $this->cipher];
         }
 
+        $successfulPayload = null;
+
         foreach ($candidates as [$candidateKey, $candidateCipher]) {
             $candidateCipher = \strtolower($candidateCipher);
             $isAead = self::$supportedCiphers[$candidateCipher]['aead'];
 
-            if (!$this->isTagValidForCipher($tag, $candidateCipher)) {
-                continue;
-            }
+            $validTag = $this->isTagValidForCipher($tag, $candidateCipher);
 
-            if (!$isAead && !\hash_equals($this->hash($payload['iv'], $payload['value'], $candidateKey), $payload['mac'])) {
-                continue;
-            }
+            $expectedMac = $this->hash($payload['iv'], $payload['value'], $candidateKey);
+            $validMac = \hash_equals($expectedMac, $payload['mac']);
 
-            $decrypted = \openssl_decrypt(
-                $payload['value'],
-                $candidateCipher,
-                $candidateKey,
-                0,
-                $iv,
-                $tag ?? ''
-            );
+            if ($validTag && ($isAead || $validMac)) {
+                $decrypted = \openssl_decrypt(
+                    $payload['value'],
+                    $candidateCipher,
+                    $candidateKey,
+                    0,
+                    $iv,
+                    $tag ?? ''
+                );
 
-            if ($decrypted !== false) {
-                if (!$unserialize) {
-                    return $decrypted;
+                if ($decrypted !== false && $successfulPayload === null) {
+                    $successfulPayload = $decrypted;
                 }
-
-                $result = \unserialize($decrypted, ['allowed_classes' => false]);
-
-                if ($result === false && $decrypted !== \serialize(false)) {
-                    throw new DecryptException('The decrypted data is invalid.');
-                }
-
-                return $result;
             }
+        }
+
+        if ($successfulPayload !== null) {
+            if (!$unserialize) {
+                return $successfulPayload;
+            }
+
+            $result = \unserialize($successfulPayload);
+
+            if ($result === false && $successfulPayload !== \serialize(false)) {
+                throw new DecryptException('The decrypted data is invalid.');
+            }
+
+            return $result;
         }
 
         throw new DecryptException('Could not decrypt the data.');
