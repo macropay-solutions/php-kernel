@@ -6,16 +6,14 @@ use MacropaySolutions\Kernel\Contracts\Encryption\DecryptException;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter as EncrypterContract;
 use MacropaySolutions\Kernel\Contracts\Encryption\EncryptException;
 use MacropaySolutions\Kernel\Contracts\Encryption\StringEncrypter;
-use RuntimeException;
+use Random\RandomException;
 
 class Encrypter implements EncrypterContract, StringEncrypter
 {
     /**
      * The encryption key.
-     *
-     * @var string
      */
-    protected $key;
+    protected string $key;
 
     /**
      * The previous / legacy encryption keys to ciphers map
@@ -24,17 +22,15 @@ class Encrypter implements EncrypterContract, StringEncrypter
 
     /**
      * The algorithm used for encryption.
-     *
-     * @var string
      */
-    protected $cipher;
+    protected string $cipher;
 
     /**
      * The supported cipher algorithms and their properties.
      *
      * @var array
      */
-    private static $supportedCiphers = [
+    private static array $supportedCiphers = [
         'aes-128-cbc' => ['size' => 16, 'aead' => false],
         'aes-256-cbc' => ['size' => 32, 'aead' => false],
         'aes-128-gcm' => ['size' => 16, 'aead' => true],
@@ -44,21 +40,16 @@ class Encrypter implements EncrypterContract, StringEncrypter
     /**
      * Create a new encrypter instance.
      *
-     * @param string $key
-     * @param string $cipher
-     * @param ?array $previousKeysCiphersMap
-     * @return void
-     *
      * @throws \RuntimeException
      */
-    public function __construct($key, $cipher = 'aes-128-cbc')
+    public function __construct(string $key, string $cipher = 'aes-128-cbc', array $previousKeysCiphersMap = [])
     {
-        $key = (string)$key;
+        $cipher = \strtolower($cipher);
 
         if (!static::supported($key, $cipher)) {
             $ciphers = implode(', ', array_keys(self::$supportedCiphers));
 
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 "Unsupported cipher or incorrect key length. Supported ciphers are: {$ciphers}."
             );
         }
@@ -67,59 +58,56 @@ class Encrypter implements EncrypterContract, StringEncrypter
         $this->cipher = $cipher;
 
         $index = 0;
-        $keys = (\func_get_args()[2] ?? []);
 
-        foreach ($keys as $key => $cipher) {
-            if (!static::supported($key, $cipher ?? $this->cipher)) {
-                throw new RuntimeException('Unsupported cipher or incorrect key length of previous key ' .
+        foreach ($previousKeysCiphersMap as $previousKey => $previousCipher) {
+            $previousKey = (string)$previousKey;
+
+            if (!static::supported($previousKey, \strtolower($previousCipher ?? $this->cipher))) {
+                throw new \RuntimeException('Unsupported cipher or incorrect key length of previous key ' .
                     $index . ' Supported ciphers are: ' . \implode(', ', \array_keys(self::$supportedCiphers)));
             }
 
             $index++;
         }
 
-        $this->previousKeysCiphersMap = $keys;
+        $this->previousKeysCiphersMap = $previousKeysCiphersMap;
     }
 
     /**
      * Determine if the given key and cipher combination is valid.
-     *
-     * @param string $key
-     * @param string $cipher
-     * @return bool
      */
-    public static function supported($key, $cipher)
+    public static function supported(string $key, string $cipher): bool
     {
-        if (!isset(self::$supportedCiphers[strtolower($cipher)])) {
-            return false;
-        }
+        $cipher = \strtolower($cipher);
 
-        return mb_strlen($key, '8bit') === self::$supportedCiphers[strtolower($cipher)]['size'];
+        return isset(self::$supportedCiphers[$cipher])
+            && \mb_strlen($key, '8bit') === self::$supportedCiphers[$cipher]['size'];
     }
 
     /**
      * Create a new encryption key for the given cipher.
-     *
-     * @param string $cipher
-     * @return string
+     * @throws RandomException|\RuntimeException
      */
-    public static function generateKey($cipher)
+    public static function generateKey(string $cipher): string
     {
-        return random_bytes(self::$supportedCiphers[strtolower($cipher)]['size'] ?? 32);
+        $cipher = strtolower($cipher);
+
+        if (!isset(self::$supportedCiphers[$cipher])) {
+            throw new \RuntimeException('Unsupported cipher: ' . $cipher);
+        }
+
+        return \random_bytes(self::$supportedCiphers[$cipher]['size']);
     }
 
     /**
      * Encrypt the given value.
      *
-     * @param mixed $value
-     * @param bool $serialize
-     * @return string
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\EncryptException
+     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\EncryptException|\Random\RandomException
      */
-    public function encrypt($value, $serialize = true)
+    public function encrypt(mixed $value, bool $serialize = true): string
     {
-        $iv = random_bytes(openssl_cipher_iv_length(strtolower($this->cipher)));
+        $ivLength = \openssl_cipher_iv_length(strtolower($this->cipher)) ?: 16;
+        $iv = \random_bytes($ivLength);
 
         $value = \openssl_encrypt(
             $serialize ? serialize($value) : $value,
@@ -153,12 +141,9 @@ class Encrypter implements EncrypterContract, StringEncrypter
     /**
      * Encrypt a string without serialization.
      *
-     * @param string $value
-     * @return string
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\EncryptException
+     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\EncryptException|\Random\RandomException
      */
-    public function encryptString($value)
+    public function encryptString(string $value): string
     {
         return $this->encrypt($value, false);
     }
@@ -166,13 +151,9 @@ class Encrypter implements EncrypterContract, StringEncrypter
     /**
      * Decrypt the given value.
      *
-     * @param string $payload
-     * @param bool $unserialize
-     * @return mixed
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\DecryptException
+     * @throws DecryptException
      */
-    public function decrypt($payload, $unserialize = true)
+    public function decrypt(string $payload, bool $unserialize = true): mixed
     {
         $payload = $this->getJsonPayload($payload);
 
@@ -185,43 +166,54 @@ class Encrypter implements EncrypterContract, StringEncrypter
         $tag = null;
 
         if ('' !== ($payload['tag'] ?? '')) {
-            $tag = \base64_decode((string)$payload['tag'], true);
+            $tag = \base64_decode($payload['tag'], true);
 
             if ($tag === false) {
                 throw new DecryptException('The payload MAC tag is invalid Base64.');
             }
         }
 
-        $this->ensureTagIsValid($tag);
+        $candidates = [
+            [$this->key, $this->cipher],
+        ];
 
-        // Here we will decrypt the value. If we are able to successfully decrypt it
-        // we will then unserialize it and return it out to the caller. If we are
-        // unable to decrypt this value we will throw out an exception message.
-        if (
-            false !== $decrypted = \openssl_decrypt(
+        foreach ($this->previousKeysCiphersMap as $key => $cipher) {
+            $candidates[] = [$key, $cipher ?? $this->cipher];
+        }
+
+        foreach ($candidates as [$candidateKey, $candidateCipher]) {
+            $candidateCipher = \strtolower($candidateCipher);
+            $isAead = self::$supportedCiphers[$candidateCipher]['aead'];
+
+            if (!$this->isTagValidForCipher($tag, $candidateCipher)) {
+                continue;
+            }
+
+            if (!$isAead && !\hash_equals($this->hash($payload['iv'], $payload['value'], $candidateKey), $payload['mac'])) {
+                continue;
+            }
+
+            $decrypted = \openssl_decrypt(
                 $payload['value'],
-                strtolower($this->cipher),
-                $this->key,
+                $candidateCipher,
+                $candidateKey,
                 0,
                 $iv,
                 $tag ?? ''
-            )
-        ) {
-            return $unserialize ? \unserialize($decrypted, ['allowed_classes' => false]) : $decrypted;
-        }
+            );
 
-        foreach ($this->previousKeysCiphersMap as $key => $cipher) {
-            if (
-                false !== $decrypted = \openssl_decrypt(
-                    $payload['value'],
-                    \strtolower($cipher ?? $this->cipher),
-                    $key,
-                    0,
-                    $iv,
-                    $tag ?? ''
-                )
-            ) {
-                return $unserialize ? \unserialize($decrypted, ['allowed_classes' => false]) : $decrypted;
+            if ($decrypted !== false) {
+                if (!$unserialize) {
+                    return $decrypted;
+                }
+
+                $result = \unserialize($decrypted, ['allowed_classes' => false]);
+
+                if ($result === false && $decrypted !== \serialize(false)) {
+                    throw new DecryptException('The decrypted data is invalid.');
+                }
+
+                return $result;
             }
         }
 
@@ -231,44 +223,29 @@ class Encrypter implements EncrypterContract, StringEncrypter
     /**
      * Decrypt the given string without unserialization.
      *
-     * @param string $payload
-     * @return string
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\DecryptException
+     * @throws DecryptException
      */
-    public function decryptString($payload)
+    public function decryptString(string $payload): string
     {
         return $this->decrypt($payload, false);
     }
 
     /**
      * Create a MAC for the given value.
-     *
-     * @param string $iv
-     * @param mixed $value
-     * @param ?string $key
-     * @return string
      */
-    protected function hash($iv, $value)
+    protected function hash(string $iv, mixed $value, ?string $key = null): string
     {
-        return hash_hmac('sha256', $iv . $value, \func_get_args()[2] ?? $this->key);
+        return hash_hmac('sha256', $iv . $value, $key ?? $this->key);
     }
 
     /**
      * Get the JSON array from the given payload.
      *
-     * @param string $payload
-     * @return array
-     *
-     * @throws \MacropaySolutions\Kernel\Contracts\Encryption\DecryptException
+     * @throws DecryptException
      */
-    protected function getJsonPayload($payload)
+    protected function getJsonPayload(string $payload): array
     {
-        if (!is_string($payload)) {
-            throw new DecryptException('The payload is invalid.');
-        }
-
-        $decoded = \base64_decode((string)$payload, true);
+        $decoded = \base64_decode($payload, true);
 
         if ($decoded === false) {
             throw new DecryptException('The payload is invalid Base64.');
@@ -276,15 +253,8 @@ class Encrypter implements EncrypterContract, StringEncrypter
 
         $payload = \json_decode($decoded, true);
 
-        // If the payload is not valid JSON or does not have the proper keys set we will
-        // assume it is invalid and bail out of the routine since we will not be able
-        // to decrypt the given value. We'll also check the MAC for this encryption.
         if (!$this->validPayload($payload)) {
             throw new DecryptException('The payload is invalid.');
-        }
-
-        if (!self::$supportedCiphers[strtolower($this->cipher)]['aead'] && !$this->validMac($payload)) {
-            throw new DecryptException('The MAC is invalid.');
         }
 
         return $payload;
@@ -292,24 +262,27 @@ class Encrypter implements EncrypterContract, StringEncrypter
 
     /**
      * Verify that the encryption payload is valid.
-     *
-     * @param mixed $payload
-     * @return bool
      */
-    protected function validPayload($payload)
+    protected function validPayload(mixed $payload): bool
     {
-        if (!is_array($payload)) {
+        if (!\is_array($payload)) {
             return false;
         }
 
         foreach (['iv', 'value', 'mac'] as $item) {
-            if (!isset($payload[$item]) || !is_string($payload[$item])) {
+            if (!isset($payload[$item]) || !\is_string($payload[$item])) {
                 return false;
             }
         }
 
-        if (isset($payload['tag']) && !is_string($payload['tag'])) {
+        if (\base64_decode($payload['value'], true) === false) {
             return false;
+        }
+
+        if (isset($payload['tag'])) {
+            if (!\is_string($payload['tag']) || \base64_decode($payload['tag'], true) === false) {
+                return false;
+            }
         }
 
         $iv = \base64_decode($payload['iv'], true);
@@ -318,23 +291,15 @@ class Encrypter implements EncrypterContract, StringEncrypter
             return false;
         }
 
-        return \strlen($iv) === \openssl_cipher_iv_length(\strtolower($this->cipher));
-    }
+        $length = \strlen($iv);
+        $candidates = [$this->cipher];
 
-    /**
-     * Determine if the MAC for the given payload is valid.
-     *
-     * @param array $payload
-     * @return bool
-     */
-    protected function validMac(array $payload)
-    {
-        if (\hash_equals($this->hash($payload['iv'], $payload['value']), $payload['mac'])) {
-            return true;
+        foreach ($this->previousKeysCiphersMap as $oldCipher) {
+            $candidates[] = $oldCipher ?? $this->cipher;
         }
 
-        foreach (\array_keys($this->previousKeysCiphersMap) as $key) {
-            if (true === \hash_equals($this->hash($payload['iv'], $payload['value'], $key), $payload['mac'])) {
+        foreach ($candidates as $candidateCipher) {
+            if ($length === \openssl_cipher_iv_length(\strtolower($candidateCipher))) {
                 return true;
             }
         }
@@ -343,32 +308,23 @@ class Encrypter implements EncrypterContract, StringEncrypter
     }
 
     /**
-     * Ensure the given tag is a valid tag given the selected cipher.
-     *
-     * @param string $tag
-     * @return void
+     * Ensure the given tag is structurally valid for the candidate cipher.
      */
-    protected function ensureTagIsValid($tag)
+    protected function isTagValidForCipher(null|bool|string $tag, string $cipher): bool
     {
-        if (self::$supportedCiphers[strtolower($this->cipher)]['aead'] && strlen($tag) !== 16) {
-            throw new DecryptException('Could not decrypt the data.');
+        if (self::$supportedCiphers[\strtolower($cipher)]['aead']) {
+            return \is_string($tag) && \strlen($tag) === 16;
         }
 
-        if (!self::$supportedCiphers[strtolower($this->cipher)]['aead'] && is_string($tag)) {
-            throw new DecryptException('Unable to use tag because the cipher algorithm does not support AEAD.');
-        }
+        return !\is_string($tag);
     }
 
     /**
      * Get the encryption key that the encrypter is currently using or all
-     * @param ?bool $includingPrevious
-     * @return string|array
      */
-    public function getKey()
+    public function getKey(?bool $includingPrevious = false): string|array
     {
-        $args = \func_get_args();
-
-        if (\reset($args) === true) {
+        if ($includingPrevious) {
             return [$this->key, ...\array_keys($this->previousKeysCiphersMap)];
         }
 

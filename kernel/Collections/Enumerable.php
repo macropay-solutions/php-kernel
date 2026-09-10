@@ -1125,10 +1125,8 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * Return only unique items from the collection array.
      *
      * @param (callable(TValue, TKey): mixed)|string|null $key
-     * @param bool $strict
-     * @return static
      */
-    public function unique($key = null, $strict = false);
+    public function unique(null|callable|string $key = null, bool $strict = false, int $flags = SORT_REGULAR): static;
 
     /**
      * Return only unique items from the collection array using strict comparison.

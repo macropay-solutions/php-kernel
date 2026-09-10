@@ -1292,14 +1292,10 @@ class Validator implements ValidatorContract
 
     /**
      * Parse the given rules and merge them into current rules.
-     *
-     * @param array $rules
-     * @param bool $shouldReplaceEscapedDotInKeyParameters default true
-     * @return void
      */
-    public function addRules($rules)
+    public function addRules(array $rules, bool $shouldReplaceEscapedDotInKeyParameters = true): void
     {
-        if (\func_get_args()[1] ?? true) {
+        if ($shouldReplaceEscapedDotInKeyParameters) {
             $rules = $this->replaceEscapedDotInKeyParameters($rules);
         }
 

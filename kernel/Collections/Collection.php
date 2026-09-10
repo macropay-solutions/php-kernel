@@ -1661,8 +1661,6 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      * Return only unique items from the collection array.
      *
      * @param (callable(TValue, TKey): mixed)|string|null $key
-     * @param bool $strict
-     * @param int $flags [optional] <p>
      *  The optional second parameter sort_flags
      *  may be used to modify the sorting behavior using these values:
      *  </p>
@@ -1686,11 +1684,9 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      *  </ul>
      * @return static
      */
-    public function unique($key = null, $strict = false)
+    public function unique(null|callable|string $key = null, bool $strict = false, int $flags = SORT_REGULAR): static
     {
         if ($key === null && $strict === false) {
-            $flags = \func_get_args()[2] ?? SORT_REGULAR;
-
             return new static(
                 SORT_REGULAR === $flags ? \arrayUniqueSortRegular($this->items) : \array_unique($this->items, $flags)
             );

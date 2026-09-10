@@ -405,13 +405,12 @@ class Collection extends BaseCollection implements QueueableCollection
      * Return only unique items from the collection.
      *
      * @param (callable(TModel, TKey): mixed)|string|null $key
-     * @param bool $strict
      * @return static<int, TModel>
      */
-    public function unique($key = null, $strict = false)
+    public function unique(null|callable|string $key = null, bool $strict = false, int $flags = SORT_REGULAR): static
     {
         if (!is_null($key)) {
-            return parent::unique($key, $strict);
+            return parent::unique($key, $strict, $flags);
         }
 
         return new static(array_values($this->getDictionary()));
