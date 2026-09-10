@@ -1,11 +1,10 @@
 <?php
 
-namespace Tests\Unit\Mail;
-
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
+use MacropaySolutions\Kernel\Events\Dispatcher as EventsDispatcher;
 use MacropaySolutions\Kernel\Mail\Events\MessageSending;
 use MacropaySolutions\Kernel\Mail\Events\MessageSent;
 use MacropaySolutions\Kernel\Mail\Mailable;
@@ -50,7 +49,6 @@ class MailEventSecurityTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Restore PHP's native handlers to prevent PHPUnit 11 "Risky" test warnings
         restore_error_handler();
         restore_exception_handler();
 
@@ -136,15 +134,7 @@ class MailEventSecurityTest extends TestCase
         $queueFake = new QueueFake($this->app, []);
         $this->app->instance('queue', $queueFake);
 
-        // Bind a dummy mailer for the container to resolve
-        $this->app->singleton('mailer', function () {
-            return new class {
-                public function to($address) { return $this; }
-                public function queue($mailable) { \app('queue')->push(new SendQueuedMailable($mailable)); }
-            };
-        });
-
-        $this->app->make('mailer')->to('user@example.com')->queue($mailable);
+        $mailable->queue($queueFake);
 
         $queueFake->assertPushed(SendQueuedMailable::class);
     }
@@ -152,7 +142,7 @@ class MailEventSecurityTest extends TestCase
     public function test_should_queue_listener_on_message_sent_event_throws_logic_exception(): void
     {
         $this->app->singleton('events', function () {
-            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
+            return new EventsDispatcher($this->app);
         });
 
         /** @var Dispatcher $dispatcher */
@@ -168,7 +158,7 @@ class MailEventSecurityTest extends TestCase
     public function test_should_queue_listener_on_message_sending_event_throws_logic_exception(): void
     {
         $this->app->singleton('events', function () {
-            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
+            return new EventsDispatcher($this->app);
         });
 
         /** @var Dispatcher $dispatcher */
