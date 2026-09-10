@@ -4,32 +4,38 @@ namespace MacropaySolutions\Kernel\Mail\Events;
 
 use Symfony\Component\Mime\Email;
 
-class MessageSending
+class MessageSending implements \JsonSerializable
 {
     /**
-     * The Symfony Email instance.
-     *
-     * @var \Symfony\Component\Mime\Email
-     */
-    public $message;
-
-    /**
-     * The message data.
-     *
-     * @var array
-     */
-    public $data;
-
-    /**
      * Create a new event instance.
-     *
-     * @param \Symfony\Component\Mime\Email $message
-     * @param array $data
-     * @return void
      */
-    public function __construct(Email $message, array $data = [])
+    public function __construct(
+        public Email $message,
+        public array $data = []
+    ) {
+    }
+
+    /**
+     * Prevent JSON serialization for queue transport.
+     */
+    public function jsonSerialize(): array
     {
-        $this->data = $data;
-        $this->message = $message;
+        throw new \LogicException('MessageSending events cannot be queued. They do not support JSON serialization.');
+    }
+
+    /**
+     * Prevent native PHP serialization.
+     */
+    public function __serialize(): array
+    {
+        throw new \LogicException('MessageSending events cannot be serialized using native PHP serialize().');
+    }
+
+    /**
+     * Prevent native PHP unserialization.
+     */
+    public function __unserialize(array $data): void
+    {
+        throw new \LogicException('MessageSending events cannot be unserialized using native PHP unserialize().');
     }
 }

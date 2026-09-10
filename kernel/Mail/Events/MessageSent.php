@@ -2,36 +2,28 @@
 
 namespace MacropaySolutions\Kernel\Mail\Events;
 
-use Exception;
-use LogicException;
 use MacropaySolutions\Kernel\Mail\SentMessage;
 
 /**
  * @property \Symfony\Component\Mime\Email $message
  */
-class MessageSent
+class MessageSent implements \JsonSerializable
 {
-    /**
-     * The message that was sent.
-     *
-     * @var \MacropaySolutions\Kernel\Mail\SentMessage
-     */
-    public $sent;
-
-    /**
-     * The message data.
-     *
-     * @var array
-     */
-    public $data;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(SentMessage|array $sent, array $data = [])
+    public function __construct(
+        public SentMessage $sent,
+        public array $data = []
+    ) {
+    }
+
+    /**
+     * Prevent JSON serialization for queue transport.
+     */
+    public function jsonSerialize(): array
     {
-        $this->sent = \is_array($sent) ? new SentMessage($sent) : $sent;
-        $this->data = $data;
+        throw new \LogicException('MessageSent events cannot be queued. They do not support JSON serialization.');
     }
 
     /**
@@ -39,7 +31,7 @@ class MessageSent
      */
     public function __serialize(): array
     {
-        throw new LogicException('MessageSent events cannot be serialized using native PHP serialize().');
+        throw new \LogicException('MessageSent events cannot be serialized using native PHP serialize().');
     }
 
     /**
@@ -47,23 +39,20 @@ class MessageSent
      */
     public function __unserialize(array $data): void
     {
-        throw new LogicException('MessageSent events cannot be unserialized using native PHP unserialize().');
+        throw new \LogicException('MessageSent events cannot be unserialized using native PHP unserialize().');
     }
 
     /**
      * Dynamically get the original message.
      *
-     * @param string $key
-     * @return mixed
-     *
      * @throws \Exception
      */
-    public function __get($key)
+    public function __get(string $key): mixed
     {
         if ($key === 'message') {
             return $this->sent->getOriginalMessage();
         }
 
-        throw new Exception('Unable to access undefined property on ' . __CLASS__ . ': ' . $key);
+        throw new \Exception('Unable to access undefined property on ' . __CLASS__ . ': ' . $key);
     }
 }
