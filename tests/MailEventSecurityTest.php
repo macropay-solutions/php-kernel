@@ -155,8 +155,30 @@ class MailEventSecurityTest extends TestCase
         $this->app->make('mailer')->to('user@example.com')->queue($mailable);
     }
 
+    public function test_should_queue_job_holding_sent_message_throws_logic_exception(): void
+    {
+        $queuedJob = new SampleQueuedJob($this->createMockSentMessage());
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('SentMessage instances cannot be jsonSerialized.');
+
+        \json_encode($queuedJob, JSON_THROW_ON_ERROR);
+    }
+
     public function test_should_queue_listener_on_message_sent_event_throws_logic_exception(): void
     {
+        // 1. Bind the queue so the Dispatcher attempts to queue the listener instead of executing it synchronously
+        $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
+        $queueMock->shouldIgnoreMissing();
+
+        // 2. Simulate the exact moment the payload hits the network/database serialization layer
+        $serializeSim = function ($job) { \json_encode($job, JSON_THROW_ON_ERROR); };
+        $queueMock->shouldReceive('push')->andReturnUsing($serializeSim);
+        $queueMock->shouldReceive('pushOn')
+            ->andReturnUsing(function ($queue, $job) use ($serializeSim) { $serializeSim($job); });
+
+        $this->app->instance('queue', $queueMock);
+
         $this->app->singleton('events', function () {
             return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
         });
@@ -173,6 +195,16 @@ class MailEventSecurityTest extends TestCase
 
     public function test_should_queue_listener_on_message_sending_event_throws_logic_exception(): void
     {
+        $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
+        $queueMock->shouldIgnoreMissing();
+
+        $serializeSim = function ($job) { \json_encode($job, JSON_THROW_ON_ERROR); };
+        $queueMock->shouldReceive('push')->andReturnUsing($serializeSim);
+        $queueMock->shouldReceive('pushOn')
+            ->andReturnUsing(function ($queue, $job) use ($serializeSim) { $serializeSim($job); });
+
+        $this->app->instance('queue', $queueMock);
+
         $this->app->singleton('events', function () {
             return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
         });
@@ -185,15 +217,5 @@ class MailEventSecurityTest extends TestCase
         $this->expectExceptionMessage('MessageSending events cannot be queued. They do not support JSON serialization.');
 
         $dispatcher->dispatch(new MessageSending(new Email()));
-    }
-
-    public function test_should_queue_job_holding_sent_message_throws_logic_exception(): void
-    {
-        $queuedJob = new SampleQueuedJob($this->createMockSentMessage());
-
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('SentMessage instances cannot be jsonSerialized.');
-
-        \json_encode($queuedJob, JSON_THROW_ON_ERROR);
     }
 }
