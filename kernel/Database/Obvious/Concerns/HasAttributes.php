@@ -369,7 +369,7 @@ trait HasAttributes
             return $this->relations[$key];
         }
 
-        if ($this->preventsLazyLoading) {
+        if ($this->preventsLazyLoading && $this->exists && !$this->wasRecentlyCreated) {
             $this->handleLazyLoadingViolation($key);
         }
 
@@ -394,10 +394,6 @@ trait HasAttributes
     {
         if (isset(static::$lazyLoadingViolationCallback)) {
             return (static::$lazyLoadingViolationCallback)($this, $key);
-        }
-
-        if (!$this->exists || $this->wasRecentlyCreated) {
-            return null;
         }
 
         throw new LazyLoadingViolationException($this, $key);

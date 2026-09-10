@@ -409,14 +409,12 @@ class Builder implements BuilderContract, Macroable
     public function hydrate(array $items)
     {
         $instance = $this->newModelInstance();
-        $areMoreThanOne = \count($items) > 1;
+        $areMoreThanOne = Model::preventsLazyLoading() && \count($items) > 1;
 
         return $instance->newCollection(array_map(function ($item) use ($items, $instance, $areMoreThanOne) {
             $model = $instance->newFromBuilder($item);
 
-            if ($areMoreThanOne) {
-                $model->preventsLazyLoading = Model::preventsLazyLoading();
-            }
+            $model->preventsLazyLoading = $model->preventsLazyLoading || $areMoreThanOne;
 
             return $model;
         }, $items));
