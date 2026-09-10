@@ -39,10 +39,10 @@ class MailEventSecurityTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('SentMessage instances cannot be jsonSerialized.');
 
-        \json_encode($sentMessage);
+        \json_encode($sentMessage, JSON_THROW_ON_ERROR);
     }
 
-    public function test_message_sent_event_blocks_serialization(): void
+    public function test_message_sent_event_blocks_native_serialization(): void
     {
         $event = new MessageSent($this->createMockSentMessage());
 
@@ -59,10 +59,10 @@ class MailEventSecurityTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSent events cannot be queued. They do not support JSON serialization.');
 
-        \json_encode($event);
+        \json_encode($event, JSON_THROW_ON_ERROR);
     }
 
-    public function test_message_sending_event_blocks_serialization(): void
+    public function test_message_sending_event_blocks_native_serialization(): void
     {
         $event = new MessageSending(new Email());
 
@@ -79,6 +79,22 @@ class MailEventSecurityTest extends TestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSending events cannot be queued. They do not support JSON serialization.');
 
-        \json_encode($event);
+        \json_encode($event, JSON_THROW_ON_ERROR);
+    }
+
+    public function test_mailable_implementing_should_queue_can_be_queued(): void
+    {
+        $mailable = new class extends \MacropaySolutions\Kernel\Mail\Mailable implements
+            \MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue
+        {
+            public ?int $orderId = 123;
+        };
+
+        $queueFake = new \MacropaySolutions\KernelDev\Support\Testing\Fakes\QueueFake(\app(), [], \app('queue'));
+        \app()->instance('queue', $queueFake);
+
+        \app('mailer')->to('user@example.com')->queue($mailable);
+
+        $queueFake->assertPushed(\MacropaySolutions\Kernel\Mail\SendQueuedMailable::class);
     }
 }
