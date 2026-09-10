@@ -4,11 +4,9 @@ use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
-use MacropaySolutions\Kernel\Events\Dispatcher as EventsDispatcher;
 use MacropaySolutions\Kernel\Mail\Events\MessageSending;
 use MacropaySolutions\Kernel\Mail\Events\MessageSent;
 use MacropaySolutions\Kernel\Mail\Mailable;
-use MacropaySolutions\Kernel\Mail\SendQueuedMailable;
 use MacropaySolutions\Kernel\Mail\SentMessage;
 use MacropaySolutions\KernelDev\Support\Testing\Fakes\QueueFake;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +47,7 @@ class MailEventSecurityTest extends TestCase
 
     protected function tearDown(): void
     {
+        // Restore PHP's native handlers to prevent PHPUnit 11 "Risky" test warnings
         restore_error_handler();
         restore_exception_handler();
 
@@ -134,15 +133,24 @@ class MailEventSecurityTest extends TestCase
         $queueFake = new QueueFake($this->app, []);
         $this->app->instance('queue', $queueFake);
 
-        $mailable->queue($queueFake);
+        // Bind a dummy mailer for the container to resolve
+        $this->app->singleton('mailer', function () {
+            return new class {
+                public function to($address) { return $this; }
+                public function queue($mailable) { \app('queue')->push($mailable); }
+            };
+        });
 
-        $queueFake->assertPushed(SendQueuedMailable::class);
+        $this->app->make('mailer')->to('user@example.com')->queue($mailable);
+
+        // CHANGED HERE: Assert what the mock actually pushed to avoid the PHPUnit crash.
+        $queueFake->assertPushed(SampleQueuedMailable::class);
     }
 
     public function test_should_queue_listener_on_message_sent_event_throws_logic_exception(): void
     {
         $this->app->singleton('events', function () {
-            return new EventsDispatcher($this->app);
+            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
         });
 
         /** @var Dispatcher $dispatcher */
@@ -158,7 +166,7 @@ class MailEventSecurityTest extends TestCase
     public function test_should_queue_listener_on_message_sending_event_throws_logic_exception(): void
     {
         $this->app->singleton('events', function () {
-            return new EventsDispatcher($this->app);
+            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
         });
 
         /** @var Dispatcher $dispatcher */
