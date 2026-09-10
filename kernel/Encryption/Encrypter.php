@@ -213,7 +213,7 @@ class Encrypter implements EncrypterContract, StringEncrypter
                 return $successfulPayload;
             }
 
-            $result = \unserialize($successfulPayload);
+            $result = \unserialize($successfulPayload, ['allowed_classes' => false]);
 
             if ($result === false && $successfulPayload !== \serialize(false)) {
                 throw new DecryptException('The decrypted data is invalid.');
