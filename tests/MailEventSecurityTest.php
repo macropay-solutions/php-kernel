@@ -163,7 +163,7 @@ class MailEventSecurityTest extends TestCase
     public function test_should_queue_listener_on_message_sent_event_throws_logic_exception(): void
     {
         $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
-        $queueMock->shouldIgnoreMissing();
+        $queueMock->shouldReceive('connection')->andReturnSelf();
 
         $serializeSim = function ($job) { \json_encode($job, JSON_THROW_ON_ERROR); };
         $queueMock->shouldReceive('push')->andReturnUsing($serializeSim);
@@ -190,7 +190,7 @@ class MailEventSecurityTest extends TestCase
     public function test_should_queue_listener_on_message_sending_event_throws_logic_exception(): void
     {
         $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
-        $queueMock->shouldIgnoreMissing();
+        $queueMock->shouldReceive('connection')->andReturnSelf();
 
         $serializeSim = function ($job) { \json_encode($job, JSON_THROW_ON_ERROR); };
         $queueMock->shouldReceive('push')->andReturnUsing($serializeSim);
