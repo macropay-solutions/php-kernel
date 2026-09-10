@@ -1678,12 +1678,17 @@ class Str implements Macroable
 
     /**
      * Decode the given Base64 encoded string.
+     * @throws \InvalidArgumentException
      */
-    public static function fromBase64(string $string, bool $strict = true): ?string
+    public static function fromBase64(string $string, bool $strict = true): string
     {
         $decoded = \base64_decode($string, $strict);
 
-        return $decoded === false ? null : $decoded;
+        if ($decoded === false) {
+            throw new \InvalidArgumentException('Invalid Base64 payload.');
+        }
+
+        return $decoded;
     }
 
     /**
