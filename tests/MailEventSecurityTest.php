@@ -8,7 +8,6 @@ use MacropaySolutions\Kernel\Mail\Events\MessageSending;
 use MacropaySolutions\Kernel\Mail\Events\MessageSent;
 use MacropaySolutions\Kernel\Mail\Mailable;
 use MacropaySolutions\Kernel\Mail\SentMessage;
-use MacropaySolutions\KernelDev\Support\Testing\Fakes\QueueFake;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
@@ -130,8 +129,6 @@ class MailEventSecurityTest extends TestCase
     {
         $mailable = new SampleQueuedMailable();
 
-        // 1. Mock the queue directly to bypass QueueFake's "Strict Queue Mode" exception,
-        // which was causing the Exit Code 2 segfault during failure tracing.
         $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
         $queueMock->shouldReceive('push')
             ->once()
@@ -141,7 +138,6 @@ class MailEventSecurityTest extends TestCase
 
         $this->app->instance('queue', $queueMock);
 
-        // 2. Bind the dummy mailer exactly as you had it
         $this->app->singleton('mailer', function () {
             return new class {
                 public function to($address) { return $this; }
@@ -151,7 +147,6 @@ class MailEventSecurityTest extends TestCase
             };
         });
 
-        // 3. Trigger the mailer
         $this->app->make('mailer')->to('user@example.com')->queue($mailable);
     }
 
@@ -167,11 +162,9 @@ class MailEventSecurityTest extends TestCase
 
     public function test_should_queue_listener_on_message_sent_event_throws_logic_exception(): void
     {
-        // 1. Bind the queue so the Dispatcher attempts to queue the listener instead of executing it synchronously
         $queueMock = \Mockery::mock(\MacropaySolutions\Kernel\Queue\QueueManager::class);
         $queueMock->shouldIgnoreMissing();
 
-        // 2. Simulate the exact moment the payload hits the network/database serialization layer
         $serializeSim = function ($job) { \json_encode($job, JSON_THROW_ON_ERROR); };
         $queueMock->shouldReceive('push')->andReturnUsing($serializeSim);
         $queueMock->shouldReceive('pushOn')
@@ -180,14 +173,13 @@ class MailEventSecurityTest extends TestCase
         $this->app->instance('queue', $queueMock);
 
         $this->app->singleton('events', function () {
-            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
+            return (new \MacropaySolutions\Kernel\Events\Dispatcher($this->app))
+                ->setQueueResolver(fn () => $this->app->make('queue'));
         });
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
-
-        // Pass as a valid array callable so the Dispatcher detects ShouldQueue and passes validation
-        $dispatcher->listen(MessageSent::class, [new SampleQueuedListener(), 'handle']);
+        $dispatcher->listen(MessageSent::class, SampleQueuedListener::class);
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSent events cannot be queued. They do not support JSON serialization.');
@@ -208,14 +200,13 @@ class MailEventSecurityTest extends TestCase
         $this->app->instance('queue', $queueMock);
 
         $this->app->singleton('events', function () {
-            return new \MacropaySolutions\Kernel\Events\Dispatcher($this->app);
+            return (new \MacropaySolutions\Kernel\Events\Dispatcher($this->app))
+                ->setQueueResolver(fn () => $this->app->make('queue'));
         });
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
-
-        // Pass as a valid array callable so the Dispatcher detects ShouldQueue and passes validation
-        $dispatcher->listen(MessageSending::class, [new SampleQueuedListener(), 'handle']);
+        $dispatcher->listen(MessageSending::class, SampleQueuedListener::class);
 
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('MessageSending events cannot be queued. They do not support JSON serialization.');
