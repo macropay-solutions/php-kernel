@@ -16,9 +16,7 @@ class RedirectResponse extends BaseRedirectResponse implements Macroable
 {
     use ForwardsCalls;
     use ResponseTrait;
-    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpRedirectResponse {
-        __call as macroCall;
-    }
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpRedirectResponse;
 
     /**
      * The request instance.
@@ -237,23 +235,5 @@ class RedirectResponse extends BaseRedirectResponse implements Macroable
     public function setSession(SessionStore $session)
     {
         $this->session = $session;
-    }
-
-    /**
-     * Dynamically bind flash data in the session.
-     *
-     * @throws \BadMethodCallException
-     */
-    public function __call(string $method, array $parameters): mixed
-    {
-        if (static::hasMacro($method)) {
-            return $this->macroCall($method, $parameters);
-        }
-
-        if (str_starts_with($method, 'with')) {
-            return $this->with(Str::snake(substr($method, 4)), $parameters[0]);
-        }
-
-        static::throwBadMethodCallException($method);
     }
 }

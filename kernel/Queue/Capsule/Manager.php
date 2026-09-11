@@ -174,11 +174,27 @@ class Manager
     }
 
     /**
+     * Pass dynamic instance methods to the manager.
+     */
+    public function to(): \MacropaySolutions\Kernel\Queue\QueueManager
+    {
+        return $this->getQueueManager();
+    }
+
+    /**
      * Dynamically pass methods to the default connection.
      *
      */
     public static function __callStatic(string $method, array $parameters): mixed
     {
         return static::connection()->$method(...$parameters);
+    }
+
+    /**
+     * Dynamically pass methods to the default connection.
+     */
+    public static function toStatic(): \MacropaySolutions\Kernel\Contracts\Queue\Queue
+    {
+        return static::connection();
     }
 }

@@ -15,13 +15,13 @@ use MacropaySolutions\Kernel\Http\JsonResponse;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Session\TokenMismatchException;
 use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Validation\ValidationException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -250,7 +250,7 @@ class Handler implements ExceptionHandler
     public function renderForConsole($output, Throwable $e)
     {
         if ($e instanceof CommandNotFoundException) {
-            $message = str($e->getMessage())->explode('.')->first();
+            $message = Str::of($e->getMessage())->explode('.')->first();
 
             if (!empty($alternatives = $e->getAlternatives())) {
                 $message .= '. Did you mean one of these?';

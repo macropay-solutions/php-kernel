@@ -114,14 +114,30 @@ class Optional implements ArrayAccess, Macroable
     /**
      * Dynamically pass a method to the underlying object.
      */
+    public function to(): ?object
+    {
+        return is_object($this->value) ? $this->value : null;
+    }
+
+    /**
+     * Dynamically pass a method to the underlying object.
+     */
     public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);
         }
 
-        if (is_object($this->value)) {
-            return $this->value->{$method}(...$parameters);
-        }
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
+
+        throw new \BadMethodCallException(sprintf(
+            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            $method,
+            $method,
+            $file,
+            $line
+        ));
     }
 }

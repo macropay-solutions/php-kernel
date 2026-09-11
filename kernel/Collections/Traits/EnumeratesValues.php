@@ -4,7 +4,6 @@ namespace MacropaySolutions\Kernel\Support\Traits;
 
 use CachingIterator;
 use Closure;
-use Exception;
 use InvalidArgumentException;
 use JsonSerializable;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
@@ -12,7 +11,6 @@ use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Enumerable;
-use MacropaySolutions\Kernel\Support\HigherOrderCollectionProxy;
 use Symfony\Component\VarDumper\VarDumper;
 use Traversable;
 use UnexpectedValueException;
@@ -23,36 +21,6 @@ use WeakMap;
  * @template TKey of array-key
  *
  * @template-covariant TValue
- *
- * @property-read HigherOrderCollectionProxy $average
- * @property-read HigherOrderCollectionProxy $avg
- * @property-read HigherOrderCollectionProxy $contains
- * @property-read HigherOrderCollectionProxy $doesntContain
- * @property-read HigherOrderCollectionProxy $each
- * @property-read HigherOrderCollectionProxy $every
- * @property-read HigherOrderCollectionProxy $filter
- * @property-read HigherOrderCollectionProxy $first
- * @property-read HigherOrderCollectionProxy $flatMap
- * @property-read HigherOrderCollectionProxy $groupBy
- * @property-read HigherOrderCollectionProxy $keyBy
- * @property-read HigherOrderCollectionProxy $map
- * @property-read HigherOrderCollectionProxy $max
- * @property-read HigherOrderCollectionProxy $min
- * @property-read HigherOrderCollectionProxy $partition
- * @property-read HigherOrderCollectionProxy $percentage
- * @property-read HigherOrderCollectionProxy $reject
- * @property-read HigherOrderCollectionProxy $skipUntil
- * @property-read HigherOrderCollectionProxy $skipWhile
- * @property-read HigherOrderCollectionProxy $some
- * @property-read HigherOrderCollectionProxy $sortBy
- * @property-read HigherOrderCollectionProxy $sortByDesc
- * @property-read HigherOrderCollectionProxy $sum
- * @property-read HigherOrderCollectionProxy $takeUntil
- * @property-read HigherOrderCollectionProxy $takeWhile
- * @property-read HigherOrderCollectionProxy $unique
- * @property-read HigherOrderCollectionProxy $unless
- * @property-read HigherOrderCollectionProxy $until
- * @property-read HigherOrderCollectionProxy $when
  */
 trait EnumeratesValues
 {
@@ -62,43 +30,6 @@ trait EnumeratesValues
      * Indicates that the object's string representation should be escaped when __toString is invoked.
      */
     protected bool $escapeWhenCastingToString = false;
-
-    /**
-     * The methods that can be proxied.
-     *
-     * @var array<int, string>
-     */
-    protected static $proxies = [
-        'average',
-        'avg',
-        'contains',
-        'doesntContain',
-        'each',
-        'every',
-        'filter',
-        'first',
-        'flatMap',
-        'groupBy',
-        'keyBy',
-        'map',
-        'max',
-        'min',
-        'partition',
-        'percentage',
-        'reject',
-        'skipUntil',
-        'skipWhile',
-        'some',
-        'sortBy',
-        'sortByDesc',
-        'sum',
-        'takeUntil',
-        'takeWhile',
-        'unique',
-        'unless',
-        'until',
-        'when',
-    ];
 
     /**
      * Create a new collection instance if the value isn't one already.
@@ -993,17 +924,6 @@ trait EnumeratesValues
     }
 
     /**
-     * Add a method to the list of proxied methods.
-     *
-     * @param string $method
-     * @return void
-     */
-    public static function proxy($method)
-    {
-        static::$proxies[] = $method;
-    }
-
-    /**
      * Dynamically access collection proxies.
      *
      * @param string $key
@@ -1013,11 +933,16 @@ trait EnumeratesValues
      */
     public function __get($key)
     {
-        if (!in_array($key, static::$proxies)) {
-            throw new Exception("Property [{$key}] does not exist on this collection instance.");
-        }
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
 
-        return new HigherOrderCollectionProxy($this, $key);
+        throw new \BadMethodCallException(sprintf(
+            'Magic call ->%s is disabled in %s:%d',
+            $key,
+            $file,
+            $line
+        ));
     }
 
     /**

@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Queue\Console;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Queue\Listener;
 use MacropaySolutions\Kernel\Queue\ListenerOptions;
+use MacropaySolutions\Kernel\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'queue:listen')]
@@ -72,7 +73,7 @@ class ListenCommand extends Command
         );
 
         $this->info(
-            sprintf('Processing jobs from the [%s] %s.', $queue, str('queue')->plural(explode(',', $queue)))
+            sprintf('Processing jobs from the [%s] %s.', $queue, Str::of('queue')->plural(explode(',', $queue)))
         );
 
         $this->listener->listen($connection, $queue, $this->gatherOptions());

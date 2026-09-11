@@ -427,7 +427,7 @@ class Message
      *
      * @return \Symfony\Component\Mime\Email
      */
-    public function getSymfonyMessage()
+    public function getBaseMessage()
     {
         return $this->message;
     }

@@ -30,9 +30,7 @@ class Mailable implements MailableContract, Renderable, Macroable
     use Conditionable;
     use ForwardsCalls;
     use Localizable;
-    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelMailMailable {
-        __call as macroCall;
-    }
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelMailMailable;
 
     /**
      * The locale of the message.
@@ -572,7 +570,7 @@ class Mailable implements MailableContract, Renderable, Macroable
     protected function runCallbacks($message)
     {
         foreach ($this->callbacks as $callback) {
-            $callback($message->getSymfonyMessage());
+            $callback($message->getBaseMessage());
         }
 
         return $this;
@@ -1837,23 +1835,5 @@ class Mailable implements MailableContract, Renderable, Macroable
     public static function buildViewDataUsing(callable $callback)
     {
         static::$viewDataCallback = $callback;
-    }
-
-    /**
-     * Dynamically bind parameters to the message.
-     *
-     * @throws \BadMethodCallException
-     */
-    public function __call(string $method, array $parameters): mixed
-    {
-        if (static::hasMacro($method)) {
-            return $this->macroCall($method, $parameters);
-        }
-
-        if (str_starts_with($method, 'with')) {
-            return $this->with(Str::camel(substr($method, 4)), $parameters[0]);
-        }
-
-        static::throwBadMethodCallException($method);
     }
 }

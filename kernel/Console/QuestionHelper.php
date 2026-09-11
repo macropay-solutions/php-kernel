@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Console;
 
+use MacropaySolutions\Kernel\Support\Str;
 use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Helper\SymfonyQuestionHelper;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -81,7 +82,7 @@ class QuestionHelper extends SymfonyQuestionHelper
      */
     protected function ensureEndsWithPunctuation($string)
     {
-        if (!str($string)->endsWith(['?', ':', '!', '.'])) {
+        if (!Str::of($string)->endsWith(['?', ':', '!', '.'])) {
             return "$string:";
         }
 

@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Http\Concerns;
 
 use MacropaySolutions\Kernel\Http\UploadedFile;
 use MacropaySolutions\Kernel\Support\Arr;
+use MacropaySolutions\Kernel\Support\Str;
 use SplFileInfo;
 use stdClass;
 use Symfony\Component\HttpFoundation\InputBag;
@@ -327,7 +328,7 @@ trait InteractsWithInput
      */
     public function string($key, $default = null)
     {
-        return str($this->input($key, $default));
+        return Str::of($this->input($key, $default));
     }
 
     /**

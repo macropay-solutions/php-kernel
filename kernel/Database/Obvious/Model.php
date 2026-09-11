@@ -1899,19 +1899,20 @@ abstract class Model implements
         $this->offsetUnset($key);
     }
 
-    /**
-     * Handle dynamic method calls into the model.
-     * @throws \BadMethodCallException
-     */
-    public function __call(string $method, array $parameters): Relation
+    public function __call(string $method, array $parameters): mixed
     {
-        if ($this->isRelationInSegregatedRelationsMap($method, false)) {
-            return $this->callSegregatedRelation($method, $parameters);
-        }
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
 
-        throw new \BadMethodCallException(
-            \sprintf('Call to undefined method %s::%s().', static::class, $method)
-        );
+        throw new \BadMethodCallException(\sprintf(
+            'Magic relation call ->%s() is disabled. Use ->r->%s() | ->callSegregatedRelation(\'%s\') instead in %s:%d',
+            $method,
+            $method,
+            $method,
+            $file,
+            $line
+        ));
     }
 
     /**

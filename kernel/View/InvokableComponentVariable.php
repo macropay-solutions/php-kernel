@@ -6,11 +6,14 @@ use ArrayIterator;
 use Closure;
 use IteratorAggregate;
 use MacropaySolutions\Kernel\Contracts\Support\DeferringDisplayableValue;
+use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 use MacropaySolutions\Kernel\Support\Enumerable;
 use Traversable;
 
 class InvokableComponentVariable implements DeferringDisplayableValue, IteratorAggregate
 {
+    use ExplicitForwardable;
+
     /**
      * The callable instance to resolve the variable value.
      *
@@ -64,14 +67,10 @@ class InvokableComponentVariable implements DeferringDisplayableValue, IteratorA
 
     /**
      * Dynamically proxy method access to the variable.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call(string $method, array $parameters): mixed
+    public function to(): mixed
     {
-        return $this->__invoke()->{$method}(...$parameters);
+        return $this->__invoke();
     }
 
     /**

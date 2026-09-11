@@ -197,4 +197,12 @@ class Manager
     {
         return static::connection()->$method(...$parameters);
     }
+
+    /**
+     * Dynamically pass methods to the default connection.
+     */
+    public static function toStatic(): \MacropaySolutions\Kernel\Database\Connection
+    {
+        return static::connection();
+    }
 }

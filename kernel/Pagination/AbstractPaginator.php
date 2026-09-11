@@ -4,19 +4,16 @@ namespace MacropaySolutions\Kernel\Pagination;
 
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
+use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
-use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Support\Traits\Tappable;
 use Traversable;
 
-/**
- * @mixin \MacropaySolutions\Kernel\Support\Collection
- */
 abstract class AbstractPaginator implements Htmlable
 {
-    use ForwardsCalls;
     use Tappable;
+    use ExplicitForwardable;
 
     /**
      * All the items being paginated.
@@ -737,14 +734,10 @@ abstract class AbstractPaginator implements Htmlable
 
     /**
      * Make dynamic calls into the collection.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call(string $method, array $parameters): mixed
+    public function to(): \MacropaySolutions\Kernel\Support\Collection
     {
-        return $this->forwardCallTo($this->getCollection(), $method, $parameters);
+        return $this->getCollection();
     }
 
     /**

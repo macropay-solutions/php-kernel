@@ -145,6 +145,10 @@ abstract class Factory implements Macroable
         $connection = null,
         ?Collection $recycle = null
     ) {
+        if (\app()->isProduction()) {
+            throw new \Exception('Production seeding is forbidden. Use migrations instead.');
+        }
+
         $this->count = $count;
         $this->states = $states ?? \di(Collection::class);
         $this->has = $has ?? \di(Collection::class);

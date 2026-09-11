@@ -501,6 +501,11 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
     /**
      * Dynamically pass methods to the default connection.
      */
+    public function to(): \MacropaySolutions\Kernel\Database\Connection
+    {
+        return $this->connection();
+    }
+
     public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {

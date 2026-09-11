@@ -304,11 +304,11 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * @template TWhenReturnType as null
      *
      * @param bool $value
-     * @param (callable($this): TWhenReturnType)|null $callback
+     * @param (callable($this): TWhenReturnType) $callback
      * @param (callable($this): TWhenReturnType)|null $default
      * @return $this|TWhenReturnType
      */
-    public function when($value, ?callable $callback = null, ?callable $default = null);
+    public function when($value, callable $callback, ?callable $default = null): static;
 
     /**
      * Apply the callback if the collection is empty.
@@ -1240,14 +1240,6 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * @return $this
      */
     public function escapeWhenCastingToString(bool $escape = true): static;
-
-    /**
-     * Add a method to the list of proxied methods.
-     *
-     * @param string $method
-     * @return void
-     */
-    public static function proxy($method);
 
     /**
      * Dynamically access collection proxies.

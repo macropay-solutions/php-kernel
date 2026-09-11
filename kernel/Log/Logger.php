@@ -7,6 +7,7 @@ use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
 use MacropaySolutions\Kernel\Log\Events\MessageLogged;
+use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -14,6 +15,7 @@ use RuntimeException;
 class Logger implements LoggerInterface
 {
     use Conditionable;
+    use ExplicitForwardable;
 
     /**
      * The underlying logger implementation.
@@ -301,13 +303,9 @@ class Logger implements LoggerInterface
 
     /**
      * Dynamically proxy method calls to the underlying logger.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call(string $method, array $parameters): mixed
+    public function to(): \Psr\Log\LoggerInterface
     {
-        return $this->logger->{$method}(...$parameters);
+        return $this->getLogger();
     }
 }

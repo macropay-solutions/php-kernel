@@ -17,9 +17,6 @@ use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
-/**
- * @mixin \MacropaySolutions\Kernel\Contracts\Cache\Store
- */
 class Repository implements ArrayAccess, CacheContract, Macroable
 {
     use InteractsWithTime;
@@ -695,7 +692,15 @@ class Repository implements ArrayAccess, CacheContract, Macroable
     }
 
     /**
-     * Handle dynamic calls into macros or pass missing methods to the store.
+     * Pass missing methods to the store.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Cache\Store
+    {
+        return $this->getStore();
+    }
+
+    /**
+     * Handle dynamic calls into macros.
      */
     public function __call(string $method, array $parameters): mixed
     {
@@ -703,7 +708,17 @@ class Repository implements ArrayAccess, CacheContract, Macroable
             return $this->macroCall($method, $parameters);
         }
 
-        return $this->store->$method(...$parameters);
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
+
+        throw new \BadMethodCallException(sprintf(
+            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            $method,
+            $method,
+            $file,
+            $line
+        ));
     }
 
     /**

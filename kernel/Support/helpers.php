@@ -4,10 +4,8 @@ use MacropaySolutions\Kernel\Contracts\Support\DeferringDisplayableValue;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Env;
-use MacropaySolutions\Kernel\Support\HigherOrderTapProxy;
 use MacropaySolutions\Kernel\Support\Optional;
 use MacropaySolutions\Kernel\Support\Sleep;
-use MacropaySolutions\Kernel\Support\Str;
 
 if (!function_exists('append_config')) {
     /**
@@ -263,47 +261,12 @@ if (!function_exists('retry')) {
     }
 }
 
-if (!function_exists('str')) {
-    /**
-     * Get a new stringable object from the given string.
-     *
-     * @param string|null $string
-     * @return \MacropaySolutions\Kernel\Support\Stringable|mixed
-     */
-    function str($string = null)
-    {
-        if (func_num_args() === 0) {
-            return new class {
-                public function __call(string $method, array $parameters): mixed
-                {
-                    return Str::$method(...$parameters);
-                }
-
-                public function __toString()
-                {
-                    return '';
-                }
-            };
-        }
-
-        return Str::of($string);
-    }
-}
-
 if (!function_exists('tap')) {
     /**
      * Call the given Closure with the given value then return the value.
-     *
-     * @param mixed $value
-     * @param callable|null $callback
-     * @return mixed
      */
-    function tap($value, $callback = null)
+    function tap(mixed $value, callable $callback): mixed
     {
-        if (is_null($callback)) {
-            return new HigherOrderTapProxy($value);
-        }
-
         $callback($value);
 
         return $value;

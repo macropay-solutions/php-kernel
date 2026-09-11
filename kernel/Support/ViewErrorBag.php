@@ -4,12 +4,12 @@ namespace MacropaySolutions\Kernel\Support;
 
 use Countable;
 use MacropaySolutions\Kernel\Contracts\Support\MessageBag as MessageBagContract;
+use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 
-/**
- * @mixin \MacropaySolutions\Kernel\Contracts\Support\MessageBag
- */
 class ViewErrorBag implements Countable
 {
+    use ExplicitForwardable;
+
     /**
      * The array of the view error bags.
      *
@@ -85,14 +85,10 @@ class ViewErrorBag implements Countable
 
     /**
      * Dynamically call methods on the default bag.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call(string $method, array $parameters): mixed
+    public function to(): \MacropaySolutions\Kernel\Contracts\Support\MessageBag
     {
-        return $this->getBag('default')->$method(...$parameters);
+        return $this->getBag('default');
     }
 
     /**

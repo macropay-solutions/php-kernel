@@ -5,6 +5,8 @@ namespace MacropaySolutions\Kernel\Auth;
 use Closure;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Auth\Factory as FactoryContract;
+use MacropaySolutions\Kernel\Contracts\Auth\Guard;
+use MacropaySolutions\Kernel\Contracts\Auth\StatefulGuard;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Auth\Guard
@@ -61,7 +63,7 @@ class AuthManager implements FactoryContract
      * Attempt to get the guard from the local cache.
      *
      * @param string|null $name
-     * @return \MacropaySolutions\Kernel\Contracts\Auth\Guard|\MacropaySolutions\Kernel\Contracts\Auth\StatefulGuard
+     * @return Guard|StatefulGuard
      */
     public function guard($name = null)
     {
@@ -74,7 +76,7 @@ class AuthManager implements FactoryContract
      * Resolve the given guard.
      *
      * @param string $name
-     * @return \MacropaySolutions\Kernel\Contracts\Auth\Guard|\MacropaySolutions\Kernel\Contracts\Auth\StatefulGuard
+     * @return Guard|StatefulGuard
      *
      * @throws \InvalidArgumentException
      */
@@ -344,5 +346,13 @@ class AuthManager implements FactoryContract
     public function __call(string $method, array $parameters): mixed
     {
         return $this->guard()->{$method}(...$parameters);
+    }
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function to(): StatefulGuard|Guard
+    {
+        return $this->guard();
     }
 }

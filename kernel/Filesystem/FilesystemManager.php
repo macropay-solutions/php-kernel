@@ -464,4 +464,12 @@ class FilesystemManager implements FactoryContract
     {
         return $this->disk()->$method(...$parameters);
     }
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Filesystem\Filesystem|FilesystemAdapter
+    {
+        return $this->disk();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Mail;
 
+use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
 
@@ -10,7 +11,7 @@ use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
  */
 class SentMessage implements \JsonSerializable
 {
-    use ForwardsCalls;
+    use ExplicitForwardable;
 
     /**
      * Create a new SentMessage instance.
@@ -25,21 +26,17 @@ class SentMessage implements \JsonSerializable
      *
      * @return \Symfony\Component\Mailer\SentMessage
      */
-    public function getSymfonySentMessage()
+    public function getBaseSentMessage()
     {
         return $this->sentMessage;
     }
 
     /**
      * Dynamically pass missing methods to the Symfony instance.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
      */
-    public function __call(string $method, array $parameters): mixed
+    public function to(): \Symfony\Component\Mailer\SentMessage
     {
-        return $this->forwardCallTo($this->sentMessage, $method, $parameters);
+        return $this->getBaseSentMessage();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Broadcasting\Broadcasters;
 
 use MacropaySolutions\Kernel\Broadcasting\BroadcastException;
+use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use Pusher\ApiErrorException;
@@ -36,14 +37,11 @@ class PusherBroadcaster extends Broadcaster
      *
      * See: https://pusher.com/docs/channels/library_auth_reference/auth-signatures/#user-authentication
      * See: https://pusher.com/docs/channels/server_api/authenticating-users/#response
-     *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
-     * @return array|null
      */
-    public function resolveAuthenticatedUser($request)
+    public function resolveAuthenticatedUser(Request $request): ?array
     {
         if (!$user = parent::resolveAuthenticatedUser($request)) {
-            return;
+            return null;
         }
 
         if (method_exists($this->pusher, 'authenticateUser')) {
@@ -69,7 +67,7 @@ class PusherBroadcaster extends Broadcaster
     /**
      * Authenticate the incoming request for a given channel.
      *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
+     * @param Request $request
      * @return mixed
      *
      * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
@@ -95,7 +93,7 @@ class PusherBroadcaster extends Broadcaster
     /**
      * Return the valid authentication response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
+     * @param Request $request
      * @param mixed $result
      * @return mixed
      */
@@ -139,7 +137,7 @@ class PusherBroadcaster extends Broadcaster
     /**
      * Decode the given Pusher response.
      *
-     * @param \MacropaySolutions\Kernel\Http\Request $request
+     * @param Request $request
      * @param mixed $response
      * @return array
      */

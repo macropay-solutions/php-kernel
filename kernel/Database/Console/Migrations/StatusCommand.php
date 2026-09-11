@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Database\Console\Migrations;
 
 use MacropaySolutions\Kernel\Database\Migrations\Migrator;
 use MacropaySolutions\Kernel\Support\Collection;
+use MacropaySolutions\Kernel\Support\Str;
 use Symfony\Component\Console\Input\InputOption;
 
 class StatusCommand extends BaseCommand
@@ -64,7 +65,7 @@ class StatusCommand extends BaseCommand
 
             $migrations = $this->getStatusFor($ran, $batches)
                 ->when($this->option('pending'), fn($collection) => $collection->filter(function ($migration) {
-                    return str($migration[1])->contains('Pending');
+                    return Str::of($migration[1])->contains('Pending');
                 }));
 
             if (count($migrations) > 0) {

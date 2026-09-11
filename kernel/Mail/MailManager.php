@@ -28,7 +28,7 @@ use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransportFactory;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 
 /**
- * @mixin \MacropaySolutions\Kernel\Mail\Mailer
+ * @mixin Mailer
  */
 class MailManager implements FactoryContract
 {
@@ -81,7 +81,7 @@ class MailManager implements FactoryContract
      * Get a mailer driver instance.
      *
      * @param string|null $driver
-     * @return \MacropaySolutions\Kernel\Mail\Mailer
+     * @return Mailer
      */
     public function driver($driver = null)
     {
@@ -92,7 +92,7 @@ class MailManager implements FactoryContract
      * Attempt to get the mailer from the local cache.
      *
      * @param string $name
-     * @return \MacropaySolutions\Kernel\Mail\Mailer
+     * @return Mailer
      */
     protected function get($name)
     {
@@ -103,7 +103,7 @@ class MailManager implements FactoryContract
      * Resolve the given mailer.
      *
      * @param string $name
-     * @return \MacropaySolutions\Kernel\Mail\Mailer
+     * @return Mailer
      *
      * @throws \InvalidArgumentException
      */
@@ -458,7 +458,7 @@ class MailManager implements FactoryContract
     /**
      * Set a global address on the mailer by type.
      *
-     * @param \MacropaySolutions\Kernel\Mail\Mailer $mailer
+     * @param Mailer $mailer
      * @param array $config
      * @param string $type
      * @return void
@@ -597,5 +597,13 @@ class MailManager implements FactoryContract
     public function __call(string $method, array $parameters): mixed
     {
         return $this->mailer()->$method(...$parameters);
+    }
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Mail\Mailer|Mailer
+    {
+        return $this->mailer();
     }
 }

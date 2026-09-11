@@ -32,9 +32,7 @@ class Builder implements BuilderContract, Macroable
     use BuildsQueries;
     use ExplainsQueries;
     use ForwardsCalls;
-    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryBuilder {
-        __call as macroCall;
-    }
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseQueryBuilder;
 
     /**
      * The database connection instance.
@@ -4185,19 +4183,5 @@ class Builder implements BuilderContract, Macroable
     public function ddRawSql()
     {
         dd($this->toRawSql());
-    }
-
-    /**
-     * Handle dynamic method calls into the method.
-     *
-     * @throws \BadMethodCallException
-     */
-    public function __call(string $method, array $parameters): mixed
-    {
-        if (static::hasMacro($method)) {
-            return $this->macroCall($method, $parameters);
-        }
-
-        static::throwBadMethodCallException($method);
     }
 }

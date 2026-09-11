@@ -13,6 +13,7 @@ use MacropaySolutions\Kernel\Queue\Events\JobReleasedAfterException;
 use MacropaySolutions\Kernel\Queue\Worker;
 use MacropaySolutions\Kernel\Queue\WorkerOptions;
 use MacropaySolutions\Kernel\Support\Carbon;
+use MacropaySolutions\Kernel\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Terminal;
 
@@ -116,7 +117,7 @@ class WorkCommand extends Command
 
         if (Terminal::hasSttyAvailable()) {
             $this->info(
-                sprintf('Processing jobs from the [%s] %s.', $queue, str('queue')->plural(explode(',', $queue)))
+                sprintf('Processing jobs from the [%s] %s.', $queue, Str::of('queue')->plural(explode(',', $queue)))
             );
         }
 

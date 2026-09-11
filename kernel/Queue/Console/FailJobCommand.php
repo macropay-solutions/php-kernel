@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Queue\Console;
 
 use MacropaySolutions\Kernel\Queue\Events\JobFailed;
 use MacropaySolutions\Kernel\Queue\WorkerOptions;
+use MacropaySolutions\Kernel\Support\Str;
 use Symfony\Component\Console\Terminal;
 
 class FailJobCommand extends WorkCommand
@@ -75,7 +76,7 @@ class FailJobCommand extends WorkCommand
 
         if (Terminal::hasSttyAvailable()) {
             $this->info(
-                sprintf('Processing jobs from the [%s] %s.', $queue, str('queue')->plural(explode(',', $queue)))
+                sprintf('Processing jobs from the [%s] %s.', $queue, Str::of('queue')->plural(explode(',', $queue)))
             );
         }
 

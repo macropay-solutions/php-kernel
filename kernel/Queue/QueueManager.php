@@ -290,4 +290,12 @@ class QueueManager implements FactoryContract, MonitorContract
     {
         return $this->connection()->$method(...$parameters);
     }
+
+    /**
+     * Dynamically pass calls to the default connection.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Queue\Queue
+    {
+        return $this->connection();
+    }
 }

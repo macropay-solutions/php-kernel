@@ -393,7 +393,6 @@ trait HasRelationships
      *  return [
      *      'relName' => fn(): HasOne => $this->hasOne(Model::class, 'model_id', 'id'),
      *      // Reuse the segregated relation inside another segregated relation:
-     *      'relNameScoped' => fn(): HasOne => $this->relName()->where('col', '=', 'text'),
      *      'relNameScoped2' => fn(): HasOne => $this->callSegregatedRelation('relName')->where('col', '=', 'text'),
      *      // Reuse the method relation:
      *      'relNameAsMethod' => fn(): HasOne => $this->relNameAsMethod(),

@@ -6,13 +6,14 @@ use Aws\DynamoDb\DynamoDbClient;
 use Closure;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Cache\Factory as FactoryContract;
+use MacropaySolutions\Kernel\Contracts\Cache\LockProvider;
 use MacropaySolutions\Kernel\Contracts\Cache\Store;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher as DispatcherContract;
 use MacropaySolutions\Kernel\Support\Arr;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Cache\Repository
- * @mixin \MacropaySolutions\Kernel\Contracts\Cache\LockProvider
+ * @mixin LockProvider
  */
 class CacheManager implements FactoryContract
 {
@@ -430,5 +431,13 @@ class CacheManager implements FactoryContract
     public function __call(string $method, array $parameters): mixed
     {
         return $this->store()->$method(...$parameters);
+    }
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Cache\Repository|LockProvider
+    {
+        return $this->store();
     }
 }

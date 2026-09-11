@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\View\Engines;
 
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
+use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\View\Compilers\CompilerInterface;
 use MacropaySolutions\Kernel\View\ViewException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -72,7 +73,7 @@ class CompilerEngine extends PhpEngine
         try {
             $results = $this->evaluatePath($this->compiler->getCompiledPath($path), $data);
         } catch (ViewException $e) {
-            if (!str($e->getMessage())->contains(['No such file or directory', 'File does not exist at path'])) {
+            if (!Str::of($e->getMessage())->contains(['No such file or directory', 'File does not exist at path'])) {
                 throw $e;
             }
 

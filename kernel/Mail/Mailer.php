@@ -255,7 +255,7 @@ class Mailer implements MailerContract, MailQueueContract, Macroable
 
         return $this->replaceEmbeddedAttachments(
             $this->renderView($view ?: $plain, $data),
-            $data['message']->getSymfonyMessage()->getAttachments()
+            $data['message']->getBaseMessage()->getAttachments()
         );
     }
 
@@ -329,7 +329,7 @@ class Mailer implements MailerContract, MailQueueContract, Macroable
         // Next we will determine if the message should be sent. We give the developer
         // one final chance to stop this message and then we will send it to all of
         // its recipients. We will then fire the sent event for the sent message.
-        $symfonyMessage = $message->getSymfonyMessage();
+        $symfonyMessage = $message->getBaseMessage();
 
         if ($this->shouldSendMessage($symfonyMessage, $data)) {
             $symfonySentMessage = $this->sendSymfonyMessage($symfonyMessage);
@@ -616,7 +616,7 @@ class Mailer implements MailerContract, MailQueueContract, Macroable
      *
      * @return \Symfony\Component\Mailer\Transport\TransportInterface
      */
-    public function getSymfonyTransport()
+    public function getBaseTransport()
     {
         return $this->transport;
     }
@@ -637,7 +637,7 @@ class Mailer implements MailerContract, MailQueueContract, Macroable
      * @param \Symfony\Component\Mailer\Transport\TransportInterface $transport
      * @return void
      */
-    public function setSymfonyTransport(TransportInterface $transport)
+    public function setBaseTransport(TransportInterface $transport)
     {
         $this->transport = $transport;
     }

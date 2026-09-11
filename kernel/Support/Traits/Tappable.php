@@ -6,12 +6,9 @@ trait Tappable
 {
     /**
      * Call the given Closure with this instance then return the instance.
-     *
-     * @param callable|null $callback
-     * @return $this|\MacropaySolutions\Kernel\Support\HigherOrderTapProxy
      */
-    public function tap($callback = null)
+    public function tap(callable $callback): static
     {
-        return tap($this, $callback);
+        return \tap($this, $callback);
     }
 }

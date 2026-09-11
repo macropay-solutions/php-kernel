@@ -22,10 +22,6 @@ use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 
 /**
- * @property-read HigherOrderBuilderProxy $orWhere
- * @property-read HigherOrderBuilderProxy $whereNot
- * @property-read HigherOrderBuilderProxy $orWhereNot
- *
  * @mixin QueryBuilder
  */
 class Builder implements BuilderContract, Macroable
@@ -1924,10 +1920,6 @@ class Builder implements BuilderContract, Macroable
      */
     public function __get($key)
     {
-        if (in_array($key, ['orWhere', 'whereNot', 'orWhereNot'])) {
-            return new HigherOrderBuilderProxy($this, $key);
-        }
-
         if (in_array($key, $this->propertyPassthru)) {
             return $this->toBase()->{$key};
         }

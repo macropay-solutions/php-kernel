@@ -35,9 +35,6 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/**
- * @mixin \League\Flysystem\FilesystemOperator
- */
 class FilesystemAdapter implements CloudFilesystemContract, Macroable
 {
     use Conditionable;
@@ -983,15 +980,28 @@ class FilesystemAdapter implements CloudFilesystemContract, Macroable
 
     /**
      * Pass dynamic methods call onto Flysystem.
-     *
-     * @throws \BadMethodCallException
      */
+    public function to(): \League\Flysystem\FilesystemOperator
+    {
+        return $this->getDriver();
+    }
+
     public function __call(string $method, array $parameters): mixed
     {
         if (static::hasMacro($method)) {
             return $this->macroCall($method, $parameters);
         }
 
-        return $this->driver->{$method}(...$parameters);
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
+
+        throw new \BadMethodCallException(\sprintf(
+            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            $method,
+            $method,
+            $file,
+            $line
+        ));
     }
 }

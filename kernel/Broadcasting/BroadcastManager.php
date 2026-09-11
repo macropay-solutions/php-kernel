@@ -215,7 +215,7 @@ class BroadcastManager implements FactoryContract
      * Get a driver instance.
      *
      * @param string|null $name
-     * @return mixed
+     * @return \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
      */
     public function driver($name = null)
     {
@@ -469,5 +469,13 @@ class BroadcastManager implements FactoryContract
     public function __call(string $method, array $parameters): mixed
     {
         return $this->driver()->$method(...$parameters);
+    }
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function to(): \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
+    {
+        return $this->driver();
     }
 }
