@@ -694,7 +694,7 @@ class Repository implements ArrayAccess, CacheContract, Macroable
     /**
      * Pass missing methods to the store.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Cache\Store
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Cache\Store
     {
         return $this->getStore();
     }
@@ -713,7 +713,7 @@ class Repository implements ArrayAccess, CacheContract, Macroable
         $line = $caller['line'] ?? 0;
 
         throw new \BadMethodCallException(sprintf(
-            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            'Magic call ->%s() is disabled. Use ->fwd()->%s() instead in %s:%d',
             $method,
             $method,
             $file,

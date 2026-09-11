@@ -304,7 +304,7 @@ class Logger implements LoggerInterface
     /**
      * Dynamically proxy method calls to the underlying logger.
      */
-    public function to(): \Psr\Log\LoggerInterface
+    public function fwd(): \Psr\Log\LoggerInterface
     {
         return $this->getLogger();
     }

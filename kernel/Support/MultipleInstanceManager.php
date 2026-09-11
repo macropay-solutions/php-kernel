@@ -192,7 +192,7 @@ abstract class MultipleInstanceManager
     /**
      * Dynamically call the default instance.
      */
-    public function to(): mixed
+    public function fwd(): mixed
     {
         return $this->instance();
     }

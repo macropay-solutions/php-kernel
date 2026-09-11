@@ -474,7 +474,7 @@ class BroadcastManager implements FactoryContract
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
     {
         return $this->driver();
     }

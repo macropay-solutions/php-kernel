@@ -602,7 +602,7 @@ class MailManager implements FactoryContract
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Mail\Mailer|Mailer
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Mail\Mailer|Mailer
     {
         return $this->mailer();
     }

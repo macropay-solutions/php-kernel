@@ -981,7 +981,7 @@ class FilesystemAdapter implements CloudFilesystemContract, Macroable
     /**
      * Pass dynamic methods call onto Flysystem.
      */
-    public function to(): \League\Flysystem\FilesystemOperator
+    public function fwd(): \League\Flysystem\FilesystemOperator
     {
         return $this->getDriver();
     }
@@ -997,7 +997,7 @@ class FilesystemAdapter implements CloudFilesystemContract, Macroable
         $line = $caller['line'] ?? 0;
 
         throw new \BadMethodCallException(\sprintf(
-            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            'Magic call ->%s() is disabled. Use ->fwd()->%s() instead in %s:%d',
             $method,
             $method,
             $file,

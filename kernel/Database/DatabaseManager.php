@@ -501,7 +501,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
     /**
      * Dynamically pass methods to the default connection.
      */
-    public function to(): \MacropaySolutions\Kernel\Database\Connection
+    public function fwd(): \MacropaySolutions\Kernel\Database\Connection
     {
         return $this->connection();
     }

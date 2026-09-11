@@ -114,7 +114,7 @@ class Optional implements ArrayAccess, Macroable
     /**
      * Dynamically pass a method to the underlying object.
      */
-    public function to(): ?object
+    public function fwd(): ?object
     {
         return is_object($this->value) ? $this->value : null;
     }
@@ -133,7 +133,7 @@ class Optional implements ArrayAccess, Macroable
         $line = $caller['line'] ?? 0;
 
         throw new \BadMethodCallException(sprintf(
-            'Magic call ->%s() is disabled. Use ->to()->%s() instead in %s:%d',
+            'Magic call ->%s() is disabled. Use ->fwd()->%s() instead in %s:%d',
             $method,
             $method,
             $file,

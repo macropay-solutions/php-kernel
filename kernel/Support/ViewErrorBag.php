@@ -86,7 +86,7 @@ class ViewErrorBag implements Countable
     /**
      * Dynamically call methods on the default bag.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Support\MessageBag
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Support\MessageBag
     {
         return $this->getBag('default');
     }

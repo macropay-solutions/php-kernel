@@ -787,7 +787,7 @@ class LogManager implements LoggerInterface
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): \Psr\Log\LoggerInterface|\MacropaySolutions\Kernel\Log\Logger
+    public function fwd(): \Psr\Log\LoggerInterface|\MacropaySolutions\Kernel\Log\Logger
     {
         return $this->driver();
     }

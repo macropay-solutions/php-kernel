@@ -351,7 +351,7 @@ class AuthManager implements FactoryContract
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): StatefulGuard|Guard
+    public function fwd(): StatefulGuard|Guard
     {
         return $this->guard();
     }

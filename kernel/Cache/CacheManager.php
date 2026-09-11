@@ -436,7 +436,7 @@ class CacheManager implements FactoryContract
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Cache\Repository|LockProvider
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Cache\Repository|LockProvider
     {
         return $this->store();
     }

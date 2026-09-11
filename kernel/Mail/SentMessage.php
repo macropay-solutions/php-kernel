@@ -34,7 +34,7 @@ class SentMessage implements \JsonSerializable
     /**
      * Dynamically pass missing methods to the Symfony instance.
      */
-    public function to(): \Symfony\Component\Mailer\SentMessage
+    public function fwd(): \Symfony\Component\Mailer\SentMessage
     {
         return $this->getBaseSentMessage();
     }

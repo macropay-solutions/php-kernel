@@ -197,7 +197,7 @@ abstract class Manager
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): mixed
+    public function fwd(): mixed
     {
         return $this->driver();
     }

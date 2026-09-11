@@ -283,7 +283,7 @@ class RedisManager implements Factory
     /**
      * Pass methods onto the default Redis connection.
      */
-    public function to(): \MacropaySolutions\Kernel\Redis\Connections\Connection
+    public function fwd(): \MacropaySolutions\Kernel\Redis\Connections\Connection
     {
         return $this->connection();
     }

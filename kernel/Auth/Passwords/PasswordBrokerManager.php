@@ -150,7 +150,7 @@ class PasswordBrokerManager implements FactoryContract
     /**
      * Dynamically call the default driver instance.
      */
-    public function to(): \MacropaySolutions\Kernel\Contracts\Auth\PasswordBroker
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Auth\PasswordBroker
     {
         return $this->broker();
     }

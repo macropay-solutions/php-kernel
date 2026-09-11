@@ -626,7 +626,7 @@ abstract class AbstractCursorPaginator implements Htmlable
     /**
      * Make dynamic calls into the collection.
      */
-    public function to(): \MacropaySolutions\Kernel\Support\Collection
+    public function fwd(): \MacropaySolutions\Kernel\Support\Collection
     {
         return $this->getCollection();
     }

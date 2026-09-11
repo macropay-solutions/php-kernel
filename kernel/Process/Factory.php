@@ -314,7 +314,7 @@ class Factory implements Macroable
     /**
      * Dynamically proxy methods to a new pending process instance.
      */
-    public function to(): \MacropaySolutions\Kernel\Process\PendingProcess
+    public function fwd(): \MacropaySolutions\Kernel\Process\PendingProcess
     {
         return $this->newPendingProcess();
     }

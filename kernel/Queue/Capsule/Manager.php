@@ -176,7 +176,7 @@ class Manager
     /**
      * Pass dynamic instance methods to the manager.
      */
-    public function to(): \MacropaySolutions\Kernel\Queue\QueueManager
+    public function fwd(): \MacropaySolutions\Kernel\Queue\QueueManager
     {
         return $this->getQueueManager();
     }
@@ -193,7 +193,7 @@ class Manager
     /**
      * Dynamically pass methods to the default connection.
      */
-    public static function toStatic(): \MacropaySolutions\Kernel\Contracts\Queue\Queue
+    public static function sfwd(): \MacropaySolutions\Kernel\Contracts\Queue\Queue
     {
         return static::connection();
     }

@@ -201,7 +201,7 @@ class Manager
     /**
      * Dynamically pass methods to the default connection.
      */
-    public static function toStatic(): \MacropaySolutions\Kernel\Database\Connection
+    public static function sfwd(): \MacropaySolutions\Kernel\Database\Connection
     {
         return static::connection();
     }
