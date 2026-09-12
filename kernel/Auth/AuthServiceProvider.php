@@ -40,7 +40,12 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerUserResolver()
     {
-        $this->app->bind(AuthenticatableContract::class, fn($app) => call_user_func($app['auth']->userResolver()));
+        $this->app->bind(AuthenticatableContract::class, [self::class, 'getAuthPassword']);
+    }
+
+    public static function getAuthenticatableContract($app)
+    {
+        return $app['auth']->userResolver()();
     }
 
     /**

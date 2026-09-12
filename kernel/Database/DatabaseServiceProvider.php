@@ -44,28 +44,43 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
         // The connection factory is used to create the actual connection instances on
         // the database. We will inject the factory into the manager so that it may
         // make the connections while they are actually needed and not of before.
-        $this->app->singleton('db.factory', function ($app) {
-            return new ConnectionFactory($app);
-        });
+        $this->app->singleton('db.factory', [self::class, 'getDbFactory']);
 
         // The database manager is used to resolve various connections, since multiple
         // connections might be managed. It also implements the connection resolver
         // interface which may be used by other components requiring connections.
-        $this->app->singleton('db', function ($app) {
-            return new DatabaseManager($app, $app['db.factory']);
-        });
+        $this->app->singleton('db', [self::class, 'getDb']);
 
-        $this->app->bind('db.connection', function ($app) {
-            return $app['db']->connection();
-        });
+        $this->app->bind('db.connection', [self::class, 'getDbConnection']);
 
-        $this->app->bind('db.schema', function ($app) {
-            return $app['db']->connection()->getSchemaBuilder();
-        });
+        $this->app->bind('db.schema', [self::class, 'getDbSchema']);
 
-        $this->app->singleton('db.transactions', function ($app) {
-            return new DatabaseTransactionsManager();
-        });
+        $this->app->singleton('db.transactions', [self::class, 'getDbTransactions']);
+    }
+
+    public static function getDb($app)
+    {
+        return new DatabaseManager($app, $app['db.factory']);
+    }
+
+    public static function getDbFactory($app)
+    {
+        return new ConnectionFactory($app);
+    }
+
+    public static function getDbConnection($app)
+    {
+        return $app['db']->connection();
+    }
+
+    public static function getDbSchema($app)
+    {
+        return $app['db']->connection()->getSchemaBuilder();
+    }
+
+    public static function getDbTransactions($app)
+    {
+        return new DatabaseTransactionsManager();
     }
 
     /**
@@ -75,17 +90,20 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
      */
     protected function registerObviousFactory()
     {
-        $this->app->singleton(FakerGenerator::class, function ($app, $parameters) {
-            $locale = $parameters['locale'] ?? $app['config']->get('app.faker_locale', 'en_US');
+        $this->app->singleton(FakerGenerator::class, [self::class, 'getFakerGenerator']);
+    }
 
-            if (!isset(static::$fakers[$locale])) {
-                static::$fakers[$locale] = FakerFactory::create($locale);
-            }
+    public static function getFakerGenerator($app, $parameters)
+    {
+        $locale = $parameters['locale'] ?? $app['config']->get('app.faker_locale', 'en_US');
 
-            static::$fakers[$locale]->unique(true);
+        if (!isset(static::$fakers[$locale])) {
+            static::$fakers[$locale] = FakerFactory::create($locale);
+        }
 
-            return static::$fakers[$locale];
-        });
+        static::$fakers[$locale]->unique(true);
+
+        return static::$fakers[$locale];
     }
 
     /**
@@ -95,9 +113,12 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
      */
     protected function registerQueueableEntityResolver()
     {
-        $this->app->singleton(EntityResolver::class, function () {
-            return new QueueEntityResolver();
-        });
+        $this->app->singleton(EntityResolver::class, [self::class, 'getEntityResolver']);
+    }
+
+    public static function getEntityResolver()
+    {
+        return new QueueEntityResolver();
     }
 
     /**

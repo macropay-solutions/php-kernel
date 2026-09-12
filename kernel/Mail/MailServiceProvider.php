@@ -25,13 +25,19 @@ class MailServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerKernelMailer()
     {
-        $this->app->singleton('mail.manager', function ($app) {
-            return new MailManager($app);
-        });
+        $this->app->singleton('mail.manager', [self::class, 'getMailManager']);
 
-        $this->app->bind('mailer', function ($app) {
-            return $app->make('mail.manager')->mailer();
-        });
+        $this->app->bind('mailer', [self::class, 'getMailer']);
+    }
+
+    public static function getMailManager($app)
+    {
+        return new MailManager($app);
+    }
+
+    public static function getMailer($app)
+    {
+        return $app->make('mail.manager')->mailer();
     }
 
     /**
@@ -41,14 +47,17 @@ class MailServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerMarkdownRenderer()
     {
-        $this->app->singleton(Markdown::class, function ($app) {
-            $config = $app->make('config');
+        $this->app->singleton(Markdown::class, [self::class, 'getMarkdown']);
+    }
 
-            return new Markdown($app->make('view'), [
-                'theme' => $config->get('mail.markdown.theme', 'default'),
-                'paths' => $config->get('mail.markdown.paths', []),
-            ]);
-        });
+    public static function getMarkdown($app)
+    {
+        $config = $app->make('config');
+
+        return new Markdown($app->make('view'), [
+            'theme' => $config->get('mail.markdown.theme', 'default'),
+            'paths' => $config->get('mail.markdown.paths', []),
+        ]);
     }
 
     /**

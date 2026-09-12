@@ -37,42 +37,32 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function registerFactory()
     {
-        $this->app->singleton('view', function ($app) {
-            // Next we need to grab the engine resolver instance that will be used by the
-            // environment. The resolver will be used by an environment to get each of
-            // the various engine implementations such as plain PHP or Template engine.
-            $resolver = $app['view.engine.resolver'];
-
-            $finder = $app['view.finder'];
-
-            $factory = $this->createFactory($resolver, $finder, $app['events']);
-
-            // We will also set the container instance on this view environment since the
-            // view composers may be classes registered in the container, which allows
-            // for great testable, flexible composers for the application developer.
-            $factory->setContainer($app);
-
-            $factory->share('app', $app);
-
-            $app->terminating(static function () {
-                Component::forgetFactory();
-            });
-
-            return $factory;
-        });
+        $this->app->singleton('view', [self::class, 'getView']);
     }
 
-    /**
-     * Create a new Factory Instance.
-     *
-     * @param \MacropaySolutions\Kernel\View\Engines\EngineResolver $resolver
-     * @param \MacropaySolutions\Kernel\View\ViewFinderInterface $finder
-     * @param \MacropaySolutions\Kernel\Contracts\Events\Dispatcher $events
-     * @return \MacropaySolutions\Kernel\View\Factory
-     */
-    protected function createFactory($resolver, $finder, $events)
+    public static function getView($app)
     {
-        return new Factory($resolver, $finder, $events);
+        // Next we need to grab the engine resolver instance that will be used by the
+        // environment. The resolver will be used by an environment to get each of
+        // the various engine implementations such as plain PHP or Template engine.
+        $resolver = $app['view.engine.resolver'];
+
+        $finder = $app['view.finder'];
+
+        $factory = new Factory($resolver, $finder, $app['events']);
+
+        // We will also set the container instance on this view environment since the
+        // view composers may be classes registered in the container, which allows
+        // for great testable, flexible composers for the application developer.
+        $factory->setContainer($app);
+
+        $factory->share('app', $app);
+
+        $app->terminating(static function () {
+            Component::forgetFactory();
+        });
+
+        return $factory;
     }
 
     /**
@@ -82,9 +72,12 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function registerViewFinder()
     {
-        $this->app->bind('view.finder', function ($app) {
-            return new FileViewFinder($app['files'], $app['config']['view.paths']);
-        });
+        $this->app->bind('view.finder', [self::class, 'getViewFinder']);
+    }
+
+    public static function getViewFinder($app)
+    {
+        return new FileViewFinder($app['files'], $app['config']['view.paths']);
     }
 
     /**
@@ -94,20 +87,23 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function registerTemplateCompiler()
     {
-        $this->app->singleton('template.compiler', function ($app) {
-            return tap(
-                new TemplateCompiler(
-                    $app['files'],
-                    $app['config']['view.compiled'],
-                    $app['config']->get('view.relative_hash', false) ? $app->basePath() : '',
-                    $app['config']->get('view.cache', true),
-                    $app['config']->get('view.compiled_extension', 'php'),
-                ),
-                function ($template) {
-                    $template->component('dynamic-component', DynamicComponent::class);
-                }
-            );
-        });
+        $this->app->singleton('template.compiler', [self::class, 'getTemplateCompiler']);
+    }
+
+    public static function getTemplateCompiler($app)
+    {
+        return tap(
+            new TemplateCompiler(
+                $app['files'],
+                $app['config']['view.compiled'],
+                $app['config']->get('view.relative_hash', false) ? $app->basePath() : '',
+                $app['config']->get('view.cache', true),
+                $app['config']->get('view.compiled_extension', 'php'),
+            ),
+            function ($template) {
+                $template->component('dynamic-component', DynamicComponent::class);
+            }
+        );
     }
 
     /**
@@ -117,54 +113,24 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function registerEngineResolver()
     {
-        $this->app->singleton('view.engine.resolver', function () {
-            $resolver = new EngineResolver();
-
-            // Next, we will register the various view engines with the resolver so that the
-            // environment will resolve the engines needed for various views based on the
-            // extension of view file. We call a method for each of the view's engines.
-            foreach (['file', 'php', 'template'] as $engine) {
-                $this->{'register' . ucfirst($engine) . 'Engine'}($resolver);
-            }
-
-            return $resolver;
-        });
+        $this->app->singleton('view.engine.resolver', [self::class, 'getViewEngineResolver']);
     }
 
-    /**
-     * Register the file engine implementation.
-     *
-     * @param \MacropaySolutions\Kernel\View\Engines\EngineResolver $resolver
-     * @return void
-     */
-    public function registerFileEngine($resolver)
+    public static function getViewEngineResolver()
     {
+        $resolver = new EngineResolver();
+
+        // Next, we will register the various view engines with the resolver so that the
+        // environment will resolve the engines needed for various views based on the
+        // extension of view file. We call a method for each of the view's engines.
         $resolver->register('file', function () {
             return new FileEngine(Container::getInstance()->make('files'));
         });
-    }
 
-    /**
-     * Register the PHP engine implementation.
-     *
-     * @param \MacropaySolutions\Kernel\View\Engines\EngineResolver $resolver
-     * @return void
-     */
-    public function registerPhpEngine($resolver)
-    {
         $resolver->register('php', function () {
             return new PhpEngine(Container::getInstance()->make('files'));
         });
-    }
 
-    /**
-     * Register the Template engine implementation.
-     *
-     * @param \MacropaySolutions\Kernel\View\Engines\EngineResolver $resolver
-     * @return void
-     */
-    public function registerTemplateEngine($resolver)
-    {
         $resolver->register('template', function () {
             $app = Container::getInstance();
 
@@ -179,6 +145,8 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
 
             return $compiler;
         });
+
+        return $resolver;
     }
 
     /**
