@@ -188,4 +188,9 @@ interface Filesystem
      * @return bool
      */
     public function deleteDirectory($directory);
+
+    /**
+     * Pass dynamic methods call onto Flysystem.
+     */
+    public function fwd(): \League\Flysystem\FilesystemOperator;
 }

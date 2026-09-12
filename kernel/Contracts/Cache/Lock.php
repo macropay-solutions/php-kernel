@@ -2,9 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Contracts\Cache;
 
-/**
- * @method bool refresh(?int $seconds = null)
- */
 interface Lock
 {
     /**
@@ -44,4 +41,9 @@ interface Lock
      * @return void
      */
     public function forceRelease();
+
+    /**
+     * Extend a lock time to live
+     */
+    public function refresh(?int $seconds = null): bool;
 }

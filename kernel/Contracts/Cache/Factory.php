@@ -11,4 +11,9 @@ interface Factory
      * @return \MacropaySolutions\Kernel\Contracts\Cache\Repository
      */
     public function store($name = null);
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Cache\Repository|LockProvider;
 }

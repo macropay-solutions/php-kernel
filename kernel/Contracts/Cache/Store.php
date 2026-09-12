@@ -2,9 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Contracts\Cache;
 
-/**
- * @method bool touch(string $key, int $seconds)
- */
 interface Store
 {
     /**
@@ -92,4 +89,9 @@ interface Store
      * @return string
      */
     public function getPrefix();
+
+    /**
+     * Adjust the expiration time of a cached item.
+     */
+    public function touch(string $key, int $seconds): bool;
 }

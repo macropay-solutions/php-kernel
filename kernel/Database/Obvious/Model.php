@@ -1915,6 +1915,21 @@ abstract class Model implements
         ));
     }
 
+    public static function __callStatic(string $method, array $parameters): mixed
+    {
+        $caller = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0] ?? [];
+        $file = $caller['file'] ?? 'unknown file';
+        $line = $caller['line'] ?? 0;
+
+        throw new \BadMethodCallException(\sprintf(
+            'Magic call ::%s() is disabled. Use ::query()->%s() instead in %s:%d',
+            $method,
+            $method,
+            $file,
+            $line
+        ));
+    }
+
     /**
      * Convert the model to its string representation.
      */

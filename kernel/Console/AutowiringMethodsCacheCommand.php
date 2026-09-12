@@ -48,14 +48,11 @@ class AutowiringMethodsCacheCommand extends Command
         $this->callSilent('list');
         $this->callSilent('autowiring:clear');
 
-        if ($this->app instanceof \MacropaySolutions\Framework\Application) {
-            foreach ($this->app->availableBindings as $binding => $resolver) {
-                try {
-                    $this->app->make($binding);
-                } catch (\Throwable $e) {
-                    $this->info($this->signature . ' notice for availableBinding ' . $binding . ': ' .
-                        $e->getMessage());
-                }
+        foreach ($this->app->availableBindings as $binding => $resolver) {
+            try {
+                $this->app->make($binding);
+            } catch (\Throwable $e) {
+                $this->info($this->signature . ' notice for availableBinding ' . $binding . ': ' . $e->getMessage());
             }
         }
 

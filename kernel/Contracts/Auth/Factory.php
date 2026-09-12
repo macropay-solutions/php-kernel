@@ -19,4 +19,9 @@ interface Factory
      * @return void
      */
     public function shouldUse($name);
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function fwd(): StatefulGuard|Guard;
 }

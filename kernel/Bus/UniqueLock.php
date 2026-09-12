@@ -39,7 +39,7 @@ class UniqueLock
             ? $job->uniqueVia()
             : $this->cache;
 
-        return (bool)$cache->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor)->get();
+        return (bool)$cache->fwd()->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor)->get();
     }
 
     /**
@@ -53,7 +53,7 @@ class UniqueLock
             ? $job->uniqueVia()
             : $this->cache;
 
-        $cache->lock($this->getKey($job))->forceRelease();
+        $cache->fwd()->lock($this->getKey($job))->forceRelease();
     }
 
     /**
@@ -61,9 +61,11 @@ class UniqueLock
      */
     public function refresh(mixed $job, ?int $seconds = null): bool
     {
-        $cache = \method_exists($job, 'uniqueVia') ? $job->uniqueVia() : $this->cache;
+        $cache = \method_exists($job, 'uniqueVia')
+            ? $job->uniqueVia()
+            : $this->cache;
 
-        return \method_exists($lock = $cache->lock($this->getKey($job)), 'refresh') && $lock->refresh($seconds);
+        return $cache->fwd()->lock($this->getKey($job))->refresh($seconds);
     }
 
     /**
@@ -86,7 +88,7 @@ class UniqueLock
     public static function getUniqueJobCacheStore(mixed $job): ?string
     {
         return \method_exists($job, 'uniqueVia')
-            ? $job->uniqueVia()->getName()
+            ? $job->uniqueVia()->fwd()->getName()
             : \config('cache.default');
     }
 }

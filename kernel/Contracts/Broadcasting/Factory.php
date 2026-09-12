@@ -11,4 +11,9 @@ interface Factory
      * @return \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster
      */
     public function connection($name = null);
+
+    /**
+     * Dynamically call the default driver instance.
+     */
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster;
 }

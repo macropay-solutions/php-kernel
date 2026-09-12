@@ -11,4 +11,9 @@ interface Factory
      * @return \MacropaySolutions\Kernel\Redis\Connections\Connection
      */
     public function connection($name = null);
+
+    /**
+     * Pass methods onto the default Redis connection.
+     */
+    public function fwd(): \MacropaySolutions\Kernel\Redis\Connections\Connection;
 }

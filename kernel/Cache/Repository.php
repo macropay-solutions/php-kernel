@@ -450,8 +450,7 @@ class Repository implements ArrayAccess, CacheContract, Macroable
             return $this->store->forget($key);
         }
 
-        return \method_exists($this->store, 'touch')
-            && $this->store->touch($this->itemKey($key), $this->getSeconds($ttl ?? 0));
+        return $this->store->touch($this->itemKey($key), $this->getSeconds($ttl ?? 0));
     }
 
     /**

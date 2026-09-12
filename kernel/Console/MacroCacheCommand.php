@@ -45,6 +45,14 @@ class MacroCacheCommand extends Command
 
         $cacheDir = $this->app->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'traitables');
 
+        foreach ($this->app->availableBindings as $binding => $resolver) {
+            try {
+                $this->app->make($binding);
+            } catch (\Throwable $e) {
+                $this->info($this->signature . ' notice for availableBinding ' . $binding . ': ' . $e->getMessage());
+            }
+        }
+
         $this->files->ensureDirectoryExists($cacheDir);
 
         $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;

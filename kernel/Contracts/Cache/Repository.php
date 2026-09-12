@@ -5,9 +5,6 @@ namespace MacropaySolutions\Kernel\Contracts\Cache;
 use Closure;
 use Psr\SimpleCache\CacheInterface;
 
-/**
- * @method bool touch(string $key, \DateTimeInterface|\DateInterval|int|null $ttl = null)
- */
 interface Repository extends CacheInterface
 {
     /**
@@ -116,4 +113,14 @@ interface Repository extends CacheInterface
      * @return \MacropaySolutions\Kernel\Contracts\Cache\Store
      */
     public function getStore();
+
+    /**
+     * Set the expiration of a cached item; null TTL will retain indefinitely; 0 will forget it.
+     */
+    public function touch(string $key, \DateTimeInterface|\DateInterval|int|null $ttl = null): bool;
+
+    /**
+     * Pass missing methods to the store.
+     */
+    public function fwd(): \MacropaySolutions\Kernel\Contracts\Cache\Store;
 }
