@@ -138,14 +138,7 @@ class MailEventSecurityTest extends TestCase
 
         $this->app->instance('queue', $queueMock);
 
-        $this->app->singleton('mailer', function () {
-            return new class {
-                public function to($address) { return $this; }
-                public function queue($mailable) {
-                    \app('queue')->push(new \MacropaySolutions\Kernel\Mail\SendQueuedMailable($mailable));
-                }
-            };
-        });
+        $this->app->singleton('mailer', [self::class, 'createMailerMock']);
 
         $this->app->make('mailer')->to('user@example.com')->queue($mailable);
     }
@@ -172,10 +165,7 @@ class MailEventSecurityTest extends TestCase
 
         $this->app->instance('queue', $queueMock);
 
-        $this->app->singleton('events', function () {
-            return (new \MacropaySolutions\Kernel\Events\Dispatcher($this->app))
-                ->setQueueResolver(fn () => $this->app->make('queue'));
-        });
+        $this->app->singleton('events', [self::class, 'createEventsMock']);
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
@@ -199,10 +189,7 @@ class MailEventSecurityTest extends TestCase
 
         $this->app->instance('queue', $queueMock);
 
-        $this->app->singleton('events', function () {
-            return (new \MacropaySolutions\Kernel\Events\Dispatcher($this->app))
-                ->setQueueResolver(fn () => $this->app->make('queue'));
-        });
+        $this->app->singleton('events', [self::class, 'createEventsMock']);
 
         /** @var Dispatcher $dispatcher */
         $dispatcher = $this->app->make('events');
@@ -212,5 +199,21 @@ class MailEventSecurityTest extends TestCase
         $this->expectExceptionMessage('MessageSending events cannot be queued. They do not support JSON serialization.');
 
         $dispatcher->dispatch(new MessageSending(new Email()));
+    }
+
+    public static function createMailerMock()
+    {
+        return new class {
+            public function to($address) { return $this; }
+            public function queue($mailable) {
+                \app('queue')->push(new \MacropaySolutions\Kernel\Mail\SendQueuedMailable($mailable));
+            }
+        };
+    }
+
+    public static function createEventsMock($app)
+    {
+        return (new \MacropaySolutions\Kernel\Events\Dispatcher($app))
+            ->setQueueResolver(fn () => $app->make('queue'));
     }
 }

@@ -50,10 +50,13 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerRequestRebindHandler()
     {
-        $this->app->rebinding('request', function ($app, $request) {
-            $request->setUserResolver(function ($guard = null) use ($app) {
-                return call_user_func($app['auth']->userResolver(), $guard);
-            });
+        $this->app->rebinding('request', [self::class, 'getRegisterRequestBindingHandler']);
+    }
+
+    public static function getRegisterRequestBindingHandler($app, $request): void
+    {
+        $request->setUserResolver(function ($guard = null) use ($app) {
+            return call_user_func($app['auth']->userResolver(), $guard);
         });
     }
 
@@ -64,18 +67,21 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerEventRebindHandler()
     {
-        $this->app->rebinding('events', function ($app, $dispatcher) {
-            if (
-                !$app->resolved('auth') ||
-                $app['auth']->hasResolvedGuards() === false
-            ) {
-                return;
-            }
+        $this->app->rebinding('events', [self::class, 'getRegisterRebindHandler']);
+    }
 
-            if (method_exists($guard = $app['auth']->guard(), 'setDispatcher')) {
-                $guard->setDispatcher($dispatcher);
-            }
-        });
+    public static function getRegisterRebindHandler($app, $dispatcher): void
+    {
+        if (
+            !$app->resolved('auth') ||
+            $app['auth']->hasResolvedGuards() === false
+        ) {
+            return;
+        }
+
+        if (method_exists($guard = $app['auth']->guard(), 'setDispatcher')) {
+            $guard->setDispatcher($dispatcher);
+        }
     }
 
     /**

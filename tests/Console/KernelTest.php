@@ -23,12 +23,8 @@ class KernelTest extends \MacropaySolutions\KernelDev\Framework\Testing\TestCase
 
         $app->configure('app');
 
-        $app->singleton(ExceptionHandlerContract::class, fn() => new ExceptionHandler());
-        $app->singleton(ConsoleKernelContract::class, function () use ($app) {
-            return tap(new ConsoleKernel($app), function ($kernel) {
-                $kernel->rerouteSymfonyCommandEvents();
-            });
-        });
+        $app->singleton(ExceptionHandlerContract::class, [self::class, 'createExceptionHandler']);
+        $app->singleton(ConsoleKernelContract::class, [self::class, 'createConsoleKernel']);
 
         return $app;
     }
@@ -44,5 +40,17 @@ class KernelTest extends \MacropaySolutions\KernelDev\Framework\Testing\TestCase
         restore_error_handler();
         restore_exception_handler();
         parent::tearDown();
+    }
+
+    public static function createExceptionHandler()
+    {
+        return new ExceptionHandler();
+    }
+
+    public static function createConsoleKernel($app)
+    {
+        return tap(new ConsoleKernel($app), function ($kernel) {
+            $kernel->rerouteSymfonyCommandEvents();
+        });
     }
 }

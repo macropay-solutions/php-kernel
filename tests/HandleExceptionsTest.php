@@ -26,7 +26,7 @@ class HandleExceptionsTest extends TestCase
         Container::setInstance($this->container);
 
         $this->config = new Config();
-        $this->container->singleton('config', fn() => $this->config);
+        $this->container->instance('config', $this->config);
     }
 
     protected function tearDown(): void
@@ -130,7 +130,7 @@ class HandleExceptionsTest extends TestCase
     public function testIgnoreDeprecationIfLoggerUnresolvable()
     {
         // Mock a failure to resolve 'log' to trigger the catch block in the trait
-        $this->container->singleton('log', function() { throw new Exception; });
+        $this->container->singleton('log', [self::class, 'throwsException']);
 
         $this->handleError(E_DEPRECATED, 'deprecated', 'file.php', 1);
         $this->assertTrue(true);
@@ -139,5 +139,10 @@ class HandleExceptionsTest extends TestCase
     protected function make($abstract, array $parameters = [])
     {
         return $this->container->make($abstract, $parameters);
+    }
+
+    public static function throwsException()
+    {
+        throw new Exception();
     }
 }

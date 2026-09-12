@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Contracts\Container;
 
-use Closure;
 use Psr\Container\ContainerInterface;
 
 interface Container extends ContainerInterface
@@ -45,79 +44,45 @@ interface Container extends ContainerInterface
 
     /**
      * Register a binding with the container.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @param bool $shared
-     * @return void
      */
-    public function bind($abstract, $concrete = null, $shared = false);
+    public function bind(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
 
     /**
      * Bind a callback to resolve with Container::call.
-     *
-     * @param array|string $method
-     * @param \Closure $callback
-     * @return void
      */
-    public function bindMethod($method, $callback);
+    public function bindMethod(array|string $method, array $callback): void;
 
     /**
      * Register a binding if it hasn't already been registered.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @param bool $shared
-     * @return void
      */
-    public function bindIf($abstract, $concrete = null, $shared = false);
+    public function bindIf(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
 
     /**
      * Register a shared binding in the container.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @return void
      */
-    public function singleton($abstract, $concrete = null);
+    public function singleton(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a shared binding if it hasn't already been registered.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @return void
      */
-    public function singletonIf($abstract, $concrete = null);
+    public function singletonIf(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a scoped binding in the container.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @return void
      */
-    public function scoped($abstract, $concrete = null);
+    public function scoped(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a scoped binding if it hasn't already been registered.
-     *
-     * @param string $abstract
-     * @param \Closure|string|null $concrete
-     * @return void
      */
-    public function scopedIf($abstract, $concrete = null);
+    public function scopedIf(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * "Extend" an abstract type in the container.
      *
-     * @param string $abstract
-     * @param \Closure $closure
-     * @return void
-     *
      * @throws \InvalidArgumentException
      */
-    public function extend($abstract, Closure $closure);
+    public function extend(string $abstract, array $closure): void;
 
     /**
      * Register an existing instance as shared in the container.
@@ -127,14 +92,6 @@ interface Container extends ContainerInterface
      * @return mixed
      */
     public function instance($abstract, $instance);
-
-    /**
-     * Get a closure to resolve the given type from the container.
-     *
-     * @param string $abstract
-     * @return \Closure
-     */
-    public function factory($abstract);
 
     /**
      * Flush the container of all bindings and resolved instances.
@@ -164,47 +121,33 @@ interface Container extends ContainerInterface
     public function makeWithoutAlias(string $abstract, array $parameters = []): mixed;
 
     /**
-     * Call the given Closure / class@method and inject its dependencies.
+     * Call the given callable / class@method and inject its dependencies.
      *
      * @param callable|string $callback
      * @param array $parameters
      * @param string|null $defaultMethod
      * @return mixed
      */
-    public function call($callback, array $parameters = [], $defaultMethod = null);
+    public function call($callback, array $parameters = [], ?string $defaultMethod = null);
 
     /**
      * Determine if the given abstract type has been resolved.
-     *
-     * @param string $abstract
-     * @return bool
      */
-    public function resolved($abstract);
+    public function resolved(string $abstract): bool;
 
     /**
      * Register a new before resolving callback.
-     *
-     * @param \Closure|string $abstract
-     * @param \Closure|null $callback
-     * @return void
      */
-    public function beforeResolving($abstract, ?Closure $callback = null);
+    public function beforeResolving(array|string $abstract, array|null $callback = null): void;
 
     /**
      * Register a new resolving callback.
-     *
-     * @param \Closure|string $abstract
-     * @param \Closure|null $callback
-     * @return void
      */
-    public function resolving($abstract, ?Closure $callback = null);
+    public function resolving(array|string $abstract, array|null $callback = null): void;
 
     /**
      * Register a new after resolving callback.
-     *
-     * @param \Closure|string $abstract
-     * @param \Closure|null $callback
      * @return void
      */
-    public function afterResolving($abstract, ?Closure $callback = null);
+    public function afterResolving(array|string $abstract, array|null $callback = null): void;
 }

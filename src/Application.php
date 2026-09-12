@@ -1036,10 +1036,8 @@ class Application extends Container implements ApplicationContract
 
     /**
      * Register the core container aliases.
-     *
-     * @return void
      */
-    protected function registerContainerAliases()
+    protected function registerContainerAliases(): void
     {
         $this->abstractAliases = [
             'app' => [
