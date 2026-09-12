@@ -737,9 +737,9 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
         $rebound = false;
-        $app->rebinding('request', function () use (&$rebound) {
+        $app->rebinding('request', [function () use (&$rebound) {
             $rebound = true;
-        });
+        }, '__invoke']);
 
         $app->middleware([FrameworkTestDuplicateMiddleware::class]);
 

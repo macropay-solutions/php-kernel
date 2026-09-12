@@ -136,7 +136,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * All the registered rebound callbacks.
      *
-     * @var \Closure|array[]
+     * @var array[]
      */
     protected array $reboundCallbacks = [];
 
@@ -531,7 +531,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Bind a new callback to an abstract's rebind event.
      */
-    public function rebinding(string $abstract, array|\Closure $callback): mixed
+    public function rebinding(string $abstract, array $callback): mixed
     {
         $this->reboundCallbacks[$abstract = $this->getAlias($abstract)][] = $callback;
 
@@ -552,9 +552,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function refresh($abstract, $target, $method)
     {
-        return $this->rebinding($abstract, static function ($app, $instance) use ($target, $method) {
+        return $this->rebinding($abstract, [static function ($app, $instance) use ($target, $method) {
             $target->{$method}($instance);
-        });
+        }, '__invoke']);
     }
 
     /**

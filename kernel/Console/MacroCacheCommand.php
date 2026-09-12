@@ -45,7 +45,7 @@ class MacroCacheCommand extends Command
 
         $cacheDir = $this->app->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'traitables');
 
-        foreach ($this->app->availableBindings as $binding => $resolver) {
+        foreach ($this->app->getAvailableBindings() as $binding => $resolver) {
             try {
                 $this->app->make($binding);
             } catch (\Throwable $e) {

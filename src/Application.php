@@ -1207,10 +1207,8 @@ class Application extends Container implements ApplicationContract
 
     /**
      * The available container bindings and their respective load methods.
-     *
-     * @var array
      */
-    public $availableBindings = [
+    protected array $availableBindings = [
         'auth' => 'registerAuthBindings',
         'auth.driver' => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Auth\AuthManager::class => 'registerAuthBindings',
@@ -1265,6 +1263,11 @@ class Application extends Container implements ApplicationContract
 
         'cookie' => 'registerCookieBindings',
     ];
+
+    public function getAvailableBindings(): array
+    {
+        return $this->availableBindings;
+    }
 
     /**
      * @inheritDoc
