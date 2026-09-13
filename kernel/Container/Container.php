@@ -250,11 +250,8 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Determine if a given string is an alias.
-     *
-     * @param string $name
-     * @return bool
      */
-    public function isAlias($name)
+    public function isAlias(string $name): bool
     {
         return isset($this->aliases[$name]);
     }
@@ -544,16 +541,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Refresh an instance on the given target and method.
-     *
-     * @param string $abstract
-     * @param mixed $target
-     * @param string $method
-     * @return mixed
      */
-    public function refresh($abstract, $target, $method)
+    public function refresh(string $abstract, \WeakReference $target, string $method): mixed
     {
         return $this->rebinding($abstract, [static function ($app, $instance) use ($target, $method) {
-            $target->{$method}($instance);
+            $target->get()?->{$method}($instance);
         }, '__invoke']);
     }
 

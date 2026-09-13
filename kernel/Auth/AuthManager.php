@@ -149,7 +149,7 @@ class AuthManager implements FactoryContract
         }
 
         if (method_exists($guard, 'setRequest')) {
-            $guard->setRequest($this->app->refresh('request', $guard, 'setRequest'));
+            $guard->setRequest($this->app->refresh('request', \WeakReference::create($guard), 'setRequest'));
         }
 
         if (isset($config['remember'])) {
@@ -179,7 +179,7 @@ class AuthManager implements FactoryContract
             $config['hash'] ?? false
         );
 
-        $this->app->refresh('request', $guard, 'setRequest');
+        $this->app->refresh('request', \WeakReference::create($guard), 'setRequest');
 
         return $guard;
     }
@@ -244,7 +244,7 @@ class AuthManager implements FactoryContract
             //$guard = new RequestGuard($callback, $this->app['request'], $this->createUserProvider());
             $guard = \di(RequestGuard::class, [$callback, $this->app['request'], $this->createUserProvider()]);
 
-            $this->app->refresh('request', $guard, 'setRequest');
+            $this->app->refresh('request', \WeakReference::create($guard), 'setRequest');
 
             return $guard;
         });
