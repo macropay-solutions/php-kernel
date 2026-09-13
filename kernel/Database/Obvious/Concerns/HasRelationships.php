@@ -405,7 +405,7 @@ trait HasRelationships
      *  ];
      *
      */
-    protected function segregatedRelationsDefinitionMap(): array
+    protected static function segregatedRelationsDefinitionMap(): array
     {
         return [];
     }
@@ -441,12 +441,7 @@ trait HasRelationships
 
     private function thisSegregatedRelationDefinitionMap(): array
     {
-        return self::$segregatedRelationsGlobalMap[static::class] ??=
-            \array_map(
-                // definitions are bound to $this so we detach from scope to save memory
-                fn(\Closure $closure): \Closure => static::unbindClosure($closure),
-                $this->segregatedRelationsDefinitionMap()
-            );
+        return self::$segregatedRelationsGlobalMap[static::class] ??= static::segregatedRelationsDefinitionMap();
     }
 
     private function resolveSegregatedRelationClosure(string $relation): ?\Closure

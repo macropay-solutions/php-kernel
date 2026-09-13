@@ -1007,7 +1007,7 @@ trait HasAttributes
      * ];
      *
      */
-    protected function segregatedAccessorsMap(): array
+    protected static function segregatedAccessorsMap(): array
     {
         return [];
     }
@@ -1028,7 +1028,7 @@ trait HasAttributes
      * ];
      *
      */
-    protected function segregatedMutatorsMap(): array
+    protected static function segregatedMutatorsMap(): array
     {
         return [];
     }
@@ -1039,13 +1039,7 @@ trait HasAttributes
             return self::$segregatedAccessorsGlobalMap[static::class];
         }
 
-        $map = [];
-
-        foreach ($this->segregatedAccessorsMap() as $key => $closure) {
-            $map[self::getNormalizedMutatorKey($key)] = static::unbindClosure($closure);
-        }
-
-        return self::$segregatedAccessorsGlobalMap[static::class] = $map;
+        return self::$segregatedAccessorsGlobalMap[static::class] = static::segregatedAccessorsMap();
     }
 
     private function thisSegregatedMutatorsDefinitionMap(): array
@@ -1054,13 +1048,7 @@ trait HasAttributes
             return self::$segregatedMutatorsGlobalMap[static::class];
         }
 
-        $map = [];
-
-        foreach ($this->segregatedMutatorsMap() as $key => $closure) {
-            $map[self::getNormalizedMutatorKey($key)] = static::unbindClosure($closure);
-        }
-
-        return self::$segregatedMutatorsGlobalMap[static::class] = $map;
+        return self::$segregatedMutatorsGlobalMap[static::class] = static::segregatedMutatorsMap();
     }
 
     private function resolveSegregatedAccessorClosure(string $key): ?\Closure
