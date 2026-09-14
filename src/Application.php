@@ -285,7 +285,7 @@ class Application extends Container implements ApplicationContract
      * @param array $parameters
      * @return mixed
      */
-    public function make($abstract, $parameters = [])
+    public function make($abstract, array $parameters = [])
     {
         return parent::make($this->handleDeferredProvidersAndReturnAlias($abstract), $parameters);
     }
@@ -293,7 +293,7 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritdoc
      */
-    public function makeWithoutAlias($abstract, $parameters = [])
+    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed
     {
         $this->handleDeferredProvidersAndReturnAlias($abstract);
 

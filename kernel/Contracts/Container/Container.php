@@ -46,61 +46,45 @@ interface Container extends ContainerInterface
 
     /**
      * Register a binding with the container.
-     *
-     * @param string $abstract
-     * @param array|string|null $concrete
-     * @param bool $shared
-     * @return void
      */
-    public function bind($abstract, $concrete = null, $shared = false);
+    public function bind(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
 
     /**
      * Bind a callback to resolve with Container::call.
-     *
-     * @param array|string $method
-     * @param array $callback
-     * @return void
      */
-    public function bindMethod($method, $callback);
+    public function bindMethod(array|string $method, array $callback): void;
 
     /**
      * Register a binding if it hasn't already been registered.
-     * @param string $abstract
-     * @param array|string|null $concrete
-     * @param ?bool $shared
-     * @return void
      */
-    public function bindIf($abstract, $concrete = null, $shared = false);
+    public function bindIf(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
 
     /**
      * Register a shared binding in the container.
      */
-    public function singleton($abstract, $concrete = null);
+    public function singleton(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a shared binding if it hasn't already been registered.
      */
-    public function singletonIf($abstract, $concrete = null);
+    public function singletonIf(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a scoped binding in the container.
      */
-    public function scoped($abstract, $concrete = null);
+    public function scoped(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * Register a scoped binding if it hasn't already been registered.
      */
-    public function scopedIf($abstract, $concrete = null);
+    public function scopedIf(string $abstract, array|string|null $concrete = null): void;
 
     /**
      * "Extend" an abstract type in the container.
      *
-     * @param string $abstract
-     * @param array $closure
-     * @return void
      * @throws \InvalidArgumentException
      */
-    public function extend($abstract, $closure);
+    public function extend(string $abstract, array $closure): void;
 
     /**
      * Register an existing instance as shared in the container.
@@ -127,7 +111,7 @@ interface Container extends ContainerInterface
      *
      * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
      */
-    public function make($abstract, $parameters = []);
+    public function make($abstract, array $parameters = []);
 
     /**
      * Resolve the given type from the container.
@@ -136,7 +120,7 @@ interface Container extends ContainerInterface
      * @throws CircularDependencyException
      * @throws \ReflectionException
      */
-    public function makeWithoutAlias($abstract, $parameters = []);
+    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed;
 
     /**
      * Call the given callable / class@method and inject its dependencies.
@@ -146,39 +130,26 @@ interface Container extends ContainerInterface
      * @param string|null $defaultMethod
      * @return mixed
      */
-    public function call($callback, $parameters = [], $defaultMethod = null);
+    public function call($callback, array $parameters = [], ?string $defaultMethod = null);
 
     /**
      * Determine if the given abstract type has been resolved.
-     * @param string $abstract
-     * @return bool
      */
-    public function resolved($abstract);
+    public function resolved(string $abstract): bool;
 
     /**
      * Register a new before resolving callback.
-     *
-     * @param array|string $abstract
-     * @param array|callable|null $callback
-     * @return void
      */
-    public function beforeResolving($abstract, $callback = null);
+    public function beforeResolving(array|string $abstract, array|null $callback = null): void;
 
     /**
      * Register a new resolving callback.
-     *
-     * @param array|string $abstract
-     * @param array|callable|null $callback
-     * @return void
      */
-    public function resolving($abstract, $callback = null);
+    public function resolving(array|string $abstract, array|null $callback = null): void;
 
     /**
      * Register a new after resolving callback.
-     *
-     * @param array|string $abstract
-     * @param array|callable|null $callback
      * @return void
      */
-    public function afterResolving($abstract, $callback = null);
+    public function afterResolving(array|string $abstract, array|null $callback = null): void;
 }
