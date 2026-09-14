@@ -338,16 +338,22 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Register a shared binding in the container.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @return void
      */
-    public function singleton(string $abstract, array|string|null $concrete = null): void
+    public function singleton($abstract, $concrete = null)
     {
         $this->bind($abstract, $concrete, true);
     }
 
     /**
      * Register a shared binding if it hasn't already been registered.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @return void
      */
-    public function singletonIf(string $abstract, array|string|null $concrete = null): void
+    public function singletonIf($abstract, $concrete = null)
     {
         if (!$this->bound($abstract)) {
             $this->singleton($abstract, $concrete);
@@ -356,8 +362,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Register a scoped binding in the container.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @return void
      */
-    public function scoped(string $abstract, array|string|null $concrete = null): void
+    public function scoped($abstract, $concrete = null)
     {
         $this->scopedInstances[] = $abstract;
 
@@ -366,8 +375,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Register a scoped binding if it hasn't already been registered.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @return void
      */
-    public function scopedIf(string $abstract, array|string|null $concrete = null): void
+    public function scopedIf($abstract, $concrete = null)
     {
         if (!$this->bound($abstract)) {
             $this->scoped($abstract, $concrete);

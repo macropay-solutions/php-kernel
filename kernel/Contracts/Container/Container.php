@@ -60,22 +60,22 @@ interface Container extends ContainerInterface
     /**
      * Register a shared binding in the container.
      */
-    public function singleton(string $abstract, array|string|null $concrete = null): void;
+    public function singleton($abstract, $concrete = null);
 
     /**
      * Register a shared binding if it hasn't already been registered.
      */
-    public function singletonIf(string $abstract, array|string|null $concrete = null): void;
+    public function singletonIf($abstract, $concrete = null);
 
     /**
      * Register a scoped binding in the container.
      */
-    public function scoped(string $abstract, array|string|null $concrete = null): void;
+    public function scoped($abstract, $concrete = null);
 
     /**
      * Register a scoped binding if it hasn't already been registered.
      */
-    public function scopedIf(string $abstract, array|string|null $concrete = null): void;
+    public function scopedIf($abstract, $concrete = null);
 
     /**
      * "Extend" an abstract type in the container.
