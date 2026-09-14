@@ -320,8 +320,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Get the method to be bound in class@method format.
+     *
+     * @param array|string $method
+     * @return string
      */
-    protected function parseBindMethod(array|string $method): string
+    protected function parseBindMethod($method)
     {
         if (\is_array($method)) {
             return $method[0] . '@' . $method[1];
@@ -571,7 +574,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    public function rebinding($abstract, $callback): mixed
+    public function rebinding($abstract, $callback)
     {
         $this->reboundCallbacks[$abstract = $this->getAlias($abstract)][] = $callback;
 
@@ -851,16 +854,17 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param mixed $concrete
+     * @param bool $isBuildable
+     * @param string $initialAbstract
+     * @param array $parameters
+     * @return mixed
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function getObject(
-        mixed $concrete,
-        bool $isBuildable,
-        string $initialAbstract,
-        array $parameters = []
-    ): mixed {
+    protected function getObject($concrete, $isBuildable, $initialAbstract, $parameters = [])
+    {
         if (($this->monitorResolvingAbstractMap[$initialAbstract]['i'] ??= 0) < 7) {
             return $this->returnObject($concrete, $isBuildable, $initialAbstract, $parameters);
         }
@@ -886,16 +890,17 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param mixed $concrete
+     * @param bool $isBuildable
+     * @param string $initialAbstract
+     * @param array $parameters
+     * @return mixed|object
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function returnObject(
-        mixed $concrete,
-        bool $isBuildable,
-        string $initialAbstract,
-        array $parameters = []
-    ): mixed {
+    protected function returnObject($concrete, $isBuildable, $initialAbstract, $parameters = [])
+    {
         try {
             $this->monitorResolvingAbstractMap[$initialAbstract]['i']++;
 
@@ -928,11 +933,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Determine if the given concrete is buildable.
      *
-     * @param mixed $concrete
+     * @param array|string $concrete
      * @param string $abstract
      * @return bool
      */
-    protected function isBuildable(array|string $concrete, string $abstract): bool
+    protected function isBuildable($concrete, $abstract)
     {
         return $concrete === $abstract || \is_array($concrete);
     }
@@ -1117,8 +1122,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Get all before resolving callbacks for a given type.
+     *
+     * @param mixed $abstract
+     * @return array
      */
-    protected function getBeforeResolvingCallbacksForType(mixed $abstract): array
+    protected function getBeforeResolvingCallbacksForType($abstract)
     {
         if ([] === $this->beforeResolvingCallbacks || !\is_string($abstract)) {
             return [];
@@ -1419,7 +1427,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @param string $offset
      * @return mixed
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset)
     {
         return $this->make($offset);
     }
