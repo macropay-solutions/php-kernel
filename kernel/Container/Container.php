@@ -935,6 +935,10 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.');
         }
 
+        if ($parameters !== [] && \array_is_list($parameters)) {
+            return new $concrete(...$parameters);
+        }
+
         BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
 
         if (
@@ -944,10 +948,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             )
         ) {
             return new $concrete();
-        }
-
-        if ($parameters !== [] && \array_is_list($parameters)) {
-            return new $concrete(...$parameters);
         }
 
         return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
