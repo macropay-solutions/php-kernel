@@ -54,8 +54,12 @@ interface Container extends ContainerInterface
 
     /**
      * Register a binding if it hasn't already been registered.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @param ?bool $shared
+     * @return void
      */
-    public function bindIf(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
+    public function bindIf($abstract, $concrete = null, $shared = false);
 
     /**
      * Register a shared binding in the container.

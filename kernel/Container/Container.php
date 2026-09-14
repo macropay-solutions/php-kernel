@@ -328,8 +328,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Register a binding if it hasn't already been registered.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @param ?bool $shared
+     * @return void
      */
-    public function bindIf(string $abstract, array|string|null $concrete = null, bool $shared = false): void
+    public function bindIf($abstract, $concrete = null, $shared = false)
     {
         if (!$this->bound($abstract)) {
             $this->bind($abstract, $concrete, $shared);
