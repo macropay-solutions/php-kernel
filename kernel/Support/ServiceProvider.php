@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Support;
 
 use Closure;
 use MacropaySolutions\Kernel\Console\Application as ConsoleApp;
+use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesConfiguration;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesRoutes;
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
@@ -164,9 +165,13 @@ abstract class ServiceProvider
      * Set up an after resolving listener, or fire immediately if already resolved.
      *
      *  Call this ONLY from a deferred service provider like for example
-     * @see \MacropaySolutions\Kernel\Mail\MailServiceProvider
+     * @param string $name
+     * @param callable $callback
+     * @return void
+     * @throws BindingResolutionException
+     *@see \MacropaySolutions\Kernel\Mail\MailServiceProvider
      */
-    protected function callAfterResolving(string $name, callable $callback): void
+    protected function callAfterResolving($name, $callback)
     {
         if (!$this instanceof DeferrableProvider || !$this->app->isBooted()) {
             throw new \RuntimeException(__FUNCTION__ . ' should be called only from a deferred service provider');

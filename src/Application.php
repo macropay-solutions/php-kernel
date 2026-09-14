@@ -74,13 +74,6 @@ class Application extends Container implements ApplicationContract
     protected bool $hasBeenBootstrapped = false;
 
     /**
-     * Indicates if the application has "booted".
-     *
-     * @var bool
-     */
-    protected $booted = false;
-
-    /**
      * The loaded service providers.
      *
      * @var array
@@ -253,11 +246,6 @@ class Application extends Container implements ApplicationContract
         }
     }
 
-    public function isBooted(): bool
-    {
-        return $this->booted;
-    }
-
     /**
      * Boots the registered providers.
      */
@@ -297,7 +285,7 @@ class Application extends Container implements ApplicationContract
      * @param array $parameters
      * @return mixed
      */
-    public function make($abstract, array $parameters = [])
+    public function make($abstract, $parameters = [])
     {
         return parent::make($this->handleDeferredProvidersAndReturnAlias($abstract), $parameters);
     }
@@ -305,7 +293,7 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritdoc
      */
-    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed
+    public function makeWithoutAlias($abstract, $parameters = [])
     {
         $this->handleDeferredProvidersAndReturnAlias($abstract);
 

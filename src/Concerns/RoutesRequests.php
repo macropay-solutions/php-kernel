@@ -26,9 +26,8 @@ trait RoutesRequests
     /**
      * List of all the global middleware for the application.
      * Note that this is executed before the route is found.
-     * @var array
      */
-    protected $middleware = [];
+    protected array $middleware = [];
 
     /**
      * Global middlewares list that are applied ONLY after the route is found
@@ -37,10 +36,8 @@ trait RoutesRequests
 
     /**
      * All the route specific middleware short-hands.
-     *
-     * @var array
      */
-    protected $routeMiddleware = [];
+    protected array $routeMiddleware = [];
 
     /**
      * The current route being dispatched.

@@ -23,6 +23,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public const VERSION = '1.0.0';
 
     /**
+     * Indicates if the application has "booted".
+     */
+    protected bool $booted = false;
+
+    /**
      * Override this in your \App\Application with true if you need/want
      */
     public const DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING = false;
@@ -190,6 +195,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         return static::$isDevEnv;
     }
 
+    public function isBooted(): bool
+    {
+        return $this->booted;
+    }
+
     public static function getAbstractToTypeOfResolvingCallbacksEventsAsKeys(): array
     {
         return static::getCachedFileContentsFromMemory(static::RESOLVING_EVENTS_PHP) ?? [];
@@ -226,8 +236,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Determine if the given abstract type has been resolved.
+     * @inheritdoc
      */
-    public function resolved(string $abstract): bool
+    public function resolved($abstract)
     {
         $abstract = $this->getAlias($abstract);
 
@@ -261,8 +272,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * Explicit bindings accept a class FQN string or a static array callable (e.g. [Factory::class, 'make']).
      * Array callables MUST use a class string as element 0 to remain state-free and memory-friendly under OPcache.
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @param bool $shared
+     * @return void
      */
-    public function bind(string $abstract, array|string|null $concrete = null, bool $shared = false): void
+    public function bind($abstract, $concrete = null, $shared = false)
     {
         $this->dropStaleInstances($abstract);
 
@@ -296,8 +311,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Bind a callback to resolve with Container::call.
+     * @inheritdoc
      */
-    public function bindMethod(array|string $method, array $callback): void
+    public function bindMethod($method, $callback)
     {
         $this->methodBindings[$this->parseBindMethod($method)] = $callback;
     }
@@ -392,10 +408,10 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * "Extend" an abstract type in the container.
-     *
+     * @inheritdoc
      * @throws \InvalidArgumentException
      */
-    public function extend(string $abstract, array $closure): void
+    public function extend($abstract, $closure)
     {
         $abstract = $this->getAlias($abstract);
 
@@ -571,7 +587,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @param string $abstract
      * @return void
      */
-    protected function rebound(string $abstract): void
+    protected function rebound($abstract)
     {
         $instance = $this->make($abstract);
 
@@ -595,10 +611,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @param array<string, mixed> $parameters
      * @param string|null $defaultMethod
      * @return mixed
-     *
-     * @throws \InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function call($callback, array $parameters = [], ?string $defaultMethod = null)
+    public function call($callback, $parameters = [], $defaultMethod = null)
     {
         return BoundMethod::call($this, $callback, $parameters, $defaultMethod);
     }
@@ -628,7 +643,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    public function make($abstract, array $parameters = [])
+    public function make($abstract, $parameters = [])
     {
         return $this->resolve($abstract, $parameters);
     }
@@ -636,11 +651,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Resolve the given type from the container.
      *
+     * @inheritdoc
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed
+    public function makeWithoutAlias($abstract, $parameters = [])
     {
         return $this->resolveWithoutAlias($abstract, $parameters);
     }
@@ -943,8 +959,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Register a new before resolving callback for all types.
+     * @param array|string $abstract
+     * @param array|callable|null $callback
+     * @return void
      */
-    public function beforeResolving(array|string $abstract, array|null $callback = null): void
+    public function beforeResolving($abstract, $callback = null)
     {
         $abstract = $this->getAlias($abstract);
 
@@ -959,8 +978,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * Register a new resolving callback.
      *
      * Note that the execution speed decreases with the increase of resolvingCallbacks !!!
+     * @param array|string $abstract
+     * @param array|callable|null $callback
+     * @return void
      */
-    public function resolving(array|string $abstract, array|null $callback = null): void
+    public function resolving($abstract, $callback = null)
     {
         $abstract = $this->getAlias($abstract);
 
@@ -975,8 +997,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * Register a new after resolving callback for all types.
      *
      * Note that the execution speed decreases with the increase of resolvingCallbacks !!!
+     * @param array|string $abstract
+     * @param array|callable|null $callback
+     * @return void
      */
-    public function afterResolving(array|string $abstract, array|null $callback = null): void
+    public function afterResolving($abstract, $callback = null)
     {
         $abstract = $this->getAlias($abstract);
 

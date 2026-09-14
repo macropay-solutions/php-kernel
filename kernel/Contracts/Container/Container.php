@@ -6,6 +6,8 @@ use Psr\Container\ContainerInterface;
 
 interface Container extends ContainerInterface
 {
+    public function isBooted(): bool;
+
     /**
      * Determine if the given abstract type has been bound.
      *
@@ -44,13 +46,22 @@ interface Container extends ContainerInterface
 
     /**
      * Register a binding with the container.
+     *
+     * @param string $abstract
+     * @param array|string|null $concrete
+     * @param bool $shared
+     * @return void
      */
-    public function bind(string $abstract, array|string|null $concrete = null, bool $shared = false): void;
+    public function bind($abstract, $concrete = null, $shared = false);
 
     /**
      * Bind a callback to resolve with Container::call.
+     *
+     * @param array|string $method
+     * @param array $callback
+     * @return void
      */
-    public function bindMethod(array|string $method, array $callback): void;
+    public function bindMethod($method, $callback);
 
     /**
      * Register a binding if it hasn't already been registered.
@@ -84,9 +95,12 @@ interface Container extends ContainerInterface
     /**
      * "Extend" an abstract type in the container.
      *
+     * @param string $abstract
+     * @param array $closure
+     * @return void
      * @throws \InvalidArgumentException
      */
-    public function extend(string $abstract, array $closure): void;
+    public function extend($abstract, $closure);
 
     /**
      * Register an existing instance as shared in the container.
@@ -113,7 +127,7 @@ interface Container extends ContainerInterface
      *
      * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
      */
-    public function make($abstract, array $parameters = []);
+    public function make($abstract, $parameters = []);
 
     /**
      * Resolve the given type from the container.
@@ -122,7 +136,7 @@ interface Container extends ContainerInterface
      * @throws CircularDependencyException
      * @throws \ReflectionException
      */
-    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed;
+    public function makeWithoutAlias($abstract, $parameters = []);
 
     /**
      * Call the given callable / class@method and inject its dependencies.
@@ -132,26 +146,39 @@ interface Container extends ContainerInterface
      * @param string|null $defaultMethod
      * @return mixed
      */
-    public function call($callback, array $parameters = [], ?string $defaultMethod = null);
+    public function call($callback, $parameters = [], $defaultMethod = null);
 
     /**
      * Determine if the given abstract type has been resolved.
+     * @param string $abstract
+     * @return bool
      */
-    public function resolved(string $abstract): bool;
+    public function resolved($abstract);
 
     /**
      * Register a new before resolving callback.
+     *
+     * @param array|string $abstract
+     * @param array|callable|null $callback
+     * @return void
      */
-    public function beforeResolving(array|string $abstract, array|null $callback = null): void;
+    public function beforeResolving($abstract, $callback = null);
 
     /**
      * Register a new resolving callback.
+     *
+     * @param array|string $abstract
+     * @param array|callable|null $callback
+     * @return void
      */
-    public function resolving(array|string $abstract, array|null $callback = null): void;
+    public function resolving($abstract, $callback = null);
 
     /**
      * Register a new after resolving callback.
+     *
+     * @param array|string $abstract
+     * @param array|callable|null $callback
      * @return void
      */
-    public function afterResolving(array|string $abstract, array|null $callback = null): void;
+    public function afterResolving($abstract, $callback = null);
 }
