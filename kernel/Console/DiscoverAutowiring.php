@@ -55,21 +55,13 @@ class DiscoverAutowiring
      */
     public static function inFqnToMethodsMap(array $fqnToMethodsMap): array
     {
-        $map = [];
+        $map = BoundMethod::getPrecompiledAutoWiringClassMethodParametersMap() ?? [];
 
         foreach ($fqnToMethodsMap as $fqn => $methods) {
             $map = static::getMethods([$fqn], '', \array_flip((array)$methods), $map);
         }
 
-        return static::getMethods(
-            \array_keys(\array_filter(
-                BoundMethod::getPrecompiledAutoWiringClassMethodParametersMap() ?? [],
-                fn($val): bool => array_key_exists('__construct', $val)
-            ),
-            '',
-            ['__construct' => null],
-            $map
-        );
+        return $map;
     }
 
     /**
