@@ -905,8 +905,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.');
         }
 
-        BoundMethod::addToClassesFqnsToCacheForAutowire($concrete);
-
         if (
             [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
                 \ltrim($concrete, '\\'),

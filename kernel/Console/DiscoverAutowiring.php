@@ -62,7 +62,10 @@ class DiscoverAutowiring
         }
 
         return static::getMethods(
-            \array_keys(BoundMethod::getClassesFqnsToCacheForAutowire()),
+            \array_keys(\array_filter(
+                BoundMethod::getPrecompiledAutoWiringClassMethodParametersMap() ?? [],
+                fn($val): bool => array_key_exists('__construct', $val)
+            ),
             '',
             ['__construct' => null],
             $map

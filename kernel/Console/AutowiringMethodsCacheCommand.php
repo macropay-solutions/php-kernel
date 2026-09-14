@@ -44,7 +44,6 @@ class AutowiringMethodsCacheCommand extends Command
      */
     public function handle(): void
     {
-        BoundMethod::enableClassesFqnsToCacheForAutowire();
         $this->callSilent('list');
         $this->callSilent('autowiring:clear');
 

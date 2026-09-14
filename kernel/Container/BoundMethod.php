@@ -11,13 +11,6 @@ use ReflectionMethod;
 
 class BoundMethod
 {
-    protected static bool $areEnabledClassesFqnsToCacheForAutowire = false;
-
-    /**
-     * Contains classesFQN as keys
-     */
-    protected static array $classesFqnsToCacheForAutowire = [];
-
     /**
      * [
      *   '{classFqn}' => [
@@ -260,23 +253,6 @@ class BoundMethod
         return is_array($callback)
             ? new ReflectionMethod(\reset($callback), \next($callback))
             : new ReflectionFunction($callback);
-    }
-
-    public static function enableClassesFqnsToCacheForAutowire(): void
-    {
-        static::$areEnabledClassesFqnsToCacheForAutowire = true;
-    }
-
-    public static function addToClassesFqnsToCacheForAutowire(string $concrete): void
-    {
-        if (static::$areEnabledClassesFqnsToCacheForAutowire) {
-            static::$classesFqnsToCacheForAutowire[$concrete] = true;
-        }
-    }
-
-    public static function getClassesFqnsToCacheForAutowire(): array
-    {
-        return static::$classesFqnsToCacheForAutowire;
     }
 
     protected static function getPreparedCallback(object|string|array $callback): \Closure|string|array
