@@ -28,277 +28,126 @@ class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function register()
     {
-        $this->registerManager();
-        $this->registerConnection();
-        $this->registerWorker();
-        $this->registerListener();
-        $this->registerFailedJobServices();
+        $this->app->singleton('queue', [self::class, 'getQueueManager']);
+        $this->app->singleton('queue.connection', [self::class, 'getQueueConnection']);
+        $this->app->singleton('queue.worker', [self::class, 'getQueueWorker']);
+        $this->app->singleton('queue.listener', [self::class, 'getQueueListener']);
+        $this->app->singleton('queue.failer', [self::class, 'getQueueFailer']);
     }
 
-    /**
-     * Register the queue manager.
-     *
-     * @return void
-     */
-    protected function registerManager()
+    public static function getQueueManager($app)
     {
-        $this->app->singleton('queue', function ($app) {
-            // Once we have an instance of the queue manager, we will register the various
-            // resolvers for the queue connectors. These connectors are responsible for
-            // creating the classes that accept queue configs and instantiate queues.
-            return tap(new QueueManager($app), function ($manager) {
-                $this->registerConnectors($manager);
-            });
-        });
+        $manager = new QueueManager($app);
+
+        $manager->addConnector('null', static fn() => new NullConnector());
+        $manager->addConnector('sync', static fn() => new SyncConnector());
+        $manager->addConnector('database', static fn() => new DatabaseConnector($app->make('db')));
+        $manager->addConnector('redis', static fn() => new RedisConnector($app->make('redis')));
+        $manager->addConnector('beanstalkd', static fn() => new BeanstalkdConnector());
+        $manager->addConnector('sqs', static fn() => new SqsConnector());
+
+        return $manager;
     }
 
-    /**
-     * Register the default queue connection binding.
-     *
-     * @return void
-     */
-    protected function registerConnection()
+    public static function getQueueConnection($app)
     {
-        $this->app->singleton('queue.connection', function ($app) {
-            return $app['queue']->connection();
-        });
+        return $app->make('queue')->connection();
     }
 
-    /**
-     * Register the connectors on the queue manager.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    public function registerConnectors($manager)
+    public static function getQueueWorker($app)
     {
-        foreach (['Null', 'Sync', 'Database', 'Redis', 'Beanstalkd', 'Sqs'] as $connector) {
-            $this->{"register{$connector}Connector"}($manager);
+
+        $resetScope = static function () use ($app) {
+            $log = $app->make('log');
+            $log->flushSharedContext();
+
+            if (\method_exists($log, 'withoutContext')) {
+                $log->withoutContext();
+            }
+
+            $db = $app->make('db');
+
+            if (\method_exists($db, 'getConnections')) {
+                foreach ($db->getConnections() as $connection) {
+                    $connection->resetTotalQueryDuration();
+                    $connection->allowQueryDurationHandlersToRunAgain();
+                }
+            }
+
+            $app->forgetScopedInstances();
+        };
+
+        return $app->make(Worker::class, [
+            $app->make('queue'),
+            $app->make('events'),
+            $app->make(ExceptionHandler::class),
+            [$app, 'isDownForMaintenance'],
+            $resetScope,
+        ]);
+    }
+
+    public static function getQueueListener($app)
+    {
+        return new Listener($app->basePath());
+    }
+
+    public static function getQueueFailer($app)
+    {
+        $config = $app->make('config')->get('queue.failed', []);
+
+        if (
+            \array_key_exists('driver', $config) &&
+            (\is_null($config['driver']) || $config['driver'] === 'null')
+        ) {
+            return new NullFailedJobProvider();
         }
-    }
 
-    /**
-     * Register the Null queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerNullConnector($manager)
-    {
-        $manager->addConnector('null', function () {
-            return new NullConnector();
-        });
-    }
-
-    /**
-     * Register the Sync queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerSyncConnector($manager)
-    {
-        $manager->addConnector('sync', function () {
-            return new SyncConnector();
-        });
-    }
-
-    /**
-     * Register the database queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerDatabaseConnector($manager)
-    {
-        $manager->addConnector('database', function () {
-            return new DatabaseConnector($this->app['db']);
-        });
-    }
-
-    /**
-     * Register the Redis queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerRedisConnector($manager)
-    {
-        $manager->addConnector('redis', function () {
-            return new RedisConnector($this->app['redis']);
-        });
-    }
-
-    /**
-     * Register the Beanstalkd queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerBeanstalkdConnector($manager)
-    {
-        $manager->addConnector('beanstalkd', function () {
-            return new BeanstalkdConnector();
-        });
-    }
-
-    /**
-     * Register the Amazon SQS queue connector.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\QueueManager $manager
-     * @return void
-     */
-    protected function registerSqsConnector($manager)
-    {
-        $manager->addConnector('sqs', function () {
-            return new SqsConnector();
-        });
-    }
-
-    /**
-     * Register the queue worker.
-     *
-     * @return void
-     */
-    protected function registerWorker()
-    {
-        $this->app->singleton('queue.worker', function ($app) {
-            $isDownForMaintenance = function () {
-                return $this->app->isDownForMaintenance();
-            };
-
-            $resetScope = function () use ($app) {
-                $app['log']->flushSharedContext();
-
-                if (method_exists($app['log'], 'withoutContext')) {
-                    $app['log']->withoutContext();
-                }
-
-                if (method_exists($app['db'], 'getConnections')) {
-                    foreach ($app['db']->getConnections() as $connection) {
-                        $connection->resetTotalQueryDuration();
-                        $connection->allowQueryDurationHandlersToRunAgain();
-                    }
-                }
-
-                $app->forgetScopedInstances();
-            };
-
-            //return new Worker(
-            //return \di(Worker::class, [
-            return $app->make(Worker::class, [
-                $app['queue'],
-                $app['events'],
-                $app[ExceptionHandler::class],
-                $isDownForMaintenance,
-                $resetScope
-            ]);
-        });
-    }
-
-    /**
-     * Register the queue listener.
-     *
-     * @return void
-     */
-    protected function registerListener()
-    {
-        $this->app->singleton('queue.listener', function ($app) {
-            return new Listener($app->basePath());
-        });
-    }
-
-    /**
-     * Register the failed job services.
-     *
-     * @return void
-     */
-    protected function registerFailedJobServices()
-    {
-        $this->app->singleton('queue.failer', function ($app) {
-            $config = $app['config']['queue.failed'];
-
-            if (
-                array_key_exists('driver', $config) &&
-                (is_null($config['driver']) || $config['driver'] === 'null')
-            ) {
-                return new NullFailedJobProvider();
-            }
-
-            if (isset($config['driver']) && $config['driver'] === 'file') {
-                return new FileFailedJobProvider(
-                    $config['path'] ?? $this->app->storagePath('framework/cache/failed-jobs.json'),
-                    $config['limit'] ?? 100,
-                    fn() => $app['cache']->store('file'),
-                );
-            } elseif (isset($config['driver']) && $config['driver'] === 'dynamodb') {
-                return $this->dynamoFailedJobProvider($config);
-            } elseif (isset($config['driver']) && $config['driver'] === 'database-uuids') {
-                return $this->databaseUuidFailedJobProvider($config);
-            } elseif (isset($config['table'])) {
-                return $this->databaseFailedJobProvider($config);
-            } else {
-                return new NullFailedJobProvider();
-            }
-        });
-    }
-
-    /**
-     * Create a new database failed job provider.
-     *
-     * @param array $config
-     * @return \MacropaySolutions\Kernel\Queue\Failed\DatabaseFailedJobProvider
-     */
-    protected function databaseFailedJobProvider($config)
-    {
-        return new DatabaseFailedJobProvider(
-            $this->app['db'],
-            $config['database'],
-            $config['table']
-        );
-    }
-
-    /**
-     * Create a new database failed job provider that uses UUIDs as IDs.
-     *
-     * @param array $config
-     * @return \MacropaySolutions\Kernel\Queue\Failed\DatabaseUuidFailedJobProvider
-     */
-    protected function databaseUuidFailedJobProvider($config)
-    {
-        return new DatabaseUuidFailedJobProvider(
-            $this->app['db'],
-            $config['database'],
-            $config['table']
-        );
-    }
-
-    /**
-     * Create a new DynamoDb failed job provider.
-     *
-     * @param array $config
-     * @return \MacropaySolutions\Kernel\Queue\Failed\DynamoDbFailedJobProvider
-     */
-    protected function dynamoFailedJobProvider($config)
-    {
-        $dynamoConfig = [
-            'region' => $config['region'],
-            'version' => 'latest',
-            'endpoint' => $config['endpoint'] ?? null,
-        ];
-
-        if (!empty($config['key']) && !empty($config['secret'])) {
-            $dynamoConfig['credentials'] = Arr::only(
-                $config,
-                ['key', 'secret', 'token']
+        if (isset($config['driver']) && $config['driver'] === 'file') {
+            return new FileFailedJobProvider(
+                $config['path'] ?? $app->storagePath('framework/cache/failed-jobs.json'),
+                $config['limit'] ?? 100,
+                static fn() => $app->make('cache')->store('file')
             );
         }
 
-        return new DynamoDbFailedJobProvider(
-            new DynamoDbClient($dynamoConfig),
-            $this->app['config']['app.name'],
-            $config['table']
-        );
+        if (isset($config['driver']) && $config['driver'] === 'dynamodb') {
+            $dynamoConfig = [
+                'region' => $config['region'],
+                'version' => 'latest',
+                'endpoint' => $config['endpoint'] ?? null,
+            ];
+
+            if (!empty($config['key']) && !empty($config['secret'])) {
+                $dynamoConfig['credentials'] = Arr::only(
+                    $config,
+                    ['key', 'secret', 'token']
+                );
+            }
+
+            return new DynamoDbFailedJobProvider(
+                new DynamoDbClient($dynamoConfig),
+                $app->make('config')->get('app.name'),
+                $config['table']
+            );
+        }
+
+        if (isset($config['driver']) && $config['driver'] === 'database-uuids') {
+            return new DatabaseUuidFailedJobProvider(
+                $app->make('db'),
+                $config['database'],
+                $config['table']
+            );
+        }
+
+        if (isset($config['table'])) {
+            return new DatabaseFailedJobProvider(
+                $app->make('db'),
+                $config['database'],
+                $config['table']
+            );
+        }
+
+        return new NullFailedJobProvider();
     }
 
     /**

@@ -25,9 +25,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         $this->registerTemplateCompiler();
         $this->registerEngineResolver();
 
-        $this->app->terminating(static function () {
-            Component::flushCache();
-        });
+        $this->app->terminating([Component::class, 'flushCache']);
     }
 
     /**
@@ -45,11 +43,12 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         // Next we need to grab the engine resolver instance that will be used by the
         // environment. The resolver will be used by an environment to get each of
         // the various engine implementations such as plain PHP or Template engine.
-        $resolver = $app['view.engine.resolver'];
 
-        $finder = $app['view.finder'];
-
-        $factory = new Factory($resolver, $finder, $app['events']);
+        $factory = new Factory(
+            $app->make('view.engine.resolver'),
+            $app->make('view.finder'),
+            $app->make('events')
+        );
 
         // We will also set the container instance on this view environment since the
         // view composers may be classes registered in the container, which allows
@@ -58,9 +57,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
 
         $factory->share('app', $app);
 
-        $app->terminating(static function () {
-            Component::forgetFactory();
-        });
+        $app->terminating([Component::class, 'forgetFactory']);
 
         return $factory;
     }
@@ -77,7 +74,7 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public static function getViewFinder($app)
     {
-        return new FileViewFinder($app['files'], $app['config']['view.paths']);
+        return new FileViewFinder($app->make('files'), $app->make('config')->get('view.paths'));
     }
 
     /**
@@ -92,18 +89,19 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public static function getTemplateCompiler($app)
     {
-        return tap(
-            new TemplateCompiler(
-                $app['files'],
-                $app['config']['view.compiled'],
-                $app['config']->get('view.relative_hash', false) ? $app->basePath() : '',
-                $app['config']->get('view.cache', true),
-                $app['config']->get('view.compiled_extension', 'php'),
-            ),
-            function ($template) {
-                $template->component('dynamic-component', DynamicComponent::class);
-            }
+        $config = $app->make('config');
+
+        $compiler = new TemplateCompiler(
+            $app->make('files'),
+            $config->get('view.compiled'),
+            $config->get('view.relative_hash', false) ? $app->basePath() : '',
+            $config->get('view.cache', true),
+            $config->get('view.compiled_extension', 'php'),
         );
+
+        $compiler->component('dynamic-component', DynamicComponent::class);
+
+        return $compiler;
     }
 
     /**
@@ -123,30 +121,36 @@ class ViewServiceProvider extends ServiceProvider implements DeferrableProvider
         // Next, we will register the various view engines with the resolver so that the
         // environment will resolve the engines needed for various views based on the
         // extension of view file. We call a method for each of the view's engines.
-        $resolver->register('file', function () {
-            return new FileEngine(Container::getInstance()->make('files'));
-        });
 
-        $resolver->register('php', function () {
-            return new PhpEngine(Container::getInstance()->make('files'));
-        });
-
-        $resolver->register('template', function () {
-            $app = Container::getInstance();
-
-            $compiler = new CompilerEngine(
-                $app->make('template.compiler'),
-                $app->make('files'),
-            );
-
-            $app->terminating(static function () use ($compiler) {
-                $compiler->forgetCompiledOrNotExpired();
-            });
-
-            return $compiler;
-        });
+        $resolver->register('file', [self::class, 'getFileEngine']);
+        $resolver->register('php', [self::class, 'getPhpEngine']);
+        $resolver->register('template', [self::class, 'getTemplateEngine']);
 
         return $resolver;
+    }
+
+    public static function getFileEngine()
+    {
+        return new FileEngine(Container::getInstance()->make('files'));
+    }
+
+    public static function getPhpEngine()
+    {
+        return new PhpEngine(Container::getInstance()->make('files'));
+    }
+
+    public static function getTemplateEngine()
+    {
+        $app = Container::getInstance();
+
+        $compiler = new CompilerEngine(
+            $app->make('template.compiler'),
+            $app->make('files')
+        );
+
+        $app->terminating([$compiler, 'forgetCompiledOrNotExpired']);
+
+        return $compiler;
     }
 
     /**

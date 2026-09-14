@@ -16,42 +16,31 @@ class SessionServiceProvider extends ServiceProvider implements DeferrableProvid
      */
     public function register()
     {
-        $this->registerSessionManager();
+        $this->app->singleton('session', [self::class, 'getSessionManager']);
 
-        $this->registerSessionDriver();
+        $this->app->singleton('session.store', [self::class, 'getSessionStore']);
 
-        $this->app->singleton(StartSession::class, function ($app) {
-            return new StartSession($app->make(SessionManager::class), function () use ($app) {
-                return $app->make(CacheFactory::class);
-            });
-        });
+        $this->app->singleton(StartSession::class, [self::class, 'getStartSession']);
     }
 
-    /**
-     * Register the session manager instance.
-     *
-     * @return void
-     */
-    protected function registerSessionManager()
+    public static function getSessionManager($app)
     {
-        $this->app->singleton('session', function ($app) {
-            return new SessionManager($app);
-        });
+        return new SessionManager($app);
     }
 
-    /**
-     * Register the session driver instance.
-     *
-     * @return void
-     */
-    protected function registerSessionDriver()
+    public static function getSessionStore($app)
     {
-        $this->app->singleton('session.store', function ($app) {
-            // First, we will create the session manager which is responsible for the
-            // creation of the various session drivers when they are needed by the
-            // application instance, and will resolve them on a lazy load basis.
-            return $app->make('session')->driver();
-        });
+        return $app->make('session')->driver();
+    }
+
+    public static function getStartSession($app)
+    {
+        return new StartSession($app->make(SessionManager::class), [self::class, 'getCacheFactory']);
+    }
+
+    public static function getCacheFactory()
+    {
+        return \app()->make(CacheFactory::class);
     }
 
     /**

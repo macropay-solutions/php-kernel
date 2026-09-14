@@ -453,14 +453,14 @@ class Factory implements FactoryContract, Macroable
      *
      * @param string $extension
      * @param string $engine
-     * @param \Closure|null $resolver
+     * @param callable|null $resolver
      * @return void
      */
-    public function addExtension($extension, $engine, $resolver = null)
+    public function addExtension($extension, $engine, ?array $resolver = null)
     {
         $this->finder->addExtension($extension);
 
-        if (isset($resolver)) {
+        if (null !== $resolver && \is_callable($resolver)) {
             $this->engines->register($engine, $resolver);
         }
 

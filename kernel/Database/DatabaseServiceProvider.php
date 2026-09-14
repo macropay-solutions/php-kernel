@@ -60,7 +60,7 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
 
     public static function getDb($app)
     {
-        return new DatabaseManager($app, $app['db.factory']);
+        return new DatabaseManager($app, $app->make('db.factory'));
     }
 
     public static function getDbFactory($app)
@@ -70,12 +70,12 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
 
     public static function getDbConnection($app)
     {
-        return $app['db']->connection();
+        return $app->make('db')->connection();
     }
 
     public static function getDbSchema($app)
     {
-        return $app['db']->connection()->getSchemaBuilder();
+        return $app->make('db')->connection()->getSchemaBuilder();
     }
 
     public static function getDbTransactions($app)
@@ -95,7 +95,7 @@ class DatabaseServiceProvider extends ServiceProvider implements DeferrableProvi
 
     public static function getFakerGenerator($app, $parameters)
     {
-        $locale = $parameters['locale'] ?? $app['config']->get('app.faker_locale', 'en_US');
+        $locale = $parameters['locale'] ?? $app->make('config')->get('app.faker_locale', 'en_US');
 
         if (!isset(static::$fakers[$locale])) {
             static::$fakers[$locale] = FakerFactory::create($locale);

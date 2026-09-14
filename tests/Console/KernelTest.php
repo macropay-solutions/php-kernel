@@ -14,8 +14,6 @@ class KernelTest extends \MacropaySolutions\KernelDev\Framework\Testing\TestCase
      * Creates the application.
      *
      * Needs to be implemented by subclasses.
-     *
-     * @return \Symfony\Component\HttpKernel\HttpKernelInterface
      */
     public function createApplication()
     {

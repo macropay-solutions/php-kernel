@@ -28,9 +28,19 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     protected function registerAuthenticator()
     {
-        $this->app->singleton('auth', fn($app) => new AuthManager($app));
+        $this->app->singleton('auth', [self::class, 'getAuthManager']);
 
-        $this->app->singleton('auth.driver', fn($app) => $app['auth']->guard());
+        $this->app->singleton('auth.driver', [self::class, 'getAuthDriver']);
+    }
+
+    public static function getAuthManager($app)
+    {
+        return new AuthManager($app);
+    }
+
+    public static function getAuthDriver($app)
+    {
+        return $app->make('auth')->guard();
     }
 
     /**
@@ -45,7 +55,7 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public static function getAuthenticatableContract($app)
     {
-        return $app['auth']->userResolver()();
+        return $app->make('auth')->userResolver()();
     }
 
     /**
@@ -61,7 +71,7 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
     public static function getRegisterRequestBindingHandler($app, $request): void
     {
         $request->setUserResolver(function ($guard = null) use ($app) {
-            return call_user_func($app['auth']->userResolver(), $guard);
+            return call_user_func($app->make('auth')->userResolver(), $guard);
         });
     }
 
@@ -79,12 +89,12 @@ class AuthServiceProvider extends ServiceProvider implements DeferrableProvider
     {
         if (
             !$app->resolved('auth') ||
-            $app['auth']->hasResolvedGuards() === false
+            $app->make('auth')->hasResolvedGuards() === false
         ) {
             return;
         }
 
-        if (method_exists($guard = $app['auth']->guard(), 'setDispatcher')) {
+        if (method_exists($guard = $app->make('auth')->guard(), 'setDispatcher')) {
             $guard->setDispatcher($dispatcher);
         }
     }

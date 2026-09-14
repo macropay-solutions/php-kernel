@@ -144,481 +144,450 @@ class ConsoleServiceProvider extends ServiceProvider
 
     protected function registerAutowiringMethodsCacheCommand(): void
     {
-        $this->app->singleton('command.autowiring.cache', function ($app): AutowiringMethodsCacheCommand {
-            return new AutowiringMethodsCacheCommand($app['files']);
-        });
+        $this->app->singleton('command.autowiring.cache', [self::class, 'getAutowiringMethodsCacheCommand']);
+    }
+
+    public static function getAutowiringMethodsCacheCommand($app)
+    {
+        return new AutowiringMethodsCacheCommand($app->make('files'));
     }
 
     protected function registerAutowiringMethodsClearCommand(): void
     {
-        $this->app->singleton('command.autowiring.clear', function ($app): AutowiringMethodsClearCommand {
-            return new AutowiringMethodsClearCommand($app['files']);
-        });
+        $this->app->singleton('command.autowiring.clear', [self::class, 'getAutowiringMethodsClearCommand']);
+    }
+
+    public static function getAutowiringMethodsClearCommand($app)
+    {
+        return new AutowiringMethodsClearCommand($app->make('files'));
     }
 
     protected function registerMacroCacheCommand(): void
     {
-        $this->app->singleton('command.macro.cache', function ($app): MacroCacheCommand {
-            return new MacroCacheCommand($app['files']);
-        });
+        $this->app->singleton('command.macro.cache', [self::class, 'getMacroCacheCommand']);
+    }
+
+    public static function getMacroCacheCommand($app)
+    {
+        return new MacroCacheCommand($app->make('files'));
     }
 
     protected function registerMacroClearCommand(): void
     {
-        $this->app->singleton('command.macro.clear', function ($app): MacroClearCommand {
-            return new MacroClearCommand($app['files']);
-        });
+        $this->app->singleton('command.macro.clear', [self::class, 'getMacroClearCommand']);
+    }
+
+    public static function getMacroClearCommand($app)
+    {
+        return new MacroClearCommand($app->make('files'));
     }
 
     protected function registerMergeCachedFilesCacheCommand(): void
     {
-        $this->app->singleton('command.merge-cached-files.cache', function ($app): MergeCachedFilesCacheCommand {
-            return new MergeCachedFilesCacheCommand($app['files']);
-        });
+        $this->app->singleton('command.merge-cached-files.cache', [self::class, 'getMergeCachedFilesCacheCommand']);
+    }
+
+    public static function getMergeCachedFilesCacheCommand($app)
+    {
+        return new MergeCachedFilesCacheCommand($app->make('files'));
     }
 
     protected function registerMergeCachedFilesClearCommand(): void
     {
-        $this->app->singleton('command.merge-cached-files.clear', function ($app): MergeCachedFilesClearCommand {
-            return new MergeCachedFilesClearCommand($app['files']);
-        });
+        $this->app->singleton('command.merge-cached-files.clear', [self::class, 'getMergeCachedFilesClearCommand']);
+    }
+
+    public static function getMergeCachedFilesClearCommand($app)
+    {
+        return new MergeCachedFilesClearCommand($app->make('files'));
     }
 
     protected function registerCommandsCacheCommand(): void
     {
-        $this->app->singleton('command.commands.cache', function ($app): CommandsCacheCommand {
-            return new CommandsCacheCommand($app['files']);
-        });
+        $this->app->singleton('command.commands.cache', [self::class, 'getCommandsCacheCommand']);
+    }
+
+    public static function getCommandsCacheCommand($app)
+    {
+        return new CommandsCacheCommand($app->make('files'));
     }
 
     protected function registerCommandsClearCommand(): void
     {
-        $this->app->singleton('command.commands.clear', function ($app): CommandsClearCommand {
-            return new CommandsClearCommand($app['files']);
-        });
+        $this->app->singleton('command.commands.clear', [self::class, 'getCommandsClearCommand']);
+    }
+
+    public static function getCommandsClearCommand($app)
+    {
+        return new CommandsClearCommand($app->make('files'));
     }
 
     protected function registerEventCacheCommand(): void
     {
-        $this->app->singleton('command.event.cache', function (): EventCacheCommand {
-            return new EventCacheCommand();
-        });
+        $this->app->singleton('command.event.cache', [self::class, 'getEventCacheCommand']);
+    }
+
+    public static function getEventCacheCommand()
+    {
+        return new EventCacheCommand();
     }
 
     protected function registerEventClearCommand(): void
     {
-        $this->app->singleton('command.event.clear', function ($app): EventClearCommand {
-            return new EventClearCommand($app['files']);
-        });
+        $this->app->singleton('command.event.clear', [self::class, 'getEventClearCommand']);
+    }
+
+    public static function getEventClearCommand($app)
+    {
+        return new EventClearCommand($app->make('files'));
     }
 
     protected function registerViewCacheCommand(): void
     {
-        $this->app->singleton('command.view.cache', function ($app): ViewCacheCommand {
-            if ($app->make('config')->has('view')) {
-                $app->make('view');
-            }
+        $this->app->singleton('command.view.cache', [self::class, 'getViewCacheCommand']);
+    }
 
-            return new ViewCacheCommand();
-        });
+    public static function getViewCacheCommand($app)
+    {
+        if ($app->make('config')->has('view')) {
+            $app->make('view');
+        }
+
+        return new ViewCacheCommand();
     }
 
     protected function registerViewClearCommand(): void
     {
-        $this->app->singleton('command.view.clear', function ($app): ViewClearCommand {
-            if ($app->make('config')->has('view')) {
-                $app->make('view');
-            }
-
-            return new ViewClearCommand($app['files']);
-        });
+        $this->app->singleton('command.view.clear', [self::class, 'getViewClearCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerCacheClearCommand()
+    public static function getViewClearCommand($app)
     {
-        $this->app->singleton('command.cache.clear', function ($app): CacheClearCommand {
-            return new CacheClearCommand($app['cache'], $app['files']);
-        });
+        if ($app->make('config')->has('view')) {
+            $app->make('view');
+        }
+
+        return new ViewClearCommand($app->make('files'));
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    protected function registerCacheClearCommand(): void
+    {
+        $this->app->singleton('command.cache.clear', [self::class, 'getCacheClearCommand']);
+    }
+
+    public static function getCacheClearCommand($app)
+    {
+        return new CacheClearCommand($app->make('cache'), $app->make('files'));
+    }
+
     protected function registerCacheForgetCommand()
     {
-        $this->app->singleton('command.cache.forget', function ($app): CacheForgetCommand {
-            return new CacheForgetCommand($app['cache']);
-        });
+        $this->app->singleton('command.cache.forget', [self::class, 'getCacheForgetCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getCacheForgetCommand($app)
+    {
+        return new CacheForgetCommand($app->make('cache'));
+    }
+
     protected function registerCacheTableCommand()
     {
-        $this->app->singleton('command.cache.table', function ($app): CacheTableCommand {
-            return new CacheTableCommand($app['files'], $app['composer']);
-        });
+        $this->app->singleton('command.cache.table', [self::class, 'getCacheTableCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getCacheTableCommand($app)
+    {
+        return new CacheTableCommand($app->make('files'), $app->make('composer'));
+    }
+
     protected function registerClearResetsCommand()
     {
-        $this->app->singleton('command.auth.resets.clear', function (): ClearResetsCommand {
-            return new ClearResetsCommand();
-        });
+        $this->app->singleton('command.auth.resets.clear', [self::class, 'getClearResetsCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getClearResetsCommand()
+    {
+        return new ClearResetsCommand();
+    }
+
     protected function registerMigrateCommand()
     {
-        $this->app->singleton('command.migrate', function ($app): MigrateCommand {
-            return new MigrateCommand($app['migrator'], $app['events']);
-        });
+        $this->app->singleton('command.migrate', [self::class, 'getMigrateCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateCommand($app)
+    {
+        return new MigrateCommand($app->make('migrator'), $app->make('events'));
+    }
+
     protected function registerMigrateInstallCommand()
     {
-        $this->app->singleton('command.migrate.install', function ($app): MigrateInstallCommand {
-            return new MigrateInstallCommand($app['migration.repository']);
-        });
+        $this->app->singleton('command.migrate.install', [self::class, 'getMigrateInstallCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateInstallCommand($app)
+    {
+        return new MigrateInstallCommand($app->make('migration.repository'));
+    }
+
     protected function registerMigrateMakeCommand()
     {
-        $this->app->singleton('command.migrate.make', function ($app): MigrateMakeCommand {
-            // Once we have the migration creator registered, we will create the command
-            // and inject the creator. The creator is responsible for the actual file
-            // creation of the migrations, and may be extended by these developers.
-            $creator = $app['migration.creator'];
-
-            $composer = $app['composer'];
-
-            return new MigrateMakeCommand($creator, $composer);
-        });
+        $this->app->singleton('command.migrate.make', [self::class, 'getMigrateMakeCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
-    protected function registerMigrateFreshCommand()
+    public static function getMigrateMakeCommand($app)
     {
-        $this->app->singleton('command.migrate.fresh', function (): MigrateFreshCommand {
-            return new MigrateFreshCommand();
-        });
+        return new MigrateMakeCommand($app->make('migration.creator'), $app->make('composer'));
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    protected function registerMigrateFreshCommand(): void
+    {
+        $this->app->singleton('command.migrate.fresh', [self::class, 'getMigrateFreshCommand']);
+    }
+
+    public static function getMigrateFreshCommand()
+    {
+        return new MigrateFreshCommand();
+    }
+
     protected function registerMigrateRefreshCommand()
     {
-        $this->app->singleton('command.migrate.refresh', function (): MigrateRefreshCommand {
-            return new MigrateRefreshCommand();
-        });
+        $this->app->singleton('command.migrate.refresh', [self::class, 'getMigrateRefreshCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateRefreshCommand()
+    {
+        return new MigrateRefreshCommand();
+    }
+
     protected function registerMigrateResetCommand()
     {
-        $this->app->singleton('command.migrate.reset', function ($app): MigrateResetCommand {
-            return new MigrateResetCommand($app['migrator']);
-        });
+        $this->app->singleton('command.migrate.reset', [self::class, 'getMigrateResetCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateResetCommand($app)
+    {
+        return new MigrateResetCommand($app->make('migrator'));
+    }
+
     protected function registerMigrateRollbackCommand()
     {
-        $this->app->singleton('command.migrate.rollback', function ($app): MigrateRollbackCommand {
-            return new MigrateRollbackCommand($app['migrator']);
-        });
+        $this->app->singleton('command.migrate.rollback', [self::class, 'getMigrateRollbackCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateRollbackCommand($app)
+    {
+        return new MigrateRollbackCommand($app->make('migrator'));
+    }
+
     protected function registerMigrateStatusCommand()
     {
-        $this->app->singleton('command.migrate.status', function ($app): MigrateStatusCommand {
-            return new MigrateStatusCommand($app['migrator']);
-        });
+        $this->app->singleton('command.migrate.status', [self::class, 'getMigrateStatusCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getMigrateStatusCommand($app)
+    {
+        return new MigrateStatusCommand($app->make('migrator'));
+    }
+
     protected function registerQueueClearCommand()
     {
-        $this->app->singleton('command.queue.clear', function (): ClearQueueCommand {
-            return new ClearQueueCommand();
-        });
+        $this->app->singleton('command.queue.clear', [self::class, 'getQueueClearCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueClearCommand()
+    {
+        return new ClearQueueCommand();
+    }
+
     protected function registerQueueFailedCommand()
     {
-        $this->app->singleton('command.queue.failed', function (): ListFailedQueueCommand {
-            return new ListFailedQueueCommand();
-        });
+        $this->app->singleton('command.queue.failed', [self::class, 'getQueueFailedCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueFailedCommand()
+    {
+        return new ListFailedQueueCommand();
+    }
+
     protected function registerQueueForgetCommand()
     {
-        $this->app->singleton('command.queue.forget', function (): ForgetFailedQueueCommand {
-            return new ForgetFailedQueueCommand();
-        });
+        $this->app->singleton('command.queue.forget', [self::class, 'getQueueForgetCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueForgetCommand()
+    {
+        return new ForgetFailedQueueCommand();
+    }
+
     protected function registerQueueFlushCommand()
     {
-        $this->app->singleton('command.queue.flush', function (): FlushFailedQueueCommand {
-            return new FlushFailedQueueCommand();
-        });
+        $this->app->singleton('command.queue.flush', [self::class, 'getQueueFlushCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueFlushCommand()
+    {
+        return new FlushFailedQueueCommand();
+    }
+
     protected function registerQueueListenCommand()
     {
-        $this->app->singleton('command.queue.listen', function ($app): QueueListenCommand {
-            return new QueueListenCommand($app['queue.listener']);
-        });
+        $this->app->singleton('command.queue.listen', [self::class, 'getQueueListenCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueListenCommand($app)
+    {
+        return new QueueListenCommand($app->make('queue.listener'));
+    }
+
     protected function registerQueueRestartCommand()
     {
-        $this->app->singleton('command.queue.restart', function ($app): QueueRestartCommand {
-            return new QueueRestartCommand($app['cache.store']);
-        });
+        $this->app->singleton('command.queue.restart', [self::class, 'getQueueRestartCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueRestartCommand($app)
+    {
+        return new QueueRestartCommand($app->make('cache.store'));
+    }
+
     protected function registerQueueRetryCommand()
     {
-        $this->app->singleton('command.queue.retry', function (): QueueRetryCommand {
-            return new QueueRetryCommand();
-        });
+        $this->app->singleton('command.queue.retry', [self::class, 'getQueueRetryCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueRetryCommand()
+    {
+        return new QueueRetryCommand();
+    }
+
     protected function registerQueueWorkCommand()
     {
-        $this->app->singleton('command.queue.work', function ($app): QueueWorkCommand {
-            return new QueueWorkCommand($app['queue.worker'], $app['cache.store']);
-        });
+        $this->app->singleton('command.queue.work', [self::class, 'getQueueWorkCommand']);
     }
 
-    /**
-     * Register the command.
-     */
+    public static function getQueueWorkCommand($app)
+    {
+        return new QueueWorkCommand($app->make('queue.worker'), $app->make('cache.store'));
+    }
+
     protected function registerQueueFailJobCommand(): void
     {
-        $this->app->singleton('command.queue.fail', function ($app): QueueFailJobCommand {
-            return new QueueFailJobCommand($app['queue.worker'], $app['cache.store']);
-        });
+        $this->app->singleton('command.queue.fail', [self::class, 'getQueueFailJobCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueFailJobCommand($app)
+    {
+        return new QueueFailJobCommand($app->make('queue.worker'), $app->make('cache.store'));
+    }
+
     protected function registerQueueFailedTableCommand()
     {
-        $this->app->singleton('command.queue.failed-table', function ($app): FailedTableCommand {
-            return new FailedTableCommand($app['files'], $app['composer']);
-        });
+        $this->app->singleton('command.queue.failed-table', [self::class, 'getQueueFailedTableCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueFailedTableCommand($app)
+    {
+        return new FailedTableCommand($app->make('files'), $app->make('composer'));
+    }
+
     protected function registerQueueBatchesTableCommand()
     {
-        $this->app->singleton('command.queue.batches-table', function ($app): BatchesTableCommand {
-            return new BatchesTableCommand($app['files'], $app['composer']);
-        });
+        $this->app->singleton('command.queue.batches-table', [self::class, 'getQueueBatchesTableCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueBatchesTableCommand($app)
+    {
+        return new BatchesTableCommand($app->make('files'), $app->make('composer'));
+    }
+
     protected function registerQueueTableCommand()
     {
-        $this->app->singleton('command.queue.table', function ($app): TableCommand {
-            return new TableCommand($app['files'], $app['composer']);
-        });
+        $this->app->singleton('command.queue.table', [self::class, 'getQueueTableCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getQueueTableCommand($app)
+    {
+        return new TableCommand($app->make('files'), $app->make('composer'));
+    }
+
     protected function registerSeederMakeCommand()
     {
-        $this->app->singleton('command.seeder.make', function ($app): SeederMakeCommand {
-            return new SeederMakeCommand($app['files']);
-        });
+        $this->app->singleton('command.seeder.make', [self::class, 'getSeederMakeCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getSeederMakeCommand($app)
+    {
+        return new SeederMakeCommand($app->make('files'));
+    }
+
     protected function registerSeedCommand()
     {
-        $this->app->singleton('command.seed', function ($app): SeedCommand {
-            return new SeedCommand($app['db']);
-        });
+        $this->app->singleton('command.seed', [self::class, 'getSeedCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getSeedCommand($app)
+    {
+        return new SeedCommand($app->make('db'));
+    }
+
     protected function registerWipeCommand()
     {
-        $this->app->singleton('command.wipe', function ($app): WipeCommand {
-            return new WipeCommand();
-        });
+        $this->app->singleton('command.wipe', [self::class, 'getWipeCommand']);
     }
 
-    /**
-     * Register the command.
-     */
+    public static function getWipeCommand()
+    {
+        return new WipeCommand();
+    }
+
     protected function registerAboutCommand(): void
     {
-        $this->app->singleton('command.about', function ($app): AboutCommand {
-            return new AboutCommand($app->make('composer'));
-        });
+        $this->app->singleton('command.about', [self::class, 'getAboutCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getAboutCommand($app)
+    {
+        return new AboutCommand($app->make('composer'));
+    }
+
     protected function registerScheduleFinishCommand()
     {
-        $this->app->singleton('command.schedule.finish', function (): ScheduleFinishCommand {
-            return new ScheduleFinishCommand();
-        });
+        $this->app->singleton('command.schedule.finish', [self::class, 'getScheduleFinishCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getScheduleFinishCommand()
+    {
+        return new ScheduleFinishCommand();
+    }
+
     protected function registerScheduleRunCommand()
     {
-        $this->app->singleton('command.schedule.run', function (): ScheduleRunCommand {
-            return new ScheduleRunCommand();
-        });
+        $this->app->singleton('command.schedule.run', [self::class, 'getScheduleRunCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getScheduleRunCommand()
+    {
+        return new ScheduleRunCommand();
+    }
+
     protected function registerScheduleWorkCommand()
     {
-        $this->app->singleton('command.schedule.work', function (): ScheduleWorkCommand {
-            return new ScheduleWorkCommand();
-        });
+        $this->app->singleton('command.schedule.work', [self::class, 'getScheduleWorkCommand']);
     }
 
-    /**
-     * Register the command.
-     *
-     * @return void
-     */
+    public static function getScheduleWorkCommand()
+    {
+        return new ScheduleWorkCommand();
+    }
+
     protected function registerSchemaDumpCommand()
     {
-        $this->app->singleton('command.schema.dump', function (): DumpCommand {
-            return new DumpCommand();
-        });
+        $this->app->singleton('command.schema.dump', [self::class, 'getSchemaDumpCommand']);
+    }
+
+    public static function getSchemaDumpCommand()
+    {
+        return new DumpCommand();
     }
 
     /**

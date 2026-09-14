@@ -17,7 +17,7 @@ class RedisServiceProvider extends ServiceProvider implements DeferrableProvider
     {
         $this->app->singleton('redis', [self::class, 'getRedis']);
 
-        $this->app->bind('redis.connection',[self::class, 'getRedisConnection']);
+        $this->app->bind('redis.connection', [self::class, 'getRedisConnection']);
     }
 
     public static function getRedis($app)
@@ -29,7 +29,7 @@ class RedisServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public static function getRedisConnection($app)
     {
-        return $app['redis']->connection();
+        return $app->make('redis')->connection();
     }
 
     /**

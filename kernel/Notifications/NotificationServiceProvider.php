@@ -15,7 +15,7 @@ class NotificationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(ChannelManager::class, fn($app) => new ChannelManager($app));
+        $this->app->singleton(ChannelManager::class, [self::class, 'getChannelManager']);
 
         $this->app->alias(
             ChannelManager::class,
@@ -26,5 +26,10 @@ class NotificationServiceProvider extends ServiceProvider
             ChannelManager::class,
             FactoryContract::class
         );
+    }
+
+    public static function getChannelManager($app)
+    {
+        return new ChannelManager($app);
     }
 }

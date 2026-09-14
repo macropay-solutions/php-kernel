@@ -24,7 +24,6 @@ use MacropaySolutions\Kernel\Log\LogManager;
 use MacropaySolutions\Kernel\Pagination\PaginationServiceProvider;
 use MacropaySolutions\Kernel\Queue\QueueServiceProvider;
 use MacropaySolutions\Kernel\Session\SessionServiceProvider;
-use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Composer;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 use MacropaySolutions\Kernel\Support\Str;
@@ -381,9 +380,17 @@ class Application extends Container implements ApplicationContract
             $this->ranServiceBinders['registerAuthBindings'] = true;
         }
 
-        $this->singleton(\MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class, function ($app) {
-            return new Gate($app, fn() => call_user_func($app['auth']->userResolver()));
-        });
+        $this->singleton(\MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class, [self::class, 'getGate']);
+    }
+
+    public static function getGate($app)
+    {
+        return new Gate($app, [self::class, 'getGateUserResolver']);
+    }
+
+    public static function getGateUserResolver()
+    {
+        return \app()->make('auth')->userResolver()();
     }
 
     /**
@@ -425,9 +432,12 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerComposerBindings()
     {
-        $this->singleton('composer', function ($app) {
-            return new Composer($app->make('files'), $this->basePath());
-        });
+        $this->singleton('composer', [self::class, 'getComposer']);
+    }
+
+    public static function getComposer($app)
+    {
+        return new Composer($app->make('files'), $app->basePath());
     }
 
     /**
@@ -437,9 +447,12 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerConfigBindings()
     {
-        $this->singleton('config', function () {
-            return new ConfigRepository();
-        });
+        $this->singleton('config', [self::class, 'getConfig']);
+    }
+
+    public static function getConfig()
+    {
+        return new ConfigRepository();
     }
 
     /**
@@ -484,9 +497,12 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerFilesBindings()
     {
-        $this->singleton('files', function () {
-            return new Filesystem();
-        });
+        $this->singleton('files', [self::class, 'getFiles']);
+    }
+
+    public static function getFiles()
+    {
+        return new Filesystem();
     }
 
     /**
@@ -517,11 +533,14 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerLogBindings()
     {
-        $this->singleton(LoggerInterface::class, function () {
-            $this->configure('logging');
+        $this->singleton(LoggerInterface::class, [self::class, 'getLogger']);
+    }
 
-            return new LogManager($this);
-        });
+    public static function getLogger($app)
+    {
+        $app->configure('logging');
+
+        return new LogManager($app);
     }
 
     /**
@@ -542,9 +561,12 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerRouterBindings()
     {
-        $this->singleton('router', function () {
-            return $this->router;
-        });
+        $this->singleton('router', [self::class, 'getRouter']);
+    }
+
+    public static function getRouter($app)
+    {
+        return $app->router;
     }
 
     /**
@@ -554,18 +576,21 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerPsrRequestBindings()
     {
-        $this->singleton(ServerRequestInterface::class, function ($app) {
-            if (class_exists(Psr17Factory::class) && class_exists(PsrHttpFactory::class)) {
-                $psr17Factory = new Psr17Factory();
+        $this->singleton(ServerRequestInterface::class, [self::class, 'getPsrRequest']);
+    }
 
-                return (new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory))
-                    ->createRequest($app->make('request'));
-            }
+    public static function getPsrRequest($app)
+    {
+        if (\class_exists(Psr17Factory::class) && \class_exists(PsrHttpFactory::class)) {
+            $psr17Factory = new Psr17Factory();
 
-            throw new BindingResolutionException(
-                'Unable to resolve PSR request. Please install symfony/psr-http-message-bridge and nyholm/psr7.'
-            );
-        });
+            return (new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory))
+                ->createRequest($app->make('request'));
+        }
+
+        throw new BindingResolutionException(
+            'Unable to resolve PSR request. Please install symfony/psr-http-message-bridge and nyholm/psr7.'
+        );
     }
 
     /**
@@ -575,13 +600,16 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerPsrResponseBindings()
     {
-        $this->singleton(ResponseInterface::class, function () {
-            if (class_exists(PsrResponse::class)) {
-                return new PsrResponse();
-            }
+        $this->singleton(ResponseInterface::class, [self::class, 'getPsrResponse']);
+    }
 
-            throw new BindingResolutionException('Unable to resolve PSR response. Please install nyholm/psr7.');
-        });
+    public static function getPsrResponse()
+    {
+        if (\class_exists(PsrResponse::class)) {
+            return new PsrResponse();
+        }
+
+        throw new BindingResolutionException('Unable to resolve PSR response. Please install nyholm/psr7.');
     }
 
     /**
@@ -617,9 +645,12 @@ class Application extends Container implements ApplicationContract
      */
     protected function registerUrlGeneratorBindings()
     {
-        $this->singleton('url', function () {
-            return new Routing\UrlGenerator($this);
-        });
+        $this->singleton('url', [self::class, 'getUrlGenerator']);
+    }
+
+    public static function getUrlGenerator($app)
+    {
+        return new Routing\UrlGenerator($app);
     }
 
     /**
@@ -1355,7 +1386,15 @@ class Application extends Container implements ApplicationContract
     {
         $name = \is_string($provider) ? $provider : \get_class($provider);
 
-        return Arr::where($this->loadedProviders, fn(mixed $value): bool => $value instanceof $name);
+        $result = [];
+
+        foreach ($this->loadedProviders as $loadedProvider) {
+            if ($loadedProvider instanceof $name) {
+                $result[] = $loadedProvider;
+            }
+        }
+
+        return $result;
     }
 
     /**

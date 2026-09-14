@@ -25,17 +25,20 @@ class EncryptionServiceProvider extends ServiceProvider implements DeferrablePro
      */
     protected function registerEncrypter()
     {
-        $this->app->singleton('encrypter', function ($app) {
-            $config = $app->make('config')->get('app');
+        $this->app->singleton('encrypter', [self::class, 'getEncrypter']);
+    }
 
-            $map = [];
+    public static function getEncrypter($app)
+    {
+        $config = $app->make('config')->get('app');
 
-            foreach (($config['previous_keys_cipher_map'] ?? []) as $k => $c) {
-                $map[$this->parseKey(['key' => $k])] = $c;
-            }
+        $map = [];
 
-            return new Encrypter($this->parseKey($config), $config['cipher'], $map);
-        });
+        foreach (($config['previous_keys_cipher_map'] ?? []) as $k => $c) {
+            $map[self::parseKey(['key' => $k])] = $c;
+        }
+
+        return new Encrypter(self::parseKey($config), $config['cipher'], $map);
     }
 
     /**
@@ -44,9 +47,9 @@ class EncryptionServiceProvider extends ServiceProvider implements DeferrablePro
      * @param array $config
      * @return string
      */
-    protected function parseKey(array $config)
+    protected static function parseKey(array $config)
     {
-        if (Str::startsWith($key = $this->key($config), $prefix = 'base64:')) {
+        if (Str::startsWith($key = self::key($config), $prefix = 'base64:')) {
             $decoded = \base64_decode(Str::after($key, $prefix), true);
 
             if ($decoded === false) {
@@ -67,9 +70,9 @@ class EncryptionServiceProvider extends ServiceProvider implements DeferrablePro
      *
      * @throws \MacropaySolutions\Kernel\Encryption\MissingAppKeyException
      */
-    protected function key(array $config)
+    protected static function key(array $config)
     {
-        return tap($config['key'], function ($key) {
+        return tap($config['key'] ?? null, static function ($key) {
             if (empty($key)) {
                 throw new MissingAppKeyException();
             }

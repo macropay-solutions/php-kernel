@@ -41,13 +41,13 @@ trait RegistersExceptionHandlers
      */
     protected function registerErrorHandling()
     {
-        error_reporting(-1);
+        \error_reporting(-1);
 
-        set_error_handler(function ($level, $message, $file = '', $line = 0) {
+        \set_error_handler(function ($level, $message, $file = '', $line = 0) {
             $this->handleError($level, $message, $file, $line);
         });
 
-        set_exception_handler(function ($e) {
+        \set_exception_handler(function ($e) {
             try {
                 $this->handleException($e);
             } catch (\Throwable) {
@@ -57,7 +57,7 @@ trait RegistersExceptionHandlers
             }
         });
 
-        register_shutdown_function(function () {
+        \register_shutdown_function(function () {
             try {
                 $this->handleShutdown();
             } catch (Throwable) {
@@ -110,9 +110,9 @@ trait RegistersExceptionHandlers
 
         $this->ensureDeprecationLoggerIsConfigured();
 
-        with($logger->channel('deprecations'), function ($log) use ($message, $file, $line) {
+        with($logger->channel('deprecations'), static function ($log) use ($message, $file, $line) {
             $log->warning(
-                sprintf(
+                \sprintf(
                     '%s in %s on line %s',
                     $message,
                     $file,
@@ -129,7 +129,7 @@ trait RegistersExceptionHandlers
      */
     protected function ensureDeprecationLoggerIsConfigured()
     {
-        with($this->make('config'), function ($config) {
+        with($this->make('config'), static function ($config) {
             if ($config->get('logging.channels.deprecations')) {
                 return;
             }
@@ -143,12 +143,11 @@ trait RegistersExceptionHandlers
     /**
      * Handle the PHP shutdown event.
      *
-     * @return void
      * @throws \Throwable
      */
-    public function handleShutdown()
+    public function handleShutdown(): void
     {
-        if (!is_null($error = error_get_last()) && $this->isFatal($error['type'])) {
+        if (null !== ($error = error_get_last()) && $this->isFatal($error['type'])) {
             $this->handleException($this->fatalErrorFromPhpError($error, 0));
         }
     }
@@ -205,11 +204,9 @@ trait RegistersExceptionHandlers
     /**
      * Handle an uncaught exception instance.
      *
-     * @param \Throwable $e
-     * @return void
      * @throws \Throwable
      */
-    protected function handleException(Throwable $e)
+    protected function handleException(Throwable $e): void
     {
         $handler = $this->resolveExceptionHandler();
 

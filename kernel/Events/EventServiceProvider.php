@@ -15,16 +15,21 @@ class EventServiceProvider extends ServiceProvider implements DeferrableProvider
      */
     public function register()
     {
-        $this->app->singleton('events', function ($app) {
-//            return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
-            return $app->makeWithoutAlias(Dispatcher::class, [$app])->setQueueResolver(function () use ($app) {
+        $this->app->singleton('events', [self::class, 'getEvents']);
+    }
+
+    public static function getEvents($app)
+    {
+//        return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
+        return $app->makeWithoutAlias(Dispatcher::class, [$app])
+            ->setQueueResolver(static function () use ($app) {
                 return $app->make(QueueFactoryContract::class);
-            })->setTransactionManagerResolver(function () use ($app) {
+            })
+            ->setTransactionManagerResolver(static function () use ($app) {
                 return $app->bound('db.transactions')
                     ? $app->make('db.transactions')
                     : null;
             });
-        });
     }
 
     /**

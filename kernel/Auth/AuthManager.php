@@ -242,7 +242,7 @@ class AuthManager implements FactoryContract
     {
         return $this->extend($driver, function () use ($callback) {
             //$guard = new RequestGuard($callback, $this->app['request'], $this->createUserProvider());
-            $guard = \di(RequestGuard::class, [$callback, $this->app['request'], $this->createUserProvider()]);
+            $guard = \di(RequestGuard::class, [$callback, $this->app->make('request'), $this->createUserProvider()]);
 
             $this->app->refresh('request', \WeakReference::create($guard), 'setRequest');
 

@@ -69,11 +69,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerRepository()
     {
-        $this->app->singleton('migration.repository', function ($app) {
-            $table = $app['config']['database.migrations'];
+        $this->app->singleton('migration.repository', [self::class, 'getMigrationRepository']);
+    }
 
-            return new DatabaseMigrationRepository($app['db'], $table);
-        });
+    public static function getMigrationRepository($app)
+    {
+        return new DatabaseMigrationRepository($app->make('db'), $app->make('config')->get('database.migrations'));
     }
 
     /**
@@ -86,11 +87,17 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
         // The migrator is responsible for actually running and rollback the migration
         // files in the application. We'll pass in our database connection resolver
         // so the migrator can resolve any of these connections when it needs to.
-        $this->app->singleton('migrator', function ($app) {
-            $repository = $app['migration.repository'];
+        $this->app->singleton('migrator', [self::class, 'getMigrator']);
+    }
 
-            return new Migrator($repository, $app['db'], $app['files'], $app['events']);
-        });
+    public static function getMigrator($app)
+    {
+        return new Migrator(
+            $app->make('migration.repository'),
+            $app->make('db'),
+            $app->make('files'),
+            $app->make('events')
+        );
     }
 
     /**
@@ -100,9 +107,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerCreator()
     {
-        $this->app->singleton('migration.creator', function ($app) {
-            return new MigrationCreator($app['files'], $app->basePath('stubs'));
-        });
+        $this->app->singleton('migration.creator', [self::class, 'getMigrationCreator']);
+    }
+
+    public static function getMigrationCreator($app)
+    {
+        return new MigrationCreator($app->make('files'), $app->basePath('stubs'));
     }
 
     /**
@@ -129,9 +139,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateCommand()
     {
-        $this->app->singleton(MigrateCommand::class, function ($app) {
-            return new MigrateCommand($app['migrator'], $app[Dispatcher::class]);
-        });
+        $this->app->singleton(MigrateCommand::class, [self::class, 'getMigrateCommand']);
+    }
+
+    public static function getMigrateCommand($app)
+    {
+        return new MigrateCommand($app->make('migrator'), $app->make(Dispatcher::class));
     }
 
     /**
@@ -151,9 +164,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateInstallCommand()
     {
-        $this->app->singleton(InstallCommand::class, function ($app) {
-            return new InstallCommand($app['migration.repository']);
-        });
+        $this->app->singleton(InstallCommand::class, [self::class, 'getMigrateInstallCommand']);
+    }
+
+    public static function getMigrateInstallCommand($app)
+    {
+        return new InstallCommand($app->make('migration.repository'));
     }
 
     /**
@@ -163,16 +179,15 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateMakeCommand()
     {
-        $this->app->singleton(MigrateMakeCommand::class, function ($app) {
-            // Once we have the migration creator registered, we will create the command
-            // and inject the creator. The creator is responsible for the actual file
-            // creation of the migrations, and may be extended by these developers.
-            $creator = $app['migration.creator'];
+        $this->app->singleton(MigrateMakeCommand::class, [self::class, 'getMigrateMakeCommand']);
+    }
 
-            $composer = $app['composer'];
-
-            return new MigrateMakeCommand($creator, $composer);
-        });
+    public static function getMigrateMakeCommand($app)
+    {
+        // Once we have the migration creator registered, we will create the command
+        // and inject the creator. The creator is responsible for the actual file
+        // creation of the migrations, and may be extended by these developers.
+        return new MigrateMakeCommand($app->make('migration.creator'), $app->make('composer'));
     }
 
     /**
@@ -192,9 +207,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateResetCommand()
     {
-        $this->app->singleton(ResetCommand::class, function ($app) {
-            return new ResetCommand($app['migrator']);
-        });
+        $this->app->singleton(ResetCommand::class, [self::class, 'getMigrateResetCommand']);
+    }
+
+    public static function getMigrateResetCommand($app)
+    {
+        return new ResetCommand($app->make('migrator'));
     }
 
     /**
@@ -204,9 +222,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateRollbackCommand()
     {
-        $this->app->singleton(RollbackCommand::class, function ($app) {
-            return new RollbackCommand($app['migrator']);
-        });
+        $this->app->singleton(RollbackCommand::class, [self::class, 'getMigrateRollbackCommand']);
+    }
+
+    public static function getMigrateRollbackCommand($app)
+    {
+        return new RollbackCommand($app->make('migrator'));
     }
 
     /**
@@ -216,9 +237,12 @@ class MigrationServiceProvider extends ServiceProvider implements DeferrableProv
      */
     protected function registerMigrateStatusCommand()
     {
-        $this->app->singleton(StatusCommand::class, function ($app) {
-            return new StatusCommand($app['migrator']);
-        });
+        $this->app->singleton(StatusCommand::class, [self::class, 'getMigrateStatusCommand']);
+    }
+
+    public static function getMigrateStatusCommand($app)
+    {
+        return new StatusCommand($app->make('migrator'));
     }
 
     /**

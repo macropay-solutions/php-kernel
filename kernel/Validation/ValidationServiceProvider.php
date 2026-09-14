@@ -15,54 +15,32 @@ class ValidationServiceProvider extends ServiceProvider implements DeferrablePro
      */
     public function register()
     {
-        $this->registerPresenceVerifier();
-        $this->registerUncompromisedVerifier();
-        $this->registerValidationFactory();
+        $this->app->singleton('validation.presence', [self::class, 'getValidationPresence']);
+
+        $this->app->singleton(UncompromisedVerifier::class, [self::class, 'getUncompromisedVerifier']);
+
+        $this->app->singleton('validator', [self::class, 'getValidator']);
     }
 
-    /**
-     * Register the validation factory.
-     *
-     * @return void
-     */
-    protected function registerValidationFactory()
+    public static function getValidationPresence($app)
     {
-        $this->app->singleton('validator', function ($app) {
-            $validator = new Factory($app['translator'], $app);
-
-            // The validation presence verifier is responsible for determining the existence of
-            // values in a given data collection which is typically a relational database or
-            // other persistent data stores. It is used to check for "uniqueness" as well.
-            if (isset($app['db'], $app['validation.presence'])) {
-                $validator->setPresenceVerifier($app['validation.presence']);
-            }
-
-            return $validator;
-        });
+        return new DatabasePresenceVerifier($app->make('db'));
     }
 
-    /**
-     * Register the database presence verifier.
-     *
-     * @return void
-     */
-    protected function registerPresenceVerifier()
+    public static function getUncompromisedVerifier($app)
     {
-        $this->app->singleton('validation.presence', function ($app) {
-            return new DatabasePresenceVerifier($app['db']);
-        });
+        return new NotPwnedVerifier($app->make(\GuzzleHttp\Client::class));
     }
 
-    /**
-     * Register the uncompromised password verifier.
-     *
-     * @return void
-     */
-    protected function registerUncompromisedVerifier()
+    public static function getValidator($app)
     {
-        $this->app->singleton(UncompromisedVerifier::class, function ($app) {
-            return new NotPwnedVerifier($app[\GuzzleHttp\Client::class]);
-        });
+        $validator = new Factory($app->make('translator'), $app);
+
+        if ($app->bound('db') && $app->bound('validation.presence')) {
+            $validator->setPresenceVerifier($app->make('validation.presence'));
+        }
+
+        return $validator;
     }
 
     /**
