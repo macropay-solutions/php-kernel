@@ -710,11 +710,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param string $abstract
+     * @param array $parameters
+     * @param bool $raiseEvents
+     * @return mixed
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function resolveString(string $abstract, array $parameters = [], bool $raiseEvents = true): mixed
+    protected function resolveString($abstract, $parameters = [], $raiseEvents = true)
     {
         if ($abstract === '') {
             throw new BindingResolutionException('Can\'t resolve empty string');
@@ -724,11 +728,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param string $abstract
+     * @param array $parameters
+     * @param bool $raiseEvents
+     * @return mixed
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function resolveFinalString(string $abstract, array $parameters, bool $raiseEvents = true): mixed
+    protected function resolveFinalString($abstract, $parameters, $raiseEvents = true)
     {
         // First we'll fire any event handlers which handle the "before" resolving of
         // specific types. This gives some hooks the chance to add various extends
