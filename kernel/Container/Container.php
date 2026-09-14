@@ -456,11 +456,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param string $abstract
+     * @param mixed $instance
+     * @param bool $resolve
+     * @return bool
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    public function isInInstances(string $abstract, mixed $instance, bool $resolve = true): bool
+    public function isInInstances(string $abstract, $instance, $resolve = true)
     {
         return $instance === ($this->instances[$abstract] ?? ($resolve ? $this->resolve($abstract) : null));
     }
@@ -559,8 +563,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Bind a new callback to an abstract's rebind event.
+     *
+     * @param string $abstract
+     * @param array $callback
+     * @return mixed
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     * @throws ReflectionException
      */
-    public function rebinding(string $abstract, array $callback): mixed
+    public function rebinding($abstract, $callback): mixed
     {
         $this->reboundCallbacks[$abstract = $this->getAlias($abstract)][] = $callback;
 
@@ -573,8 +584,16 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Refresh an instance on the given target and method.
+     *
+     * @param string $abstract
+     * @param \WeakReference $target
+     * @param string $method
+     * @return mixed
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     * @throws ReflectionException
      */
-    public function refresh(string $abstract, \WeakReference $target, string $method): mixed
+    public function refresh($abstract, \WeakReference $target, $method)
     {
         return $this->rebinding($abstract, [static function ($app, $instance) use ($target, $method) {
             $target->get()?->{$method}($instance);
@@ -627,7 +646,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
      */
-    public function makeWith($abstract, array $parameters = [])
+    public function makeWith($abstract, $parameters = [])
     {
         return $this->make($abstract, $parameters);
     }
@@ -682,7 +701,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Resolve the given type from the container.
      *
-     * @param string|callable $abstract
+     * @param string|callable|array $abstract
      * @param array $parameters
      * @param bool $raiseEvents
      * @return mixed
@@ -712,11 +731,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Resolve the given final string from the container without alias.
      *
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
-     * @throws \MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException
+     * @param string $abstract
+     * @param array $parameters
+     * @param $raiseEvents
+     * @return mixed
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function resolveWithoutAlias(string $abstract, array $parameters = [], $raiseEvents = true): mixed
+    protected function resolveWithoutAlias($abstract, $parameters = [], $raiseEvents = true)
     {
         if ($abstract === '') {
             throw new BindingResolutionException('Can\'t resolve empty string');
@@ -806,11 +829,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
+     * @param mixed $concrete
+     * @param array $parameters
+     * @param string $abstract
+     * @return mixed
      * @throws BindingResolutionException
      * @throws CircularDependencyException
      * @throws ReflectionException
      */
-    protected function handleObjectInstantiationLogic(mixed $concrete, array $parameters, string $abstract): mixed
+    protected function handleObjectInstantiationLogic($concrete, $parameters, $abstract)
     {
         if (static::$circularDependencyMemoryLimit > 0) {
             return $this->getObject($concrete, $this->isBuildable($concrete, $abstract), $abstract, $parameters);
@@ -913,11 +940,14 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Instantiate a concrete instance of the given type.
      *
+     * @param array|string $concrete
+     * @param array $parameters
+     * @return mixed
      * @throws \MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException
      * @throws \MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException
      * @throws ReflectionException
      */
-    public function build(array|string $concrete, array $parameters = []): mixed
+    public function build($concrete, $parameters = [])
     {
         if (\is_array($concrete)) {
             return $concrete($this, $parameters);
@@ -1042,7 +1072,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @param array $callbacks
      * @return void
      */
-    protected function fireBeforeCallbackArray($abstract, $parameters, array $callbacks)
+    protected function fireBeforeCallbackArray($abstract, $parameters, $callbacks)
     {
         foreach ($callbacks as $callback) {
             $callback($abstract, $parameters, $this);
@@ -1124,8 +1154,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Get all resolving callbacks for a given type.
+     *
+     * @param mixed $abstract
+     * @param mixed $object
+     * @return array
      */
-    protected function getResolvingCallbacksForType(mixed $abstract, mixed $object): array
+    protected function getResolvingCallbacksForType($abstract, $object)
     {
         if ([] === $this->resolvingCallbacks || !\is_string($abstract)) {
             return [];
@@ -1163,8 +1197,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Get all after resolving callbacks for a given type.
+     *
+     * @param mixed $abstract
+     * @param mixed $object
+     * @return array
      */
-    protected function getAfterResolvingCallbacksForType(mixed $abstract, mixed $object): array
+    protected function getAfterResolvingCallbacksForType($abstract, $object)
     {
         if ([] === $this->afterResolvingCallbacks || !\is_string($abstract)) {
             return [];
@@ -1207,7 +1245,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      * @param array $callbacks
      * @return void
      */
-    protected function fireCallbackArray($object, array $callbacks)
+    protected function fireCallbackArray($object, $callbacks)
     {
         foreach ($callbacks as $callback) {
             $callback($object, $this);
