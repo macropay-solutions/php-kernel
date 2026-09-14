@@ -140,16 +140,16 @@ interface Container extends ContainerInterface
     /**
      * Register a new before resolving callback.
      */
-    public function beforeResolving(array|string $abstract, array|null $callback = null): void;
+    public function beforeResolving(array|string $abstract, callable|null $callback = null): void;
 
     /**
      * Register a new resolving callback.
      */
-    public function resolving(array|string $abstract, array|null $callback = null): void;
+    public function resolving(array|string $abstract, callable|null $callback = null): void;
 
     /**
      * Register a new after resolving callback.
      * @return void
      */
-    public function afterResolving(array|string $abstract, array|null $callback = null): void;
+    public function afterResolving(array|string $abstract, callable|null $callback = null): void;
 }

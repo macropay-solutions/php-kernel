@@ -930,7 +930,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Register a new before resolving callback for all types.
      */
-    public function beforeResolving(array|string $abstract, array|null $callback = null): void
+    public function beforeResolving(array|string $abstract, callable|null $callback = null): void
     {
         $abstract = $this->getAlias($abstract);
 
@@ -946,7 +946,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * Note that the execution speed decreases with the increase of resolvingCallbacks !!!
      */
-    public function resolving(array|string $abstract, array|null $callback = null): void
+    public function resolving(array|string $abstract, callable|null $callback = null): void
     {
         $abstract = $this->getAlias($abstract);
 
@@ -962,7 +962,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * Note that the execution speed decreases with the increase of resolvingCallbacks !!!
      */
-    public function afterResolving(array|string $abstract, array|null $callback = null): void
+    public function afterResolving(array|string $abstract, callable|null $callback = null): void
     {
         $abstract = $this->getAlias($abstract);
 
