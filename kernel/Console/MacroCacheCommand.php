@@ -58,8 +58,12 @@ class MacroCacheCommand extends Command
         $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;
         $classMap = require $this->app->basePath('vendor/composer/autoload_classmap.php');
 
-        $count = 0;
-        $skipped = 0;
+        $count = [
+            'totalMacros' => 0,
+            'totalCompiledTraits' => 0,
+            'totalCompiledEmptyTraits' => 0,
+            'skippedDueToErrors' => 0,
+        ];
 
         foreach (\array_keys(\array_diff_key($classMap, [$macroableInterface => true])) as $class) {
             if (
@@ -81,7 +85,7 @@ class MacroCacheCommand extends Command
                 $reflector = new \ReflectionClass($class);
             } catch (\ReflectionException $e) {
                 $this->warn("Failed to reflect class {$class}: {$e->getMessage()}");
-                $skipped++;
+                $count['skippedDueToErrors']++;
 
                 continue;
             }
@@ -98,41 +102,34 @@ class MacroCacheCommand extends Command
                 $macros = $reflector->getStaticPropertyValue('macros', []);
             } catch (\ReflectionException $e) {
                 $this->warn("Cannot access macros property on {$class}: {$e->getMessage()}");
-                $skipped++;
+                $count['skippedDueToErrors']++;
 
                 continue;
             } catch (\Throwable $e) {
                 $this->error("Unexpected error accessing macros on {$class}: {$e->getMessage()}");
-                $skipped++;
+                $count['skippedDueToErrors']++;
 
-                continue;
-            }
-
-            if ([] === $macros) {
                 continue;
             }
 
             try {
-                $this->compileTrait($class, $macros, $cacheDir);
-
-                $count++;
+                $number = $this->compileTrait($class, $macros, $cacheDir);
+                $count['totalMacros'] += $number;
+                $count['totalCompiledTraits'] += (int)(bool)$number;
+                $count['totalCompiledEmptyTraits'] += (int)($number === 0);
             } catch (\Throwable $e) {
                 $this->error("Failed to compile trait for {$class}: {$e->getMessage()}");
-                $skipped++;
+                $count['skippedDueToErrors']++;
             }
         }
 
-        $this->info("Macro traits compiled successfully for {$count} classes.");
-
-        if ($skipped > 0) {
-            $this->warn("Skipped {$skipped} classes due to errors.");
-        }
+        $this->info('Macros compiled successfully: ' . \json_encode($count));
     }
 
     /**
      * @throws \Exception
      */
-    protected function compileTrait(string $class, array $macros, string $cacheDir): void
+    protected function compileTrait(string $class, array $macros, string $cacheDir): int
     {
         $shortTraitName = \str_replace('\\', '', $class);
         $methods = [];
@@ -206,11 +203,7 @@ PHP;
 PHP;
         }
 
-        if ([] === $methods) {
-            throw new \Exception("No valid macros found for {$class}");
-        }
-
-        $methodsCode = \implode("\n\n", $methods);
+        $methodsCode = [] === $methods ? '' : \implode("\n\n", $methods);
 
         $content = <<<PHP
 <?php
@@ -233,6 +226,8 @@ PHP;
         } catch (\Throwable $e) {
             throw new \RuntimeException("Failed to write trait file {$traitPath}: {$e->getMessage()}", 0, $e);
         }
+        
+        return \count($methods);
     }
 
     /**
