@@ -50,7 +50,7 @@ class BoundMethod
     ): array {
         return static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ??= (
             static function (string $class, string $method): array {
-                $cacheClass = self::MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS . \str_replace('\\', '', $class);
+                $cacheClass = self::MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS . self::getHashedAutowireClass($class);
 
                 if (\class_exists($cacheClass)) {
                     static::$precompiledAutoWiringClassMethodParametersMap[$class] = $cacheClass::MAP ?? [];
@@ -443,5 +443,10 @@ class BoundMethod
         }
 
         return static::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod($classFqn, $method);
+    }
+
+    public static function getHashedAutowireClass(string $class): string
+    {
+        return 'Class_' . \hash('sha256', \ltrim($class, '\\'));
     }
 }

@@ -64,7 +64,7 @@ class AutowiringMethodsCacheCommand extends Command
                 continue;
             }
 
-            $safeClassName = \str_replace('\\', '', $fqn);
+            $safeClassName = BoundMethod::getHashedAutowireClass($fqn);
 
             $exportedArray = \var_export($methods, true);
 
