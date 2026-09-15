@@ -60,6 +60,10 @@ class AutowiringMethodsCacheCommand extends Command
         $this->files->ensureDirectoryExists($cacheDir);
 
         foreach ($this->getMap() as $fqn => $methods) {
+            if (\str_contains($fqn, "\0") || \str_contains($fqn, '@anonymous')) {
+                continue;
+            }
+
             $safeClassName = \str_replace('\\', '', $fqn);
 
             $exportedArray = \var_export($methods, true);
