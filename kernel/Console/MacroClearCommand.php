@@ -41,7 +41,7 @@ class MacroClearCommand extends Command
      */
     public function handle(): void
     {
-        $this->files->deleteDirectory($this->app->bootstrapPath('cache/traitables'));
+        $this->files->deleteDirectory($this->app->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'traitables'));
 
         $this->info('Macro traits cache cleared successfully.');
     }

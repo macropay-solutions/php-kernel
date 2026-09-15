@@ -55,9 +55,34 @@ class AutowiringMethodsCacheCommand extends Command
             }
         }
 
+        $cacheDir = $this->app->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'autowiring');
+
+        $this->files->ensureDirectoryExists($cacheDir);
+
+        foreach ($this->getMap() as $fqn => $methods) {
+            $safeClassName = \str_replace('\\', '', $fqn);
+
+            $exportedArray = \var_export($methods, true);
+
+            $phpContent = <<<PHP
+<?php
+
+namespace MacropaySolutions\Framework\Autowiring;
+
+class {$safeClassName}
+{
+    public const MAP = {$exportedArray};
+}
+PHP;
+
+            \file_put_contents($cacheDir . DIRECTORY_SEPARATOR . $safeClassName . '.php', $phpContent);
+        }
+
         \file_put_contents(
             $this->app->getCachedAutowiringPath(),
-            '<?php return ' . \var_export($this->getMap(), true) . ';'
+            '<?php return [
+    \MacropaySolutions\Kernel\Container\BoundMethod::MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS => true
+];'
         );
 
         if ([] !== $this->app::getAbstractToTypeOfResolvingCallbacksEventsAsKeys()) {

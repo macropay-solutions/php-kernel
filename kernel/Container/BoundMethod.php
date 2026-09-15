@@ -11,6 +11,8 @@ use ReflectionMethod;
 
 class BoundMethod
 {
+    public const MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS = '\\MacropaySolutions\\Framework\\Autowiring\\';
+
     /**
      * [
      *   '{classFqn}' => [
@@ -46,11 +48,16 @@ class BoundMethod
         string $class,
         string $method
     ): array {
-        return Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP)[$class][$method] ??
-            (static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ??= (static function (
-                string $class,
-                string $method
-            ): array {
+        return static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ??= (
+            static function (string $class, string $method): array {
+                $cacheClass = self::MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS . \str_replace('\\', '', $class);
+
+                if (\class_exists($cacheClass)) {
+                    static::$precompiledAutoWiringClassMethodParametersMap[$class] = $cacheClass::MAP ?? [];
+
+                    return static::$precompiledAutoWiringClassMethodParametersMap[$class][$method] ?? [];
+                }
+
                 if (!\class_exists($class) || !\in_array($method, \get_class_methods($class) ?? [], true)) {
                     return [];
                 }
@@ -62,7 +69,8 @@ class BoundMethod
                 }
 
                 return $parameters;
-            })($class, $method));
+            }
+        )($class, $method);
     }
 
 
@@ -215,9 +223,7 @@ class BoundMethod
             if (
                 \is_string($classFqn)
                 && \is_string($method)
-                && \is_array($a = (Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP) ?? [])[
-                    $classFqn = \ltrim($classFqn, '\\')
-                ][$method] ?? static::$precompiledAutoWiringClassMethodParametersMap[$classFqn][$method] ?? null)
+                && \is_array($a = self::getAutowiringCache($classFqn, $method))
             ) {
                 foreach ($a as $name => $map) {
                     static::addDependencyWithoutReflectionForCallParameter(
@@ -270,7 +276,7 @@ class BoundMethod
 
     /**
      * @throws BindingResolutionException
-     * @see Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP) &
+     * @see BoundMethod::getAutowiringCache() &
      *    static::$precompiledAutoWiringClassMethodParametersMap for $parameterMap
      *   [
      *     'c' => string, // can not exist
@@ -423,5 +429,19 @@ class BoundMethod
     protected static function isCallableWithAtSign($callback)
     {
         return is_string($callback) && str_contains($callback, '@');
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    public static function getAutowiringCache(string $classFqn, string $method): ?array
+    {
+        $nameSpace = Container::getCachedFileContentsFromMemory(Container::AUTOWIRING_PHP);
+
+        if ($nameSpace === null || !($nameSpace[self::MACROPAY_SOLUTIONS_FRAMEWORK_AUTOWIRING_NS] ?? false)) {
+            return null;
+        }
+
+        return static::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod($classFqn, $method);
     }
 }

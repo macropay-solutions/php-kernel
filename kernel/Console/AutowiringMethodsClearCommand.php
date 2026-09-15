@@ -44,6 +44,8 @@ class AutowiringMethodsClearCommand extends Command
         $this->files->delete($this->app->getCachedAutowiringPath());
         $this->files->delete($this->app->getCachedAbstractToTypeOfResolvingCallbacksEventsAsKeysPath());
 
+        $this->files->deleteDirectory($this->app->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'autowiring'));
+
         $this->app::setBootstrapCacheFiles($this->app->bootstrapPath('cache'));
 
         $this->info('Autowiring cache cleared successfully.');
