@@ -611,7 +611,7 @@ abstract class Model implements
     /**
      * Create a new model instance that is existing.
      */
-    public function newFromBuilder(array $attributes = [], ?string $connection = null): static
+    public function newFromBuilder(array | \stdClass $attributes = [], ?string $connection = null): static
     {
         $model = $this->newInstance([], true);
 
