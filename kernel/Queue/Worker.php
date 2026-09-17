@@ -66,13 +66,6 @@ class Worker
     protected $exceptions;
 
     /**
-     * The callback used to determine if the application is in maintenance mode.
-     *
-     * @var callable
-     */
-    protected $isDownForMaintenance;
-
-    /**
      * The callback used to reset the application's scope.
      *
      * @var callable
@@ -114,7 +107,6 @@ class Worker
      * @param \MacropaySolutions\Kernel\Contracts\Queue\Factory $manager
      * @param \MacropaySolutions\Kernel\Contracts\Events\Dispatcher $events
      * @param \MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler $exceptions
-     * @param callable $isDownForMaintenance
      * @param callable|null $resetScope
      * @return void
      */
@@ -122,13 +114,11 @@ class Worker
         QueueManager $manager,
         Dispatcher $events,
         ExceptionHandler $exceptions,
-        callable $isDownForMaintenance,
         ?callable $resetScope = null
     ) {
         $this->events = $events;
         $this->manager = $manager;
         $this->exceptions = $exceptions;
-        $this->isDownForMaintenance = $isDownForMaintenance;
         $this->resetScope = $resetScope;
     }
 
@@ -183,7 +173,7 @@ class Worker
                 $this->registerTimeoutHandler($job, $options);
             }
 
-            // If the daemon should run (not in maintenance mode, etc.), then we can run
+            // If the daemon should run, then we can run
             // fire off this job for processing. Otherwise, we will need to sleep the
             // worker so no more jobs are processed until they should be processed.
             if ($job) {
@@ -302,9 +292,10 @@ class Worker
      */
     protected function daemonShouldRun(WorkerOptions $options, $connectionName, $queue)
     {
-        return !((($this->isDownForMaintenance)() && !$options->force) ||
+        return !(
             $this->paused ||
-            $this->events->until(new Looping($connectionName, $queue)) === false);
+            $this->events->until(new Looping($connectionName, $queue)) === false
+        );
     }
 
     /**

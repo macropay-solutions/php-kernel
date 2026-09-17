@@ -23,7 +23,6 @@ class ListenCommand extends Command
         {--name=default : The name of the worker}
         {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
         {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
-        {--force : Force the worker to run even in maintenance mode}
         {--memory=128 : The memory limit in megabytes}
         {--queue= : The queue to listen on}
         {--sleep=3 : Number of seconds to sleep when no job is available}
@@ -114,7 +113,6 @@ class ListenCommand extends Command
             timeout: $this->option('timeout'),
             sleep: $this->option('sleep'),
             maxTries: $this->option('tries'),
-            force: $this->option('force'),
             rest: $this->option('rest')
         );
     }

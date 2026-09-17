@@ -38,7 +38,6 @@ class WorkCommand extends Command
         {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
         {--max-jobs=0 : The number of jobs to process before stopping}
         {--max-time=0 : The maximum number of seconds the worker should run}
-        {--force : Force the worker to run even in maintenance mode}
         {--memory=128 : The memory limit in megabytes}
         {--sleep=3 : Number of seconds to sleep when no job is available}
         {--rest=0 : Number of seconds to rest between jobs}
@@ -96,12 +95,6 @@ class WorkCommand extends Command
      */
     public function handle()
     {
-        if ($this->downForMaintenance() && $this->option('once')) {
-            $this->worker->sleep($this->option('sleep'));
-
-            return null;
-        }
-
         // We'll listen to the processed and failed events so we can write information
         // to the console as jobs are processed, which will let the developer watch
         // which jobs are coming through a queue and be informed on its progress.
@@ -158,7 +151,6 @@ class WorkCommand extends Command
             $this->option('timeout'),
             $this->option('sleep'),
             (int)$this->option('tries'),
-            $this->option('force'),
             $this->option('stop-when-empty'),
             $this->option('max-jobs'),
             $this->option('max-time'),
@@ -313,15 +305,5 @@ class WorkCommand extends Command
             "queue.connections.{$connection}.queue",
             'default'
         );
-    }
-
-    /**
-     * Determine if the worker should run in maintenance mode.
-     *
-     * @return bool
-     */
-    protected function downForMaintenance()
-    {
-        return $this->option('force') ? false : $this->app->isDownForMaintenance();
     }
 }

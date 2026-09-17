@@ -74,7 +74,8 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * The container's bindings.
      *
-     * @see Application::registerContainerAliases() to handle alias changes if impacted by additions here
+     * @see Application::aliases to handle alias changes if impacted by additions here
+     * @see Application::abstractAliases to handle alias changes if impacted by additions here
      * @var array[]
      */
     protected array $bindings = [
@@ -110,14 +111,14 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * @var string[]
      */
-    protected $aliases = [];
+    protected array $aliases = [];
 
     /**
      * The registered aliases keyed by the abstract name.
      *
      * @var array[]
      */
-    protected $abstractAliases = [];
+    protected array $abstractAliases = [];
 
     /**
      * @var string[]

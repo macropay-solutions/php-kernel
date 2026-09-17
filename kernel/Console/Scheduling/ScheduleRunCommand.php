@@ -229,8 +229,6 @@ class ScheduleRunCommand extends Command
      */
     protected function repeatEvents($events)
     {
-        $hasEnteredMaintenanceMode = false;
-
         $endOfMinute = $this->startedAt->copy()->endOfMinute();
 
         while (\appDate()->now()->lte($endOfMinute)) {
@@ -245,12 +243,6 @@ class ScheduleRunCommand extends Command
 
                 if (\appDate()->now()->gt($endOfMinute)) {
                     return;
-                }
-
-                $hasEnteredMaintenanceMode = $hasEnteredMaintenanceMode || $this->app->isDownForMaintenance();
-
-                if ($hasEnteredMaintenanceMode && !$event->runsInMaintenanceMode()) {
-                    continue;
                 }
 
                 if (!$event->filtersPass($this->app)) {

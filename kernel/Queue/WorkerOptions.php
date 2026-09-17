@@ -15,7 +15,6 @@ class WorkerOptions
         public int $timeout = 60,
         public int $sleep = 3,
         public int $maxTries = 1,
-        public bool $force = false,
         public bool $stopWhenEmpty = false,
         public int $maxJobs = 0,
         public int $maxTime = 0,

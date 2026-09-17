@@ -107,20 +107,6 @@ interface Application extends Container
     public function hasDebugModeEnabled();
 
     /**
-     * Get an instance of the maintenance mode manager implementation.
-     *
-     * @return \MacropaySolutions\Kernel\Contracts\Foundation\MaintenanceMode
-     */
-    public function maintenanceMode();
-
-    /**
-     * Determine if the application is currently down for maintenance.
-     *
-     * @return bool
-     */
-    public function isDownForMaintenance();
-
-    /**
      * Register a service provider with the application.
      *
      * @param \MacropaySolutions\Kernel\Support\ServiceProvider|string $provider

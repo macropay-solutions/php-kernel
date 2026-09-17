@@ -81,7 +81,6 @@ class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
             $app->make('queue'),
             $app->make('events'),
             $app->make(ExceptionHandler::class),
-            [$app, 'isDownForMaintenance'],
             $resetScope,
         ]);
     }

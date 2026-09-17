@@ -21,7 +21,6 @@ class ListenerOptions extends WorkerOptions
      * @param int $timeout
      * @param int $sleep
      * @param int $maxTries
-     * @param bool $force
      * @param int $rest
      * @return void
      */
@@ -33,11 +32,10 @@ class ListenerOptions extends WorkerOptions
         $timeout = 60,
         $sleep = 3,
         $maxTries = 1,
-        $force = false,
         $rest = 0
     ) {
         $this->environment = $environment;
 
-        parent::__construct($name, $backoff, $memory, $timeout, $sleep, $maxTries, $force, false, 0, 0, $rest);
+        parent::__construct($name, $backoff, $memory, $timeout, $sleep, $maxTries, false, 0, 0, $rest);
     }
 }

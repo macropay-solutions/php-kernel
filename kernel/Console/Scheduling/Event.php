@@ -9,10 +9,10 @@ use GuzzleHttp\Exception\TransferException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Mail\Mailer;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Reflector;
 use MacropaySolutions\Kernel\Support\Stringable;
-use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Process\Process;
@@ -63,13 +63,6 @@ class Event implements Macroable
      * @var array
      */
     public $environments = [];
-
-    /**
-     * Indicates if the command should run in maintenance mode.
-     *
-     * @var bool
-     */
-    public $evenInMaintenanceMode = false;
 
     /**
      * Indicates if the command should not overlap itself.
@@ -353,22 +346,8 @@ class Event implements Macroable
      */
     public function isDue($app)
     {
-        if (!$this->runsInMaintenanceMode() && $app->isDownForMaintenance()) {
-            return false;
-        }
-
         return $this->expressionPasses() &&
             $this->runsInEnvironment($app->environment());
-    }
-
-    /**
-     * Determine if the event runs in maintenance mode.
-     *
-     * @return bool
-     */
-    public function runsInMaintenanceMode()
-    {
-        return $this->evenInMaintenanceMode;
     }
 
     /**
@@ -674,18 +653,6 @@ class Event implements Macroable
     public function environments($environments)
     {
         $this->environments = is_array($environments) ? $environments : func_get_args();
-
-        return $this;
-    }
-
-    /**
-     * State that the command should run even in maintenance mode.
-     *
-     * @return $this
-     */
-    public function evenInMaintenanceMode()
-    {
-        $this->evenInMaintenanceMode = true;
 
         return $this;
     }
