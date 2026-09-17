@@ -330,6 +330,10 @@ class Application extends Container implements ApplicationContract
             'concrete' => [self::class, 'getUrlGenerator'],
             'shared' => true
         ],
+        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => [
+            'concrete' => [self::class, 'getGate'],
+            'shared' => true
+        ],
     ];
 
     /**
@@ -340,7 +344,7 @@ class Application extends Container implements ApplicationContract
         'auth.driver' => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Auth\AuthManager::class => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Contracts\Auth\Guard::class => 'registerAuthBindings',
-        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerGateAuthBindings',
+        \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class => 'registerBusBindings',
@@ -609,21 +613,6 @@ class Application extends Container implements ApplicationContract
     {
         $this->configure('auth');
         $this->register(AuthServiceProvider::class);
-    }
-
-    /**
-     * Register container bindings for the application.
-     *
-     * @return void
-     */
-    protected function registerGateAuthBindings()
-    {
-        if (!isset($this->ranServiceBinders['registerAuthBindings'])) {
-            $this->registerAuthBindings();
-            $this->ranServiceBinders['registerAuthBindings'] = true;
-        }
-
-        $this->singleton(\MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class, [self::class, 'getGate']);
     }
 
     public static function getGate($app)
