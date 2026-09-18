@@ -11,7 +11,9 @@ use MacropaySolutions\Kernel\Bus\BusServiceProvider;
 use MacropaySolutions\Kernel\Cache\CacheServiceProvider;
 use MacropaySolutions\Kernel\Config\Repository as ConfigRepository;
 use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Container\EntryNotFoundException;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
+use MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException;
 use MacropaySolutions\Kernel\Contracts\Foundation\Application as ApplicationContract;
 use MacropaySolutions\Kernel\Cookie\CookieServiceProvider;
 use MacropaySolutions\Kernel\Database\DatabaseServiceProvider;
@@ -547,6 +549,23 @@ class Application extends Container implements ApplicationContract
     public function make($abstract, array $parameters = [])
     {
         return parent::make($this->handleDeferredProvidersAndReturnAlias($abstract), $parameters);
+    }
+
+    /**
+     * @throws CircularDependencyException
+     * @throws EntryNotFoundException
+     */
+    public function get(string $id): mixed
+    {
+        try {
+            return $this->make($id);
+        } catch (\Exception $e) {
+            if ($this->has($id) || $e instanceof CircularDependencyException) {
+                throw $e;
+            }
+
+            throw new EntryNotFoundException($id, is_int($e->getCode()) ? $e->getCode() : 0, $e);
+        }
     }
 
     /**
