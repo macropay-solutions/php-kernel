@@ -31,7 +31,7 @@ class ClearResetsCommand extends Command
      */
     public function handle()
     {
-        $this->app['auth.password']->broker($this->argument('name'))->getRepository()->deleteExpired();
+        $this->app->make('auth.password')->broker($this->argument('name'))->getRepository()->deleteExpired();
 
         $this->info('Expired reset tokens cleared successfully.');
     }

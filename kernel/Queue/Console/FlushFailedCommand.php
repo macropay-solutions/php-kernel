@@ -31,7 +31,7 @@ class FlushFailedCommand extends Command
      */
     public function handle()
     {
-        $this->app['queue.failer']->flush($this->option('hours'));
+        $this->app->make('queue.failer')->flush($this->option('hours'));
 
         if ($this->option('hours')) {
             $this->info(

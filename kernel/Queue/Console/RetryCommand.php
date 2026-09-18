@@ -45,16 +45,16 @@ class RetryCommand extends Command
         }
 
         foreach ($ids as $id) {
-            $job = $this->app['queue.failer']->find($id);
+            $job = $this->app->make('queue.failer')->find($id);
 
             if (is_null($job)) {
                 $this->error("Unable to find failed job with ID [{$id}].");
             } else {
-                $this->app['events']->dispatch(new JobRetryRequested($job));
+                $this->app->make('events')->dispatch(new JobRetryRequested($job));
 
                 $this->task($id, fn() => $this->retryJob($job));
 
-                $this->app['queue.failer']->forget($id);
+                $this->app->make('queue.failer')->forget($id);
             }
         }
 
@@ -71,7 +71,7 @@ class RetryCommand extends Command
         $ids = (array)$this->argument('id');
 
         if (count($ids) === 1 && $ids[0] === 'all') {
-            $failer = $this->app['queue.failer'];
+            $failer = $this->app->make('queue.failer');
 
             return method_exists($failer, 'ids')
                 ? $failer->ids()
@@ -97,7 +97,7 @@ class RetryCommand extends Command
      */
     protected function getJobIdsByQueue($queue)
     {
-        $failer = $this->app['queue.failer'];
+        $failer = $this->app->make('queue.failer');
 
         $ids = method_exists($failer, 'ids')
             ? $failer->ids($queue)
@@ -140,9 +140,9 @@ class RetryCommand extends Command
      */
     protected function retryJob($job)
     {
-        $queue = $this->app['queue']->connection($job->connection);
+        $queue = $this->app->make('queue')->connection($job->connection);
 
-        $this->app['queue']->connection($job->connection)->pushRaw(
+        $this->app->make('queue')->connection($job->connection)->pushRaw(
             $this->refreshRetryUntil($this->resetAttempts($job->payload)),
             $job->queue,
             $this->getQueueableOptions($queue, $job)

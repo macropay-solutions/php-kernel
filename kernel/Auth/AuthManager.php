@@ -129,23 +129,23 @@ class AuthManager implements FactoryContract
 //        $guard = new SessionGuard(
 //            $name,
 //            $provider,
-//            $this->app['session.store'],
+//            $this->app->make('session.store'),
 //        );
         $guard = \di(SessionGuard::class, [
             $name,
             $provider,
-            $this->app['session.store'],
+            $this->app->make('session.store'),
         ]);
 
         // When using the remember me functionality of the authentication services we
         // will need to be set the encryption instance of the guard, which allows
         // secure, encrypted cookie values to get generated for those cookies.
         if (method_exists($guard, 'setCookieJar')) {
-            $guard->setCookieJar($this->app['cookie']);
+            $guard->setCookieJar($this->app->make('cookie'));
         }
 
         if (method_exists($guard, 'setDispatcher')) {
-            $guard->setDispatcher($this->app['events']);
+            $guard->setDispatcher($this->app->make('events'));
         }
 
         if (method_exists($guard, 'setRequest')) {
@@ -173,7 +173,7 @@ class AuthManager implements FactoryContract
         // user in the database or another persistence layer where users are.
         $guard = new TokenGuard(
             $this->createUserProvider($config['provider'] ?? null),
-            $this->app['request'],
+            $this->app->make('request'),
             $config['input_key'] ?? 'api_token',
             $config['storage_key'] ?? 'api_token',
             $config['hash'] ?? false
@@ -192,7 +192,7 @@ class AuthManager implements FactoryContract
      */
     protected function getConfig($name)
     {
-        return $this->app['config']["auth.guards.{$name}"];
+        return $this->app->make('config')->get("auth.guards.{$name}");
     }
 
     /**
@@ -202,7 +202,7 @@ class AuthManager implements FactoryContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['auth.defaults.guard'];
+        return $this->app->make('config')->get('auth.defaults.guard');
     }
 
     /**
@@ -228,7 +228,7 @@ class AuthManager implements FactoryContract
      */
     public function setDefaultDriver($name)
     {
-        $this->app['config']['auth.defaults.guard'] = $name;
+        $this->app->make('config')->set('auth.defaults.guard', $name);
     }
 
     /**
@@ -241,7 +241,7 @@ class AuthManager implements FactoryContract
     public function viaRequest($driver, callable $callback)
     {
         return $this->extend($driver, function () use ($callback) {
-            //$guard = new RequestGuard($callback, $this->app['request'], $this->createUserProvider());
+            //$guard = new RequestGuard($callback, $this->app->make('request'), $this->createUserProvider());
             $guard = \di(RequestGuard::class, [$callback, $this->app->make('request'), $this->createUserProvider()]);
 
             $this->app->refresh('request', \WeakReference::create($guard), 'setRequest');

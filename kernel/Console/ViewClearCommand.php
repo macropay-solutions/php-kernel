@@ -54,13 +54,13 @@ class ViewClearCommand extends Command
      */
     public function handle()
     {
-        $path = $this->app['config']['view.compiled'];
+        $path = $this->app->make('config')->get('view.compiled');
 
         if (!$path) {
             throw new RuntimeException('View path not found.');
         }
 
-        $this->app['view.engine.resolver']
+        $this->app->make('view.engine.resolver')
             ->resolve('template')
             ->forgetCompiledOrNotExpired();
 

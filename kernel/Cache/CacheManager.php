@@ -146,7 +146,7 @@ class CacheManager implements FactoryContract
     protected function createFileDriver(array $config)
     {
         return $this->repository(
-            (new FileStore($this->app['files'], $config['path'], $config['permission'] ?? null))
+            (new FileStore($this->app->make('files'), $config['path'], $config['permission'] ?? null))
                 ->setLockDirectory($config['lock_path'] ?? null)
         );
     }
@@ -161,7 +161,7 @@ class CacheManager implements FactoryContract
     {
         $prefix = $this->getPrefix($config);
 
-        $memcached = $this->app['memcached.connector']->connect(
+        $memcached = $this->app->make('memcached.connector')->connect(
             $config['servers'],
             $config['persistent_id'] ?? null,
             $config['options'] ?? [],
@@ -189,7 +189,7 @@ class CacheManager implements FactoryContract
      */
     protected function createRedisDriver(array $config)
     {
-        $redis = $this->app['redis'];
+        $redis = $this->app->make('redis');
 
         $connection = $config['connection'] ?? 'default';
 
@@ -208,7 +208,7 @@ class CacheManager implements FactoryContract
      */
     protected function createDatabaseDriver(array $config)
     {
-        $connection = $this->app['db']->connection($config['connection'] ?? null);
+        $connection = $this->app->make('db')->connection($config['connection'] ?? null);
 
         $store = new DatabaseStore(
             $connection,
@@ -221,7 +221,7 @@ class CacheManager implements FactoryContract
 
         return $this->repository(
             $store->setLockConnection(
-                $this->app['db']->connection($config['lock_connection'] ?? $config['connection'] ?? null)
+                $this->app->make('db')->connection($config['lock_connection'] ?? $config['connection'] ?? null)
             )
         );
     }
@@ -301,7 +301,7 @@ class CacheManager implements FactoryContract
         }
 
         $repository->setEventDispatcher(
-            $this->app[DispatcherContract::class]
+            $this->app->make(DispatcherContract::class)
         );
     }
 
@@ -323,7 +323,7 @@ class CacheManager implements FactoryContract
      */
     protected function getPrefix(array $config)
     {
-        return $config['prefix'] ?? $this->app['config']['cache.prefix'];
+        return $config['prefix'] ?? $this->app->make('config')->get('cache.prefix');
     }
 
     /**
@@ -335,7 +335,7 @@ class CacheManager implements FactoryContract
     protected function getConfig($name)
     {
         if (!is_null($name) && $name !== 'null') {
-            return $this->app['config']["cache.stores.{$name}"];
+            return $this->app->make('config')->get("cache.stores.{$name}");
         }
 
         return ['driver' => 'null'];
@@ -348,7 +348,7 @@ class CacheManager implements FactoryContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['cache.default'];
+        return $this->app->make('config')->get('cache.default');
     }
 
     /**
@@ -359,7 +359,7 @@ class CacheManager implements FactoryContract
      */
     public function setDefaultDriver($name)
     {
-        $this->app['config']['cache.default'] = $name;
+        $this->app->make('config')->set('cache.default', $name);
     }
 
     /**

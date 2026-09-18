@@ -74,6 +74,11 @@ class WorkCommand extends Command
     protected $latestStartedAt;
 
     /**
+     * The currently active command instance for static event listeners.
+     */
+    protected static WorkCommand $activeInstance = null;
+
+    /**
      * Create a new queue work command.
      *
      * @param \MacropaySolutions\Kernel\Queue\Worker $worker
@@ -101,7 +106,7 @@ class WorkCommand extends Command
         $this->listenForEvents();
 
         $connection = $this->argument('connection')
-            ?: $this->app['config']['queue.default'];
+            ?: $this->app->make('config')->get('queue.default');
 
         // We need to get the right queue for the connection which is set in the queue
         // configuration file for the application. We will pull it based on the set
@@ -166,23 +171,47 @@ class WorkCommand extends Command
      */
     protected function listenForEvents()
     {
-        $this->app['events']->listen(JobProcessing::class, function ($event) {
-            $this->writeOutput($event->job, 'starting');
-        });
+        static::$activeInstance = $this;
 
-        $this->app['events']->listen(JobProcessed::class, function ($event) {
-            $this->writeOutput($event->job, 'success');
-        });
+        $events = $this->app->make('events');
+        
+        $events->listen(JobProcessing::class, [self::class, 'onJobProcessing']);
+        $events->listen(JobProcessed::class, [self::class, 'onJobProcessed']);
+        $events->listen(JobReleasedAfterException::class, [self::class, 'onJobReleasedAfterException']);
+        $events->listen(JobFailed::class, [self::class, 'onJobFailed']);
+    }
 
-        $this->app['events']->listen(JobReleasedAfterException::class, function ($event) {
-            $this->writeOutput($event->job, 'released_after_exception');
-        });
+    /**
+     * Handle the JobProcessing event.
+     */
+    public static function onJobProcessing($event): void
+    {
+        static::$activeInstance?->writeOutput($event->job, 'starting');
+    }
 
-        $this->app['events']->listen(JobFailed::class, function ($event) {
-            $this->writeOutput($event->job, 'failed');
+    /**
+     * Handle the JobProcessed event.
+     */
+    public static function onJobProcessed($event): void
+    {
+        static::$activeInstance?->writeOutput($event->job, 'success');
+    }
 
-            $this->logFailedJob($event);
-        });
+    /**
+     * Handle the JobReleasedAfterException event.
+     */
+    public static function onJobReleasedAfterException($event): void
+    {
+        static::$activeInstance?->writeOutput($event->job, 'released_after_exception');
+    }
+
+    /**
+     * Handle the JobFailed event.
+     */
+    public static function onJobFailed($event): void
+    {
+        static::$activeInstance?->writeOutput($event->job, 'failed');
+        static::$activeInstance?->logFailedJob($event);
     }
 
     /**
@@ -250,11 +279,11 @@ class WorkCommand extends Command
      */
     protected function now()
     {
-        $queueTimezone = $this->app['config']->get('queue.output_timezone');
+        $queueTimezone = $this->app->make('config')->get('queue.output_timezone');
 
         if (
             $queueTimezone &&
-            $queueTimezone !== $this->app['config']->get('app.timezone')
+            $queueTimezone !== $this->app->make('config')->get('app.timezone')
         ) {
             return Carbon::now()->setTimezone($queueTimezone);
         }
@@ -285,7 +314,7 @@ class WorkCommand extends Command
      */
     protected function logFailedJob(JobFailed $event)
     {
-        $this->app['queue.failer']->log(
+        $this->app->make('queue.failer')->log(
             $event->connectionName,
             $event->job->getQueue(),
             $event->job->getRawBody(),
@@ -301,7 +330,7 @@ class WorkCommand extends Command
      */
     protected function getQueue($connection)
     {
-        return $this->option('queue') ?: $this->app['config']->get(
+        return $this->option('queue') ?: $this->app->make('config')->get(
             "queue.connections.{$connection}.queue",
             'default'
         );

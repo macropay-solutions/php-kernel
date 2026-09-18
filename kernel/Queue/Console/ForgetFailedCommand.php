@@ -31,7 +31,7 @@ class ForgetFailedCommand extends Command
      */
     public function handle()
     {
-        if ($this->app['queue.failer']->forget($this->argument('id'))) {
+        if ($this->app->make('queue.failer')->forget($this->argument('id'))) {
             $this->info('Failed job deleted successfully.');
         } else {
             $this->error('No failed job matches the given ID.');

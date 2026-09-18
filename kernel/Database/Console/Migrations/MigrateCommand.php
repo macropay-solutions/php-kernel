@@ -195,7 +195,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
     protected function createMissingMysqlDatabase($connection)
     {
         if (
-            $this->app['config']->get(
+            $this->app->make('config')->get(
                 "database.connections.{$connection->getName()}.database"
             ) !== $connection->getDatabaseName()
         ) {
@@ -217,20 +217,20 @@ class MigrateCommand extends BaseCommand implements Isolatable
         }
 
         try {
-            $this->app['config']->set("database.connections.{$connection->getName()}.database", null);
+            $this->app->make('config')->set("database.connections.{$connection->getName()}.database", null);
 
-            $this->app['db']->purge();
+            $this->app->make('db')->purge();
 
             $freshConnection = $this->migrator->resolveConnection($this->option('database'));
 
             return tap(
                 $freshConnection->unprepared("CREATE DATABASE IF NOT EXISTS `{$connection->getDatabaseName()}`"),
                 function () {
-                    $this->app['db']->purge();
+                    $this->app->make('db')->purge();
                 }
             );
         } finally {
-            $this->app['config']->set(
+            $this->app->make('config')->set(
                 "database.connections.{$connection->getName()}.database",
                 $connection->getDatabaseName()
             );

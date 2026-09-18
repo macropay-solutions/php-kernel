@@ -64,7 +64,7 @@ class FreshCommand extends Command
         ]));
 
         if ($this->app->bound(Dispatcher::class)) {
-            $this->app[Dispatcher::class]->dispatch(
+            $this->app->make(Dispatcher::class)->dispatch(
                 new DatabaseRefreshed($database, $this->needsSeeding())
             );
         }

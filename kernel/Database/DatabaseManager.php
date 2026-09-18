@@ -194,7 +194,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
         // To get the database connection configuration, we will just pull each of the
         // connection configurations and get the configurations for the given name.
         // If the configuration doesn't exist, we'll throw an exception and bail.
-        $connections = $this->app['config']['database.connections'];
+        $connections = $this->app->make('config')->get('database.connections');
 
         if (is_null($config = Arr::get($connections, $name))) {
             throw new InvalidArgumentException("Database connection [{$name}] not configured.");
@@ -219,11 +219,11 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
         // connection. This method basically just configures and prepares it to get
         // used by the application. Once we're finished we'll return it back out.
         if ($this->app->bound('events')) {
-            $connection->setEventDispatcher($this->app['events']);
+            $connection->setEventDispatcher($this->app->make('events'));
         }
 
         if ($this->app->bound('db.transactions')) {
-            $connection->setTransactionManager($this->app['db.transactions']);
+            $connection->setTransactionManager($this->app->make('db.transactions'));
         }
 
         // Here we'll set a reconnector callback. This reconnector can be any callable
@@ -248,7 +248,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
             return;
         }
 
-        $this->app['events']->dispatch(
+        $this->app->make('events')->dispatch(
             new ConnectionEstablished($connection)
         );
     }
@@ -279,7 +279,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
      */
     protected function registerConfiguredDoctrineTypes(Connection $connection): void
     {
-        foreach ($this->app['config']->get('database.dbal.types', []) as $name => $class) {
+        foreach ($this->app->make('config')->get('database.dbal.types', []) as $name => $class) {
             $this->registerDoctrineType($class, $name, $name);
         }
 
@@ -404,7 +404,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
      */
     public function getDefaultConnection()
     {
-        return $this->app['config']['database.default'];
+        return $this->app->make('config')->get('database.default');
     }
 
     /**
@@ -415,7 +415,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
      */
     public function setDefaultConnection($name)
     {
-        $this->app['config']['database.default'] = $name;
+        $this->app->make('config')->set('database.default', $name);
     }
 
     /**

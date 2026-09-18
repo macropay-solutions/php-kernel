@@ -64,7 +64,7 @@ class ClearCommand extends Command
      */
     public function handle()
     {
-        $this->app['events']->dispatch(
+        $this->app->make('events')->dispatch(
             'cache:clearing',
             [$this->argument('store'), $this->tags()]
         );
@@ -79,7 +79,7 @@ class ClearCommand extends Command
             return;
         }
 
-        $this->app['events']->dispatch(
+        $this->app->make('events')->dispatch(
             'cache:cleared',
             [$this->argument('store'), $this->tags()]
         );

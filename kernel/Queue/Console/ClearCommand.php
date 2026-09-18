@@ -44,14 +44,14 @@ class ClearCommand extends Command
         }
 
         $connection = $this->argument('connection')
-            ?: $this->app['config']['queue.default'];
+            ?: $this->app->make('config')->get('queue.default');
 
         // We need to get the right queue for the connection which is set in the queue
         // configuration file for the application. We will pull it based on the set
         // connection being run for the queue operation currently being executed.
         $queueName = $this->getQueue($connection);
 
-        $queue = $this->app['queue']->connection($connection);
+        $queue = $this->app->make('queue')->connection($connection);
 
         if ($queue instanceof ClearableQueue) {
             $count = $queue->clear($queueName);
@@ -78,7 +78,7 @@ class ClearCommand extends Command
      */
     protected function getQueue($connection)
     {
-        return $this->option('queue') ?: $this->app['config']->get(
+        return $this->option('queue') ?: $this->app->make('config')->get(
             "queue.connections.{$connection}.queue",
             'default'
         );

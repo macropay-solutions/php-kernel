@@ -57,7 +57,7 @@ class ListFailedCommand extends Command
      */
     protected function getFailedJobs()
     {
-        $failed = $this->app['queue.failer']->all();
+        $failed = $this->app->make('queue.failer')->all();
 
         return collect($failed)->map(function ($failed) {
             return $this->parseFailedJob((array)$failed);

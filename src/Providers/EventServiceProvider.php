@@ -33,7 +33,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         /** @var Dispatcher $events */
-        $events = $this->app['events'];
+        $events = $this->app->make('events');
 
         $events->listen($this->getEvents());
         $events->listen($this->getEventsAsObservers());

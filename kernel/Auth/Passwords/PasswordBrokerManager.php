@@ -69,7 +69,7 @@ class PasswordBrokerManager implements FactoryContract
         // aggregate service of sorts providing a convenient interface for resets.
         return new PasswordBroker(
             $this->createTokenRepository($config),
-            $this->app['auth']->createUserProvider($config['provider'] ?? null)
+            $this->app->make('auth')->createUserProvider($config['provider'] ?? null)
         );
     }
 
@@ -81,7 +81,7 @@ class PasswordBrokerManager implements FactoryContract
      */
     protected function createTokenRepository(array $config)
     {
-        $key = $this->app['config']['app.key'];
+        $key = $this->app->make('config')->get('app.key');
 
         if (str_starts_with($key, 'base64:')) {
             $key = \base64_decode(\substr($key, 7), true);
@@ -94,8 +94,8 @@ class PasswordBrokerManager implements FactoryContract
         $connection = $config['connection'] ?? null;
 
         return new DatabaseTokenRepository(
-            $this->app['db']->connection($connection),
-            $this->app['hash'],
+            $this->app->make('db')->connection($connection),
+            $this->app->make('hash'),
             $config['table'],
             $key,
             $config['expire'],
@@ -111,7 +111,7 @@ class PasswordBrokerManager implements FactoryContract
      */
     protected function getConfig($name)
     {
-        return $this->app['config']["auth.passwords.{$name}"];
+        return $this->app->make('config')->get("auth.passwords.{$name}");
     }
 
     /**
@@ -121,7 +121,7 @@ class PasswordBrokerManager implements FactoryContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['auth.defaults.passwords'];
+        return $this->app->make('config')->get('auth.defaults.passwords');
     }
 
     /**
@@ -132,7 +132,7 @@ class PasswordBrokerManager implements FactoryContract
      */
     public function setDefaultDriver($name)
     {
-        $this->app['config']['auth.defaults.passwords'] = $name;
+        $this->app->make('config')->set('auth.defaults.passwords', $name);
     }
 
     /**

@@ -57,7 +57,7 @@ class ViewCacheCommand extends Command
      */
     protected function compileViews(Collection $views)
     {
-        $compiler = $this->app['view']->getEngineResolver()->resolve('template')->getCompiler();
+        $compiler = $this->app->make('view')->getEngineResolver()->resolve('template')->getCompiler();
 
         $views->map(function (SplFileInfo $file) use ($compiler) {
             $this->task(
@@ -82,7 +82,7 @@ class ViewCacheCommand extends Command
      */
     protected function templateFilesIn(array $paths)
     {
-        $extensions = collect($this->app['view']->getExtensions())
+        $extensions = collect($this->app->make('view')->getExtensions())
             ->filter(fn($value) => $value === 'template')
             ->keys()
             ->map(fn($extension) => "*.{$extension}")
@@ -104,7 +104,7 @@ class ViewCacheCommand extends Command
      */
     protected function paths()
     {
-        $finder = $this->app['view']->getFinder();
+        $finder = $this->app->make('view')->getFinder();
 
         return collect($finder->getPaths())->merge(
             collect($finder->getHints())->flatten()

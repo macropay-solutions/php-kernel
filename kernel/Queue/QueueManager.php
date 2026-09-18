@@ -6,6 +6,7 @@ use Closure;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Queue\Factory as FactoryContract;
 use MacropaySolutions\Kernel\Contracts\Queue\Monitor as MonitorContract;
+use MacropaySolutions\Kernel\Events\QueuedCallable;
 
 /**
  * @mixin \MacropaySolutions\Kernel\Contracts\Queue\Queue
@@ -47,67 +48,67 @@ class QueueManager implements FactoryContract, MonitorContract
     /**
      * Register an event listener for the before job event.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function before($callback)
     {
-        $this->app['events']->listen(Events\JobProcessing::class, $callback);
+        $this->app->make('events')->listen(Events\JobProcessing::class, $callback);
     }
 
     /**
      * Register an event listener for the after job event.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function after($callback)
     {
-        $this->app['events']->listen(Events\JobProcessed::class, $callback);
+        $this->app->make('events')->listen(Events\JobProcessed::class, $callback);
     }
 
     /**
      * Register an event listener for the exception occurred job event.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function exceptionOccurred($callback)
     {
-        $this->app['events']->listen(Events\JobExceptionOccurred::class, $callback);
+        $this->app->make('events')->listen(Events\JobExceptionOccurred::class, $callback);
     }
 
     /**
      * Register an event listener for the daemon queue loop.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function looping($callback)
     {
-        $this->app['events']->listen(Events\Looping::class, $callback);
+        $this->app->make('events')->listen(Events\Looping::class, $callback);
     }
 
     /**
      * Register an event listener for the failed job event.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function failing($callback)
     {
-        $this->app['events']->listen(Events\JobFailed::class, $callback);
+        $this->app->make('events')->listen(Events\JobFailed::class, $callback);
     }
 
     /**
      * Register an event listener for the daemon queue stopping.
      *
-     * @param mixed $callback
+     * @param array|QueuedCallable|null|string $callback
      * @return void
      */
     public function stopping($callback)
     {
-        $this->app['events']->listen(Events\WorkerStopping::class, $callback);
+        $this->app->make('events')->listen(Events\WorkerStopping::class, $callback);
     }
 
     /**
@@ -214,7 +215,7 @@ class QueueManager implements FactoryContract, MonitorContract
     protected function getConfig($name)
     {
         if (!is_null($name) && $name !== 'null') {
-            return $this->app['config']["queue.connections.{$name}"];
+            return $this->app->make('config')->get("queue.connections.{$name}");
         }
 
         return ['driver' => 'null'];
@@ -227,7 +228,7 @@ class QueueManager implements FactoryContract, MonitorContract
      */
     public function getDefaultDriver()
     {
-        return $this->app['config']['queue.default'];
+        return $this->app->make('config')->get('queue.default');
     }
 
     /**
@@ -238,7 +239,7 @@ class QueueManager implements FactoryContract, MonitorContract
      */
     public function setDefaultDriver($name)
     {
-        $this->app['config']['queue.default'] = $name;
+        $this->app->make('config')->set('queue.default', $name);
     }
 
     /**

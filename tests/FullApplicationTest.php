@@ -601,7 +601,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $app['auth']->viaRequest('api', function ($request) {
+        $app->make('auth')->viaRequest('api', function ($request) {
             return new \MacropaySolutions\Kernel\Auth\GenericUser(['id' => 1234]);
         });
 
@@ -616,7 +616,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $filesystem = $app[MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class];
+        $filesystem = $app->make(MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class);
 
         $this->assertInstanceOf(MacropaySolutions\Kernel\Contracts\Filesystem\Factory::class, $filesystem);
     }
@@ -625,7 +625,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
 
-        $validator = $app[Factory::class];
+        $validator = $app->make(Factory::class);
 
         $this->assertInstanceOf(Factory::class, $validator);
     }
@@ -765,7 +765,7 @@ class FullApplicationTest extends TestCase
         $app->instance(ExceptionHandler::class, $mock = m::mock('MacropaySolutions\Framework\Exceptions\Handler[report]'));
         $mock->shouldIgnoreMissing();
 
-        $kernel = $app[MacropaySolutions\Framework\Console\Kernel::class];
+        $kernel = $app->make(MacropaySolutions\Framework\Console\Kernel::class);
 
         (fn() => $kernel->getConsoleApp())->call($kernel)->resolveCommands(
             SendEmails::class,

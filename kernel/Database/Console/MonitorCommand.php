@@ -84,7 +84,7 @@ class MonitorCommand extends DatabaseInspectionCommand
     {
         return collect(explode(',', $databases))->map(function ($database) {
             if (!$database) {
-                $database = $this->app['config']['database.default'];
+                $database = $this->app->make('config')->get('database.default');
             }
 
             $maxConnections = $this->option('max');

@@ -121,13 +121,13 @@ class MailManager implements FactoryContract
 //        $mailer = new Mailer(
         $mailer = $this->app->makeWithoutAlias(Mailer::class, [
             $name,
-            $this->app['view'],
+            $this->app->make('view'),
             $this->createSymfonyTransport($config),
-            $this->app['events'],
+            $this->app->make('events'),
         ]);
 
         if ($this->app->bound('queue')) {
-            $mailer->setQueue($this->app['queue']);
+            $mailer->setQueue($this->app->make('queue'));
         }
 
         // Next we will set all the global addresses on this mailer, which allows
@@ -153,7 +153,7 @@ class MailManager implements FactoryContract
         // Here we will check if the "transport" key exists and if it doesn't we will
         // assume an application is still using the legacy mail configuration file
         // format and use the "mail.driver" configuration option instead for BC.
-        $transport = $config['transport'] ?? $this->app['config']['mail.driver'];
+        $transport = $config['transport'] ?? $this->app->make('config')->get('mail.driver');
 
         if (isset($this->customCreators[$transport])) {
             return call_user_func($this->customCreators[$transport], $config);
@@ -234,7 +234,7 @@ class MailManager implements FactoryContract
     protected function createSendmailTransport(array $config)
     {
         return new SendmailTransport(
-            $config['path'] ?? $this->app['config']->get('mail.sendmail')
+            $config['path'] ?? $this->app->make('config')->get('mail.sendmail')
         );
     }
 
@@ -247,7 +247,7 @@ class MailManager implements FactoryContract
     protected function createSesTransport(array $config)
     {
         $config = array_merge(
-            $this->app['config']->get('services.ses', []),
+            $this->app->make('config')->get('services.ses', []),
             ['version' => 'latest', 'service' => 'email'],
             $config
         );
@@ -269,7 +269,7 @@ class MailManager implements FactoryContract
     protected function createSesV2Transport(array $config)
     {
         $config = array_merge(
-            $this->app['config']->get('services.ses', []),
+            $this->app->make('config')->get('services.ses', []),
             ['version' => 'latest'],
             $config
         );
@@ -318,7 +318,7 @@ class MailManager implements FactoryContract
         $factory = new MailgunTransportFactory(null, $this->getHttpClient($config));
 
         if (!isset($config['secret'])) {
-            $config = $this->app['config']->get('services.mailgun', []);
+            $config = $this->app->make('config')->get('services.mailgun', []);
         }
 
         return $factory->create(
@@ -349,7 +349,7 @@ class MailManager implements FactoryContract
             new Dsn(
                 'postmark+api',
                 'default',
-                $config['token'] ?? $this->app['config']->get('services.postmark.token'),
+                $config['token'] ?? $this->app->make('config')->get('services.postmark.token'),
                 null,
                 null,
                 $options
@@ -376,7 +376,7 @@ class MailManager implements FactoryContract
 
             // Now, we will check if the "driver" key exists and if it does we will set
             // the transport configuration parameter in order to offer BC
-            $transports[] = $this->app['config']['mail.driver']
+            $transports[] = $this->app->make('config')->get('mail.driver')
                 ? $this->createSymfonyTransport(array_merge($config, ['transport' => $name]))
                 : $this->createSymfonyTransport($config);
         }
@@ -403,7 +403,7 @@ class MailManager implements FactoryContract
 
             // Now, we will check if the "driver" key exists and if it does we will set
             // the transport configuration parameter in order to offer BC
-            $transports[] = $this->app['config']['mail.driver']
+            $transports[] = $this->app->make('config')->get('mail.driver')
                 ? $this->createSymfonyTransport(array_merge($config, ['transport' => $name]))
                 : $this->createSymfonyTransport($config);
         }
@@ -423,7 +423,7 @@ class MailManager implements FactoryContract
 
         if ($logger instanceof LogManager) {
             $logger = $logger->channel(
-                $config['channel'] ?? $this->app['config']->get('mail.log_channel')
+                $config['channel'] ?? $this->app->make('config')->get('mail.log_channel')
             );
         }
 
@@ -465,7 +465,7 @@ class MailManager implements FactoryContract
      */
     protected function setGlobalAddress($mailer, array $config, string $type)
     {
-        $address = Arr::get($config, $type, $this->app['config']['mail.' . $type]);
+        $address = Arr::get($config, $type, $this->app->make('config')->get('mail.' . $type));
 
         if (is_array($address) && isset($address['address'])) {
             $mailer->{'always' . Str::studly($type)}($address['address'], $address['name']);
@@ -483,9 +483,9 @@ class MailManager implements FactoryContract
         // Here we will check if the "driver" key exists and if it does we will use
         // the entire mail configuration file as the "driver" config in order to
         // provide "BC"
-        $config = $this->app['config']['mail.driver']
-            ? $this->app['config']['mail']
-            : $this->app['config']["mail.mailers.{$name}"];
+        $config = $this->app->make('config')->get('mail.driver')
+            ? $this->app->make('config')->get('mail')
+            : $this->app->make('config')->get("mail.mailers.{$name}");
 
         if (isset($config['url'])) {
             $config = array_merge($config, (new ConfigurationUrlParser())->parseConfiguration($config));
@@ -506,8 +506,8 @@ class MailManager implements FactoryContract
         // Here we will check if the "driver" key exists and if it does we will use
         // that as the default driver in order to provide support for old styles
         // of the Kernel mail configuration file for backwards compatibility.
-        return $this->app['config']['mail.driver'] ??
-            $this->app['config']['mail.default'];
+        return $this->app->make('config')->get('mail.driver') ??
+            $this->app->make('config')->get('mail.default');
     }
 
     /**
@@ -518,11 +518,11 @@ class MailManager implements FactoryContract
      */
     public function setDefaultDriver(string $name)
     {
-        if ($this->app['config']['mail.driver']) {
-            $this->app['config']['mail.driver'] = $name;
+        if ($this->app->make('config')->get('mail.driver')) {
+            $this->app->make('config')->set('mail.driver', $name);
         }
 
-        $this->app['config']['mail.default'] = $name;
+        $this->app->make('config')->set('mail.default', $name);
     }
 
     /**

@@ -33,7 +33,7 @@ class RetryBatchCommand extends Command implements Isolatable
      */
     public function handle()
     {
-        $batch = $this->app[BatchRepository::class]->find($id = $this->argument('id'));
+        $batch = $this->app->make(BatchRepository::class)->find($id = $this->argument('id'));
 
         if (!$batch) {
             $this->error("Unable to find a batch with ID [{$id}].");

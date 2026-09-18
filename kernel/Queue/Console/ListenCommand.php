@@ -86,9 +86,9 @@ class ListenCommand extends Command
      */
     protected function getQueue($connection)
     {
-        $connection = $connection ?: $this->app['config']['queue.default'];
+        $connection = $connection ?: $this->app->make('config')->get('queue.default');
 
-        return $this->input->getOption('queue') ?: $this->app['config']->get(
+        return $this->input->getOption('queue') ?: $this->app->make('config')->get(
             "queue.connections.{$connection}.queue",
             'default'
         );

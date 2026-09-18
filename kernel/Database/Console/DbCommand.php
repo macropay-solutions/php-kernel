@@ -67,8 +67,10 @@ class DbCommand extends Command
      */
     public function getConnection()
     {
-        $connection = $this->app['config']['database.connections.' .
-        (($db = $this->argument('connection')) ?? $this->app['config']['database.default'])];
+        $connection = $this->app->make('config')->get(
+            'database.connections.' . (($db = $this->argument('connection')) ??
+                $this->app->make('config')->get('database.default'))
+        );
 
         if (empty($connection)) {
             throw new UnexpectedValueException("Invalid database connection [{$db}].");

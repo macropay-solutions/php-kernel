@@ -133,7 +133,7 @@ class Kernel implements KernelContract
             $this->symfonyDispatcher = \di(EventDispatcher::class);
 
             $this->symfonyDispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) {
-                $this->app[Dispatcher::class]->dispatch(
+                $this->app->make(Dispatcher::class)->dispatch(
 //                    new CommandStarting($event->getCommand()->getName(), $event->getInput(), $event->getOutput())
                     \di(
                         CommandStarting::class,
@@ -143,7 +143,7 @@ class Kernel implements KernelContract
             });
 
             $this->symfonyDispatcher->addListener(ConsoleEvents::TERMINATE, function (ConsoleTerminateEvent $event) {
-                $this->app[Dispatcher::class]->dispatch(
+                $this->app->make(Dispatcher::class)->dispatch(
                     //new CommandFinished(
                     //$event->getCommand()->getName(),
                     // $event->getInput(),

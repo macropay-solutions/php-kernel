@@ -86,7 +86,7 @@ class MonitorCommand extends Command
 
             if (!isset($queue)) {
                 $queue = $connection;
-                $connection = $this->app['config']['queue.default'];
+                $connection = $this->app->make('config')->get('queue.default');
             }
 
             return [

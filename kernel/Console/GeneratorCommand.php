@@ -313,7 +313,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
     {
         $name = Str::replaceFirst($this->rootNamespace(), '', $name);
 
-        return $this->app['path'] . '/' . str_replace('\\', '/', $name) . '.php';
+        return $this->app->make('path') . '/' . str_replace('\\', '/', $name) . '.php';
     }
 
     /**
@@ -443,7 +443,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
      */
     protected function userProviderModel()
     {
-        $config = $this->app['config'];
+        $config = $this->app->make('config');
 
         $provider = $config->get('auth.guards.' . $config->get('auth.defaults.guard') . '.provider');
 
@@ -474,7 +474,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
      */
     protected function viewPath($path = '')
     {
-        $views = $this->app['config']['view.paths'][0] ?? resource_path('views');
+        $views = $this->app->make('config')->get('view.paths', [])[0] ?? resource_path('views');
 
         return $views . ($path ? DIRECTORY_SEPARATOR . $path : $path);
     }

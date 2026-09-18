@@ -12,6 +12,11 @@ class FailJobCommand extends WorkCommand
     use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelQueueConsoleFailJobCommand;
 
     /**
+     * The currently active command instance for static event listeners.
+     */
+    protected static FailJobCommand $activeInstance = null;
+
+    /**
      * The console command name.
      *
      * @var string
@@ -67,7 +72,7 @@ class FailJobCommand extends WorkCommand
         // which jobs are coming through a queue and be informed on its progress.
         $this->listenForEvents();
 
-        $connection = $this->argument('connection') ?: $this->app['config']['queue.default'];
+        $connection = $this->argument('connection') ?: $this->app->make('config')->get('queue.default');
 
         // We need to get the right queue for the connection which is set in the queue
         // configuration file for the application. We will pull it based on the set
@@ -101,10 +106,19 @@ class FailJobCommand extends WorkCommand
      */
     protected function listenForEvents()
     {
-        $this->app['events']->listen(JobFailed::class, function ($event) {
-            $this->writeOutput($event->job, 'failed');
+        static::$activeInstance = $this;
 
-            $this->logFailedJob($event);
-        });
+        $this->app->make('events')->listen(JobFailed::class, [self::class, 'onJobFailed']);
+    }
+
+    /**
+     * Handle the JobFailed event.
+     *
+     * @param \MacropaySolutions\Kernel\Queue\Events\JobFailed $event
+     */
+    public static function onJobFailed($event): void
+    {
+        static::$activeInstance?->writeOutput($event->job, 'failed');
+        static::$activeInstance?->logFailedJob($event);
     }
 }
