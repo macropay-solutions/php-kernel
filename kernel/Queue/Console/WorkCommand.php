@@ -76,7 +76,7 @@ class WorkCommand extends Command
     /**
      * The currently active command instance for static event listeners.
      */
-    protected static WorkCommand $activeInstance = null;
+    protected static ?WorkCommand $activeInstance = null;
 
     /**
      * Create a new queue work command.

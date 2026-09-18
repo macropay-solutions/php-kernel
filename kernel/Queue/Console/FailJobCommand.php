@@ -14,7 +14,7 @@ class FailJobCommand extends WorkCommand
     /**
      * The currently active command instance for static event listeners.
      */
-    protected static FailJobCommand $activeInstance = null;
+    private static ?FailJobCommand $activeInstanceChild = null;
 
     /**
      * The console command name.
@@ -106,7 +106,7 @@ class FailJobCommand extends WorkCommand
      */
     protected function listenForEvents()
     {
-        static::$activeInstance = $this;
+        static::$activeInstanceChild = $this;
 
         $this->app->make('events')->listen(JobFailed::class, [self::class, 'onJobFailed']);
     }
@@ -118,7 +118,7 @@ class FailJobCommand extends WorkCommand
      */
     public static function onJobFailed($event): void
     {
-        static::$activeInstance?->writeOutput($event->job, 'failed');
-        static::$activeInstance?->logFailedJob($event);
+        static::$activeInstanceChild?->writeOutput($event->job, 'failed');
+        static::$activeInstanceChild?->logFailedJob($event);
     }
 }
