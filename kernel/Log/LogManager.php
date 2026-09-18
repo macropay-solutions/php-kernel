@@ -106,7 +106,7 @@ class LogManager implements LoggerInterface
      * Get a log channel instance.
      *
      * @param string|null $channel
-     * @return \Psr\Log\LoggerInterface
+     * @return \MacropaySolutions\Kernel\Log\Logger
      */
     public function channel($channel = null)
     {
@@ -117,7 +117,7 @@ class LogManager implements LoggerInterface
      * Get a log driver instance.
      *
      * @param string|null $driver
-     * @return \Psr\Log\LoggerInterface
+     * @return \MacropaySolutions\Kernel\Log\Logger
      */
     public function driver($driver = null)
     {
@@ -129,7 +129,7 @@ class LogManager implements LoggerInterface
      *
      * @param string $name
      * @param array|null $config
-     * @return \Psr\Log\LoggerInterface
+     * @return \MacropaySolutions\Kernel\Log\Logger
      */
     protected function get($name, ?array $config = null)
     {
@@ -265,13 +265,13 @@ class LogManager implements LoggerInterface
         }
 
         $handlers = collect($config['channels'])->flatMap(function ($channel) {
-            return $channel instanceof LoggerInterface
+            return $channel instanceof Logger
                 ? $channel->fwd()->getHandlers()
                 : $this->channel($channel)->fwd()->getHandlers();
         })->all();
 
         $processors = collect($config['channels'])->flatMap(function ($channel) {
-            return $channel instanceof LoggerInterface
+            return $channel instanceof Logger
                 ? $channel->fwd()->getProcessors()
                 : $this->channel($channel)->fwd()->getProcessors();
         })->all();
