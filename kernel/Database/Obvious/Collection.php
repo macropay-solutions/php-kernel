@@ -458,7 +458,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function makeHidden($attributes)
     {
-        return $this->each->makeHidden($attributes);
+        return $this->each(fn($item, $key) => $item->makeHidden($attributes));
     }
 
     /**
@@ -469,7 +469,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function makeVisible($attributes)
     {
-        return $this->each->makeVisible($attributes);
+        return $this->each(fn($item, $key) => $item->makeVisible($attributes));
     }
 
     /**
@@ -480,7 +480,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function setVisible($visible)
     {
-        return $this->each->setVisible($visible);
+        return $this->each(fn($item, $key) => $item->setVisible($visible));
     }
 
     /**
@@ -491,7 +491,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function setHidden($hidden)
     {
-        return $this->each->setHidden($hidden);
+        return $this->each(fn($item, $key) => $item->setHidden($hidden));
     }
 
     /**
@@ -502,7 +502,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function append($attributes)
     {
-        return $this->each->append($attributes);
+        return $this->each(fn($item, $key) => $item->append($attributes));
     }
 
     /**
