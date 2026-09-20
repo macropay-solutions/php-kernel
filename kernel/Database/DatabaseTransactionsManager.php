@@ -97,7 +97,7 @@ class DatabaseTransactionsManager
 
         $this->committedTransactions = $forOtherConnections->values();
 
-        $forThisConnection->map->executeCallbacks();
+        $forThisConnection->map(fn($transaction) => $transaction->executeCallbacks());
 
         return $forThisConnection;
     }

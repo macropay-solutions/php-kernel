@@ -1653,10 +1653,10 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
                 return $this->makeIterator($iterable);
             })->prepend($this->getIterator());
 
-            while ($iterators->contains->valid()) {
-                yield new static($iterators->map->current());
+            while ($iterators->contains(fn($iterator) => $iterator->valid())) {
+                yield new static($iterators->map(fn($iterator) => $iterator->current()));
 
-                $iterators->each->next();
+                $iterators->each(fn($iterator) => $iterator->next());
             }
         });
     }

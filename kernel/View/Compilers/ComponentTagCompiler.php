@@ -260,7 +260,7 @@ class ComponentTagCompiler
                 $escapeBound = false
             ) . '])
 <?php if (isset($attributes) && $attributes instanceof MacropaySolutions\Kernel\View\ComponentAttributeBag && $constructor = (new ReflectionClass(' . $class . '::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([' . $this->attributesToString(
                 $attributes->all(),
@@ -488,7 +488,7 @@ class ComponentTagCompiler
         $constructor = (new ReflectionClass($class))->getConstructor();
 
         $parameterNames = $constructor
-            ? collect($constructor->getParameters())->map->getName()->all()
+            ? collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()
             : [];
 
         return collect($attributes)->partition(function ($value, $key) use ($parameterNames) {

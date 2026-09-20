@@ -118,7 +118,7 @@ abstract class Component
             $constructor = $class->getConstructor();
 
             static::$constructorParametersCache[static::class] = $constructor
-                ? collect($constructor->getParameters())->map->getName()->all()
+                ? collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()
                 : [];
         }
 

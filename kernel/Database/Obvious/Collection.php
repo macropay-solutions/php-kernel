@@ -679,7 +679,7 @@ class Collection extends BaseCollection implements QueueableCollection
         }
 
         return $this->first() instanceof QueueableEntity
-            ? $this->map->getQueueableId()->all()
+            ? $this->map(fn($entity) => $entity->getQueueableId())->all()
             : $this->modelKeys();
     }
 
@@ -694,7 +694,7 @@ class Collection extends BaseCollection implements QueueableCollection
             return [];
         }
 
-        $relations = $this->map->getQueueableRelations()->all();
+        $relations = $this->map(fn($entity) => $entity->getQueueableRelations())->all();
 
         if (count($relations) === 0 || $relations === [[]]) {
             return [];

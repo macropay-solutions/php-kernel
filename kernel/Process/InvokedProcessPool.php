@@ -52,7 +52,7 @@ class InvokedProcessPool implements Countable
      */
     public function wait()
     {
-        return new ProcessPoolResults(collect($this->invokedProcesses)->map->wait()->all());
+        return new ProcessPoolResults(collect($this->invokedProcesses)->map(fn($process) => $process->wait())->all());
     }
 
     /**

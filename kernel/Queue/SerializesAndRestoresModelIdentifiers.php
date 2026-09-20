@@ -106,7 +106,7 @@ trait SerializesAndRestoresModelIdentifiers
             return $collection;
         }
 
-        $collection = $collection->keyBy->getKey();
+        $collection = $collection->keyBy(fn($model) => $model->getKey());
 
         $collectionClass = get_class($collection);
 
