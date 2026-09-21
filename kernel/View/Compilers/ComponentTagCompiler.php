@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\View\Compilers;
 
 use InvalidArgumentException;
+use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Foundation\Application;
 use MacropaySolutions\Kernel\Contracts\View\Factory;
@@ -11,7 +12,6 @@ use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\View\AnonymousComponent;
 use MacropaySolutions\Kernel\View\DynamicComponent;
 use MacropaySolutions\Kernel\View\ViewFinderInterface;
-use ReflectionClass;
 
 class ComponentTagCompiler
 {
@@ -255,13 +255,19 @@ class ComponentTagCompiler
             $parameters = $data->all();
         }
 
+        $runtimeAttributesBlock = '<?php
+if (isset($attributes) && $attributes instanceof \MacropaySolutions\Kernel\View\ComponentAttributeBag) {  
+    $attributes = $attributes->except(\array_keys(
+        \MacropaySolutions\Kernel\Container\BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(' . $class . ', \'__construct\')
+    ));
+}
+?>';
+
         return "##BEGIN-COMPONENT-CLASS##@component('{$class}', '{$component}', [" . $this->attributesToString(
                 $parameters,
                 $escapeBound = false
             ) . '])
-<?php if (isset($attributes) && $attributes instanceof MacropaySolutions\Kernel\View\ComponentAttributeBag && $constructor = (new ReflectionClass(' . $class . '::class))->getConstructor()): ?>
-<?php $attributes = $attributes->except(collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()); ?>
-<?php endif; ?>
+' . $runtimeAttributesBlock . '
 <?php $component->withAttributes([' . $this->attributesToString(
                 $attributes->all(),
                 $escapeAttributes = $class !== DynamicComponent::class
@@ -485,15 +491,15 @@ class ComponentTagCompiler
             return [collect($attributes), collect($attributes)];
         }
 
-        $constructor = (new ReflectionClass($class))->getConstructor();
+        $parameterNames = \array_keys(
+            BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                $class,
+                '__construct'
+            )
+        );
 
-        $parameterNames = $constructor
-            ? collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()
-            : [];
-
-        return collect($attributes)->partition(function ($value, $key) use ($parameterNames) {
-            return in_array(Str::camel($key), $parameterNames);
-        })->all();
+        return collect($attributes)->partition(static fn($value, $key) => \in_array(Str::camel($key), $parameterNames))
+            ->all();
     }
 
     /**

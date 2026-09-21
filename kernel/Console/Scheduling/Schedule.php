@@ -317,7 +317,7 @@ class Schedule implements Macroable
      */
     public function dueEvents($app)
     {
-        return collect($this->events)->filter(fn($event) => $event->isDue($app));
+        return collect($this->events)->filter(static fn($event) => $event->isDue($app));
     }
 
     /**

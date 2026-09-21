@@ -220,12 +220,11 @@ class BoundMethod
 
             $method = \next($callback);
 
-            if (
-                \is_string($classFqn)
-                && \is_string($method)
-                && \is_array($a = self::getAutowiringCache($classFqn, $method))
-            ) {
-                foreach ($a as $name => $map) {
+            if (\is_string($classFqn) && \is_string($method)) {
+                foreach (
+                    self::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod($classFqn, $method)
+                        as $name => $map
+                ) {
                     static::addDependencyWithoutReflectionForCallParameter(
                         $container,
                         $parameters,
@@ -276,8 +275,7 @@ class BoundMethod
 
     /**
      * @throws BindingResolutionException
-     * @see BoundMethod::getAutowiringCache() &
-     *    static::$precompiledAutoWiringClassMethodParametersMap for $parameterMap
+     * @see static::$precompiledAutoWiringClassMethodParametersMap for $parameterMap
      *   [
      *     'c' => string, // can not exist
      *     'v' => bool, // can not exist
@@ -432,7 +430,9 @@ class BoundMethod
     }
 
     /**
+     * Use this method to check if the map is cached or not
      * @throws \ReflectionException
+     * @see self::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod
      */
     public static function getAutowiringCache(string $classFqn, string $method): ?array
     {

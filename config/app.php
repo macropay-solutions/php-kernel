@@ -168,6 +168,10 @@ return [
             'path' => \app()->path() . DIRECTORY_SEPARATOR . 'CallablesAsArray',
             'methods' => ['*'],
         ],
+        [
+            'path' => \app()->path() . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Components',
+            'methods' => ['*'],
+        ],
     ],
 
     /**

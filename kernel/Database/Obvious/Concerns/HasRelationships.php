@@ -186,7 +186,7 @@ trait HasRelationships
             }
 
             if ($val instanceof Collection) {
-                $val->each(fn($item, $key) => $item->touchOwners());
+                $val->each(static fn($item, $key) => $item->touchOwners());
             }
         }
     }

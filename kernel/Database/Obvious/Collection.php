@@ -458,7 +458,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function makeHidden($attributes)
     {
-        return $this->each(fn($item, $key) => $item->makeHidden($attributes));
+        return $this->each(static fn($item, $key) => $item->makeHidden($attributes));
     }
 
     /**
@@ -469,7 +469,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function makeVisible($attributes)
     {
-        return $this->each(fn($item, $key) => $item->makeVisible($attributes));
+        return $this->each(static fn($item, $key) => $item->makeVisible($attributes));
     }
 
     /**
@@ -480,7 +480,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function setVisible($visible)
     {
-        return $this->each(fn($item, $key) => $item->setVisible($visible));
+        return $this->each(static fn($item, $key) => $item->setVisible($visible));
     }
 
     /**
@@ -491,7 +491,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function setHidden($hidden)
     {
-        return $this->each(fn($item, $key) => $item->setHidden($hidden));
+        return $this->each(static fn($item, $key) => $item->setHidden($hidden));
     }
 
     /**
@@ -502,7 +502,7 @@ class Collection extends BaseCollection implements QueueableCollection
      */
     public function append($attributes)
     {
-        return $this->each(fn($item, $key) => $item->append($attributes));
+        return $this->each(static fn($item, $key) => $item->append($attributes));
     }
 
     /**
@@ -679,7 +679,7 @@ class Collection extends BaseCollection implements QueueableCollection
         }
 
         return $this->first() instanceof QueueableEntity
-            ? $this->map(fn($entity) => $entity->getQueueableId())->all()
+            ? $this->map(static fn($entity) => $entity->getQueueableId())->all()
             : $this->modelKeys();
     }
 
@@ -694,7 +694,7 @@ class Collection extends BaseCollection implements QueueableCollection
             return [];
         }
 
-        $relations = $this->map(fn($entity) => $entity->getQueueableRelations())->all();
+        $relations = $this->map(static fn($entity) => $entity->getQueueableRelations())->all();
 
         if (count($relations) === 0 || $relations === [[]]) {
             return [];

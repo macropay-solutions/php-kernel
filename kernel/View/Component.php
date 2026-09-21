@@ -3,12 +3,11 @@
 namespace MacropaySolutions\Kernel\View;
 
 use Closure;
+use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
 use MacropaySolutions\Kernel\Contracts\View\View as ViewContract;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
-use ReflectionClass;
-use ReflectionMethod;
 
 abstract class Component
 {
@@ -62,20 +61,6 @@ abstract class Component
     protected static $propertyCache = [];
 
     /**
-     * The cache of public method names, keyed by class.
-     *
-     * @var array
-     */
-    protected static $methodCache = [];
-
-    /**
-     * The cache of constructor parameters, keyed by class.
-     *
-     * @var array<class-string, array<int, string>>
-     */
-    protected static $constructorParametersCache = [];
-
-    /**
      * Get the view / view contents that represent the component.
      *
      * @return \MacropaySolutions\Kernel\Contracts\View\View|\MacropaySolutions\Kernel\Contracts\Support\Htmlable|\Closure|string
@@ -112,17 +97,14 @@ abstract class Component
      */
     protected static function extractConstructorParameters()
     {
-        if (!isset(static::$constructorParametersCache[static::class])) {
-            $class = new ReflectionClass(static::class);
+        $class = static::class;
 
-            $constructor = $class->getConstructor();
+        $cachedMap = BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+            $class,
+            '__construct'
+        );
 
-            static::$constructorParametersCache[static::class] = $constructor
-                ? collect($constructor->getParameters())->map(fn($param) => $param->getName())->all()
-                : [];
-        }
-
-        return static::$constructorParametersCache[static::class];
+        return \array_keys($cachedMap);
     }
 
     /**
@@ -260,39 +242,35 @@ abstract class Component
     protected function extractPublicMethods()
     {
         $class = static::class;
-
-        if (!isset(static::$methodCache[$class])) {
-            $reflection = new ReflectionClass($this);
-
-            static::$methodCache[$class] = collect($reflection->getMethods(ReflectionMethod::IS_PUBLIC))
-                ->reject(function (ReflectionMethod $method) {
-                    return $this->shouldIgnore($method->getName());
-                })
-                ->map(function (ReflectionMethod $method) {
-                    return $method->getName();
-                });
-        }
-
         $values = [];
 
-        foreach (static::$methodCache[$class] as $method) {
-            $values[$method] = $this->createVariableFromMethod(new ReflectionMethod($this, $method));
+        // Execute get_class_methods in a global, unbound scope to extract STRICTLY public
+        // methods without needing to instantiate a ReflectionClass.
+        $publicMethods = (\Closure::bind(static fn($c) => \get_class_methods($c), null, null))($class);
+
+        foreach ($publicMethods as $method) {
+            if (!$this->shouldIgnore($method)) {
+                $values[$method] = $this->createVariableFromMethod($method, \count(
+                    BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                        $class,
+                        $method
+                    )
+                ));
+            }
         }
 
         return $values;
     }
-
     /**
      * Create a callable variable from the given method.
      *
-     * @param \ReflectionMethod $method
      * @return mixed
      */
-    protected function createVariableFromMethod(ReflectionMethod $method)
+    protected function createVariableFromMethod(string $method, int $parameterCount)
     {
-        return $method->getNumberOfParameters() === 0
-            ? $this->createInvokableVariable($method->getName())
-            : Closure::fromCallable([$this, $method->getName()]);
+        return $parameterCount === 0
+            ? $this->createInvokableVariable($method)
+            : $this->$method(...);
     }
 
     /**
@@ -428,8 +406,6 @@ abstract class Component
     public static function flushCache()
     {
         static::$templateViewCache = [];
-        static::$constructorParametersCache = [];
-        static::$methodCache = [];
         static::$propertyCache = [];
     }
 

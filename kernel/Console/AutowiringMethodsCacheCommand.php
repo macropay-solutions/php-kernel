@@ -140,7 +140,15 @@ PHP;
                 'methods' => [],
             ],
             [
+                'path' => $path . DIRECTORY_SEPARATOR . 'Events',
+                'methods' => [],
+            ],
+            [
                 'path' => $path . DIRECTORY_SEPARATOR . 'CallablesAsArray',
+                'methods' => ['*'],
+            ],
+            [
+                'path' => $path . DIRECTORY_SEPARATOR . 'View' . DIRECTORY_SEPARATOR . 'Components',
                 'methods' => ['*'],
             ],
         ];

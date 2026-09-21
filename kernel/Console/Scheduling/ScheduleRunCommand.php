@@ -117,7 +117,7 @@ class ScheduleRunCommand extends Command
 
         $events = $this->schedule->dueEvents($this->app);
 
-        if ($events->contains(fn($event) => $event->isRepeatable())) {
+        if ($events->contains(static fn($event) => $event->isRepeatable())) {
             $this->clearInterruptSignal();
         }
 
@@ -137,8 +137,8 @@ class ScheduleRunCommand extends Command
             $this->eventsRan = true;
         }
 
-        if ($events->contains(fn($event) => $event->isRepeatable())) {
-            $this->repeatEvents($events->filter(fn($event) => $event->isRepeatable()));
+        if ($events->contains(static fn($event) => $event->isRepeatable())) {
+            $this->repeatEvents($events->filter(static fn($event) => $event->isRepeatable()));
         }
 
         if (!$this->eventsRan) {

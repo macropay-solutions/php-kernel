@@ -32,7 +32,7 @@ class InvokedProcessPool implements Countable
      */
     public function signal(int $signal)
     {
-        return $this->running()->each(fn($item, $key) => $item->signal($signal));
+        return $this->running()->each(static fn($item, $key) => $item->signal($signal));
     }
 
     /**
@@ -42,7 +42,7 @@ class InvokedProcessPool implements Countable
      */
     public function running()
     {
-        return collect($this->invokedProcesses)->filter(fn($process) => $process->running())->values();
+        return collect($this->invokedProcesses)->filter(static fn($process) => $process->running())->values();
     }
 
     /**
@@ -52,7 +52,7 @@ class InvokedProcessPool implements Countable
      */
     public function wait()
     {
-        return new ProcessPoolResults(collect($this->invokedProcesses)->map(fn($process) => $process->wait())->all());
+        return new ProcessPoolResults(collect($this->invokedProcesses)->map(static fn($process) => $process->wait())->all());
     }
 
     /**
