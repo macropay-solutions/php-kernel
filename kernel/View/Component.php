@@ -6,7 +6,6 @@ use Closure;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Support\Htmlable;
-use MacropaySolutions\Kernel\Contracts\View\View as ViewContract;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 abstract class Component
@@ -59,6 +58,13 @@ abstract class Component
      * @var array
      */
     protected static $propertyCache = [];
+
+    /**
+     * The cache of public method names, keyed by class.
+     *
+     * @var array
+     */
+    protected static $methodCache = [];
 
     /**
      * Get the view / view contents that represent the component.
@@ -116,26 +122,13 @@ abstract class Component
     {
         $view = $this->render();
 
-        if ($view instanceof ViewContract) {
-            return $view;
-        }
-
         if ($view instanceof Htmlable) {
             return $view;
         }
 
-        $resolver = function ($view) {
-            if ($view instanceof ViewContract) {
-                return $view;
-            }
-
-            return $this->extractTemplateViewFromString($view);
-        };
-
-        return $view instanceof Closure ? function (array $data = []) use ($view, $resolver) {
-            return $resolver($view($data));
-        }
-            : $resolver($view);
+        return $view instanceof Closure ?
+            fn(array $data = []) => $this->extractTemplateViewFromString($view($data))
+            : $this->extractTemplateViewFromString($view);
     }
 
     /**
@@ -242,25 +235,36 @@ abstract class Component
     protected function extractPublicMethods()
     {
         $class = static::class;
+
+        if (!isset(static::$methodCache[$class])) {
+            // Execute get_class_methods in a global, unbound scope to extract STRICTLY public
+            // methods without needing to instantiate a ReflectionClass.
+            $publicMethods = (\Closure::bind(static fn($c) => \get_class_methods($c), null, null))($class);
+
+            static::$methodCache[$class] = [];
+
+            foreach ($publicMethods as $method) {
+                if (!$this->shouldIgnore($method)) {
+                    static::$methodCache[$class][$method] = true;
+                }
+            }
+        }
+
         $values = [];
 
-        // Execute get_class_methods in a global, unbound scope to extract STRICTLY public
-        // methods without needing to instantiate a ReflectionClass.
-        $publicMethods = (\Closure::bind(static fn($c) => \get_class_methods($c), null, null))($class);
 
-        foreach ($publicMethods as $method) {
-            if (!$this->shouldIgnore($method)) {
-                $values[$method] = $this->createVariableFromMethod($method, \count(
-                    BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
-                        $class,
-                        $method
-                    )
-                ));
-            }
+        foreach (static::$methodCache[$class] as $method => $true) {
+            $values[$method] = $this->createVariableFromMethod($method, \count(
+                BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                    $class,
+                    $method
+                )
+            ));
         }
 
         return $values;
     }
+
     /**
      * Create a callable variable from the given method.
      *
@@ -406,6 +410,7 @@ abstract class Component
     public static function flushCache()
     {
         static::$templateViewCache = [];
+        static::$methodCache = [];
         static::$propertyCache = [];
     }
 
