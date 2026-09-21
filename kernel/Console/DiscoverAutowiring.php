@@ -191,6 +191,8 @@ class DiscoverAutowiring
         return (\is_string($c = Util::getParameterClassName($reflectionParameter)) ? ['c' => $c] : [])
             + ($reflectionParameter->isVariadic() ? ['v' => true] : [])
             + ($reflectionParameter->isOptional() ? ['o' => true] : [])
+            + ($reflectionParameter->hasType() ? ['t' => true] : [])
+            + ($reflectionParameter->allowsNull() ? ['n' => true] : [])
             + ($reflectionParameter->isDefaultValueAvailable() ? [
                 'd' => $reflectionParameter->getDefaultValue()
             ] : []);

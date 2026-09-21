@@ -3,16 +3,15 @@
 namespace MacropaySolutions\Kernel\Auth\Access;
 
 use Closure;
-use Exception;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Auth\Access\Events\GateEvaluated;
+use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Contracts\Auth\Access\Gate as GateContract;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\Str;
-use ReflectionClass;
 use ReflectionFunction;
 
 class Gate implements GateContract
@@ -511,20 +510,27 @@ class Gate implements GateContract
     protected function methodAllowsGuests($class, $method)
     {
         try {
-            $reflection = new ReflectionClass($class);
-
-            $method = $reflection->getMethod($method);
-        } catch (Exception) {
+            $parameters = BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                $class,
+                $method
+            );
+        } catch (\Exception) {
             return false;
         }
 
-        if ($method) {
-            $parameters = $method->getParameters();
-
-            return isset($parameters[0]) && $this->parameterAllowsGuests($parameters[0]);
+        if ([] === $parameters) {
+            return false;
         }
 
-        return false;
+        $firstParameter = \reset($parameters);
+
+        return (
+            \array_key_exists('t', $firstParameter)
+            && \array_key_exists('n', $firstParameter)
+        ) || (
+            \array_key_exists('d', $firstParameter)
+            && null === $firstParameter['d']
+        );
     }
 
     /**

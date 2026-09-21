@@ -2,8 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Events;
 
-use Closure;
-use Exception;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\Factory as BroadcastFactory;
 use MacropaySolutions\Kernel\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,10 +12,9 @@ use MacropaySolutions\Kernel\Contracts\Events\ShouldHandleEventsAfterCommit;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeEncrypted;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
+use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
-use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
-use ReflectionClass;
 
 class Dispatcher implements DispatcherContract, Macroable
 {
@@ -457,11 +454,6 @@ class Dispatcher implements DispatcherContract, Macroable
 
         $listener = $this->container->make($class);
 
-        /**
-         * @see createQueuedHandlerCallable
-         * @see handlerShouldBeQueued
-         * is bypassed
-         */
         if ($listener instanceof ShouldQueue) {
             return function () use ($listener, $method, $eventClass) {
                 $arguments = array_map(function ($a) {
@@ -505,37 +497,6 @@ class Dispatcher implements DispatcherContract, Macroable
     }
 
     /**
-     * Determine if the event handler class should be queued.
-     *
-     * @param string $class
-     * @return bool
-     */
-    protected function handlerShouldBeQueued($class)
-    {
-        return \is_subclass_of($class, ShouldQueue::class);
-    }
-
-    /**
-     * Create a callable for putting an event handler on the queue.
-     *
-     * @param string $class
-     * @param string $method
-     * @return \Closure
-     */
-    protected function createQueuedHandlerCallable($class, $method, ?string $eventClass = null)
-    {
-        return function () use ($class, $method, $eventClass) {
-            $arguments = array_map(function ($a) {
-                return is_object($a) ? clone $a : $a;
-            }, func_get_args());
-
-            if ($this->handlerWantsToBeQueued($class, $arguments)) {
-                $this->queueHandler($class, $method, $arguments, $eventClass);
-            }
-        };
-    }
-
-    /**
      * Determine if the given event handler should be dispatched after all database transactions have committed.
      *
      * @param object|mixed $listener
@@ -568,40 +529,6 @@ class Dispatcher implements DispatcherContract, Macroable
         };
     }
 
-    /**
-     * Determine if the event handler wants to be queued.
-     *
-     * @param string $class
-     * @param array $arguments
-     * @return bool
-     */
-    protected function handlerWantsToBeQueued($class, $arguments)
-    {
-        $instance = $this->container->make($class);
-
-        if (method_exists($instance, 'shouldQueue')) {
-            return (isset($arguments[0]) ? $instance->shouldQueue($arguments[0]) : $instance->shouldQueue());
-        }
-
-        return true;
-    }
-
-    /**
-     * Queue the handler class.
-     *
-     * @param string $class
-     * @param string $method
-     * @param array $arguments
-     * @param string|null $eventClass
-     * @return void
-     */
-    protected function queueHandler($class, $method, $arguments, ?string $eventClass = null)
-    {
-        [$listener, $job] = $this->createListenerAndJob($class, $method, $arguments, $eventClass);
-
-        $this->queueConnectionJob($listener, $arguments, $job);
-    }
-
     protected function queueConnectionJob(mixed $listener, array $arguments, mixed $job): void
     {
         $connection = $this->resolveQueue()->connection(
@@ -621,34 +548,6 @@ class Dispatcher implements DispatcherContract, Macroable
         is_null($delay)
             ? $connection->pushOn($queue, $job)
             : $connection->laterOn($queue, $delay, $job);
-    }
-
-    /**
-     * Create the listener and job for a queued listener.
-     *
-     * @param string $class
-     * @param string $method
-     * @param array $arguments
-     * @param string|null $eventClass
-     * @return array
-     */
-    protected function createListenerAndJob($class, $method, $arguments, ?string $eventClass = null)
-    {
-        $reflector = new ReflectionClass($class);
-        $constructor = $reflector->getConstructor();
-
-        $listener = (
-            !$constructor instanceof \ReflectionMethod
-            || $constructor->getNumberOfParameters() === 0
-        ) ? new $class() : $reflector->newInstanceWithoutConstructor();
-
-        return [
-            $listener,
-            $this->propagateListenerOptions(
-                $listener,
-                new CallQueuedListener($class, $method, $arguments, $eventClass)
-            ),
-        ];
     }
 
     /**

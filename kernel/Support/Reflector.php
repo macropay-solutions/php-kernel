@@ -2,9 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Support;
 
-use ReflectionClass;
 use ReflectionEnum;
-use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionUnionType;
 
@@ -39,23 +37,19 @@ class Reflector
 
         $method = $var[1];
 
-        if (!class_exists($class)) {
+        if (!\class_exists($class)) {
             return false;
         }
 
-        if (method_exists($class, $method)) {
-            return (new ReflectionMethod($class, $method))->isPublic();
+        if (\method_exists($class, $method)) {
+            return \in_array($method, \get_class_methods($class) ?? [], true);
         }
 
-        if (is_object($var[0]) && method_exists($class, '__call')) {
-            return (new ReflectionMethod($class, '__call'))->isPublic();
+        if (\is_object($var[0])) {
+            return \method_exists($class, '__call');
         }
 
-        if (!is_object($var[0]) && method_exists($class, '__callStatic')) {
-            return (new ReflectionMethod($class, '__callStatic'))->isPublic();
-        }
-
-        return false;
+        return \method_exists($class, '__callStatic');
     }
 
     /**
