@@ -222,9 +222,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function bound($abstract)
     {
-        return isset($this->bindings[$abstract]) ||
-            isset($this->instances[$abstract]) ||
-            isset($this->aliases[$abstract]);
+        return $this->inBindingsOrInstances($abstract) || isset($this->aliases[$abstract]);
+    }
+
+    public function inBindingsOrInstances(string $abstract): bool
+    {
+        return isset($this->bindings[$abstract]) || isset($this->instances[$abstract]);
     }
 
     /**
@@ -416,11 +419,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function instance($abstract, $instance)
     {
-        $this->removeAbstractAlias($abstract);
-
-        $isBound = $this->bound($abstract);
-
-        unset($this->aliases[$abstract]);
+        $isBound = $this->removeAbstractAlias($abstract) || $this->inBindingsOrInstances($abstract);
 
         // We'll check to determine if this type has been bound before, and if it has
         // we will fire the rebound callbacks registered with the container and it
@@ -446,31 +445,27 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
     /**
      * Remove an alias from the contextual binding alias cache.
-     *
-     * @param string $searched
-     * @return void
      */
-    protected function removeAbstractAlias($searched)
+    protected function removeAbstractAlias(string $searched): bool
     {
+        if (!isset($this->aliases[$searched])) {
+            return false;
+        }
+
         $this->alreadyRetrievedAliases = [];
 
-        if (!isset($this->aliases[$searched])) {
-            return;
+        if (\count($this->abstractAliases[$this->aliases[$searched]]) === 1) {
+            unset($this->abstractAliases[$this->aliases[$searched]]);
+            unset($this->aliases[$searched]);
+
+            return true;
         }
 
-        foreach ($this->abstractAliases as $abstract => $aliases) {
-            if (false === $index = \array_search($searched, $aliases)) {
-                continue;
-            }
+        $this->abstractAliases[$this->aliases[$searched]] =
+            \array_diff($this->abstractAliases[$this->aliases[$searched]], [$searched]);
+        unset($this->aliases[$searched]);
 
-            if (\count($aliases) === 1) {
-                unset($this->abstractAliases[$abstract]);
-
-                continue;
-            }
-
-            unset($this->abstractAliases[$abstract][$index]);
-        }
+        return true;
     }
 
     /**
@@ -1201,10 +1196,15 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         }
 
         $k = $abstract;
+        $i = 0;
 
-        while (isset($this->aliases[$abstract])) {
+        do {
             $abstract = $this->aliases[$abstract];
-        }
+
+            if (++$i > 100) {
+                throw new \RuntimeException('Circular alias detected for ' . $k);
+            }
+        } while (isset($this->aliases[$abstract]));
 
         return $this->alreadyRetrievedAliases[$k] = $abstract;
     }
@@ -1239,8 +1239,8 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function dropStaleInstances($abstract)
     {
-        unset($this->instances[$abstract], $this->aliases[$abstract]);
-        $this->alreadyRetrievedAliases = [];
+        unset($this->instances[$abstract]);
+        $this->removeAbstractAlias($abstract);
     }
 
     /**
