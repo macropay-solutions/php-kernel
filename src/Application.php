@@ -583,10 +583,9 @@ class Application extends Container implements ApplicationContract
         $alias = $this->getAlias($abstract);
 
         if (
-            !isset($this->bindings[$alias]) &&
-            !isset($this->instances[$alias]) &&
             isset($this->availableBindings[$alias]) &&
-            !isset($this->ranServiceBinders[$this->availableBindings[$alias]])
+            !isset($this->ranServiceBinders[$this->availableBindings[$alias]]) &&
+            !$this->inBindingsOrInstances($alias)
         ) {
             $this->{$this->availableBindings[$alias]}();
 
@@ -894,15 +893,15 @@ class Application extends Container implements ApplicationContract
      */
     public function configure($name): void
     {
+        if ($this->configurationIsCached()) {
+            return;
+        }
+
         if (isset($this->loadedConfigurations[$name])) {
             return;
         }
 
         $this->loadedConfigurations[$name] = true;
-
-        if ($this->configurationIsCached()) {
-            return;
-        }
 
         if ('' !== (string)($path = $this->getConfigurationPath($name))) {
             $this->make('config')->set($name, require $path);
