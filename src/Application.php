@@ -24,6 +24,7 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use MacropaySolutions\Kernel\Filesystem\FilesystemServiceProvider;
 use MacropaySolutions\Kernel\Hashing\HashServiceProvider;
 use MacropaySolutions\Kernel\Log\LogManager;
+use MacropaySolutions\Kernel\Notifications\NotificationServiceProvider;
 use MacropaySolutions\Kernel\Pagination\PaginationServiceProvider;
 use MacropaySolutions\Kernel\Queue\QueueServiceProvider;
 use MacropaySolutions\Kernel\Session\SessionServiceProvider;
@@ -171,6 +172,15 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\View\Factory::class => 'view',
         \MacropaySolutions\Kernel\View\Compilers\TemplateCompiler::class => 'template.compiler',
         \MacropaySolutions\Kernel\View\Engines\EngineResolver::class => 'view.engine.resolver',
+        \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class =>
+            \MacropaySolutions\Kernel\Broadcasting\BroadcastManager::class,
+        \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class => \MacropaySolutions\Kernel\Bus\Dispatcher::class,
+        \MacropaySolutions\Kernel\Contracts\Bus\QueueingDispatcher::class =>
+            \MacropaySolutions\Kernel\Bus\Dispatcher::class,
+        \MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher::class =>
+            \MacropaySolutions\Kernel\Notifications\ChannelManager::class,
+        \MacropaySolutions\Kernel\Contracts\Notifications\Factory::class =>
+            \MacropaySolutions\Kernel\Notifications\ChannelManager::class,
     ];
 
     /**
@@ -290,6 +300,17 @@ class Application extends Container implements ApplicationContract
         'view.engine.resolver' => [
             \MacropaySolutions\Kernel\View\Engines\EngineResolver::class,
         ],
+        \MacropaySolutions\Kernel\Broadcasting\BroadcastManager::class => [
+            \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class,
+        ],
+        \MacropaySolutions\Kernel\Bus\Dispatcher::class => [
+            \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class,
+            \MacropaySolutions\Kernel\Contracts\Bus\QueueingDispatcher::class,
+        ],
+        \MacropaySolutions\Kernel\Notifications\ChannelManager::class => [
+            \MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher::class,
+            \MacropaySolutions\Kernel\Contracts\Notifications\Factory::class,
+        ],
     ];
 
     /**
@@ -349,7 +370,10 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\Contracts\Auth\Access\Gate::class => 'registerAuthBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Broadcaster::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Broadcasting\Factory::class => 'registerBroadcastingBindings',
+        \MacropaySolutions\Kernel\Broadcasting\BroadcastManager::class => 'registerBroadcastingBindings',
         \MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class => 'registerBusBindings',
+        \MacropaySolutions\Kernel\Contracts\Bus\QueueingDispatcher::class => 'registerBusBindings',
+        \MacropaySolutions\Kernel\Bus\Dispatcher::class => 'registerBusBindings',
         'cache' => 'registerCacheBindings',
         'cache.store' => 'registerCacheBindings',
         \MacropaySolutions\Kernel\Contracts\Cache\Factory::class => 'registerCacheBindings',
@@ -386,6 +410,10 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\Session\Middleware\StartSession::class => 'registerSessionBindings',
 
         'cookie' => 'registerCookieBindings',
+
+        \MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher::class => 'registerNotificationBindings',
+        \MacropaySolutions\Kernel\Contracts\Notifications\Factory::class => 'registerNotificationBindings',
+        \MacropaySolutions\Kernel\Notifications\ChannelManager::class => 'registerNotificationBindings',
     ];
 
     /**
@@ -662,6 +690,11 @@ class Application extends Container implements ApplicationContract
     protected function registerBusBindings()
     {
         $this->register(BusServiceProvider::class);
+    }
+
+    protected function registerNotificationBindings(): void
+    {
+        $this->register(NotificationServiceProvider::class);
     }
 
     /**

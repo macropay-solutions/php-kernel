@@ -22,16 +22,6 @@ class BusServiceProvider extends ServiceProvider implements DeferrableProvider
         $this->app->singleton(Dispatcher::class, [self::class, 'getBusDispatcher']);
 
         $this->registerBatchServices();
-
-        $this->app->alias(
-            Dispatcher::class,
-            DispatcherContract::class
-        );
-
-        $this->app->alias(
-            Dispatcher::class,
-            QueueingDispatcherContract::class
-        );
     }
 
     public static function getBusDispatcher($app)

@@ -19,8 +19,6 @@ class BroadcastServiceProvider extends ServiceProvider implements DeferrableProv
         $this->app->singleton(BroadcastManager::class, [self::class, 'getBroadcastManager']);
 
         $this->app->singleton(BroadcasterContract::class, [self::class, 'getBroadcastManagerConnection']);
-
-        $this->app->alias(BroadcastManager::class, BroadcastingFactory::class);
     }
 
     public static function getBroadcastManager($app)

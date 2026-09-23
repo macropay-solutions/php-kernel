@@ -4,7 +4,6 @@ namespace MacropaySolutions\Kernel\Container;
 
 use ArrayAccess;
 use Exception;
-use LogicException;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException;
@@ -520,10 +519,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function alias($abstract, $alias)
     {
-        if ($alias === $abstract) {
-            throw new LogicException("[{$abstract}] is aliased to itself.");
-        }
-
         $this->removeAbstractAlias($alias);
 
         $this->aliases[$alias] = $abstract;
@@ -930,9 +925,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
 
         if (null === $callback && !\is_string($abstract)) {
             $this->globalBeforeResolvingCallbacks[] = $abstract;
-        } else {
-            $this->beforeResolvingCallbacks[$abstract][] = $callback;
+
+            return;
         }
+
+        $this->beforeResolvingCallbacks[$abstract][] = $callback;
     }
 
     /**

@@ -2,11 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Notifications;
 
-use MacropaySolutions\Kernel\Contracts\Notifications\Dispatcher as DispatcherContract;
-use MacropaySolutions\Kernel\Contracts\Notifications\Factory as FactoryContract;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
-class NotificationServiceProvider extends ServiceProvider
+class NotificationServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * Register the service provider.
@@ -16,20 +15,17 @@ class NotificationServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(ChannelManager::class, [self::class, 'getChannelManager']);
-
-        $this->app->alias(
-            ChannelManager::class,
-            DispatcherContract::class
-        );
-
-        $this->app->alias(
-            ChannelManager::class,
-            FactoryContract::class
-        );
     }
 
     public static function getChannelManager($app)
     {
         return new ChannelManager($app);
+    }
+
+    public function provides()
+    {
+        return [
+            ChannelManager::class,
+        ];
     }
 }
