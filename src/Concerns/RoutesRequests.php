@@ -4,15 +4,15 @@ namespace MacropaySolutions\Framework\Concerns;
 
 use Closure;
 use FastRoute\Dispatcher;
+use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
+use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
+use MacropaySolutions\Framework\Routing\Pipeline;
+use MacropaySolutions\Framework\Routing\Router;
 use MacropaySolutions\Kernel\Contracts\Support\Responsable;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
 use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Support\Arr;
-use MacropaySolutions\Framework\Http\Request as FrameworkRequest;
-use MacropaySolutions\Framework\Routing\Controller as FrameworkController;
-use MacropaySolutions\Framework\Routing\Pipeline;
-use MacropaySolutions\Framework\Routing\Router;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use RuntimeException;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
@@ -514,7 +514,7 @@ trait RoutesRequests
      */
     public function shouldSkipMiddleware(): bool
     {
-        return (static::$isDevEnv || $this->runningUnitTests()) &&
+        return static::$isDevEnv &&
             $this->bound('middleware.disable') &&
             $this->make('middleware.disable') === true;
     }
