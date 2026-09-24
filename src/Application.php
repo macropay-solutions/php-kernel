@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Framework;
 
+use Composer\InstalledVersions;
 use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
 use MacropaySolutions\Framework\Routing\Router;
 use MacropaySolutions\Kernel\Auth\Access\Gate;
@@ -426,10 +427,12 @@ class Application extends Container implements ApplicationContract
      */
     public function __construct($basePath = null)
     {
-        $this->basePath = $basePath;
+        if (\is_string($basePath)) {
+            $this->basePath = $basePath;
+        }
 
         static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
-        static::$isDevEnv = \class_exists(\MacropaySolutions\KernelDev\ServiceProvider::class);
+        static::$isDevEnv ??= (bool)(InstalledVersions::getRootPackage()['dev'] ?? false);
 
         $this->bootstrapContainer();
         $this->registerErrorHandling();
