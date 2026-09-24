@@ -313,7 +313,7 @@ abstract class GeneratorCommand extends Command implements PromptsForMissingInpu
     {
         $name = Str::replaceFirst($this->rootNamespace(), '', $name);
 
-        return $this->app->make('path') . '/' . str_replace('\\', '/', $name) . '.php';
+        return $this->app->path() . '/' . str_replace('\\', '/', $name) . '.php';
     }
 
     /**

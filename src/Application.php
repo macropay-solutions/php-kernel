@@ -123,6 +123,7 @@ class Application extends Container implements ApplicationContract
      * @var string[]
      */
     protected array $aliases = [
+        \MacropaySolutions\Framework\Application::class => 'app',
         \MacropaySolutions\Kernel\Contracts\Foundation\Application::class => 'app',
         \MacropaySolutions\Kernel\Contracts\Auth\Factory::class => 'auth',
         \MacropaySolutions\Kernel\Contracts\Auth\Guard::class => 'auth.driver',
@@ -190,6 +191,7 @@ class Application extends Container implements ApplicationContract
      */
     protected array $abstractAliases = [
         'app' => [
+            \MacropaySolutions\Framework\Application::class,
             \MacropaySolutions\Kernel\Contracts\Foundation\Application::class,
             \MacropaySolutions\Kernel\Container\Container::class,
             \MacropaySolutions\Kernel\Contracts\Container\Container::class,
@@ -446,11 +448,6 @@ class Application extends Container implements ApplicationContract
         $this->registerExplicitBindingsMap();
 
         $this->instance('app', $this);
-        $this->instance(self::class, $this);
-
-        $this->instance('path', $this->path());
-
-        $this->instance('env', $this->environment());
     }
 
     /**

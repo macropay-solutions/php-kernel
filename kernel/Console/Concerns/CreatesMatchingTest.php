@@ -39,7 +39,7 @@ trait CreatesMatchingTest
         }
 
         return $this->callSilent('make:test', [
-                'name' => Str::of($path)->after($this->app->make('path'))->beforeLast('.php')->append('Test')->replace(
+                'name' => Str::of($path)->after($this->app->path())->beforeLast('.php')->append('Test')->replace(
                     '\\',
                     '/'
                 ),
