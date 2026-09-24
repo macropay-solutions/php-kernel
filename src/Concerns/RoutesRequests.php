@@ -133,7 +133,7 @@ trait RoutesRequests
             $instance = $this->make(\explode(':', $middleware)[0]);
 
             if (\method_exists($instance, 'terminate')) {
-                $instance->terminate($this->instances[Request::class] ?? $this->resolve('request'), $response);
+                $instance->terminate($this->instances[Request::class] ?? $this->resolveString('request'), $response);
             }
         }
     }
@@ -152,7 +152,7 @@ trait RoutesRequests
                 $request,
                 $this->middleware,
                 function ($request) use ($method, $pathInfo) {
-                    if ($request !== ($this->instances[Request::class] ?? $this->resolve('request'))) {
+                    if ($request !== ($this->instances[Request::class] ?? $this->resolveString('request'))) {
                         $this->instance(Request::class, $request);
                     }
 
@@ -285,7 +285,7 @@ trait RoutesRequests
         $this->currentRoute = $routeInfo;
 
         /** @var Request $request*/
-        $request = $this->instances[Request::class] ?? $this->resolve('request');
+        $request = $this->instances[Request::class] ?? $this->resolveString('request');
         $action = $routeInfo[1];
 
         if (
@@ -472,7 +472,7 @@ trait RoutesRequests
     {
         if ([] !== $middleware && !$this->shouldSkipMiddleware()) {
             return (new Pipeline($this))
-                ->send($this->instances[Request::class] ?? $this->resolve('request'))
+                ->send($this->instances[Request::class] ?? $this->resolveString('request'))
                 ->through($middleware)
                 ->then($then);
         }
@@ -506,7 +506,7 @@ trait RoutesRequests
             return $response->prepare(Request::capture());
         }
 
-        return $response->prepare($this->instances[Request::class] ?? $this->resolve('request'));
+        return $response->prepare($this->instances[Request::class] ?? $this->resolveString('request'));
     }
 
     /**
@@ -522,7 +522,7 @@ trait RoutesRequests
     protected function prePrepareResponse(mixed $response): SymfonyResponse
     {
         if ($response instanceof Responsable) {
-            $response = $response->toResponse($this->instances[Request::class] ?? $this->resolve('request'));
+            $response = $response->toResponse($this->instances[Request::class] ?? $this->resolveString('request'));
         }
 
         if ($response instanceof PsrResponseInterface) {

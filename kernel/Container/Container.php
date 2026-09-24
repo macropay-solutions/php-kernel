@@ -256,9 +256,18 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function isShared($abstract)
     {
-        return isset($this->instances[$abstract]) ||
-            (isset($this->bindings[$abstract]['shared']) &&
-                $this->bindings[$abstract]['shared'] === true);
+        return isset($this->instances[$abstract]) || $this->isBoundAsShared($abstract);
+    }
+
+    /**
+     * Determine if a given type is bound shared.
+     *
+     * @param string $abstract
+     * @return bool
+     */
+    public function isBoundAsShared($abstract)
+    {
+        return isset($this->bindings[$abstract]['shared']) && $this->bindings[$abstract]['shared'] === true;
     }
 
     /**
@@ -432,7 +441,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function isInInstances(string $abstract, mixed $instance, bool $resolve = true): bool
     {
-        return $instance === ($this->instances[$abstract] ?? ($resolve ? $this->resolve($abstract) : null));
+        return $instance === ($this->instances[$abstract] ?? ($resolve ? $this->make($abstract) : null));
     }
 
     /**
@@ -631,7 +640,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public function get(string $id)
     {
         try {
-            return $this->resolve($id);
+            return $this->resolveString($id);
         } catch (Exception $e) {
             if ($this->has($id) || $e instanceof CircularDependencyException) {
                 throw $e;
@@ -708,20 +717,18 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function resolveFinalString(string $abstract, array $parameters, bool $raiseEvents = true): mixed
     {
+        // If an instance of the type is currently being managed as a singleton we'll
+        // just return an existing instance instead of instantiating new instances
+        // so the developer can keep using the same objects instance every time.
+        if (isset($this->instances[$abstract]) && [] === $parameters) {
+            return $this->instances[$abstract];
+        }
+
         // First we'll fire any event handlers which handle the "before" resolving of
         // specific types. This gives some hooks the chance to add various extends
         // calls to change the resolution of objects that they're interested in.
         if ($raiseEvents) {
             $this->fireBeforeResolvingCallbacks($abstract, $parameters);
-        }
-
-        $hasParameterOverrides = [] !== $parameters;
-
-        // If an instance of the type is currently being managed as a singleton we'll
-        // just return an existing instance instead of instantiating new instances
-        // so the developer can keep using the same objects instance every time.
-        if (isset($this->instances[$abstract]) && !$hasParameterOverrides) {
-            return $this->instances[$abstract];
         }
 
         $concrete = $this->getConcrete($abstract);
@@ -743,7 +750,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // If the requested type is registered as a singleton we'll want to cache off
         // the instances in "memory" so we can return it later without creating an
         // entirely new instance of an object on each subsequent request for it.
-        if ($this->isShared($abstract) && !$hasParameterOverrides) {
+        if ($this->isBoundAsShared($abstract) && [] === $parameters) {
             $this->instances[$abstract] = $object;
         }
 
