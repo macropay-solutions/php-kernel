@@ -107,7 +107,7 @@ class Kernel implements KernelContract
         }
 
         $app->instance(
-            'request',
+            Request::class,
             Request::create(
                 $uri,
                 'GET',
