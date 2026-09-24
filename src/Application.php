@@ -425,7 +425,7 @@ class Application extends Container implements ApplicationContract
      */
     public function __construct(?string $basePath = null)
     {
-        $this->basePath = $basePath ?? ($this->runningInConsole() ? \getcwd() : \realpath(\getcwd() . '/../'));
+        $this->basePath = $basePath ?? (string)($this->runningInConsole() ? \getcwd() : \realpath(\getcwd() . '/../'));
 
         static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
         static::$isDevEnv = \class_exists(\MacropaySolutions\KernelDev\ServiceProvider::class);
