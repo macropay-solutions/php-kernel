@@ -20,6 +20,7 @@ use MacropaySolutions\Kernel\Console\Scheduling\ScheduleRunCommand;
 use MacropaySolutions\Kernel\Console\Scheduling\ScheduleWorkCommand;
 use MacropaySolutions\Kernel\Console\ViewCacheCommand;
 use MacropaySolutions\Kernel\Console\ViewClearCommand;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Database\Console\Migrations\FreshCommand as MigrateFreshCommand;
 use MacropaySolutions\Kernel\Database\Console\Migrations\InstallCommand as MigrateInstallCommand;
 use MacropaySolutions\Kernel\Database\Console\Migrations\MigrateCommand;
@@ -48,7 +49,7 @@ use MacropaySolutions\KernelDev\Queue\Console\BatchesTableCommand;
 use MacropaySolutions\KernelDev\Queue\Console\FailedTableCommand;
 use MacropaySolutions\KernelDev\Queue\Console\TableCommand;
 
-class ConsoleServiceProvider extends ServiceProvider
+class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * The commands to be registered.

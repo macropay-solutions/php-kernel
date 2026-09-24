@@ -883,25 +883,6 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Configure and load the given component and provider.
-     *
-     * @param string $config
-     * @param array|string $providers
-     * @param string|null $return
-     * @return mixed
-     */
-    public function loadComponent($config, $providers, $return = null)
-    {
-        $this->configure($config);
-
-        foreach ((array)$providers as $provider) {
-            $this->register($provider);
-        }
-
-        return $this->make($return ?: $config);
-    }
-
-    /**
      * Load a configuration file into the application.
      *
      * @param string $name
