@@ -539,14 +539,11 @@ class Application extends Container implements ApplicationContract
 
     /**
      * Boot the given service provider.
-     *
-     * @param \MacropaySolutions\Kernel\Support\ServiceProvider $provider
-     * @return mixed
      */
-    protected function bootProvider(ServiceProvider $provider)
+    protected function bootProvider(ServiceProvider $provider): void
     {
         if (!$provider instanceof DeferrableProvider) {
-            return $provider->boot();
+            $provider->boot();
         }
     }
 
