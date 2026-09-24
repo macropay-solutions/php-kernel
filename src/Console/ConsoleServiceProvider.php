@@ -28,7 +28,6 @@ use MacropaySolutions\Kernel\Database\Console\Migrations\RefreshCommand as Migra
 use MacropaySolutions\Kernel\Database\Console\Migrations\ResetCommand as MigrateResetCommand;
 use MacropaySolutions\Kernel\Database\Console\Migrations\RollbackCommand as MigrateRollbackCommand;
 use MacropaySolutions\Kernel\Database\Console\Migrations\StatusCommand as MigrateStatusCommand;
-use MacropaySolutions\Kernel\Database\Console\Seeds\SeedCommand;
 use MacropaySolutions\Kernel\Queue\Console\ClearCommand as ClearQueueCommand;
 use MacropaySolutions\Kernel\Queue\Console\FailJobCommand as QueueFailJobCommand;
 use MacropaySolutions\Kernel\Queue\Console\FlushFailedCommand as FlushFailedQueueCommand;
@@ -42,6 +41,7 @@ use MacropaySolutions\Kernel\Support\ServiceProvider;
 use MacropaySolutions\KernelDev\Cache\Console\CacheTableCommand;
 use MacropaySolutions\KernelDev\Database\Console\DumpCommand;
 use MacropaySolutions\KernelDev\Database\Console\Migrations\MigrateMakeCommand;
+use MacropaySolutions\KernelDev\Database\Console\Seeds\SeedCommand;
 use MacropaySolutions\KernelDev\Database\Console\Seeds\SeederMakeCommand;
 use MacropaySolutions\KernelDev\Database\Console\WipeCommand;
 use MacropaySolutions\KernelDev\Foundation\Console\AboutCommand;
