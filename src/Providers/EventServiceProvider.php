@@ -4,7 +4,6 @@ namespace MacropaySolutions\Framework\Providers;
 
 use MacropaySolutions\Kernel\Console\DiscoverEvents;
 use MacropaySolutions\Kernel\Console\DiscoverEventsAsObservers;
-use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 

@@ -15,6 +15,7 @@ use MacropaySolutions\Kernel\Container\EntryNotFoundException;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException;
 use MacropaySolutions\Kernel\Contracts\Foundation\Application as ApplicationContract;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Cookie\CookieServiceProvider;
 use MacropaySolutions\Kernel\Database\DatabaseServiceProvider;
 use MacropaySolutions\Kernel\Database\MigrationServiceProvider;
@@ -544,8 +545,8 @@ class Application extends Container implements ApplicationContract
      */
     protected function bootProvider(ServiceProvider $provider)
     {
-        if (\method_exists($provider, 'boot')) {
-            return $this->call([$provider, 'boot']);
+        if (!$provider instanceof DeferrableProvider) {
+            return $provider->boot();
         }
     }
 
