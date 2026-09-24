@@ -290,13 +290,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
-     * Register dynamic middlewares or other non-binding map configurations.
-     */
-    protected function registerExplicitBindingsMap(): void
-    {
-    }
-
-    /**
      * Determine if the container has a method binding.
      *
      * @param string $method

@@ -430,23 +430,9 @@ class Application extends Container implements ApplicationContract
         static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
         static::$isDevEnv = \class_exists(\MacropaySolutions\KernelDev\ServiceProvider::class);
 
-        $this->bootstrapContainer();
+        $this->instances['app'] = parent::$instance = $this;
         $this->registerErrorHandling();
         $this->bootstrapRouter();
-    }
-
-    /**
-     * Bootstrap the application container.
-     *
-     * @return void
-     */
-    protected function bootstrapContainer()
-    {
-        static::setInstance($this);
-
-        $this->registerExplicitBindingsMap();
-
-        $this->instance('app', $this);
     }
 
     /**
