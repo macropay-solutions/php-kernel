@@ -429,7 +429,7 @@ class Application extends Container implements ApplicationContract
         $this->basePath = $basePath ?? ($this->runningInConsole() ? \getcwd() : \realpath(\getcwd() . '/../'));
 
         static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
-        static::$isDevEnv ??= (bool)(InstalledVersions::getRootPackage()['dev'] ?? false);
+        static::$isDevEnv ??= InstalledVersions::isInstalled('macropay-solutions/php-kernel-dev');
 
         $this->bootstrapContainer();
         $this->registerErrorHandling();
