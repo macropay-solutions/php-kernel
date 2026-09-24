@@ -514,7 +514,7 @@ trait RoutesRequests
      */
     public function shouldSkipMiddleware(): bool
     {
-        return static::$isDevEnv &&
+        return (static::$isDevEnv || $this->runningUnitTests()) &&
             $this->bound('middleware.disable') &&
             $this->make('middleware.disable') === true;
     }

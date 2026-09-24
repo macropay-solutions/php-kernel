@@ -422,14 +422,11 @@ class Application extends Container implements ApplicationContract
     /**
      * Create a new Framework application instance.
      *
-     * @param string|null $basePath
      * @return void
      */
-    public function __construct($basePath = null)
+    public function __construct(?string $basePath = null)
     {
-        if (\is_string($basePath)) {
-            $this->basePath = $basePath;
-        }
+        $this->basePath = $basePath ?? ($this->runningInConsole() ? \getcwd() : \realpath(\getcwd() . '/../'));
 
         static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
         static::$isDevEnv ??= (bool)(InstalledVersions::getRootPackage()['dev'] ?? false);
@@ -1019,17 +1016,7 @@ class Application extends Container implements ApplicationContract
      */
     public function basePath($path = '')
     {
-        if (isset($this->basePath)) {
-            return $this->basePath . ($path ? '/' . $path : $path);
-        }
-
-        if ($this->runningInConsole()) {
-            $this->basePath = getcwd();
-        } else {
-            $this->basePath = realpath(getcwd() . '/../');
-        }
-
-        return $this->basePath($path);
+        return $this->basePath . ($path ? '/' . $path : $path);
     }
 
     /**
