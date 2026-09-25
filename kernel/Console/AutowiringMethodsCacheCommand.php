@@ -5,7 +5,6 @@ namespace MacropaySolutions\Kernel\Console;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use MacropaySolutions\Kernel\Queue\CallQueuedHandler;
-use MacropaySolutions\Kernel\Support\ServiceProvider;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'autowiring:cache')]
@@ -325,10 +324,6 @@ PHP;
                 }
             } catch (\Throwable) {
             }
-        }
-
-        foreach ($this->app->getProviders(ServiceProvider::class) as $provider) {
-            $map[$provider::class] = ['boot'];
         }
 
         $globalMiddleware = ($frameworkReflector = new \ReflectionClass($this->app))

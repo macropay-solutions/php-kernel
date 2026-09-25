@@ -69,7 +69,7 @@ class ClearCommand extends Command
             [$this->argument('store'), $this->tags()]
         );
 
-        $successful = $this->cache()->flush();
+        $successful = $this->cache()->fwd()->flush();
 
         $this->flushFacades();
 
