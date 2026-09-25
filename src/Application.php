@@ -1347,7 +1347,7 @@ class Application extends Container implements ApplicationContract
         }
 
         foreach ($this->consoleProvider->provides() as $key) {
-            $this->availableBindings[$key] = 'registerConsoleServiceProvider' . \hash('sha256', $key);
+            $this->availableBindings[$key] = '__call' . \hash('xxh3', $key);
         }
 
         if (static::$isDevEnv) {
