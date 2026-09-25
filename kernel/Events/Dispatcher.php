@@ -82,6 +82,10 @@ class Dispatcher implements DispatcherContract, Macroable
         string|array $events,
         string|array|QueuedCallable|null $listener = null
     ): void {
+        if ([] === $events) {
+            return;
+        }
+
         if ($listener instanceof QueuedCallable) {
             $listener = $listener->resolve();
         }

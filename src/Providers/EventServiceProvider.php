@@ -4,10 +4,12 @@ namespace MacropaySolutions\Framework\Providers;
 
 use MacropaySolutions\Kernel\Console\DiscoverEvents;
 use MacropaySolutions\Kernel\Console\DiscoverEventsAsObservers;
+use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 
-class EventServiceProvider extends ServiceProvider
+class EventServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     /**
      * The event handler mappings for the application.
@@ -21,21 +23,14 @@ class EventServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // instances/singletons run their resolving events only once
+        $this->app->afterResolving('events', [$this, 'listen']);
     }
 
-    /**
-     * Register the application's event listeners.
-     *
-     * @return void
-     */
-    public function boot()
+    public function listen(Dispatcher $dispatcher, Container $app)
     {
-        /** @var Dispatcher $events */
-        $events = $this->app->make('events');
-
-        $events->listen($this->getEvents());
-        $events->listen($this->getEventsAsObservers());
+        $dispatcher->listen($this->getEvents());
+        $dispatcher->listen($this->getEventsAsObservers());
     }
 
     /**
