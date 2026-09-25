@@ -841,7 +841,13 @@ class Application extends Container implements ApplicationContract
 
     public static function getUrlGenerator($app)
     {
-        return new Routing\UrlGenerator($app);
+        $return = new Routing\UrlGenerator($app);
+
+        if (\str_starts_with($app->make('config')->get('app.url'), 'https://')) {
+            $return->forceScheme('https');
+        }
+
+        return $return;
     }
 
     /**
