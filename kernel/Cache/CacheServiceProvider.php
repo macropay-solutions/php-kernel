@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Cache;
 
+use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
 use Symfony\Component\Cache\Adapter\Psr16Adapter;
@@ -59,6 +60,7 @@ class CacheServiceProvider extends ServiceProvider implements DeferrableProvider
      * Get the services provided by the provider.
      *
      * @return array
+     * @see Application::$availableBindings add there a binding when you add to this method something
      */
     public function provides()
     {

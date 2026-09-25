@@ -379,6 +379,9 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\Bus\Dispatcher::class => 'registerBusBindings',
         'cache' => 'registerCacheBindings',
         'cache.store' => 'registerCacheBindings',
+        'cache.psr6' => 'registerCacheBindings',
+        'memcached.connector' => 'registerCacheBindings',
+        \MacropaySolutions\Kernel\Cache\RateLimiter::class => 'registerCacheBindings',
         \MacropaySolutions\Kernel\Contracts\Cache\Factory::class => 'registerCacheBindings',
         \MacropaySolutions\Kernel\Contracts\Cache\Repository::class => 'registerCacheBindings',
         'db' => 'registerDatabaseBindings',
@@ -396,6 +399,9 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\Contracts\Hashing\Hasher::class => 'registerHashBindings',
         'queue' => 'registerQueueBindings',
         'queue.connection' => 'registerQueueBindings',
+        'queue.worker' => 'registerQueueBindings',
+        'queue.listener' => 'registerQueueBindings',
+        'queue.failer' => 'registerQueueBindings',
         \MacropaySolutions\Kernel\Contracts\Queue\Factory::class => 'registerQueueBindings',
         \MacropaySolutions\Kernel\Contracts\Queue\Queue::class => 'registerQueueBindings',
         'translator' => 'registerTranslationBindings',
@@ -1085,9 +1091,12 @@ class Application extends Container implements ApplicationContract
     {
         $this->consoleProvider = new ConsoleServiceProvider($this);
 
-        if ($this->commandsAreCached()) {
-            $this->registerLazyAvailableBindings();
+        /**
+         * @see \MacropaySolutions\KernelDev\Support\IdeMetaGenerator
+         */
+        $this->registerLazyAvailableBindings();
 
+        if ($this->commandsAreCached()) {
             return;
         }
 
@@ -1336,14 +1345,6 @@ class Application extends Container implements ApplicationContract
 
     protected function registerLazyAvailableBindings(): void
     {
-        foreach ((new CacheServiceProvider($this))->provides() as $key) {
-            $this->availableBindings[$key] = 'registerCacheBindings';
-        }
-
-        foreach ((new QueueServiceProvider($this))->provides() as $key) {
-            $this->availableBindings[$key] = 'registerQueueBindings';
-        }
-
         foreach ((new MigrationServiceProvider($this))->provides() as $key) {
             $this->availableBindings[$key] = 'registerMigrationServiceProvider';
         }
