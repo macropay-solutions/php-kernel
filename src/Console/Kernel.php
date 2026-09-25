@@ -30,11 +30,11 @@ class Kernel implements KernelContract
     protected $app;
 
     /**
-     * The Symfony event dispatcher implementation.
+     * The Kernel event dispatcher implementation.
      *
      * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface|null
      */
-    protected $symfonyDispatcher;
+    protected $kernelDispatcher;
 
     /**
      * The ConsoleApp application instance.
@@ -121,11 +121,11 @@ class Kernel implements KernelContract
      */
     public function rerouteSymfonyCommandEvents()
     {
-        if (is_null($this->symfonyDispatcher)) {
+        if (is_null($this->kernelDispatcher)) {
 //            $this->symfonyDispatcher = new EventDispatcher;
-            $this->symfonyDispatcher = \di(EventDispatcher::class);
+            $this->kernelDispatcher = \di(EventDispatcher::class);
 
-            $this->symfonyDispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) {
+            $this->kernelDispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) {
                 $this->app->make(Dispatcher::class)->dispatch(
 //                    new CommandStarting($event->getCommand()->getName(), $event->getInput(), $event->getOutput())
                     \di(
@@ -135,7 +135,7 @@ class Kernel implements KernelContract
                 );
             });
 
-            $this->symfonyDispatcher->addListener(ConsoleEvents::TERMINATE, function (ConsoleTerminateEvent $event) {
+            $this->kernelDispatcher->addListener(ConsoleEvents::TERMINATE, function (ConsoleTerminateEvent $event) {
                 $this->app->make(Dispatcher::class)->dispatch(
                     //new CommandFinished(
                     //$event->getCommand()->getName(),
@@ -302,8 +302,8 @@ class Kernel implements KernelContract
 
             $this->consoleApp->setContainerCommandLoader();
 
-            if ($this->symfonyDispatcher instanceof EventDispatcher) {
-                $this->consoleApp->setDispatcher($this->symfonyDispatcher);
+            if ($this->kernelDispatcher instanceof EventDispatcher) {
+                $this->consoleApp->setDispatcher($this->kernelDispatcher);
                 $this->consoleApp->setSignalsToDispatchEvent();
             }
         }
