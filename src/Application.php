@@ -1091,12 +1091,9 @@ class Application extends Container implements ApplicationContract
     {
         $this->consoleProvider = new ConsoleServiceProvider($this);
 
-        /**
-         * @see \MacropaySolutions\KernelDev\Support\IdeMetaGenerator
-         */
-        $this->registerLazyAvailableBindings();
-
         if ($this->commandsAreCached()) {
+            $this->registerLazyAvailableBindings();
+
             return;
         }
 
