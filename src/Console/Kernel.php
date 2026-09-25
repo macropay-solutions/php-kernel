@@ -44,13 +44,6 @@ class Kernel implements KernelContract
     protected $consoleApp;
 
     /**
-     * Indicates if facade aliases are enabled for the console.
-     *
-     * @var bool
-     */
-    protected $aliases = true;
-
-    /**
      * The Run commands provided by the application.
      *
      * @var array
@@ -73,7 +66,7 @@ class Kernel implements KernelContract
             $this->rerouteSymfonyCommandEvents();
         }
 
-        $this->app->prepareForConsoleCommand($this->aliases);
+        $this->app->prepareForConsoleCommand();
         $this->defineConsoleSchedule();
     }
 

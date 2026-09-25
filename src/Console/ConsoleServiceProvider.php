@@ -118,12 +118,33 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
      */
     public function register()
     {
-        $this->registerCommands(
+        if (!$this->app->commandsAreCached()) {
+            $this->registerCommands(
+                $this->app::isDevEnv() ? \array_merge(
+                    $this->commands,
+                    $this->devCommands
+                ) : $this->commands
+            );
+        }
+    }
+
+    public function registerCommand(string $abstract): void
+    {
+        $commands = \array_intersect(
             $this->app::isDevEnv() ? \array_merge(
                 $this->commands,
                 $this->devCommands
-            ) : $this->commands
+            ) : $this->commands,
+            [$abstract]
         );
+
+        if ($commands === []) {
+            throw new \InvalidArgumentException(
+                'Unknown console command binding [' . $abstract . '].'
+            );
+        }
+
+        $this->registerCommands($commands);
     }
 
     /**

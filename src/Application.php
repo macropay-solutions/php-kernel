@@ -419,6 +419,8 @@ class Application extends Container implements ApplicationContract
         \MacropaySolutions\Kernel\Notifications\ChannelManager::class => 'registerNotificationBindings',
     ];
 
+    protected ConsoleServiceProvider $consoleProvider;
+
     /**
      * Create a new Framework application instance.
      *
@@ -595,7 +597,7 @@ class Application extends Container implements ApplicationContract
             !isset($this->ranServiceBinders[$this->availableBindings[$alias]]) &&
             !$this->inBindingsOrInstances($alias)
         ) {
-            $this->{$this->availableBindings[$alias]}();
+            $this->{$this->availableBindings[$alias]}($alias);
 
             $this->ranServiceBinders[$this->availableBindings[$alias]] = true;
         }
@@ -1077,22 +1079,56 @@ class Application extends Container implements ApplicationContract
     /**
      * Prepare the application to execute a console command.
      *
-     * @param bool $aliases
      * @return void
      */
-    public function prepareForConsoleCommand($aliases = true)
+    public function prepareForConsoleCommand()
     {
+        $this->consoleProvider = new ConsoleServiceProvider($this);
+
+        if ($this->commandsAreCached()) {
+            $this->registerLazyAvailableBindings();
+
+            return;
+        }
+
         $this->make('cache');
         $this->make('queue');
 
         $this->configure('database');
 
         $this->register(MigrationServiceProvider::class);
-        $this->register(ConsoleServiceProvider::class);
+        $this->register($this->consoleProvider);
 
         if (static::$isDevEnv) {
-            $this->register(\MacropaySolutions\KernelDev\ServiceProvider::class);
+            $this->registerDevConsoleProviders();
         }
+    }
+
+    public function __call(string $method, array $parameters)
+    {
+        $abstract = \reset($parameters);
+
+        if (
+            !isset($this->availableBindings[$abstract]) ||
+            $this->availableBindings[$abstract] !== $method
+        ) {
+            throw new \BadMethodCallException(
+                static::class . '::' . $method . ' not found.'
+            );
+        }
+
+        if (!$this->providerIsLoaded($this->consoleProvider::class)) {
+            $this->configure('database');
+            $this->register($this->consoleProvider);
+        }
+
+        $this->consoleProvider->registerCommand($abstract);
+    }
+
+    public function registerMigrationServiceProvider()
+    {
+        $this->configure('database');
+        $this->register(MigrationServiceProvider::class);
     }
 
     /**
@@ -1296,5 +1332,34 @@ class Application extends Container implements ApplicationContract
     public function environmentFilePath(): string
     {
         return $this->basePath('.env');
+    }
+
+    protected function registerLazyAvailableBindings(): void
+    {
+        foreach ((new CacheServiceProvider($this))->provides() as $key) {
+            $this->availableBindings[$key] = 'registerCacheBindings';
+        }
+
+        foreach ((new QueueServiceProvider($this))->provides() as $key) {
+            $this->availableBindings[$key] = 'registerQueueBindings';
+        }
+
+        foreach ((new MigrationServiceProvider($this))->provides() as $key) {
+            $this->availableBindings[$key] = 'registerMigrationServiceProvider';
+        }
+
+        foreach ($this->consoleProvider->provides() as $key) {
+            $this->availableBindings[$key] = 'registerConsoleServiceProvider' . \hash('sha256', $key);
+        }
+
+        if (static::$isDevEnv) {
+            $this->configure('database');
+            $this->registerDevConsoleProviders();
+        }
+    }
+
+    protected function registerDevConsoleProviders(): void
+    {
+        $this->register(\MacropaySolutions\KernelDev\ServiceProvider::class);
     }
 }

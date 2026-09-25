@@ -50,8 +50,11 @@ class CommandsCacheCommand extends Command
                 return;
             }
 
-            \pclose(\popen('php run commands:clear', 'r'));
-            \pclose(\popen('php run ' . $this->name . ' --is-retry', 'r'));
+            $php = \PHP_BINARY;
+            $run = $this->app->basePath('run'); // Assuming your Application has a basePath method
+
+            \pclose(\popen("{$php} {$run} commands:clear", 'r'));
+            \pclose(\popen("{$php} {$run} {$this->name} --is-retry", 'r'));
 
             \clearstatcache();
 
