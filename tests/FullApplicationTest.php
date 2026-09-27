@@ -401,8 +401,8 @@ class FullApplicationTest extends TestCase
         };
 
         $app->register($provider);
-        $app->boot();
-        $app->boot();
+        $app->boot([$provider::class]);
+        $app->boot([$provider::class]);
         $this->assertEquals(1, $provider->bootCount);
     }
 
