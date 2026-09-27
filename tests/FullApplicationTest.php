@@ -372,7 +372,7 @@ class FullApplicationTest extends TestCase
         $app->register($provider);
 
         $this->assertFalse($provider->booted);
-        $app->boot();
+        $app->boot([$provider::class]);
         $this->assertTrue($provider->booted);
     }
 
@@ -380,9 +380,12 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
         $provider = new FrameworkBootableTestServiceProvider($app);
+        $providerDeferred = new FrameworkNotBootableTestServiceProvider($app);
         $app->boot();
         $app->register($provider);
-        $this->assertTrue($provider->booted);
+        $app->register($provider);
+        $this->assertFalse($provider->booted);
+        $this->assertFalse($providerDeferred->booted);
     }
 
     public function testApplicationBootsOnlyOnce()
@@ -403,13 +406,13 @@ class FullApplicationTest extends TestCase
         $this->assertEquals(1, $provider->bootCount);
     }
 
-    public function testApplicationBootsWhenRequestIsDispatched()
+    public function testApplicationDoesNotBootWhenRequestIsDispatched()
     {
         $app = new Application();
         $provider = new FrameworkBootableTestServiceProvider($app);
         $app->register($provider);
         $resp = $app->dispatch(Request::create('/'));
-        $this->assertTrue($provider->booted);
+        $this->assertFalse($provider->booted);
     }
 
     public function testUsingCustomDispatcher()
@@ -916,6 +919,11 @@ class FrameworkBootableTestServiceProvider extends MacropaySolutions\Kernel\Supp
     {
         $this->booted = true;
     }
+}
+
+class FrameworkNotBootableTestServiceProvider extends FrameworkBootableTestServiceProvider
+    implements \MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider
+{
 }
 
 class FrameworkTestController

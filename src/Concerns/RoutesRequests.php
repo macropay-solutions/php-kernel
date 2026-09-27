@@ -16,7 +16,6 @@ use MacropaySolutions\Kernel\Support\Arr;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use RuntimeException;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -96,7 +95,7 @@ trait RoutesRequests
     /**
      * Run the application and send the response.
      */
-    public function run(?FrameworkRequest $request = null): void
+    public function run(FrameworkRequest $request): void
     {
         $response = $this->dispatch($request);
 
@@ -146,8 +145,6 @@ trait RoutesRequests
         [$method, $pathInfo] = $this->parseIncomingRequest($request);
 
         try {
-            $this->boot();
-
             return $this->prepareResponse($this->sendRequestThroughPipeline(
                 $request,
                 $this->middleware,
@@ -500,13 +497,8 @@ trait RoutesRequests
      */
     public function prepareResponse($response)
     {
-        $response = $this->prePrepareResponse($response);
-
-        if ($response instanceof BinaryFileResponse) {
-            return $response->prepare(Request::capture());
-        }
-
-        return $response->prepare($this->instances[Request::class] ?? $this->resolveString('request'));
+        return $this->prePrepareResponse($response)
+            ->prepare($this->instances[Request::class] ?? $this->resolveString('request'));
     }
 
     /**

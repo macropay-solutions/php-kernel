@@ -125,18 +125,8 @@ interface Application extends Container
 
     /**
      * Boot the application's service providers.
-     *
-     * @return void
      */
-    public function boot();
-
-    /**
-     * Run the given array of bootstrap classes.
-     *
-     * @param array $bootstrappers
-     * @return void
-     */
-    public function bootstrapWith(array $bootstrappers);
+    public function boot(array $nonDeferrableProviders = []): self;
 
     /**
      * Get the current application locale.
@@ -161,13 +151,6 @@ interface Application extends Container
      * @return array
      */
     public function getProviders($provider);
-
-    /**
-     * Determine if the application has been bootstrapped before.
-     *
-     * @return bool
-     */
-    public function hasBeenBootstrapped();
 
     /**
      * Set the current application locale.

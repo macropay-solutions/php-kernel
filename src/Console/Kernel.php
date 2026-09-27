@@ -2,6 +2,8 @@
 
 namespace MacropaySolutions\Framework\Console;
 
+use MacropaySolutions\Framework\Application;
+use MacropaySolutions\Framework\Exceptions\Handler;
 use MacropaySolutions\Kernel\Console\Application as ConsoleApp;
 use MacropaySolutions\Kernel\Console\Events\CommandFinished;
 use MacropaySolutions\Kernel\Console\Events\CommandStarting;
@@ -11,8 +13,6 @@ use MacropaySolutions\Kernel\Contracts\Console\Kernel as KernelContract;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Http\Request;
-use MacropaySolutions\Framework\Application;
-use MacropaySolutions\Framework\Exceptions\Handler;
 use RuntimeException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -184,8 +184,6 @@ class Kernel implements KernelContract
     public function handle($input, $output = null)
     {
         try {
-            $this->app->boot();
-
             $status = $this->getConsoleApp()->run($input, $output);
         } catch (Throwable $e) {
             $this->reportException($e);

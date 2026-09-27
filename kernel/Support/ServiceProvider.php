@@ -54,14 +54,6 @@ abstract class ServiceProvider
     }
 
     /**
-     * @return void
-     */
-    public function boot()
-    {
-        //
-    }
-
-    /**
      * Register a booting callback to be run before the "boot" method is called.
      *
      * @param \Closure $callback

@@ -505,9 +505,8 @@ class Application extends Container implements ApplicationContract
     public function register($provider, $force = false): void
     {
         if (
-            \array_key_exists(
-                $providerName = \is_object($provider) ? $provider::class : \ltrim($provider, '\\'),
-                $this->loadedProviders
+            $this->providerIsLoaded(
+                $providerName = \is_object($provider) ? $provider::class : \ltrim($provider, '\\')
             )
         ) {
             return;
@@ -520,29 +519,27 @@ class Application extends Container implements ApplicationContract
         $this->loadedProviders[$providerName] = $provider;
 
         $provider->register();
-
-        if ($this->booted) {
-            $this->bootProvider($provider);
-        }
     }
 
     /**
      * Boots the registered providers.
      */
-    public function boot()
+    public function boot(array $nonDeferrableProviders = []): static
     {
         if ($this->booted) {
-            return;
+            return $this;
         }
 
         static::$circularDependencyMemoryLimit =
             (int)$this->make('config')->get('app.circular_dependency_memory_limit', 0);
 
-        foreach ($this->loadedProviders as $provider) {
+        foreach (\array_intersect_key($this->loadedProviders, \array_flip($nonDeferrableProviders)) as $provider) {
             $this->bootProvider($provider);
         }
 
         $this->booted = true;
+
+        return $this;
     }
 
     /**
@@ -551,6 +548,7 @@ class Application extends Container implements ApplicationContract
     protected function bootProvider(ServiceProvider $provider): void
     {
         if (!$provider instanceof DeferrableProvider) {
+            // if boot is not defined this call will throw.
             $provider->boot();
         }
     }
@@ -1307,14 +1305,6 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritDoc
      */
-    public function bootstrapWith(array $bootstrappers): void
-    {
-        $this->hasBeenBootstrapped = true;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getProviders($provider): array
     {
         $name = \is_string($provider) ? $provider : \get_class($provider);
@@ -1328,14 +1318,6 @@ class Application extends Container implements ApplicationContract
         }
 
         return $result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasBeenBootstrapped(): bool
-    {
-        return $this->hasBeenBootstrapped;
     }
 
     /**
