@@ -372,7 +372,7 @@ class FullApplicationTest extends TestCase
         $app->register($provider);
 
         $this->assertFalse($provider->booted);
-        $app->boot([$provider::class]);
+        $app->boot($provider);
         $this->assertTrue($provider->booted);
     }
 
@@ -401,8 +401,8 @@ class FullApplicationTest extends TestCase
         };
 
         $app->register($provider);
-        $app->boot([$provider::class]);
-        $app->boot([$provider::class]);
+        $app->boot($provider);
+        $app->boot($provider);
         $this->assertEquals(1, $provider->bootCount);
     }
 

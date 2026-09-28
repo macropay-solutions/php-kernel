@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Contracts\Foundation;
 
 use MacropaySolutions\Kernel\Contracts\Container\Container;
+use MacropaySolutions\Kernel\Support\ServiceProvider;
 
 interface Application extends Container
 {
@@ -110,10 +111,9 @@ interface Application extends Container
      * Register a service provider with the application.
      *
      * @param \MacropaySolutions\Kernel\Support\ServiceProvider|string $provider
-     * @param bool $force
      * @return \MacropaySolutions\Kernel\Support\ServiceProvider
      */
-    public function register($provider, $force = false);
+    public function register($provider);
 
     /**
      * Resolve a service provider instance from the class name.
@@ -126,7 +126,7 @@ interface Application extends Container
     /**
      * Boot the application's service providers.
      */
-    public function boot(array $nonDeferrableProviders = []): self;
+    public function boot(string|ServiceProvider ...$providers): self;
 
     /**
      * Get the current application locale.

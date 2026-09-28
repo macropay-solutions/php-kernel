@@ -72,11 +72,6 @@ class Application extends Container implements ApplicationContract
     protected $loadedConfigurations = [];
 
     /**
-     * Indicates if the application has been bootstrapped before.
-     */
-    protected bool $hasBeenBootstrapped = false;
-
-    /**
      * The loaded service providers.
      *
      * @var array
@@ -502,7 +497,7 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritdoc
      */
-    public function register($provider, $force = false): void
+    public function register($provider): void
     {
         if (
             $this->providerIsLoaded(
@@ -524,7 +519,7 @@ class Application extends Container implements ApplicationContract
     /**
      * Boots the registered providers.
      */
-    public function boot(array $nonDeferrableProviders = []): static
+    public function boot(string|ServiceProvider ...$providers): static
     {
         if ($this->booted) {
             return $this;
@@ -533,24 +528,16 @@ class Application extends Container implements ApplicationContract
         static::$circularDependencyMemoryLimit =
             (int)$this->make('config')->get('app.circular_dependency_memory_limit', 0);
 
-        foreach (\array_intersect_key($this->loadedProviders, \array_flip($nonDeferrableProviders)) as $provider) {
-            $this->bootProvider($provider);
+        foreach ($providers as $provider) {
+            // if boot is not defined this call will throw.
+            ($provider instanceof ServiceProvider ? $provider : (
+                $this->loadedProviders[$provider] ?? new $provider($this)
+            ))->boot();
         }
 
         $this->booted = true;
 
         return $this;
-    }
-
-    /**
-     * Boot the given service provider.
-     */
-    protected function bootProvider(ServiceProvider $provider): void
-    {
-        if (!$provider instanceof DeferrableProvider) {
-            // if boot is not defined this call will throw.
-            $provider->boot();
-        }
     }
 
     /**

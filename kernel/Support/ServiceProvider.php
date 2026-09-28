@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Support;
 
-use Closure;
 use MacropaySolutions\Kernel\Console\Application as ConsoleApp;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesConfiguration;
 use MacropaySolutions\Kernel\Contracts\Foundation\CachesRoutes;
@@ -17,20 +16,6 @@ abstract class ServiceProvider
      * @var \MacropaySolutions\Kernel\Contracts\Foundation\Application
      */
     protected $app;
-
-    /**
-     * All the registered booting callbacks.
-     *
-     * @var array
-     */
-    protected $bootingCallbacks = [];
-
-    /**
-     * All the registered booted callbacks.
-     *
-     * @var array
-     */
-    protected $bootedCallbacks = [];
 
     /**
      * Create a new service provider instance.
@@ -51,60 +36,6 @@ abstract class ServiceProvider
     public function register()
     {
         //
-    }
-
-    /**
-     * Register a booting callback to be run before the "boot" method is called.
-     *
-     * @param \Closure $callback
-     * @return void
-     */
-    public function booting(Closure $callback)
-    {
-        $this->bootingCallbacks[] = $callback;
-    }
-
-    /**
-     * Register a booted callback to be run after the "boot" method is called.
-     *
-     * @param \Closure $callback
-     * @return void
-     */
-    public function booted(Closure $callback)
-    {
-        $this->bootedCallbacks[] = $callback;
-    }
-
-    /**
-     * Call the registered booting callbacks.
-     *
-     * @return void
-     */
-    public function callBootingCallbacks()
-    {
-        $index = 0;
-
-        while ($index < count($this->bootingCallbacks)) {
-            $this->app->call($this->bootingCallbacks[$index]);
-
-            $index++;
-        }
-    }
-
-    /**
-     * Call the registered booted callbacks.
-     *
-     * @return void
-     */
-    public function callBootedCallbacks()
-    {
-        $index = 0;
-
-        while ($index < count($this->bootedCallbacks)) {
-            $this->app->call($this->bootedCallbacks[$index]);
-
-            $index++;
-        }
     }
 
     /**
