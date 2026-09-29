@@ -12,6 +12,7 @@ use MacropaySolutions\Kernel\Console\Scheduling\ScheduleRunCommand;
 use MacropaySolutions\Kernel\Contracts\Console\Kernel as KernelContract;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
+use MacropaySolutions\Kernel\Http\ConsoleRequestMock;
 use MacropaySolutions\Kernel\Http\Request;
 use RuntimeException;
 use Symfony\Component\Console\ConsoleEvents;
@@ -60,11 +61,9 @@ class Kernel implements KernelContract
     {
         $this->app = $app;
 
-        if ($this->app->runningInConsole()) {
-            $this->setRequestForConsole($this->app);
-        } else {
+        $this->app->runningInConsole() && !$this->app->bound(Request::class) ?
+            $this->setRequestForConsole($this->app) :
             $this->rerouteSymfonyCommandEvents();
-        }
 
         $this->app->prepareForConsoleCommand();
         $this->defineConsoleSchedule();
@@ -101,7 +100,7 @@ class Kernel implements KernelContract
 
         $app->instance(
             Request::class,
-            Request::create(
+            ConsoleRequestMock::create(
                 $uri,
                 'GET',
                 [],

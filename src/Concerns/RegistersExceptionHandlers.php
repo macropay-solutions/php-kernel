@@ -5,6 +5,8 @@ namespace MacropaySolutions\Framework\Concerns;
 use ErrorException;
 use Exception;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
+use MacropaySolutions\Kernel\Http\ConsoleRequestMock;
+use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Log\LogManager;
 use MacropaySolutions\Framework\Exceptions\Handler;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -212,11 +214,18 @@ trait RegistersExceptionHandlers
 
         $handler->report($e);
 
-        if ($this->runningInConsole()) {
+        if (
+            $this->runningInConsole() && (
+                !isset($this->instances[Request::class]) ||
+                $this->instances[Request::class] instanceof ConsoleRequestMock
+            )
+        ) {
             $handler->renderForConsole(new ConsoleOutput(), $e);
-        } else {
-            $handler->render($this->make('request'), $e)->send();
+
+            return;
         }
+
+        $handler->render($this->make('request'), $e)->send();
     }
 
     /**

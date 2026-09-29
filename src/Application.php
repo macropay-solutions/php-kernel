@@ -579,6 +579,18 @@ class Application extends Container implements ApplicationContract
         return parent::makeWithoutAlias($abstract, $parameters);
     }
 
+    public function preRegisterAllAvailableBindings(): static
+    {
+        foreach ($this->availableBindings as $abstract => $method) {
+            try {
+                $this->handleDeferredProvidersAndReturnAlias($abstract);
+            } catch (\Throwable) {
+            }
+        }
+
+        return $this;
+    }
+
     protected function handleDeferredProvidersAndReturnAlias(string $abstract): string
     {
         $alias = $this->getAlias($abstract);
