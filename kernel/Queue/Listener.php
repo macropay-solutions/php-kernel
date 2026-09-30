@@ -161,7 +161,6 @@ class Listener
             "--memory={$options->memory}",
             "--sleep={$options->sleep}",
             "--tries={$options->maxTries}",
-            $options->force ? '--force' : null,
         ], function ($value) {
             return !is_null($value);
         });
