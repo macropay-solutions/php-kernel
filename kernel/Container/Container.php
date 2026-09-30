@@ -34,6 +34,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public const SERVICES_PHP = 'services.php';
     public const CONFIG_PHP = 'config.php';
     public const ROUTES_PHP = 'routes-v8.php';
+    public const FAST_ROUTES_PHP = 'fast_routes.php';
     public const AUTOWIRING_PHP = 'autowiring.php';
     public const RESOLVING_EVENTS_PHP = 'resolving-events.php';
     public const EVENTS_PHP = 'events.php';
@@ -1454,6 +1455,14 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public function getCachedRoutesPath()
     {
         return $this->bootstrapPath('cache' . DIRECTORY_SEPARATOR . static::ROUTES_PHP);
+    }
+
+    /**
+     * Get the path to the fast routes cache file.
+     */
+    public function getCachedFastRoutesPath(): string
+    {
+        return $this->bootstrapPath('cache' . DIRECTORY_SEPARATOR . static::FAST_ROUTES_PHP);
     }
 
     public function autowiringIsCached(): bool

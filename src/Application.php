@@ -457,14 +457,6 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Get the path to the fast routes cache file.
-     */
-    public function getCachedFastRoutesPath(): string
-    {
-        return $this->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'fast_routes.php');
-    }
-
-    /**
      * @inheritdoc
      */
     public function environment(...$environments): mixed
