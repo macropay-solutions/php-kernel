@@ -10,16 +10,11 @@ class WorkerOptions
      */
     public function __construct(
         public string $name = 'default',
-        public int|array $backoff = 0,
-        public int $memory = 128,
+        public string $backoff = '0',
         public int $timeout = 60,
         public int $sleep = 3,
         public int $maxTries = 1,
-        public bool $stopWhenEmpty = false,
-        public int $maxJobs = 0,
-        public int $maxTime = 0,
-        public int $rest = 0,
-        public bool $failOnFatal = false,
+        public bool $failOnFatal = true,
     ) {
     }
 }

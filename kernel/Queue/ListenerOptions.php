@@ -11,17 +11,18 @@ class ListenerOptions extends WorkerOptions
      */
     public $environment;
 
+    public int $memory = 128;
+
     /**
      * Create a new listener options instance.
      *
      * @param string $name
      * @param string|null $environment
-     * @param int|int[] $backoff
+     * @param string $backoff
      * @param int $memory
      * @param int $timeout
      * @param int $sleep
      * @param int $maxTries
-     * @param int $rest
      * @return void
      */
     public function __construct(
@@ -29,13 +30,13 @@ class ListenerOptions extends WorkerOptions
         $environment = null,
         $backoff = 0,
         $memory = 128,
-        $timeout = 60,
+        $timeout = 300,
         $sleep = 3,
         $maxTries = 1,
-        $rest = 0
     ) {
         $this->environment = $environment;
+        $this->memory = $memory;
 
-        parent::__construct($name, $backoff, $memory, $timeout, $sleep, $maxTries, false, 0, 0, $rest);
+        parent::__construct($name, $backoff, $timeout, $sleep, $maxTries);
     }
 }

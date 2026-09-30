@@ -31,26 +31,18 @@ class WorkCommand extends Command
         {connection? : The name of the queue connection to work}
         {--name=default : The name of the worker}
         {--queue= : The names of the queues to work}
-        {--daemon : Run the worker in daemon mode (Deprecated)}
-        {--once : Only process the next job on the queue}
-        {--stop-when-empty : Stop when the queue is empty}
-        {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
         {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
-        {--max-jobs=0 : The number of jobs to process before stopping}
-        {--max-time=0 : The maximum number of seconds the worker should run}
-        {--memory=128 : The memory limit in megabytes}
         {--sleep=3 : Number of seconds to sleep when no job is available}
-        {--rest=0 : Number of seconds to rest between jobs}
-        {--timeout=60 : The number of seconds a child process can run}
+        {--timeout=300 : The number of seconds the process can run}
         {--tries=1 : Number of times to attempt a job before logging it failed}
-        {--fail-on-fatal : Fail the job on fatal error} ';
+        {--fail-on-fatal=1 : Fail the job on fatal error. Use 0 to disable} ';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Start processing jobs on the queue as a daemon';
+    protected $description = 'Processing one job';
 
     /**
      * The queue worker instance.
@@ -136,10 +128,10 @@ class WorkCommand extends Command
     {
         $workerOptions = $this->gatherWorkerOptions();
 
-        return $this->worker
+        $this->worker
             ->setName($workerOptions->name)
             ->setCache($this->cache)
-            ->{$this->option('once') ? 'runNextJob' : 'daemon'}($connection, $queue, $workerOptions);
+            ->runNextJob($connection, $queue, $workerOptions);
     }
 
     /**
@@ -151,16 +143,11 @@ class WorkCommand extends Command
     {
         return new WorkerOptions(
             $this->option('name'),
-            max($this->option('backoff'), $this->option('delay')),
-            $this->option('memory'),
-            $this->option('timeout'),
-            $this->option('sleep'),
+            (string)$this->option('backoff'),
+            (int)$this->option('timeout'),
+            (int)$this->option('sleep'),
             (int)$this->option('tries'),
-            $this->option('stop-when-empty'),
-            $this->option('max-jobs'),
-            $this->option('max-time'),
-            $this->option('rest'),
-            $this->option('fail-on-fatal'),
+            (bool)$this->option('fail-on-fatal'),
         );
     }
 

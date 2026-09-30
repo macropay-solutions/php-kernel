@@ -16,7 +16,6 @@ use MacropaySolutions\Kernel\Queue\Events\JobProcessed;
 use MacropaySolutions\Kernel\Queue\Events\JobProcessing;
 use MacropaySolutions\Kernel\Queue\Events\JobReleasedAfterException;
 use MacropaySolutions\Kernel\Queue\Events\JobTimedOut;
-use MacropaySolutions\Kernel\Queue\Events\Looping;
 use MacropaySolutions\Kernel\Queue\Events\WorkerStopping;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\ProcessUtils;
@@ -26,9 +25,7 @@ class Worker
 {
     use DetectsLostConnections;
 
-    public const EXIT_SUCCESS = 0;
     public const EXIT_ERROR = 1;
-    public const EXIT_MEMORY_LIMIT = 12;
 
     /**
      * The name of the worker.
@@ -66,27 +63,6 @@ class Worker
     protected $exceptions;
 
     /**
-     * The callback used to reset the application's scope.
-     *
-     * @var callable
-     */
-    protected $resetScope;
-
-    /**
-     * Indicates if the worker should exit.
-     *
-     * @var bool
-     */
-    public $shouldQuit = false;
-
-    /**
-     * Indicates if the worker is paused.
-     *
-     * @var bool
-     */
-    public $paused = false;
-
-    /**
      * The callbacks used to pop jobs from queues.
      *
      * @var callable[]
@@ -101,114 +77,25 @@ class Worker
      */
     protected array $snapshotForFailJobInBgDueToPhpError = [];
 
+    protected bool $extensionLoadedPcntl = false;
+
     /**
      * Create a new queue worker.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Queue\Factory $manager
      * @param \MacropaySolutions\Kernel\Contracts\Events\Dispatcher $events
      * @param \MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler $exceptions
-     * @param callable|null $resetScope
      * @return void
      */
     public function __construct(
         QueueManager $manager,
         Dispatcher $events,
         ExceptionHandler $exceptions,
-        ?callable $resetScope = null
     ) {
         $this->events = $events;
         $this->manager = $manager;
         $this->exceptions = $exceptions;
-        $this->resetScope = $resetScope;
-    }
-
-    /**
-     * Listen to the given queue in a loop.
-     *
-     * @param string $connectionName
-     * @param string $queue
-     * @param \MacropaySolutions\Kernel\Queue\WorkerOptions $options
-     * @return int
-     */
-    public function daemon($connectionName, $queue, WorkerOptions $options)
-    {
-        if ($supportsAsyncSignals = $this->supportsAsyncSignals()) {
-            $this->listenForSignals();
-        }
-
-        $this->snapshotForFailJobInBgDueToPhpError = [];
-        $this->registerPhpErrorCallback($options, $queue, $connectionName);
-
-        $lastRestart = $this->getTimestampOfLastQueueRestart();
-
-        [$startTime, $jobsProcessed] = [hrtime(true) / 1e9, 0];
-
-        while (true) {
-            // Before reserving any jobs, we will make sure this queue is not paused and
-            // if it is we will just pause this worker for a given amount of time and
-            // make sure we do not need to kill this worker process off completely.
-            if (!$this->daemonShouldRun($options, $connectionName, $queue)) {
-                $status = $this->pauseWorker($options, (int)$lastRestart, $startTime, $jobsProcessed);
-
-                if (!is_null($status)) {
-                    return $this->stop($status, $options);
-                }
-
-                continue;
-            }
-
-            if (isset($this->resetScope)) {
-                ($this->resetScope)();
-            }
-
-            // First, we will attempt to get the next job off of the queue. We will also
-            // register the timeout handler and reset the alarm for this job so it is
-            // not stuck in a frozen state forever. Then, we can fire off this job.
-            $job = $this->getNextJob(
-                $this->manager->connection($connectionName),
-                $queue
-            );
-
-            if ($supportsAsyncSignals) {
-                $this->registerTimeoutHandler($job, $options);
-            }
-
-            // If the daemon should run, then we can run
-            // fire off this job for processing. Otherwise, we will need to sleep the
-            // worker so no more jobs are processed until they should be processed.
-            if ($job) {
-                $jobsProcessed++;
-
-                $this->runJob($job, $connectionName, $options);
-
-                if ($options->rest > 0) {
-                    $this->sleep($options->rest);
-                }
-            } else {
-                $this->sleep($options->sleep);
-            }
-
-            if ($supportsAsyncSignals) {
-                $this->resetTimeoutHandler();
-            }
-
-            // Finally, we will check to see if we have exceeded our memory limits or if
-            // the queue should restart based on other indications. If so, we'll stop
-            // this worker and let whatever is "monitoring" it restart the process.
-            $status = $this->stopIfNecessary(
-                $options,
-                (int)$lastRestart,
-                $startTime,
-                $jobsProcessed,
-                $job
-            );
-
-            unset($job);
-
-            if (!is_null($status)) {
-                return $this->stop($status, $options);
-            }
-        }
+        $this->extensionLoadedPcntl = \extension_loaded('pcntl');
     }
 
     /**
@@ -283,53 +170,6 @@ class Worker
     }
 
     /**
-     * Determine if the daemon should process on this iteration.
-     *
-     * @param \MacropaySolutions\Kernel\Queue\WorkerOptions $options
-     * @param string $connectionName
-     * @param string $queue
-     * @return bool
-     */
-    protected function daemonShouldRun(WorkerOptions $options, $connectionName, $queue)
-    {
-        return !(
-            $this->paused ||
-            $this->events->until(new Looping($connectionName, $queue)) === false
-        );
-    }
-
-    /**
-     * Pause the worker for the current loop.
-     */
-    protected function pauseWorker(WorkerOptions $options, int $lastRestart, float $startTime, int $jobsProcessed): ?int
-    {
-        $this->sleep($options->sleep > 0 ? $options->sleep : 1);
-
-        return $this->stopIfNecessary($options, $lastRestart, $startTime, $jobsProcessed);
-    }
-
-    /**
-     * Determine the exit code to stop the process if necessary.
-     */
-    protected function stopIfNecessary(
-        WorkerOptions $options,
-        int $lastRestart,
-        float $startTime = 0,
-        int $jobsProcessed = 0,
-        mixed $job = null
-    ): ?int {
-        return match (true) {
-            $this->shouldQuit => static::EXIT_SUCCESS,
-            $this->memoryExceeded($options->memory) => static::EXIT_MEMORY_LIMIT,
-            $this->queueShouldRestart($lastRestart) => static::EXIT_SUCCESS,
-            $options->stopWhenEmpty && is_null($job) => static::EXIT_SUCCESS,
-            $options->maxTime && hrtime(true) / 1e9 - $startTime >= $options->maxTime => static::EXIT_SUCCESS,
-            $options->maxJobs && $jobsProcessed >= $options->maxJobs => static::EXIT_SUCCESS,
-            default => null
-        };
-    }
-
-    /**
      * Process the next job on the queue.
      *
      * @param string $connectionName
@@ -351,7 +191,18 @@ class Worker
         // from this method. If there is no job on the queue, we will "sleep" the worker
         // for the specified number of seconds, then keep processing jobs after sleep.
         if ($job) {
-            return $this->runJob($job, $connectionName, $options);
+            if ($this->extensionLoadedPcntl) {
+                \pcntl_async_signals(true);
+                $this->registerTimeoutHandler($job, $options);
+            }
+
+            $this->runJob($job, $connectionName, $options);
+
+            if ($this->extensionLoadedPcntl) {
+                $this->resetTimeoutHandler();
+            }
+
+            return;
         }
 
         $this->sleep($options->sleep);
@@ -427,8 +278,6 @@ class Worker
         } catch (Throwable $e) {
             $this->exceptions->report($e);
 
-            $this->stopWorkerIfLostConnection($e);
-
             $this->sleep(1);
         }
     }
@@ -447,21 +296,6 @@ class Worker
             $this->process($connectionName, $job, $options);
         } catch (Throwable $e) {
             $this->exceptions->report($e);
-
-            $this->stopWorkerIfLostConnection($e);
-        }
-    }
-
-    /**
-     * Stop the worker if we have lost connection to a database.
-     *
-     * @param \Throwable $e
-     * @return void
-     */
-    protected function stopWorkerIfLostConnection($e)
-    {
-        if ($this->causedByLostConnection($e)) {
-            $this->shouldQuit = true;
         }
     }
 
@@ -778,79 +612,6 @@ class Worker
                 $e
             )
         );
-    }
-
-    /**
-     * Determine if the queue worker should restart.
-     *
-     * @param int|null $lastRestart
-     * @return bool
-     */
-    protected function queueShouldRestart($lastRestart)
-    {
-        return $this->getTimestampOfLastQueueRestart() != $lastRestart;
-    }
-
-    /**
-     * Get the last queue restart timestamp, or null.
-     *
-     * @return int|null
-     */
-    protected function getTimestampOfLastQueueRestart(): ?int
-    {
-        return $this->cache instanceof \MacropaySolutions\Kernel\Contracts\Cache\Repository
-            ? (int)$this->cache->get('kernel:queue:restart')
-            : null;
-    }
-
-    /**
-     * Enable async signals for the process.
-     *
-     * @return void
-     */
-    protected function listenForSignals()
-    {
-        pcntl_async_signals(true);
-
-        pcntl_signal(SIGQUIT, fn() => $this->shouldQuit = true);
-        pcntl_signal(SIGTERM, fn() => $this->shouldQuit = true);
-        pcntl_signal(SIGUSR2, fn() => $this->paused = true);
-        pcntl_signal(SIGCONT, fn() => $this->paused = false);
-    }
-
-    /**
-     * Determine if "async" signals are supported.
-     *
-     * @return bool
-     */
-    protected function supportsAsyncSignals()
-    {
-        return extension_loaded('pcntl');
-    }
-
-    /**
-     * Determine if the memory limit has been exceeded.
-     *
-     * @param int $memoryLimit
-     * @return bool
-     */
-    public function memoryExceeded($memoryLimit)
-    {
-        return (memory_get_usage(true) / 1024 / 1024) >= $memoryLimit;
-    }
-
-    /**
-     * Stop listening and bail out of the script.
-     *
-     * @param int $status
-     * @param WorkerOptions|null $options
-     * @return int
-     */
-    public function stop($status = 0, $options = null)
-    {
-        $this->events->dispatch(new WorkerStopping($status, $options));
-
-        return $status;
     }
 
     /**

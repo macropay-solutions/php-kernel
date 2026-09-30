@@ -21,13 +21,11 @@ class ListenCommand extends Command
     protected $signature = 'queue:listen
         {connection? : The name of connection}
         {--name=default : The name of the worker}
-        {--delay=0 : The number of seconds to delay failed jobs (Deprecated)}
+        {--queue= : The queue to listen on}
         {--backoff=0 : The number of seconds to wait before retrying a job that encountered an uncaught exception}
         {--memory=128 : The memory limit in megabytes}
-        {--queue= : The queue to listen on}
         {--sleep=3 : Number of seconds to sleep when no job is available}
-        {--rest=0 : Number of seconds to rest between jobs}
-        {--timeout=60 : The number of seconds a child process can run}
+        {--timeout=300 : The number of seconds a child process can run}
         {--tries=1 : Number of times to attempt a job before logging it failed}';
 
     /**
@@ -101,19 +99,14 @@ class ListenCommand extends Command
      */
     protected function gatherOptions()
     {
-        $backoff = $this->hasOption('backoff')
-            ? $this->option('backoff')
-            : $this->option('delay');
-
         return new ListenerOptions(
             name: $this->option('name'),
             environment: $this->option('env'),
-            backoff: $backoff,
+            backoff: (string)$this->option('backoff'),
             memory: $this->option('memory'),
             timeout: $this->option('timeout'),
             sleep: $this->option('sleep'),
             maxTries: $this->option('tries'),
-            rest: $this->option('rest')
         );
     }
 

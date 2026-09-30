@@ -88,10 +88,6 @@ class Listener
 
         while (true) {
             $this->runProcess($process, $options->memory);
-
-            if ($options->rest) {
-                sleep($options->rest);
-            }
         }
     }
 
@@ -154,7 +150,6 @@ class Listener
             $this->runBinary(),
             'queue:work',
             $connection,
-            '--once',
             "--name={$options->name}",
             "--queue={$queue}",
             "--backoff={$options->backoff}",

@@ -56,32 +56,10 @@ class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public static function getQueueWorker($app)
     {
-
-        $resetScope = static function () use ($app) {
-            $log = $app->make('log');
-            $log->flushSharedContext();
-
-            if (\method_exists($log, 'withoutContext')) {
-                $log->withoutContext();
-            }
-
-            $db = $app->make('db');
-
-            if (\method_exists($db, 'getConnections')) {
-                foreach ($db->getConnections() as $connection) {
-                    $connection->resetTotalQueryDuration();
-                    $connection->allowQueryDurationHandlersToRunAgain();
-                }
-            }
-
-            $app->forgetScopedInstances();
-        };
-
         return $app->make(Worker::class, [
             $app->make('queue'),
             $app->make('events'),
             $app->make(ExceptionHandler::class),
-            $resetScope,
         ]);
     }
 
