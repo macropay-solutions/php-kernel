@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Framework;
 
+use MacropaySolutions\Framework\Bootstrap\LoadEnvironmentVariables;
 use MacropaySolutions\Framework\Console\ConsoleServiceProvider;
 use MacropaySolutions\Framework\Routing\Router;
 use MacropaySolutions\Kernel\Auth\Access\Gate;
@@ -15,7 +16,6 @@ use MacropaySolutions\Kernel\Container\EntryNotFoundException;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Container\CircularDependencyException;
 use MacropaySolutions\Kernel\Contracts\Foundation\Application as ApplicationContract;
-use MacropaySolutions\Kernel\Contracts\Support\DeferrableProvider;
 use MacropaySolutions\Kernel\Cookie\CookieServiceProvider;
 use MacropaySolutions\Kernel\Database\DatabaseServiceProvider;
 use MacropaySolutions\Kernel\Database\MigrationServiceProvider;
@@ -431,12 +431,19 @@ class Application extends Container implements ApplicationContract
     {
         $this->basePath = $basePath ?? (string)($this->runningInConsole() ? \getcwd() : \realpath(\getcwd() . '/../'));
 
-        static::$bootstrapCachedFiles ??= static::getBootstrapCachedFiles($this->bootstrapPath('cache'));
+        static::setBootstrapCacheFiles($this->bootstrapPath('cache'));
+
+        if (!$this->configurationIsCached()) {
+            (new LoadEnvironmentVariables($basePath))->bootstrap();
+        }
+
         static::$isDevEnv = \class_exists(\MacropaySolutions\KernelDev\ServiceProvider::class);
 
         $this->instances['app'] = parent::$instance = $this;
         $this->registerErrorHandling();
         $this->bootstrapRouter();
+
+        \date_default_timezone_set($this->make('config')->get('app.timezone', 'UTC'));
     }
 
     /**
@@ -447,6 +454,14 @@ class Application extends Container implements ApplicationContract
     public function bootstrapRouter()
     {
         $this->router = new Router($this);
+    }
+
+    /**
+     * Get the path to the fast routes cache file.
+     */
+    public function getCachedFastRoutesPath(): string
+    {
+        return $this->bootstrapPath('cache' . DIRECTORY_SEPARATOR . 'fast_routes.php');
     }
 
     /**
@@ -698,9 +713,11 @@ class Application extends Container implements ApplicationContract
         return new Composer($app->make('files'), $app->basePath());
     }
 
-    public static function getConfig()
+    public static function getConfig(self $app)
     {
-        return new ConfigRepository();
+        return new ConfigRepository($app->configurationIsCached() ?
+            $app::getCachedFileContentsFromMemory($app::CONFIG_PHP) ?? require $app->getCachedConfigPath() :
+            []);
     }
 
     /**

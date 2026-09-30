@@ -9,12 +9,16 @@ use MacropaySolutions\Kernel\Console\AutowiringMethodsCacheCommand;
 use MacropaySolutions\Kernel\Console\AutowiringMethodsClearCommand;
 use MacropaySolutions\Kernel\Console\CommandsCacheCommand;
 use MacropaySolutions\Kernel\Console\CommandsClearCommand;
+use MacropaySolutions\Kernel\Console\ConfigCacheCommand;
+use MacropaySolutions\Kernel\Console\ConfigClearCommand;
 use MacropaySolutions\Kernel\Console\EventCacheCommand;
 use MacropaySolutions\Kernel\Console\EventClearCommand;
 use MacropaySolutions\Kernel\Console\MacroCacheCommand;
 use MacropaySolutions\Kernel\Console\MacroClearCommand;
 use MacropaySolutions\Kernel\Console\MergeCachedFilesCacheCommand;
 use MacropaySolutions\Kernel\Console\MergeCachedFilesClearCommand;
+use MacropaySolutions\Kernel\Console\RouteCacheCommand;
+use MacropaySolutions\Kernel\Console\RouteClearCommand;
 use MacropaySolutions\Kernel\Console\Scheduling\ScheduleFinishCommand;
 use MacropaySolutions\Kernel\Console\Scheduling\ScheduleRunCommand;
 use MacropaySolutions\Kernel\Console\Scheduling\ScheduleWorkCommand;
@@ -59,6 +63,10 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
     protected $commands = [
         'AutowiringMethodsCache' => 'command.autowiring.cache',
         'AutowiringMethodsClear' => 'command.autowiring.clear',
+        'ConfigCache' => 'command.config.cache',
+        'ConfigClear' => 'command.config.clear',
+        'RouteCache' => 'command.route.cache',
+        'RouteClear' => 'command.route.clear',
         'EventCache' => 'command.event.cache',
         'EventClear' => 'command.event.clear',
         'CacheClear' => 'command.cache.clear',
@@ -249,9 +257,9 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
         $this->app->singleton('command.event.cache', [self::class, 'getEventCacheCommand']);
     }
 
-    public static function getEventCacheCommand()
+    public static function getEventCacheCommand($app)
     {
-        return new EventCacheCommand();
+        return new EventCacheCommand($app->make('files'));
     }
 
     protected function registerEventClearCommand(): void
@@ -262,6 +270,46 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
     public static function getEventClearCommand($app)
     {
         return new EventClearCommand($app->make('files'));
+    }
+
+    protected function registerConfigCacheCommand(): void
+    {
+        $this->app->singleton('command.config.cache', [self::class, 'getConfigCacheCommand']);
+    }
+
+    public static function getConfigCacheCommand($app)
+    {
+        return new ConfigCacheCommand($app->make('files'));
+    }
+
+    protected function registerConfigClearCommand(): void
+    {
+        $this->app->singleton('command.config.clear', [self::class, 'getConfigClearCommand']);
+    }
+
+    public static function getConfigClearCommand($app)
+    {
+        return new ConfigClearCommand($app->make('files'));
+    }
+
+    protected function registerRouteCacheCommand(): void
+    {
+        $this->app->singleton('command.route.cache', [self::class, 'getRouteCacheCommand']);
+    }
+
+    public static function getRouteCacheCommand($app)
+    {
+        return new RouteCacheCommand($app->make('files'));
+    }
+
+    protected function registerRouteClearCommand(): void
+    {
+        $this->app->singleton('command.route.clear', [self::class, 'getRouteClearCommand']);
+    }
+
+    public static function getRouteClearCommand($app)
+    {
+        return new RouteClearCommand($app->make('files'));
     }
 
     protected function registerViewCacheCommand(): void

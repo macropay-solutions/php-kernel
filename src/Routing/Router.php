@@ -4,6 +4,7 @@ namespace MacropaySolutions\Framework\Routing;
 
 use FastRoute\RouteParser;
 use FastRoute\RouteParser\Std;
+use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Support\Arr;
 
 class Router
@@ -13,7 +14,7 @@ class Router
     /**
      * The application instance.
      *
-     * @var \MacropaySolutions\Framework\Application
+     * @var Application
      */
     public $app;
 
@@ -52,12 +53,37 @@ class Router
 
     /**
      * Router constructor.
-     *
-     * @param \MacropaySolutions\Framework\Application $app
      */
-    public function __construct($app)
+    public function __construct(Application $app)
     {
+        if ($app->routesAreCached()) {
+            $router = $app::getCachedFileContentsFromMemory($app::ROUTES_PHP) ?? require $app->getCachedRoutesPath();
+            $this->groupStack = $router['groupStack'];
+            $this->routes = $router['routes'];
+            $this->routesTree = $router['routesTree'];
+            $this->complexRoutes = $router['complexRoutes'];
+            $this->namedRoutes = $router['namedRoutes'];
+        }
+
         $this->app = $app;
+    }
+
+    public function getCacheData(): array
+    {
+        return [
+            'groupStack' => $this->groupStack,
+            'routes' => $this->routes,
+            'routesTree' => $this->routesTree,
+            'complexRoutes' => $this->complexRoutes,
+            'namedRoutes' => $this->namedRoutes,
+        ];
+    }
+
+    /**
+     * Override this to register your routes
+     */
+    public function registerRoutes(): void
+    {
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Console;
 
+use MacropaySolutions\Kernel\Filesystem\Filesystem;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'event:cache')]
@@ -24,6 +25,22 @@ class EventCacheCommand extends Command
     protected $description = "Discover and cache the application's observers, events and listeners";
 
     /**
+     * The filesystem instance.
+     */
+    protected Filesystem $files;
+
+
+    /**
+     * Create a new event cache command instance.
+     */
+    public function __construct(Filesystem $files)
+    {
+        parent::__construct();
+
+        $this->files = $files;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -32,12 +49,12 @@ class EventCacheCommand extends Command
     {
         $this->callSilent('event:clear');
 
-        \file_put_contents(
+        $this->files->put(
             $this->app->getCachedEventsPath(),
             '<?php return ' . var_export($this->getEvents(), true) . ';'
         );
 
-        \file_put_contents(
+        $this->files->put(
             $this->app->getCachedEventsAsObserversPath(),
             '<?php return ' . var_export($this->getEventsAsObservers(), true) . ';'
         );
