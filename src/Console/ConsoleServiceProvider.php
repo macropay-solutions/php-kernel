@@ -38,7 +38,6 @@ use MacropaySolutions\Kernel\Queue\Console\FlushFailedCommand as FlushFailedQueu
 use MacropaySolutions\Kernel\Queue\Console\ForgetFailedCommand as ForgetFailedQueueCommand;
 use MacropaySolutions\Kernel\Queue\Console\ListenCommand as QueueListenCommand;
 use MacropaySolutions\Kernel\Queue\Console\ListFailedCommand as ListFailedQueueCommand;
-use MacropaySolutions\Kernel\Queue\Console\RestartCommand as QueueRestartCommand;
 use MacropaySolutions\Kernel\Queue\Console\RetryCommand as QueueRetryCommand;
 use MacropaySolutions\Kernel\Queue\Console\WorkCommand as QueueWorkCommand;
 use MacropaySolutions\Kernel\Support\ServiceProvider;
@@ -87,7 +86,6 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
         'QueueFlush' => 'command.queue.flush',
         'QueueForget' => 'command.queue.forget',
         'QueueListen' => 'command.queue.listen',
-        'QueueRestart' => 'command.queue.restart',
         'QueueRetry' => 'command.queue.retry',
         'QueueWork' => 'command.queue.work',
         'QueueFailJob' => 'command.queue.fail',
@@ -508,16 +506,6 @@ class ConsoleServiceProvider extends ServiceProvider implements DeferrableProvid
     public static function getQueueListenCommand($app)
     {
         return new QueueListenCommand($app->make('queue.listener'));
-    }
-
-    protected function registerQueueRestartCommand()
-    {
-        $this->app->singleton('command.queue.restart', [self::class, 'getQueueRestartCommand']);
-    }
-
-    public static function getQueueRestartCommand($app)
-    {
-        return new QueueRestartCommand($app->make('cache.store'));
     }
 
     protected function registerQueueRetryCommand()
