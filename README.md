@@ -23,7 +23,6 @@ To maintain a stable core with no new overhead that does not need to be updated 
 
 - PHP version,
 - Symfony components LTS versions,
-- Possible missed classes that would need to be resolved instead of instantiated directly.
 - Vulnerabilities / Bugs
 
 Current version is using Symfony components 7.4 (LTS) and supports PHP 8.2 to 8.4 which are supported until the end of 2029.
