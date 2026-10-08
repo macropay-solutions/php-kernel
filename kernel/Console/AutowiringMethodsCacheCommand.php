@@ -316,6 +316,7 @@ PHP;
                 \MacropaySolutions\Kernel\Session\EncryptedStore::class,
                 \MacropaySolutions\Kernel\Validation\Rules\ImageFile::class,
                 \MacropaySolutions\Kernel\Auth\Listeners\SendEmailVerificationNotification::class,
+                \MacropaySolutions\Kernel\Validation\NotPwnedVerifier::class,
             ] as $class
         ) {
             try {
