@@ -27,9 +27,9 @@ class ValidationServiceProvider extends ServiceProvider implements DeferrablePro
         return new DatabasePresenceVerifier($app->make('db'));
     }
 
-    public static function getUncompromisedVerifier($app)
+    public static function getUncompromisedVerifier($app, array $parameters)
     {
-        return new NotPwnedVerifier($app->make(\GuzzleHttp\Client::class));
+        return $app->make(NotPwnedVerifier::class, $parameters);
     }
 
     public static function getValidator($app)
