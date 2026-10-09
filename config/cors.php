@@ -18,7 +18,6 @@ return [
     /** Define paths only if you decide to use the HandleCors Middleware */
 //    'paths' => [
 //        'api/*',
-//        'sanctum/csrf-cookie'
 //    ],
 
     'allowed_methods' => ['*'],
