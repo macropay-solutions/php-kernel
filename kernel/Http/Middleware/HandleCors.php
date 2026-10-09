@@ -7,6 +7,10 @@ use Fruitcake\Cors\CorsService;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Http\Request;
 
+/**
+ * @see \MacropaySolutions\Framework\Exceptions\Handler::render
+ * @see RouteAppendCorsHeaders
+ */
 class HandleCors
 {
     /**
@@ -49,7 +53,7 @@ class HandleCors
             return $next($request);
         }
 
-        $this->cors->setOptions($this->container['config']->get('cors', []));
+        $this->cors->setOptions($this->container->make('config')->get('cors', []));
 
         if ($this->cors->isPreflightRequest($request)) {
             $response = $this->cors->handlePreflightRequest($request);
@@ -99,7 +103,7 @@ class HandleCors
      */
     protected function getPathsByHost(string $host)
     {
-        $paths = $this->container['config']->get('cors.paths', []);
+        $paths = $this->container->make('config')->get('cors.paths', []);
 
         if (isset($paths[$host])) {
             return $paths[$host];

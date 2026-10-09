@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Framework\Exceptions;
 
 use Exception;
+use Fruitcake\Cors\CorsService;
 use MacropaySolutions\Kernel\Auth\Access\AuthorizationException;
 use MacropaySolutions\Kernel\Auth\AuthenticationException;
 use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
@@ -24,6 +25,7 @@ use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -122,6 +124,29 @@ class Handler implements ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
+        // -------------------------------------------------------------
+        // CORS Universal Preflight Interceptor
+        // -------------------------------------------------------------
+        if (
+            (
+                $e instanceof MethodNotAllowedHttpException
+                || $e instanceof NotFoundHttpException
+            )
+            && $request->getRealMethod() === 'OPTIONS'
+            && ($service = \app(CorsService::class, [\app('config')->get('cors', [])]))->isPreflightRequest($request)
+        ) {
+            $origin = $request->headers->get('Origin');
+
+            if ('' === (string)$origin) {
+                return \app(Response::class, ['', 204, []]);
+            }
+
+            $response = $service->addPreflightRequestHeaders(\app(Response::class, ['', 204, []]), $request);
+
+            return $service->varyHeader($response, 'Access-Control-Request-Method');
+        }
+        // -------------------------------------------------------------
+
         if (method_exists($e, 'render')) {
             return $e->render($request);
         } elseif ($e instanceof Responsable) {
