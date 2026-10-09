@@ -133,7 +133,8 @@ class Handler implements ExceptionHandler
                 || $e instanceof NotFoundHttpException
             )
             && $request->getRealMethod() === 'OPTIONS'
-            && ($service = \app(CorsService::class, [\app('config')->get('cors', [])]))->isPreflightRequest($request)
+            && ([] !== $config = \app('config')->get('cors', []))
+            && ($service = \app(CorsService::class, [$config]))->isPreflightRequest($request)
         ) {
             $origin = $request->headers->get('Origin');
 
