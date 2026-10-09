@@ -353,7 +353,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
         $app->instance(
-            \MacropaySolutions\Framework\Http\Request::class,
+            \MacropaySolutions\Kernel\Http\Request::class,
             Request::create('https://macropay-solutions.com', 'GET')
         );
 
@@ -397,7 +397,7 @@ class FullApplicationTest extends TestCase
     {
         $app = new Application();
         $app->instance(
-            \MacropaySolutions\Framework\Http\Request::class,
+            \MacropaySolutions\Kernel\Http\Request::class,
             Request::create('https://macropay-solutions.com', 'GET')
         );
 
