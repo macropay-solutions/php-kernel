@@ -287,6 +287,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function bind(string $abstract, array|string|null $concrete = null, bool $shared = false): void
     {
+        if (isset($this->aliases[$abstract])) {
+            throw new \LogicException('Cannot bind to alias \'' . $abstract . '\'. Bind directly to root target [' .
+                $this->getAlias($abstract) . '].');
+        }
+
         $this->dropStaleInstances($abstract);
 
         $this->bindings[$abstract] = ['concrete' => $concrete ?? $abstract, 'shared' => $shared];
@@ -421,7 +426,12 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function instance($abstract, $instance)
     {
-        $isBound = $this->removeAbstractAlias($abstract) || $this->inBindingsOrInstances($abstract);
+        if (isset($this->aliases[$abstract])) {
+            throw new \LogicException('Cannot bind instance to alias \'' . $abstract .
+                '\'. Bind instance directly to root target [' . $this->getAlias($abstract) . '].');
+        }
+
+        $isBound = $this->inBindingsOrInstances($abstract);
 
         // We'll check to determine if this type has been bound before, and if it has
         // we will fire the rebound callbacks registered with the container and it
@@ -522,11 +532,22 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function alias($abstract, $alias)
     {
+        if ($this->inBindingsOrInstances($alias)) {
+            throw new \LogicException('Cannot map alias \'' . $alias .
+                '\' because it is already registered as a root binding or instance.');
+        }
+
+        $rootAbstractTarget = $this->getAlias($abstract);
+
+        if ($rootAbstractTarget === $alias) {
+            throw new \LogicException('\'' . $alias . '\' cannot be aliased to its resolved target.');
+        }
+
         $this->removeAbstractAlias($alias);
 
-        $this->aliases[$alias] = $abstract;
+        $this->aliases[$alias] = $rootAbstractTarget;
 
-        $this->abstractAliases[$abstract][] = $alias;
+        $this->abstractAliases[$rootAbstractTarget][] = $alias;
     }
 
     /**
@@ -1238,7 +1259,6 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     protected function dropStaleInstances($abstract)
     {
         unset($this->instances[$abstract]);
-        $this->removeAbstractAlias($abstract);
     }
 
     /**
