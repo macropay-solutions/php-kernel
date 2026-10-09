@@ -225,7 +225,7 @@ trait RoutesRequests
             });
         }
 
-        $this->instance(Request::class, $request);
+        $this->instances[Request::class] = $request;
 
         return [$request->getMethod(), '/' . \trim($request->getPathInfo(), '/')];
     }
