@@ -60,6 +60,16 @@ trait RegistersExceptionHandlers
         });
 
         \register_shutdown_function(function () {
+            unset(
+                static::$bootstrapCachedFiles[static::AUTOWIRING_PHP],
+                static::$bootstrapCachedFiles[static::RESOLVING_EVENTS_PHP],
+                static::$bootstrapCachedFiles[static::COMMANDS_PHP],
+            );
+            $this->alreadyRetrievedAliases = [];
+            $this->cachedEnvironment = null;
+            $this->monitorResolvingAbstractMap = [];
+            $this->dispatcher = null;
+
             try {
                 $this->handleShutdown();
             } catch (Throwable) {
