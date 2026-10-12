@@ -278,10 +278,84 @@ class FullApplicationTest extends TestCase
         $this->assertInstanceOf(Response::class, $response);
     }
 
+    public function testInstanceAliasException()
+    {
+        $app = new Application();
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            'Cannot bind instance to alias \'request\'. Bind instance directly to root target [' . \MacropaySolutions\Kernel\Http\Request::class . '].');
+        $app->instance('request', Request::create('https://macropay-solutions.com', 'GET'));
+    }
+
+    public function testBindAliasException()
+    {
+        $app = new Application();
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            'Cannot bind to alias \'request\'. Bind directly to root target [' . \MacropaySolutions\Kernel\Http\Request::class . '].');
+        $app->bind('request');
+    }
+
+    /**
+     * Test exception when alias name conflicts with an existing root binding or instance.
+     */
+    public function testAliasToExistingBindingOrInstanceThrowsException(): void
+    {
+        $app = new Application();
+        $app->bind(\stdClass::class);
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            'Cannot map alias \'stdClass\' because it is already registered as a root binding or instance.'
+        );
+
+        $app->alias(\MacropaySolutions\Kernel\Http\Request::class, 'stdClass');
+    }
+
+    /**
+     * Test exception when an alias resolves directly to its target (self-alias or circular alias).
+     */
+    public function testAliasToResolvedTargetThrowsException(): void
+    {
+        $app = new Application();
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            '\'stdClass\' cannot be aliased to its resolved target.'
+        );
+
+        $app->alias(\stdClass::class, \stdClass::class);
+    }
+
+    /**
+     * Test exception when an alias points to another alias that resolves back to the same name.
+     */
+    public function testIndirectAliasToResolvedTargetThrowsException(): void
+    {
+        $app = new Application();
+
+        // 1. 'my-alias' points to stdClass
+        $app->alias(\stdClass::class, 'my-alias');
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage(
+            '\'' . \stdClass::class . '\' cannot be aliased to its resolved target.'
+        );
+
+        // 2. Attempting to make stdClass an alias of 'my-alias' (which resolves to stdClass)
+        // $abstract = 'my-alias' (resolves to stdClass)
+        // $alias = stdClass::class
+        // $rootAbstractTarget (stdClass) === $alias (stdClass) -> THROWS!
+        $app->alias('my-alias', \stdClass::class);
+    }
+
     public function testGeneratingUrls()
     {
         $app = new Application();
-        $app->instance('request', Request::create('https://macropay-solutions.com', 'GET'));
+        $app->instance(
+            \MacropaySolutions\Kernel\Http\Request::class,
+            Request::create('https://macropay-solutions.com', 'GET')
+        );
 
         $app->router->get('/foo-bar', [
             'as' => 'foo',
@@ -322,7 +396,10 @@ class FullApplicationTest extends TestCase
     public function testGeneratingUrlsForRegexParameters()
     {
         $app = new Application();
-        $app->instance('request', Request::create('https://macropay-solutions.com', 'GET'));
+        $app->instance(
+            \MacropaySolutions\Kernel\Http\Request::class,
+            Request::create('https://macropay-solutions.com', 'GET')
+        );
 
         $app->router->get('/foo-bar', [
             'as' => 'foo',
@@ -721,7 +798,7 @@ class FullApplicationTest extends TestCase
 
         $mock = m::mock(MacropaySolutions\Kernel\Bus\Dispatcher::class);
 
-        $app->instance(MacropaySolutions\Kernel\Contracts\Bus\Dispatcher::class, $mock);
+        $app->instance(\MacropaySolutions\Kernel\Bus\Dispatcher::class, $mock);
 
         $this->assertSame(
             $mock,
