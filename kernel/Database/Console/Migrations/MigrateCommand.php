@@ -20,6 +20,8 @@ class MigrateCommand extends BaseCommand implements Isolatable
 
     use ConfirmableTrait;
 
+    public const FRAMEWORK_MIGRATE_LOCK = 'framework_migrate_lock';
+
     /**
      * The name and signature of the console command.
      *
@@ -82,30 +84,46 @@ class MigrateCommand extends BaseCommand implements Isolatable
             return 1;
         }
 
-        $this->migrator->usingConnection($this->option('database'), function () {
-            $this->prepareDatabase();
+        $lock = $this->app->make('cache')->fwd()->lock(
+            self::FRAMEWORK_MIGRATE_LOCK,
+            $this->app->make('config')->get('database.migrations_lock_ttl', 300)
+        );
 
-            // Next, we will check to see if a path option has been defined. If it has
-            // we will use the path relative to the root of this installation folder
-            // so that migrations may be run for any path within the applications.
-            $this->migrator->setOutput($this->output)
-                ->run($this->getMigrationPaths(), [
-                    'pretend' => $this->option('pretend'),
-                    'step' => $this->option('step'),
-                ]);
+        if (!$lock->get()) {
+            $this->info('Could not acquire lock for migrate command.');
 
-            // Finally, if the "seed" option has been given, we will re-run the database
-            // seed task to re-populate the database, which is convenient when adding
-            // a migration and a seed at the same time, as it is only this command.
-            if ($this->option('seed') && !$this->option('pretend')) {
-                $this->call('db:seed', [
-                    '--class' => $this->option('seeder') ?: 'Database\\Seeders\\DatabaseSeeder',
-                    '--force' => true,
-                ]);
-            }
-        });
+            return 1;
+        }
 
-        return 0;
+        $this->info('Lock acquired for migrate command. Migrating...');
+
+        try {
+            $this->migrator->usingConnection($this->option('database'), function () {
+                $this->prepareDatabase();
+
+                // Next, we will check to see if a path option has been defined. If it has
+                // we will use the path relative to the root of this installation folder
+                // so that migrations may be run for any path within the applications.
+                $this->migrator->setOutput($this->output)
+                    ->run($this->getMigrationPaths(), [
+                        'pretend' => $this->option('pretend'),
+                        'step' => $this->option('step'),
+                    ]);
+
+                // Finally, if the "seed" option has been given, we will re-run the database
+                // seed task to re-populate the database, which is convenient when adding
+                // a migration and a seed at the same time, as it is only this command.
+                if ($this->option('seed') && !$this->option('pretend')) {
+                    $this->call('db:seed', [
+                        '--class' => $this->option('seeder') ?: 'Database\\Seeders\\DatabaseSeeder',
+                        '--force' => true,
+                    ]);
+                }
+            });
+            return 0;
+        } finally {
+            $lock->release();
+        }
     }
 
     /**

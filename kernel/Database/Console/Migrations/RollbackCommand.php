@@ -57,18 +57,35 @@ class RollbackCommand extends BaseCommand
             return 1;
         }
 
-        $this->migrator->usingConnection($this->option('database'), function () {
-            $this->migrator->setOutput($this->output)->rollback(
-                $this->getMigrationPaths(),
-                [
-                    'pretend' => $this->option('pretend'),
-                    'step' => (int)$this->option('step'),
-                    'batch' => (int)$this->option('batch'),
-                ]
-            );
-        });
+        $lock = $this->app->make('cache')->fwd()->lock(
+            MigrateCommand::FRAMEWORK_MIGRATE_LOCK,
+            $this->app->make('config')->get('database.migrations_lock_ttl', 300)
+        );
 
-        return 0;
+        if (!$lock->get()) {
+            $this->info('Could not acquire lock for migrate:rollback command.');
+
+            return 1;
+        }
+
+        $this->info('Lock acquired for migrate:rollback command. Migrating...');
+
+        try {
+            $this->migrator->usingConnection($this->option('database'), function () {
+                $this->migrator->setOutput($this->output)->rollback(
+                    $this->getMigrationPaths(),
+                    [
+                        'pretend' => $this->option('pretend'),
+                        'step' => (int)$this->option('step'),
+                        'batch' => (int)$this->option('batch'),
+                    ]
+                );
+            });
+
+            return 0;
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
