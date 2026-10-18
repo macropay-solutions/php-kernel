@@ -227,7 +227,8 @@ class Command extends SymfonyCommand implements Macroable
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (
-            $this instanceof Isolatable && $this->option('isolated') !== false &&
+            $this instanceof Isolatable &&
+            $this->option('isolated') !== false &&
             !$this->commandIsolationMutex()->create($this)
         ) {
             $this->comment(

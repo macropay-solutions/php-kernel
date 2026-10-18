@@ -108,7 +108,7 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    // Previous encryption keys to cypher map to be used for decryption...
+    // Previous encryption keys to cipher map to be used for decryption...
     'previous_keys_cipher_map' => (array)\json_decode((string)\env('APP_PREVIOUS_KEYS_CIPHERS_MAP_JSON', '[]'), true),
 
     'debug_blacklist' => [
