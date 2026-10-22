@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Container;
 
 use ArrayAccess;
+use Composer\InstalledVersions;
 use Exception;
 use MacropaySolutions\Framework\Application;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
@@ -19,7 +20,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      *
      * @var string
      */
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.x.x';
 
     /**
      * Indicates if the application has "booted".
@@ -211,7 +212,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     public function version(): string
     {
-        return static::VERSION;
+        try {
+            return InstalledVersions::getVersion('macropay-solutions/php-kernel');
+        } catch (\Throwable) {
+            return static::VERSION;
+        }
     }
 
     /**
