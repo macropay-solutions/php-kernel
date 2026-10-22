@@ -213,7 +213,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public function version(): string
     {
         try {
-            return InstalledVersions::getVersion('macropay-solutions/php-kernel');
+            return InstalledVersions::getPrettyVersion('macropay-solutions/php-kernel');
         } catch (\Throwable) {
             return static::VERSION;
         }
