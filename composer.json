@@ -105,6 +105,8 @@
         "macropay-solutions/php-crufd-wizard-client": "*",
         "macropay-solutions/php-crufd-wizard-generator": "*",
         "nikic/fast-route": "^1.3",
+        "phpoffice/phpspreadsheet": "Required to stream download/store HTML tables directly to Excel files (^5.x).",
+        "openspout/openspout": "Required to stream download/store iterable collections directly to Excel files (^4.28)",
         "symfony/cache": "Required to use PSR-6 cache bridge (^7.4).",
         "symfony/mailer": "Required to send emails (^7.4)",
         "symfony/routing": "^7.4",
