@@ -151,9 +151,23 @@ class HtmlToExcelExporter
      * @example
      * $tmpFile = \tempnam(\sys_get_temp_dir(), 'excel_');
      *
+     * if ($tmpFile === false) {
+     *     throw new \RuntimeException('Unable to create a temporary file.');
+     * }
+     *
      * try {
      *     \app(HtmlToExcelExporter::class)->store($view->toHtml(), $tmpFile);
-     *     \app('filesystem')->disk('s3')->put('exports/file.xlsx', \fopen($tmpFile, 'r'));
+     *     $stream = \fopen($tmpFile, 'r');
+     *
+     *     if ($stream === false) {
+     *         throw new \RuntimeException('Unable to open the generated export.');
+     *     }
+     *
+     *     try {
+     *         \app('filesystem')->disk('s3')->put('exports/file.xlsx', $stream);
+     *     } finally {
+     *         \fclose($stream);
+     *     }
      * } finally {
      *     \unlink($tmpFile);
      * }
