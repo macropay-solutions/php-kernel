@@ -23,17 +23,12 @@ class IteratorExporter
     {
         return \app(StreamedResponse::class, [function () use ($iterable) {
             $writer = $this->getWriter();
-            $opened = false;
+            $writer->openToFile('php://output');
 
             try {
-                $writer->openToFile('php://output');
-                $opened = true;
-
                 $this->addIterableToWriter($iterable, $writer);
             } finally {
-                if ($opened) {
-                    $writer->close();
-                }
+                $writer->close();
             }
         }, 200, \array_merge([
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -67,17 +62,12 @@ class IteratorExporter
     public function store(iterable $iterable, string $filePath): void
     {
         $writer = $this->getWriter();
-        $opened = false;
+        $writer->openToFile($filePath);
 
         try {
-            $writer->openToFile($filePath);
-            $opened = true;
-
             $this->addIterableToWriter($iterable, $writer);
         } finally {
-            if ($opened) {
-                $writer->close();
-            }
+            $writer->close();
         }
     }
 
