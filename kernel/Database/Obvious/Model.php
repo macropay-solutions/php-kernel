@@ -1951,7 +1951,7 @@ abstract class Model implements
     }
 
     /**
-     * Freeze the model into a pure primitive array (No Eloquent state bloat)
+     * Freeze the model into a pure primitive array (No Obvious state bloat)
      */
     public function __serialize(): array
     {
@@ -1997,7 +1997,7 @@ abstract class Model implements
     }
 
     /**
-     * Thaw the primitive array back into an active Eloquent Model
+     * Thaw the primitive array back into an active Obvious Model
      */
     public function __unserialize(array $data): void
     {
