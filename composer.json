@@ -128,6 +128,7 @@
             "kernel/Events/functions.php",
             "kernel/Filesystem/functions.php",
             "kernel/Support/helpers.php",
+            "prompts/src/helpers.php",
             "src/helpers.php"
         ]
     },
