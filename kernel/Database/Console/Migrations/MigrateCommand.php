@@ -84,7 +84,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
             return 1;
         }
 
-        $lock = $this->app->make('cache')->fwd()->lock(
+        $lock = $this->app->make('cache')->store()->getStore()->lock(
             self::FRAMEWORK_MIGRATE_LOCK,
             $this->app->make('config')->get('database.migrations_lock_ttl', 300)
         );
