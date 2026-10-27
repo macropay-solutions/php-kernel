@@ -80,7 +80,7 @@ class TokenGuard implements Guard
 
         $token = $this->getTokenForRequest();
 
-        if (!empty($token)) {
+        if ('' !== (string)$token) {
             $user = $this->provider->retrieveByCredentials([
                 $this->storageKey => $this->hash ? hash('sha256', $token) : $token,
             ]);
@@ -96,21 +96,25 @@ class TokenGuard implements Guard
      */
     public function getTokenForRequest()
     {
-        $token = $this->request->query($this->inputKey);
+        $token = (string)\filter_var($this->request->query($this->inputKey));
 
-        if (empty($token)) {
-            $token = $this->request->input($this->inputKey);
+        if ('' !== $token) {
+            return $token;
         }
 
-        if (empty($token)) {
-            $token = $this->request->bearerToken();
+        $token = (string)\filter_var($this->request->input($this->inputKey));
+
+        if ('' !== $token) {
+            return $token;
         }
 
-        if (empty($token)) {
-            $token = $this->request->getPassword();
+        $token = (string)$this->request->bearerToken();
+
+        if ('' !== $token) {
+            return $token;
         }
 
-        return $token;
+        return $this->request->getPassword();
     }
 
     /**
@@ -121,7 +125,7 @@ class TokenGuard implements Guard
      */
     public function validate(array $credentials = [])
     {
-        if (empty($credentials[$this->inputKey])) {
+        if (false === \filter_var($credentials[$this->inputKey] ?? []) || $credentials[$this->inputKey] === '') {
             return false;
         }
 

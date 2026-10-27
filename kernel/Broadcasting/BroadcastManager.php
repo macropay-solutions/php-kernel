@@ -310,7 +310,7 @@ class BroadcastManager implements FactoryContract
             $config['secret'],
             $config['app_id'],
             $config['options'] ?? [],
-            isset($config['client_options']) && !empty($config['client_options'])
+            \is_array($config['client_options'] ?? null) && [] !== ($config['client_options'])
                 ? new GuzzleClient($config['client_options'])
                 : null,
         );

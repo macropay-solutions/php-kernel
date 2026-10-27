@@ -120,7 +120,7 @@ class FileStore implements Store, LockProvider
 
         $expire = $file->read(10);
 
-        if (empty($expire) || $this->currentTime() >= $expire) {
+        if ('' === (string)$expire || $this->currentTime() >= $expire) {
             $file->truncate()
                 ->write($this->expiration($seconds) . serialize($value))
                 ->close();

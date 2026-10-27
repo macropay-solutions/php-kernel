@@ -54,7 +54,7 @@ trait InteractsWithInput
      */
     public function bearerToken()
     {
-        $header = $this->header('Authorization', '');
+        $header = (string)\filter_var($this->header('Authorization', ''));
 
         $position = strrpos($header, 'Bearer ');
 
@@ -63,6 +63,8 @@ trait InteractsWithInput
 
             return str_contains($header, ',') ? strstr($header, ',', true) : $header;
         }
+
+        return null;
     }
 
     /**

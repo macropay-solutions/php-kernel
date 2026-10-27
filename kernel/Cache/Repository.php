@@ -520,6 +520,7 @@ class Repository implements ArrayAccess, CacheContract, Macroable
             throw new BadMethodCallException('This cache store does not support tagging.');
         }
 
+        /** @var TaggedCache $cache */
         $cache = $this->store->tags(is_array($names) ? $names : func_get_args());
 
         if (!is_null($this->events)) {

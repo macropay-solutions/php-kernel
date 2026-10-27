@@ -114,7 +114,7 @@ class ClearCommand extends Command
     {
         $cache = $this->cache->store($this->argument('store'));
 
-        return empty($this->tags()) ? $cache : $cache->tags($this->tags());
+        return [] === ($t = $this->tags()) ? $cache : $cache->tags($t);
     }
 
     /**

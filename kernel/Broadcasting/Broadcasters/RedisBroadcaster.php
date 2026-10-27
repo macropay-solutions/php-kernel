@@ -60,13 +60,12 @@ class RedisBroadcaster extends Broadcaster
     public function auth($request)
     {
         $channelName = $this->normalizeChannelName(
-            str_replace($this->prefix, '', $request->channel_name)
+            str_replace($this->prefix, '', $cn = (string)$request->getFiltered('channel_name'))
         );
 
         if (
-            empty($request->channel_name) ||
-            ($this->isGuardedChannel($request->channel_name) &&
-                !$this->retrieveUser($request, $channelName))
+            '' === $cn ||
+            ($this->isGuardedChannel($cn) && !$this->retrieveUser($request, $channelName))
         ) {
             throw new AccessDeniedHttpException();
         }
@@ -118,7 +117,7 @@ class RedisBroadcaster extends Broadcaster
      */
     public function broadcast(array $channels, $event, array $payload = [])
     {
-        if (empty($channels)) {
+        if ([] === $channels) {
             return;
         }
 

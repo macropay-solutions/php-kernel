@@ -70,7 +70,7 @@ class MemcachedConnector
      */
     protected function createMemcachedInstance($connectionId)
     {
-        return empty($connectionId) ? new Memcached() : new Memcached($connectionId);
+        return '' === (string)$connectionId ? new Memcached() : new Memcached($connectionId);
     }
 
     /**

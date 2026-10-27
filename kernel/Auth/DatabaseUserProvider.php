@@ -105,8 +105,8 @@ class DatabaseUserProvider implements UserProvider
             ARRAY_FILTER_USE_KEY
         );
 
-        if (empty($credentials)) {
-            return;
+        if ([] === $credentials) {
+            return null;
         }
 
         // First we will add each credential element to the query as a where clause.
@@ -117,11 +117,17 @@ class DatabaseUserProvider implements UserProvider
         foreach ($credentials as $key => $value) {
             if (is_array($value) || $value instanceof Arrayable) {
                 $query->whereIn($key, $value);
-            } elseif ($value instanceof Closure) {
-                $value($query);
-            } else {
-                $query->where($key, $value);
+
+                continue;
             }
+
+            if ($value instanceof Closure) {
+                $value($query);
+
+                continue;
+            }
+
+            $query->where($key, $value);
         }
 
         // Now we are ready to execute the query to see if we have a user matching

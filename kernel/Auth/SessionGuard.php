@@ -544,7 +544,7 @@ class SessionGuard implements
      */
     protected function ensureRememberTokenIsSet(AuthenticatableContract $user)
     {
-        if (empty($user->getRememberToken())) {
+        if ('' === (string)$user->getRememberToken()) {
             $this->cycleRememberToken($user);
         }
     }
@@ -586,7 +586,7 @@ class SessionGuard implements
 
         $this->clearUserDataFromStorage();
 
-        if (!is_null($this->user) && !empty($user->getRememberToken())) {
+        if (!is_null($this->user) && '' !== (string)$user->getRememberToken()) {
             $this->cycleRememberToken($user);
         }
 

@@ -74,12 +74,11 @@ class PusherBroadcaster extends Broadcaster
      */
     public function auth($request)
     {
-        $channelName = $this->normalizeChannelName($request->channel_name);
+        $channelName = $this->normalizeChannelName($cn = (string)$request->getFiltered('channel_name'));
 
         if (
-            empty($request->channel_name) ||
-            ($this->isGuardedChannel($request->channel_name) &&
-                !$this->retrieveUser($request, $channelName))
+            '' === $cn ||
+            ($this->isGuardedChannel($cn) && !$this->retrieveUser($request, $channelName))
         ) {
             throw new AccessDeniedHttpException();
         }

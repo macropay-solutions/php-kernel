@@ -991,7 +991,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
                         return $this->query->filter($key, $default, $filter, $options);
                     }
 
-                    return $default;
+                    return \filter_var($default, $filter, $options);
                 }
 
                 if ($this->query->has($key)) {
@@ -1017,7 +1017,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
                 return ($options['flags'] ?? 0) & \FILTER_NULL_ON_FAILURE ? null : false;
             }
 
-            return $default;
+            return \filter_var($default, $filter, $options);
         }
 
         if ($filter !== '') {
@@ -1042,7 +1042,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
                     return $this->query->{'get' . $filter}($key, (string)$default);
                 }
 
-                return $default;
+                return (string)$default;
             }
 
             if ($this->query->has($key)) {
@@ -1062,6 +1062,6 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
             }
         }
 
-        return $default;
+        return (string)$default;
     }
 }
