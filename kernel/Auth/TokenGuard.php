@@ -125,11 +125,13 @@ class TokenGuard implements Guard
      */
     public function validate(array $credentials = [])
     {
-        if (false === \filter_var($credentials[$this->inputKey] ?? []) || $credentials[$this->inputKey] === '') {
+        $inputKeyValue = $credentials[$this->inputKey] ?? null;
+
+        if (!\is_string($inputKeyValue) || $inputKeyValue === '') {
             return false;
         }
 
-        $credentials = [$this->storageKey => $credentials[$this->inputKey]];
+        $credentials = [$this->storageKey => $inputKeyValue];
 
         if ($this->provider->retrieveByCredentials($credentials)) {
             return true;

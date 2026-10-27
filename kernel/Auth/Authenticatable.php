@@ -59,7 +59,7 @@ trait Authenticatable
     public function getRememberToken()
     {
         if ('' !== (string)$this->getRememberTokenName()) {
-            return $this->{$this->getRememberTokenName()};
+            return (string)$this->{$this->getRememberTokenName()};
         }
     }
 
