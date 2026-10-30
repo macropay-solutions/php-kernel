@@ -314,7 +314,7 @@ class Batch implements Arrayable, JsonSerializable
      */
     public function hasProgressCallbacks()
     {
-        return isset($this->options['progress']) && !empty($this->options['progress']);
+        return \is_array($this->options['progress'] ?? null) && [] !== $this->options['progress'];
     }
 
     /**
@@ -324,7 +324,7 @@ class Batch implements Arrayable, JsonSerializable
      */
     public function hasThenCallbacks()
     {
-        return isset($this->options['then']) && !empty($this->options['then']);
+        return \is_array($this->options['then'] ?? null) && [] !== $this->options['then'];
     }
 
     /**
@@ -405,7 +405,7 @@ class Batch implements Arrayable, JsonSerializable
      */
     public function hasCatchCallbacks()
     {
-        return isset($this->options['catch']) && !empty($this->options['catch']);
+        return \is_array($this->options['catch'] ?? null) && [] !== $this->options['catch'];
     }
 
     /**
@@ -415,7 +415,7 @@ class Batch implements Arrayable, JsonSerializable
      */
     public function hasFinallyCallbacks()
     {
-        return isset($this->options['finally']) && !empty($this->options['finally']);
+        return \is_array($this->options['finally'] ?? null) && [] !== $this->options['finally'];
     }
 
     /**

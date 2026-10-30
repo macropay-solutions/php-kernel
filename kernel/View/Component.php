@@ -89,7 +89,7 @@ abstract class Component
 
         $dataKeys = array_keys($data);
 
-        if (empty(array_diff($parameters, $dataKeys))) {
+        if ([] === array_diff($parameters, $dataKeys)) {
             return new static(...array_intersect_key($data, array_flip($parameters)));
         }
 

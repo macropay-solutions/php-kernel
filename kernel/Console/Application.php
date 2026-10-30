@@ -189,7 +189,7 @@ class Application extends SymfonyApplication implements ApplicationContract
             $command = $this->app->make($command)->getName();
         }
 
-        if (!isset($callingClass) && empty($parameters)) {
+        if (!isset($callingClass) && (!\is_array($parameters) || [] === $parameters)) {
             $command = $this->getCommandName($input = new StringInput($command));
         } else {
             array_unshift($parameters, $command);

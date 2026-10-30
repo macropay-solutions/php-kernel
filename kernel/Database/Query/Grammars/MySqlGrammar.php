@@ -211,7 +211,7 @@ class MySqlGrammar extends Grammar
      */
     public function compileInsert(Builder $query, array $values)
     {
-        if (empty($values)) {
+        if ([] === $values) {
             $values = [[]];
         }
 

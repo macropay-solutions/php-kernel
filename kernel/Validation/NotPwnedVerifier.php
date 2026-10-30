@@ -36,7 +36,7 @@ class NotPwnedVerifier implements UncompromisedVerifier
         $value = $data['value'];
         $threshold = $data['threshold'];
 
-        if (empty($value = (string)$value)) {
+        if ('' === ($value = (string)$value)) {
             return false;
         }
 

@@ -74,7 +74,7 @@ class BroadcastableModelEventOccurred implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        $channels = empty($this->channels)
+        $channels = [] === ($this->channels ?? [])
             ? ($this->model->broadcastOn($this->event) ?: [])
             : $this->channels;
 

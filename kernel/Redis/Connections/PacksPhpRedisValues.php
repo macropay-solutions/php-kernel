@@ -37,7 +37,7 @@ trait PacksPhpRedisValues
      */
     public function pack(array $values): array
     {
-        if (empty($values)) {
+        if ([] === $values) {
             return $values;
         }
 

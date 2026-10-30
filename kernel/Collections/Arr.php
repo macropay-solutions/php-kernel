@@ -112,7 +112,7 @@ class Arr implements Macroable
         $results = [];
 
         foreach ($array as $key => $value) {
-            if (is_array($value) && !empty($value)) {
+            if (is_array($value) && [] !== $value) {
                 $results = array_merge($results, static::dot($value, $prepend . $key . '.'));
             } else {
                 $results[$prepend . $key] = $value;
@@ -188,7 +188,7 @@ class Arr implements Macroable
     public static function first($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
-            if (empty($array)) {
+            if (!\is_iterable($array) || [] === $array) {
                 return value($default);
             }
 
@@ -219,7 +219,7 @@ class Arr implements Macroable
     public static function last($array, ?callable $callback = null, $default = null)
     {
         if (is_null($callback)) {
-            return empty($array) ? value($default) : end($array);
+            return !\is_array($array) || [] === $array ? value($default) : end($array);
         }
 
         return static::first(array_reverse($array, true), $callback, $default);

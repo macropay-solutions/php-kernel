@@ -237,7 +237,7 @@ class Collection extends BaseCollection implements QueueableCollection
 
         $models->filter(fn($model) => !is_null($model) && !$model->relationLoaded($name))->load($relation);
 
-        if (empty($path)) {
+        if ([] === $path) {
             return;
         }
 
@@ -386,7 +386,7 @@ class Collection extends BaseCollection implements QueueableCollection
     {
         $intersect = new static();
 
-        if (empty($items)) {
+        if (!\is_iterable($items) || [] === $items) {
             return $intersect;
         }
 

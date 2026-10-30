@@ -146,7 +146,7 @@ class MySqlBuilder extends Builder
     {
         $tables = array_column($this->getTables(), 'name');
 
-        if (empty($tables)) {
+        if ([] === $tables) {
             return;
         }
 
@@ -168,7 +168,7 @@ class MySqlBuilder extends Builder
     {
         $views = array_column($this->getViews(), 'name');
 
-        if (empty($views)) {
+        if ([] === $views) {
             return;
         }
 

@@ -165,7 +165,7 @@ trait GuardsAttributes
             return false;
         }
 
-        return empty($this->getFillable()) &&
+        return [] === $this->getFillable() &&
             !str_contains($key, '.') &&
             !str_starts_with($key, '_');
     }
@@ -180,7 +180,7 @@ trait GuardsAttributes
         }
 
         return $guarded == ['*'] ||
-            !empty(preg_grep('/^' . preg_quote($key, '/') . '$/i', $guarded)) ||
+            [] !== (preg_grep('/^' . preg_quote($key, '/') . '$/i', $guarded) ?: []) ||
             !$this->isGuardableColumn($key);
     }
 

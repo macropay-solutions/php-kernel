@@ -1373,7 +1373,9 @@ class PostgresGrammar extends Grammar
             $sql = sprintf(
                 ' generated %s as identity%s',
                 $column->always ? 'always' : 'by default',
-                !is_bool($column->generatedAs) && !empty($column->generatedAs) ? " ({$column->generatedAs})" : ''
+                \is_string($column->generatedAs) && !\in_array($column->generatedAs, ['0', ''], true) ?
+                    " ({$column->generatedAs})" :
+                    ''
             );
         }
 

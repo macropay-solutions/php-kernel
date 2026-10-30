@@ -780,7 +780,7 @@ class TemplateCompiler extends Compiler implements CompilerInterface
                 : Str::kebab(class_basename($class));
         }
 
-        if (!empty($prefix)) {
+        if (\is_string($prefix) && '' !== $prefix) {
             $alias = $prefix . '-' . $alias;
         }
 

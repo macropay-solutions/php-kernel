@@ -322,7 +322,7 @@ class RedisQueue extends Queue implements QueueContract, ClearableQueue
             $this->availableAt($this->retryAfter)
         );
 
-        if (empty($nextJob)) {
+        if (!\is_array($nextJob) || [] === $nextJob) {
             return [null, null];
         }
 

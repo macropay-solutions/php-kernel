@@ -270,7 +270,7 @@ class Translator extends NamespacedItemResolver implements TranslatorContract, M
      */
     protected function makeReplacements($line, array $replace)
     {
-        if (empty($replace)) {
+        if ([] === $replace) {
             return $line;
         }
 

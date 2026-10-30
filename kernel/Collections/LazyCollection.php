@@ -948,7 +948,7 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
 
                         unset($keys[$key]);
 
-                        if (empty($keys)) {
+                        if ([] === $keys) {
                             break;
                         }
                     }

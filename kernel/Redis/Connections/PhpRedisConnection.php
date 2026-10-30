@@ -327,7 +327,7 @@ class PhpRedisConnection extends Connection implements ConnectionContract
             $result = [];
         }
 
-        return $cursor === 0 && empty($result) ? false : [$cursor, $result];
+        return $cursor === 0 && [] === $result ? false : [$cursor, $result];
     }
 
     /**
@@ -351,7 +351,7 @@ class PhpRedisConnection extends Connection implements ConnectionContract
             $result = [];
         }
 
-        return $cursor === 0 && empty($result) ? false : [$cursor, $result];
+        return $cursor === 0 && [] === $result ? false : [$cursor, $result];
     }
 
     /**
@@ -375,7 +375,7 @@ class PhpRedisConnection extends Connection implements ConnectionContract
             $result = [];
         }
 
-        return $cursor === 0 && empty($result) ? false : [$cursor, $result];
+        return $cursor === 0 && [] === $result ? false : [$cursor, $result];
     }
 
     /**
@@ -399,7 +399,7 @@ class PhpRedisConnection extends Connection implements ConnectionContract
             $result = [];
         }
 
-        return $cursor === 0 && empty($result) ? false : [$cursor, $result];
+        return $cursor === 0 && [] === $result ? false : [$cursor, $result];
     }
 
     /**

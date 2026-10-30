@@ -429,7 +429,7 @@ class HasManyThrough extends Relation
     {
         $ids = $ids instanceof Arrayable ? $ids->toArray() : $ids;
 
-        if (empty($ids)) {
+        if ([] === ($ids ?? [])) {
             return $this->getRelated()->newCollection();
         }
 

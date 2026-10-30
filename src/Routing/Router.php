@@ -506,7 +506,7 @@ class Router
      */
     protected function mergeAsGroup(array $action, $as = null)
     {
-        if (isset($as) && !empty($as)) {
+        if (\is_string($as) && '' !== $as) {
             if (isset($action['as'])) {
                 $action['as'] = $as . '.' . $action['as'];
             } else {

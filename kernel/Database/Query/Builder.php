@@ -3176,7 +3176,7 @@ class Builder implements BuilderContract, Macroable
             }
         );
 
-        if (empty($queryResult)) {
+        if (!\is_array($queryResult) || [] === $queryResult) {
             return collect();
         }
 
@@ -3505,7 +3505,7 @@ class Builder implements BuilderContract, Macroable
         // Since every insert gets treated like a batch insert, we will make sure the
         // bindings are structured in a way that is convenient when building these
         // inserts statements by verifying these elements are actually an array.
-        if (empty($values)) {
+        if ([] === $values) {
             return true;
         }
 
@@ -3541,7 +3541,7 @@ class Builder implements BuilderContract, Macroable
      */
     public function insertOrIgnore(array $values)
     {
-        if (empty($values)) {
+        if ([] === $values) {
             return 0;
         }
 
@@ -3676,7 +3676,7 @@ class Builder implements BuilderContract, Macroable
             return $this->insert(array_merge($attributes, $values));
         }
 
-        if (empty($values)) {
+        if ([] === $values) {
             return true;
         }
 
@@ -3693,7 +3693,7 @@ class Builder implements BuilderContract, Macroable
      */
     public function upsert(array $values, $uniqueBy, $update = null)
     {
-        if (empty($values)) {
+        if ([] === $values) {
             return 0;
         } elseif ($update === []) {
             return (int)$this->insert($values);

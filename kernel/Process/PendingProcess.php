@@ -324,7 +324,7 @@ class PendingProcess
             $process->setTty(true);
         }
 
-        if (!empty($this->options)) {
+        if ([] !== ($this->options ?? [])) {
             $process->setOptions($this->options);
         }
 

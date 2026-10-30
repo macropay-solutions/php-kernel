@@ -1050,7 +1050,7 @@ class Grammar extends BaseGrammar
         // basic routine regardless of an amount of records given to us to insert.
         $table = $this->wrapTable($query->from);
 
-        if (empty($values)) {
+        if ([] === $values) {
             return "insert into {$table} default values";
         }
 
@@ -1109,7 +1109,7 @@ class Grammar extends BaseGrammar
     {
         $table = $this->wrapTable($query->from);
 
-        if (empty($columns) || $columns === ['*']) {
+        if ([] === $columns || $columns === ['*']) {
             return "insert into {$table} $sql";
         }
 

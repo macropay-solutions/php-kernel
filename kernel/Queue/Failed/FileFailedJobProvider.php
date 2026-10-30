@@ -195,9 +195,9 @@ class FileFailedJobProvider implements CountableFailedJobProvider, FailedJobProv
             return [];
         }
 
-        $content = file_get_contents($this->path);
+        $content = (string)file_get_contents($this->path);
 
-        if (empty(trim($content))) {
+        if ('' === trim($content)) {
             return [];
         }
 

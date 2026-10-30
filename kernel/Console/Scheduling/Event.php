@@ -511,7 +511,7 @@ class Event implements Macroable
     {
         $text = is_file($this->output) ? file_get_contents($this->output) : '';
 
-        if ($onlyIfOutputExists && empty($text)) {
+        if ($onlyIfOutputExists && '' === (string)$text) {
             return;
         }
 
@@ -857,7 +857,7 @@ class Event implements Macroable
         return function (Container $container) use ($callback, $onlyIfOutputExists) {
             $output = $this->output && is_file($this->output) ? file_get_contents($this->output) : '';
 
-            return $onlyIfOutputExists && empty($output)
+            return $onlyIfOutputExists && '' === (string)$output
                 ? null
 //                            : $container->call($callback, ['output' => new Stringable($output)]);
                 : $container->call($callback, ['output' => \di(Stringable::class, [$output])]);

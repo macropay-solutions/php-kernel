@@ -20,7 +20,7 @@ class TableRenderer extends Renderer
             ->setCellHeaderFormat($this->dim('<fg=default>%s</>'))
             ->setCellRowFormat('<fg=default>%s</>');
 
-        if (empty($table->headers)) {
+        if ([] === ($table->headers ?? [])) {
             $tableStyle->setCrossingChars('┼', '', '', '', '┤', '┘</>', '┴', '└', '├', '<fg=gray>┌', '┬', '┐');
         } else {
             $tableStyle->setCrossingChars('┼', '<fg=gray>┌', '┬', '┐', '┤', '┘</>', '┴', '└', '├');

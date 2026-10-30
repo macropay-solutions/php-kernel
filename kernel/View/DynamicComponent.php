@@ -96,7 +96,7 @@ EOF;
      */
     protected function compileProps(array $bindings)
     {
-        if (empty($bindings)) {
+        if ([] === $bindings) {
             return '';
         }
 

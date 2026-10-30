@@ -278,7 +278,7 @@ class Handler implements ExceptionHandler
         if ($e instanceof CommandNotFoundException) {
             $message = Str::of($e->getMessage())->explode('.')->first();
 
-            if (!empty($alternatives = $e->getAlternatives())) {
+            if ([] !== ($alternatives = $e->getAlternatives())) {
                 $message .= '. Did you mean one of these?';
 
                 $output->writeln('<error>' . $message . '</error>');

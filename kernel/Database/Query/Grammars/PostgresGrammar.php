@@ -690,7 +690,7 @@ class PostgresGrammar extends Grammar
 
         $attribute = array_pop($wrappedPath);
 
-        if (!empty($wrappedPath)) {
+        if ([] !== $wrappedPath) {
             return $field . '->' . implode('->', $wrappedPath) . '->>' . $attribute;
         }
 

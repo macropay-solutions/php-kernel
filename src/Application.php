@@ -933,7 +933,7 @@ class Application extends Container implements ApplicationContract
     public function getConfigurationPath($name = null)
     {
         if (!$name) {
-            $appConfigDir = $this->basePath('config') . '/';
+            $appConfigDir = $this->basePath('config') . DIRECTORY_SEPARATOR;
 
             if (file_exists($appConfigDir)) {
                 return $appConfigDir;
@@ -946,7 +946,7 @@ class Application extends Container implements ApplicationContract
             return null;
         }
 
-        $appConfigPath = $this->basePath('config') . '/' . $name . '.php';
+        $appConfigPath = $this->basePath('config') . DIRECTORY_SEPARATOR . $name . '.php';
 
         if (file_exists($appConfigPath)) {
             return $appConfigPath;
@@ -1000,7 +1000,7 @@ class Application extends Container implements ApplicationContract
      */
     public function basePath($path = '')
     {
-        return $this->basePath . ($path ? '/' . $path : $path);
+        return $this->basePath . ((string)$path !== '' ? DIRECTORY_SEPARATOR . $path : $path);
     }
 
     /**
@@ -1166,7 +1166,7 @@ class Application extends Container implements ApplicationContract
 
         foreach ((array)data_get($composer, 'autoload.psr-4') as $namespace => $path) {
             foreach ((array)$path as $pathChoice) {
-                if (realpath(app()->path()) == realpath(base_path() . '/' . $pathChoice)) {
+                if (realpath(app()->path()) == realpath(base_path() . DIRECTORY_SEPARATOR . $pathChoice)) {
                     return $this->namespace = $namespace;
                 }
             }

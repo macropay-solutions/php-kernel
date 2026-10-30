@@ -765,7 +765,7 @@ class Filesystem implements Macroable
     {
         $allDirectories = $this->directories($directory);
 
-        if (!empty($allDirectories)) {
+        if ([] !== $allDirectories) {
             foreach ($allDirectories as $directoryName) {
                 $this->deleteDirectory($directoryName);
             }

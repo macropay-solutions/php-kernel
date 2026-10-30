@@ -100,7 +100,7 @@ class SuggestPromptRenderer extends Renderer implements Scrolling
      */
     protected function renderOptions(SuggestPrompt $prompt): string
     {
-        if (empty($prompt->matches()) || ($prompt->value() === '' && $prompt->highlighted === null)) {
+        if ([] === $prompt->matches() || ($prompt->value() === '' && $prompt->highlighted === null)) {
             return '';
         }
 

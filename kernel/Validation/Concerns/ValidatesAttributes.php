@@ -410,11 +410,11 @@ trait ValidatesAttributes
             return false;
         }
 
-        if (empty($parameters)) {
+        if (!\is_array($parameters) || [] === $parameters) {
             return true;
         }
 
-        return empty(array_diff_key($value, array_fill_keys($parameters, '')));
+        return [] === array_diff_key($value, array_fill_keys($parameters, ''));
     }
 
     /**

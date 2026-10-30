@@ -151,10 +151,23 @@ class Spinner extends Prompt
      */
     public function __destruct()
     {
-        if (!empty($this->pid)) {
+        if (($this->pid ?? 0) > 0) {
             posix_kill($this->pid, SIGHUP);
         }
 
         parent::__destruct();
+    }
+
+    /**
+     * Prevent restoring state from an untrusted serialized payload.
+     */
+    public function __wakeup(): void
+    {
+        throw new \BadMethodCallException('Spinner cannot be unserialized.');
+    }
+
+    public function __unserialize(array $data): void
+    {
+        throw new \BadMethodCallException('Spinner cannot be unserialized.');
     }
 }

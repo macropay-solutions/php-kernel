@@ -2,7 +2,6 @@
 
 namespace MacropaySolutions\Kernel\Database\Console;
 
-use InvalidArgumentException;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningFinished;
@@ -124,10 +123,6 @@ class PruneCommand extends Command
 
         $except = $this->option('except');
 
-        if (!empty($models) && !empty($except)) {
-            throw new InvalidArgumentException('The --models and --except options cannot be combined.');
-        }
-
         return collect(Finder::create()->in($this->getPath())->files()->name('*.php'))
             ->map(function ($model) {
                 $namespace = $this->app->getNamespace();
@@ -135,7 +130,7 @@ class PruneCommand extends Command
                 return $namespace . str_replace(
                     ['/', '.php'],
                     ['\\', ''],
-                    Str::after($model->getRealPath(), realpath(app_path()) . DIRECTORY_SEPARATOR)
+                    Str::after($model->getRealPath(), realpath(\app()->path()) . DIRECTORY_SEPARATOR)
                 );
             })->when(!empty($except), function ($models) use ($except) {
                 return $models->reject(function ($model) use ($except) {
@@ -161,7 +156,7 @@ class PruneCommand extends Command
             })->all();
         }
 
-        return app_path('Models');
+        return \app()->basePath('app' . DIRECTORY_SEPARATOR . 'Models');
     }
 
     /**

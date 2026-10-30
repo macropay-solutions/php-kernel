@@ -112,7 +112,7 @@ class MultiSearchPromptRenderer extends Renderer implements Scrolling
      */
     protected function renderOptions(MultiSearchPrompt $prompt): string
     {
-        if ($prompt->searchValue() !== '' && empty($prompt->matches())) {
+        if ($prompt->searchValue() !== '' && [] === $prompt->matches()) {
             return $this->gray('  ' . ($prompt->state === 'searching' ? 'Searching...' : 'No results.'));
         }
 

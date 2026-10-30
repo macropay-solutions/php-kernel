@@ -56,7 +56,9 @@ trait PromptsForMissingInput
                     text(
                         label: $label,
                         placeholder: $placeholder ?? '',
-                        validate: fn($value) => empty($value) ? "The {$argument->getName()} is required." : null,
+                        validate: fn($value) => !\is_string($value) || '' === $value ?
+                            "The {$argument->getName()} is required." :
+                            null,
                     )
                 );
             })

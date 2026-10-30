@@ -457,7 +457,7 @@ class Builder implements BuilderContract, Macroable
     {
         $ids = $ids instanceof Arrayable ? $ids->toArray() : $ids;
 
-        if (empty($ids)) {
+        if ([] === ($ids ?? [])) {
             return $this->model->newCollection();
         }
 
@@ -1075,7 +1075,7 @@ class Builder implements BuilderContract, Macroable
      */
     public function upsert(array $values, $uniqueBy, $update = null)
     {
-        if (empty($values)) {
+        if ([] === $values) {
             return 0;
         }
 

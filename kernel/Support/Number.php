@@ -214,7 +214,7 @@ class Number implements Macroable
         ?int $maxPrecision = null,
         array $units = []
     ) {
-        if (empty($units)) {
+        if ([] === $units) {
             $units = [
                 3 => 'K',
                 6 => 'M',

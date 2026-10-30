@@ -64,7 +64,7 @@ class FakeProcessResult implements ProcessResultContract
      */
     protected function normalizeOutput(array|string $output)
     {
-        if (empty($output)) {
+        if ('' === $output || [] === $output) {
             return '';
         } elseif (is_string($output)) {
             return rtrim($output, "\n") . "\n";

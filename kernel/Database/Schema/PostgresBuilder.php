@@ -123,14 +123,14 @@ class PostgresBuilder extends Builder
             $qualifiedName = $table['schema'] . '.' . $table['name'];
 
             if (
-                empty(array_intersect($this->grammar->escapeNames([$table['name'], $qualifiedName]), $excludedTables))
+                [] === array_intersect($this->grammar->escapeNames([$table['name'], $qualifiedName]), $excludedTables)
                 && in_array($this->grammar->escapeNames([$table['schema']])[0], $schemas)
             ) {
                 $tables[] = $qualifiedName;
             }
         }
 
-        if (empty($tables)) {
+        if ([] === $tables) {
             return;
         }
 
@@ -156,7 +156,7 @@ class PostgresBuilder extends Builder
             }
         }
 
-        if (empty($views)) {
+        if ([] === $views) {
             return;
         }
 
@@ -201,11 +201,11 @@ class PostgresBuilder extends Builder
             }
         }
 
-        if (!empty($types)) {
+        if ([] !== $types) {
             $this->connection->statement($this->grammar->compileDropAllTypes($types));
         }
 
-        if (!empty($domains)) {
+        if ([] !== $domains) {
             $this->connection->statement($this->grammar->compileDropAllDomains($domains));
         }
     }
