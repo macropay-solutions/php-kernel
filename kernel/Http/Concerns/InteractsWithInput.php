@@ -7,6 +7,7 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use SplFileInfo;
 use stdClass;
+use Symfony\Component\HttpFoundation\File\UploadedFile as BaseUploadedFile;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\VarDumper\VarDumper;
 
@@ -302,11 +303,41 @@ trait InteractsWithInput
      */
     public function input($key = null, $default = null)
     {
-        return data_get(
+        return $this->filterDangerousWrapper(data_get(
             $this->getInputSource()->all() + $this->query->all(),
             $key,
             $default
-        );
+        ), $default);
+    }
+
+    /**
+     * Recursively checks if the input contains dangerous stream wrappers.
+     */
+    public function filterDangerousWrapper(mixed $value, mixed $default = null): mixed
+    {
+        if (\is_string($value)) {
+            if (\preg_match('~(?:^\s*|://)(?:php|phar)://~i', $value) === 1) {
+                return $default instanceof \Closure ? $default() : $default;
+            }
+
+            return $value;
+        }
+
+        if (!\is_array($value)) {
+            return $value;
+        }
+
+        foreach ($value as $key => $item) {
+            if (null === $this->filterDangerousWrapper($key)) {
+                unset($value[$key]);
+
+                continue;
+            }
+
+            $value[$key] = $this->filterDangerousWrapper($item, $default);
+        }
+
+        return $value;
     }
 
     /**
@@ -536,15 +567,38 @@ trait InteractsWithInput
      */
     protected function convertUploadedFiles(array $files)
     {
-        return array_map(function ($file) {
-            if (is_null($file) || (is_array($file) && [] === array_filter($file))) {
-                return $file;
+        foreach ($files as $key => $file) {
+            if (null === $this->filterDangerousWrapper($key)) {
+                unset($files[$key]);
+
+                continue;
             }
 
-            return is_array($file)
-                ? $this->convertUploadedFiles($file)
-                : UploadedFile::createFromBase($file);
-        }, $files);
+            if (\is_null($file) || (\is_array($file) && [] === \array_filter($file))) {
+                continue;
+            }
+
+            if (\is_array($file)) {
+                $files[$key] = $this->convertUploadedFiles($file);
+
+                continue;
+            }
+
+            if (
+                !$file instanceof BaseUploadedFile
+                || null === $this->filterDangerousWrapper($file->getPathname())
+                || null === $this->filterDangerousWrapper($file->getClientOriginalName())
+                || null === $this->filterDangerousWrapper($file->getClientMimeType())
+            ) {
+                unset($files[$key]);
+
+                continue;
+            }
+
+            $files[$key] = UploadedFile::createFromBase($file);
+        }
+
+        return $files;
     }
 
     /**
@@ -602,14 +656,14 @@ trait InteractsWithInput
     protected function retrieveItem($source, $key, $default)
     {
         if (is_null($key)) {
-            return $this->$source->all();
+            return $this->filterDangerousWrapper($this->$source->all(), $default);
         }
 
         if ($this->$source instanceof InputBag) {
-            return $this->$source->all()[$key] ?? $default;
+            return $this->filterDangerousWrapper($this->$source->all()[$key] ?? $default, $default);
         }
 
-        return $this->$source->get($key, $default);
+        return $this->filterDangerousWrapper($this->$source->get($key, $default), $default);
     }
 
     /**

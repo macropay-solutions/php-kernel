@@ -170,7 +170,7 @@ trait RoutesRequests
 
                         if (isset($tmp['/'])) {
                             $tmp = $tmp['/'];
-                            $parameters[] = $word;
+                            $parameters[] = \rawurldecode($word);
 
                             continue;
                         }
@@ -283,6 +283,11 @@ trait RoutesRequests
 
         /** @var Request $request*/
         $request = $this->instances[Request::class] ?? $this->resolveString('request');
+
+        if (isset($routeInfo[2]) && $routeInfo[2] !== $request->filterDangerousWrapper($routeInfo[2])) {
+            throw new NotFoundHttpException();
+        }
+
         $action = $routeInfo[1];
 
         if (

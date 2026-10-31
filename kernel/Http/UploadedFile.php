@@ -8,9 +8,9 @@ use MacropaySolutions\Kernel\Contracts\Filesystem\FileNotFoundException;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use MacropaySolutions\KernelDev\Http\Testing\FileFactory;
-use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile as BaseUploadedFile;
 
-class UploadedFile extends SymfonyUploadedFile implements Macroable
+class UploadedFile extends BaseUploadedFile implements Macroable
 {
     use FileHelpers;
     use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelHttpUploadedFile;
@@ -133,7 +133,7 @@ class UploadedFile extends SymfonyUploadedFile implements Macroable
      * @param bool $test
      * @return static
      */
-    public static function createFromBase(SymfonyUploadedFile $file, $test = false)
+    public static function createFromBase(BaseUploadedFile $file, $test = false)
     {
 //        return $file instanceof static ? $file : new static(
         return $file instanceof static ? $file : \di(static::class, [

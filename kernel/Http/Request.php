@@ -479,6 +479,20 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public function get(string $key, mixed $default = null): mixed
     {
+        return $this->filterDangerousWrapper($this->getRaw($key, $default), $default);
+    }
+
+    /**
+     * This method belongs to Symfony HttpFoundation and is not usually needed when using Kernel.
+     *
+     * Instead, you may use the "input" method.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    private function getRaw(string $key, mixed $default = null): mixed
+    {
         if ($this !== $result = $this->attributes->get($key, $this)) {
             return $result;
         }
@@ -774,7 +788,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
             return $route;
         }
 
-        return $route->parameter($param, $default);
+        return $this->filterDangerousWrapper($route->parameter($param, $default), $default);
     }
 
     /**
@@ -941,7 +955,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public function __get($key)
     {
-        return Arr::get($this->all(), $key, fn() => $this->route($key));
+        return $this->filterDangerousWrapper(Arr::get($this->all(), $key, fn() => $this->route($key)));
     }
 
     public function forceOffsetUnset(string $offset): static
@@ -971,6 +985,27 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      * DOES NOT RETURN DEFAULT NULL with FILTER_DEFAULT but empty string
      */
     public function getFiltered(
+        string $key,
+        mixed $default = null,
+        string|int $filter = \FILTER_DEFAULT,
+        array|int $options = [],
+    ): mixed
+    {
+        return $this->filterDangerousWrapper(
+            $this->getFilteredRaw($key, $default, $filter, $options),
+            static fn() => \is_string($filter) ? (string)$default : \filter_var($default, $filter, $options)
+        );
+    }
+
+    /**
+     * @param string|int $filter can be 'alpha', 'alnum', 'digits' or an int flag
+     * @see ParameterBag::filter(), \filter_var() for $filter and $options
+     * @see ParameterBag::getAlpha()
+     * @see ParameterBag::getAlnum()
+     * @see ParameterBag::getDigits()
+     * DOES NOT RETURN DEFAULT NULL with FILTER_DEFAULT but empty string
+     */
+    private function getFilteredRaw(
         string $key,
         mixed $default = null,
         string|int $filter = \FILTER_DEFAULT,
