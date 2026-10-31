@@ -533,7 +533,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
             return $this->request;
         }
 
-        return \data_get($this->request->all(), $key, $default);
+        return $this->filterDangerousWrapper(\data_get($this->request->all(), $key, $default), $default);
     }
 
     /**
@@ -989,8 +989,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
         mixed $default = null,
         string|int $filter = \FILTER_DEFAULT,
         array|int $options = [],
-    ): mixed
-    {
+    ): mixed {
         return $this->filterDangerousWrapper(
             $this->getFilteredRaw($key, $default, $filter, $options),
             static fn() => \is_string($filter) ? (string)$default : \filter_var($default, $filter, $options)
