@@ -208,7 +208,7 @@ class EncryptCookies
      */
     public function isDisabled($name)
     {
-        return \in_array($name, $this->except) && !\str_starts_with($name, \MacropaySolutions\Kernel\Auth\SessionGuard::REMEMBER_);
+        return \in_array($name, $this->except, true);
     }
 
     /**

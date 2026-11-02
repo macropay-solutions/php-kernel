@@ -41,14 +41,6 @@ class AuthenticateSession implements AuthenticatesSessions
             return $next($request);
         }
 
-        if ($this->guard()->viaRemember()) {
-            $passwordHash = explode('|', $request->cookies->get($this->guard()->getRecallerName()))[2] ?? null;
-
-            if (!$passwordHash || $passwordHash != $request->user()->getAuthPassword()) {
-                $this->logout($request);
-            }
-        }
-
         if (!$request->session()->has('password_hash_' . $this->auth->getDefaultDriver())) {
             $this->storePasswordHashInSession($request);
         }

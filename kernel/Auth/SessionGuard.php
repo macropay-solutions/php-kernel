@@ -559,7 +559,7 @@ class SessionGuard implements
     {
         $this->getCookieJar()->queue(
             $this->createRecaller(
-                $user->getAuthIdentifier() . '|' . $user->getRememberToken() . '|' . $user->getAuthPassword()
+                $user->getAuthIdentifier() . '|' . $user->getRememberToken()
             )
         );
     }
