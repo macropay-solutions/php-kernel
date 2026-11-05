@@ -7,6 +7,7 @@ use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 
 class PendingDispatch
 {
@@ -89,6 +90,10 @@ class PendingDispatch
     {
         if (!$this->job instanceof ShouldBeUnique) {
             return true;
+        }
+
+        if ($this->job instanceof StorableCallable) {
+            $this->job = $this->job->toStorableCallable();
         }
 
         return (new UniqueLock(Container::getInstance()->make(Cache::class)))

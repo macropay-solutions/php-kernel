@@ -141,7 +141,7 @@ class CallQueuedCallable implements ShouldQueue
                 };
 
                 if ($uniqueId !== null) {
-                    $callable->setUniqueId((string) $uniqueId);
+                    $callable->setUniqueId($resolvedSource::class . ':' . $uniqueId);
                 }
 
                 $uniqueFor = match (true) {
