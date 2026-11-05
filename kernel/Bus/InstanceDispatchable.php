@@ -69,7 +69,8 @@ trait InstanceDispatchable
         if (\property_exists($this, 'chainConnection')) {
             $callable->connection = $this->connection ?? null;
             $callable->queue = $this->queue ?? null;
-            $callable->messageGroup = $this->messageGroup ?? null;
+            $callable->messageGroup = $this->messageGroup ?? $callable->messageGroup;
+            $callable->deduplicationId = $this->deduplicationId ?? $callable->deduplicationId;
             $callable->chainConnection = $this->chainConnection ?? null;
             $callable->chainQueue = $this->chainQueue ?? null;
             $callable->chainCatchCallbacks = $this->chainCatchCallbacks ?? null;

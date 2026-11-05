@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Queue;
 use Aws\Sqs\SqsClient;
 use MacropaySolutions\Kernel\Contracts\Queue\ClearableQueue;
 use MacropaySolutions\Kernel\Contracts\Queue\Queue as QueueContract;
+use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Queue\Jobs\SqsJob;
 use MacropaySolutions\Kernel\Support\Str;
 
@@ -163,6 +164,12 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
         $callableClass = null;
         $callableArgs = [];
 
+        // Wrappers (queued listeners, mailables, notifications, broadcast events) and object jobs carry their
+        // message group and deduplication ID on the CallQueuedCallable that they build for the payload.
+        if ($job instanceof StorableCallable) {
+            $job = $job->toStorableCallable();
+        }
+
         if (\is_array($job) && isset($job[0], $job[1])) {
             $callableClass = $job[0];
             $callableArgs = $job[2] ?? [];
@@ -211,8 +218,14 @@ class SqsQueue extends Queue implements QueueContract, ClearableQueue
      */
     protected function resolveDeduplicationId(mixed $job, ?string $callableClass, array $callableArgs): string
     {
-        if (\is_object($job) && \method_exists($job, 'deduplicationId')) {
-            return (string)$job->deduplicationId();
+        if (\is_object($job)) {
+            if ('' !== (string)($job->deduplicationId ?? '')) {
+                return (string)$job->deduplicationId;
+            }
+
+            if (\method_exists($job, 'deduplicationId')) {
+                return (string)$job->deduplicationId();
+            }
         }
 
         if ((string)$callableClass !== '' && \is_callable([$callableClass, 'deduplicationId'])) {
