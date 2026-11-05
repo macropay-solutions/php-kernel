@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Framework\Http;
 
 use MacropaySolutions\Kernel\Http\RedirectResponse;
+use MacropaySolutions\Kernel\Session\Store as SessionStore;
 use MacropaySolutions\Framework\Application;
 
 class Redirector
@@ -69,8 +70,12 @@ class Redirector
     {
 //        $redirect = new RedirectResponse($path, $status, $headers);
         $redirect = \di(RedirectResponse::class, [$path, $status, $headers]);
+        $request = $this->app->make('request');
+        $redirect->setRequest($request);
 
-        $redirect->setRequest($this->app->make('request'));
+        if ($request->hasSession() && ($session = $request->session()) instanceof SessionStore) {
+            $redirect->setSession($session);
+        }
 
         return $redirect;
     }

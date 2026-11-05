@@ -1303,7 +1303,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
             ? $this->operatorForWhere(...func_get_args())
             : $key;
 
-        $items = $this->unless($filter == null)->filter($filter);
+        $items = $filter === null ? $this : $this->filter($filter);
 
         $count = $items->count();
 

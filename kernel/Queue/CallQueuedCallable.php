@@ -34,6 +34,41 @@ class CallQueuedCallable implements ShouldQueue
     public array $failureCallbacks = [];
 
     /**
+     * The number of times the job may be attempted.
+     */
+    public ?int $tries = null;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     */
+    public ?int $timeout = null;
+
+    /**
+     * The maximum number of unhandled exceptions to allow before failing.
+     */
+    public ?int $maxExceptions = null;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     */
+    public null|int|string|array $backoff = null;
+
+    /**
+     * The timestamp after which the job should no longer be attempted.
+     */
+    public ?int $retryUntil = null;
+
+    /**
+     * Indicates if the job should be marked as failed on timeout.
+     */
+    public bool $failOnTimeout = false;
+
+    /**
+     * Indicates if the job should be encrypted.
+     */
+    public bool $shouldBeEncrypted = false;
+
+    /**
      * Create a new job instance.
      * @throws \InvalidArgumentException
      */
@@ -63,6 +98,7 @@ class CallQueuedCallable implements ShouldQueue
         };
 
         $callable = $wrapperClass::create($storableCallable);
+        static::copyJobSettings($source, $callable);
 
         if ($sourceIsObject) {
             if (!isset($callable->messageGroup)) {
@@ -127,6 +163,63 @@ class CallQueuedCallable implements ShouldQueue
         }
 
         return $callable;
+    }
+
+    /**
+     * Copy the job settings and the failed() handler of the job source onto the queued callable.
+     * Only public properties and public methods of the source are read.
+     */
+    protected static function copyJobSettings(object|string $source, self $callable): void
+    {
+        $sourceIsObject = \is_object($source);
+        $sourceClass = $sourceIsObject ? $source::class : $source;
+
+        if (!\class_exists($sourceClass)) {
+            return;
+        }
+
+        $values = $sourceIsObject ? \get_object_vars($source) : \get_class_vars($sourceClass);
+
+        foreach (['tries', 'timeout', 'maxExceptions', 'backoff', 'retryUntil'] as $setting) {
+            if (isset($values[$setting])) {
+                $callable->{$setting} = $values[$setting] instanceof \DateTimeInterface
+                    ? $values[$setting]->getTimestamp()
+                    : $values[$setting];
+            }
+        }
+
+        if (true === ($values['failOnTimeout'] ?? false)) {
+            $callable->failOnTimeout = true;
+        }
+
+        if ($sourceIsObject) {
+            static::copyJobSettingsFromMethods($source, $callable);
+        }
+
+        if ($callable->storableCallable[0] === $sourceClass && \method_exists($sourceClass, 'failed')) {
+            $callable->onFailure([$sourceClass, 'failed', $callable->storableCallable[2] ?? []]);
+        }
+    }
+
+    /**
+     * Copy the job settings that the job source defines as methods.
+     */
+    protected static function copyJobSettingsFromMethods(object $source, self $callable): void
+    {
+        if (!isset($callable->tries) && \method_exists($source, 'tries')) {
+            $callable->tries = $source->tries();
+        }
+
+        if (!isset($callable->backoff) && \method_exists($source, 'backoff')) {
+            $callable->backoff = $source->backoff();
+        }
+
+        if (!isset($callable->retryUntil) && \method_exists($source, 'retryUntil')) {
+            $retryUntil = $source->retryUntil();
+            $callable->retryUntil = $retryUntil instanceof \DateTimeInterface
+                ? $retryUntil->getTimestamp()
+                : $retryUntil;
+        }
     }
 
     protected static function getMessageGroup(object $resolvedSource): string

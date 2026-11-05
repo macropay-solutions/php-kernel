@@ -13,6 +13,7 @@ use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
 use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
 use MacropaySolutions\Kernel\Http\Exceptions\HttpResponseException;
 use MacropaySolutions\Kernel\Http\JsonResponse;
+use MacropaySolutions\Kernel\Http\Request;
 use MacropaySolutions\Kernel\Http\Response;
 use MacropaySolutions\Kernel\Session\TokenMismatchException;
 use MacropaySolutions\Kernel\Support\Arr;
@@ -54,6 +55,18 @@ class Handler implements ExceptionHandler
         SuspiciousOperationException::class,
         TokenMismatchException::class,
         ValidationException::class,
+    ];
+
+    /**
+     * A list of the inputs that are never flashed to the session on validation exceptions.
+     *
+     * @var array<int, string>
+     */
+    protected array $dontFlash = [
+        'current_password',
+        'password',
+        'token',
+        'password_confirmation',
     ];
 
     /**
@@ -164,9 +177,37 @@ class Handler implements ExceptionHandler
             return $e->getResponse();
         }
 
+        if ($e instanceof ValidationException) {
+            return $this->convertValidationExceptionToResponse($request, $e);
+        }
+
         return $request->expectsJson()
             ? $this->prepareJsonResponse($request, $e)
             : $this->prepareResponse($request, $e);
+    }
+
+    /**
+     * Convert a validation exception that has no response into a response.
+     *
+     * A redirect is returned only when a redirect URL was set, the session is started and JSON is not expected.
+     * Otherwise, the same 422 JSON error map as the controller validate() method is returned.
+     */
+    protected function convertValidationExceptionToResponse(
+        Request $request,
+        ValidationException $e
+    ): \Symfony\Component\HttpFoundation\Response {
+        if (
+            \is_string($e->redirectTo)
+            && '' !== $e->redirectTo
+            && !$request->expectsJson()
+            && $request->hasSession()
+        ) {
+            return \redirect($e->redirectTo)
+                ->withInput(Arr::except($request->input(), $this->dontFlash))
+                ->withErrors($e->errors(), $e->errorBag);
+        }
+
+        return \di(JsonResponse::class, [$e->errors(), $e->status]);
     }
 
     /**

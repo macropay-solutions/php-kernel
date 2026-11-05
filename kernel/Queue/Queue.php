@@ -116,14 +116,6 @@ abstract class Queue
             $job = $job->toStorableCallable();
         }
 
-        if ($job instanceof ShouldBeUnique) {
-            self::createPayloadUsing(fn(): array => [
-                'uniqueJobKey' => UniqueLock::getKey($job),
-                'uniqueJobCacheStore' => UniqueLock::getUniqueJobCacheStore($job),
-                'uniqueUntilProcessing' => $job instanceof ShouldBeUniqueUntilProcessing
-            ]);
-        }
-
         $payload = json_encode($value = $this->createPayloadArray($job, $queue, $data), \JSON_UNESCAPED_UNICODE);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -179,6 +171,12 @@ abstract class Queue
                 'batchId' => $job->batchId ?? null,
             ],
         ]);
+
+        if ($job instanceof ShouldBeUnique) {
+            $payload['uniqueJobKey'] = UniqueLock::getKey($job);
+            $payload['uniqueJobCacheStore'] = UniqueLock::getUniqueJobCacheStore($job);
+            $payload['uniqueUntilProcessing'] = $job instanceof ShouldBeUniqueUntilProcessing;
+        }
 
         if ($job instanceof CallQueuedCallable) {
             $metadata = \get_object_vars($job);
@@ -287,7 +285,7 @@ abstract class Queue
         }
 
         if ($job instanceof CallQueuedCallable) {
-            return \is_subclass_of($job->storableCallable[0], ShouldBeEncrypted::class);
+            return $job->shouldBeEncrypted || \is_subclass_of($job->storableCallable[0], ShouldBeEncrypted::class);
         }
 
         return $job->shouldBeEncrypted ?? false;

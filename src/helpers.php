@@ -592,6 +592,28 @@ if (!function_exists('csrf_field')) {
     }
 }
 
+if (!\function_exists('method_field')) {
+    /**
+     * Generate a form field to spoof the HTTP verb used by forms.
+     */
+    function method_field(string $method): HtmlString
+    {
+        return new HtmlString(
+            '<input type="hidden" name="_method" value="' . \htmlspecialchars($method, ENT_QUOTES, 'UTF-8') . '">'
+        );
+    }
+}
+
+if (!\function_exists('old')) {
+    /**
+     * Retrieve an old input item.
+     */
+    function old(?string $key = null, mixed $default = null): mixed
+    {
+        return \app('request')->old($key, $default);
+    }
+}
+
 if (!function_exists('csrf_token')) {
     /**
      * Get the CSRF token value.

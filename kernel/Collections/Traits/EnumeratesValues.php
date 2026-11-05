@@ -103,9 +103,9 @@ trait EnumeratesValues
             return \di(static::class);
         }
 
-        return static::range(1, $number)
-            ->unless($callback == null)
-            ->map($callback);
+        $range = static::range(1, $number);
+
+        return $callback === null ? $range : $range->map($callback);
     }
 
     /**

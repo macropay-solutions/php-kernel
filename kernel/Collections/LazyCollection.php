@@ -1254,9 +1254,9 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
             ? $this->operatorForWhere(...func_get_args())
             : $key;
 
-        return $this
-            ->unless($filter == null)
-            ->filter($filter)
+        $items = $filter === null ? $this : $this->filter($filter);
+
+        return $items
             ->take(2)
             ->collect()
             ->sole();
@@ -1278,9 +1278,9 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
             ? $this->operatorForWhere(...func_get_args())
             : $key;
 
-        return $this
-            ->unless($filter == null)
-            ->filter($filter)
+        $items = $filter === null ? $this : $this->filter($filter);
+
+        return $items
             ->take(1)
             ->collect()
             ->firstOrFail();

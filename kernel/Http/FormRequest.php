@@ -164,17 +164,15 @@ abstract class FormRequest extends Request implements ValidatesWhenResolved
      */
     protected function getRedirectUrl()
     {
-        $redirector = new \MacropaySolutions\Framework\Http\Redirector($this->container);
-
-        if ($this->redirect) {
-            return $redirector->to($this->redirect);
+        if ('' !== (string)$this->redirect) {
+            return $this->container->make('url')->to($this->redirect);
         }
 
-        if ($this->redirectRoute) {
-            return $redirector->route($this->redirectRoute);
+        if ('' !== (string)$this->redirectRoute) {
+            return $this->container->make('url')->route($this->redirectRoute);
         }
 
-        return $redirector->to('/');
+        return '';
     }
 
     /**
