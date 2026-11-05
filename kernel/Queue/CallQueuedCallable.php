@@ -192,11 +192,18 @@ class CallQueuedCallable implements ShouldQueue
             $callable->failOnTimeout = true;
         }
 
+        if (true === ($values['shouldBeEncrypted'] ?? false)) {
+            $callable->shouldBeEncrypted = true;
+        }
+
         if ($sourceIsObject) {
             static::copyJobSettingsFromMethods($source, $callable);
         }
 
-        if ($callable->storableCallable[0] === $sourceClass && \method_exists($sourceClass, 'failed')) {
+        if (
+            $callable->storableCallable[0] === $sourceClass
+            && \in_array('failed', \get_class_methods($sourceClass), true)
+        ) {
             $callable->onFailure([$sourceClass, 'failed', $callable->storableCallable[2] ?? []]);
         }
     }
@@ -207,15 +214,32 @@ class CallQueuedCallable implements ShouldQueue
     protected static function copyJobSettingsFromMethods(object $source, self $callable): void
     {
         if (!isset($callable->tries) && \method_exists($source, 'tries')) {
-            $callable->tries = $source->tries();
+            try {
+                $tries = $source->tries();
+            } catch (\Throwable) {
+                $tries = null;
+            }
+
+            $callable->tries = $tries;
         }
 
         if (!isset($callable->backoff) && \method_exists($source, 'backoff')) {
-            $callable->backoff = $source->backoff();
+            try {
+                $backoff = $source->backoff();
+            } catch (\Throwable) {
+                $backoff = null;
+            }
+
+            $callable->backoff = $backoff;
         }
 
         if (!isset($callable->retryUntil) && \method_exists($source, 'retryUntil')) {
-            $retryUntil = $source->retryUntil();
+            try {
+                $retryUntil = $source->retryUntil();
+            } catch (\Throwable) {
+                $retryUntil = null;
+            }
+
             $callable->retryUntil = $retryUntil instanceof \DateTimeInterface
                 ? $retryUntil->getTimestamp()
                 : $retryUntil;
