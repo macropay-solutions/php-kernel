@@ -46,6 +46,11 @@ class Repository implements ArrayAccess, CacheContract, Macroable
     protected $default = 3600;
 
     /**
+     * The name of the cache store.
+     */
+    protected ?string $name = null;
+
+    /**
      * Create a new cache repository instance.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Cache\Store $store
@@ -54,6 +59,24 @@ class Repository implements ArrayAccess, CacheContract, Macroable
     public function __construct(Store $store)
     {
         $this->store = $store;
+    }
+
+    /**
+     * Get the name of the cache store.
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set the name of the cache store.
+     */
+    public function setName(?string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     /**

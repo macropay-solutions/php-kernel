@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Bus;
 
+use MacropaySolutions\Kernel\Cache\Repository;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
 
 class UniqueLock
@@ -87,8 +88,8 @@ class UniqueLock
      */
     public static function getUniqueJobCacheStore(mixed $job): ?string
     {
-        return \method_exists($job, 'uniqueVia')
-            ? $job->uniqueVia()->fwd()->getName()
-            : \config('cache.default');
+        $cache = \method_exists($job, 'uniqueVia') ? $job->uniqueVia() : null;
+
+        return ($cache instanceof Repository ? $cache->getName() : null) ?? \config('cache.default');
     }
 }

@@ -90,13 +90,17 @@ class CacheManager implements FactoryContract
         }
 
         if (isset($this->customCreators[$config['driver']])) {
-            return $this->callCustomCreator($config);
+            $repository = $this->callCustomCreator($config);
+
+            return $repository instanceof Repository ? $repository->setName($name) : $repository;
         }
 
         $driverMethod = 'create' . ucfirst($config['driver']) . 'Driver';
 
         if (method_exists($this, $driverMethod)) {
-            return $this->{$driverMethod}($config);
+            $repository = $this->{$driverMethod}($config);
+
+            return $repository instanceof Repository ? $repository->setName($name) : $repository;
         }
 
         throw new InvalidArgumentException("Driver [{$config['driver']}] is not supported.");
