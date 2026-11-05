@@ -139,6 +139,11 @@
             "src/helpers.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "MacropaySolutions\\Kernel\\Tests\\": "tests/"
+        }
+    },
     "extra": {
         "publish-assets": {
             "config/app.php": "config/app.php",

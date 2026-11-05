@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Queue;
 use MacropaySolutions\Framework\Bus\PendingCallableDispatch;
 use MacropaySolutions\Kernel\Bus\Batchable;
 use MacropaySolutions\Kernel\Bus\Queueable;
+use MacropaySolutions\Kernel\Cache\Repository;
 use MacropaySolutions\Kernel\Container\BoundMethod;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
@@ -155,6 +156,11 @@ class CallQueuedCallable implements ShouldQueue
                 }
 
                 $cacheStore = $resolvedSource->uniqueCacheStore ?? null;
+
+                if ('' === (string)$cacheStore && \in_array('uniqueVia', \get_class_methods($resolvedSource), true)) {
+                    $cache = $resolvedSource->uniqueVia();
+                    $cacheStore = $cache instanceof Repository ? $cache->getName() : null;
+                }
 
                 if (\is_string($cacheStore)) {
                     $callable->setUniqueCacheStore($cacheStore);
