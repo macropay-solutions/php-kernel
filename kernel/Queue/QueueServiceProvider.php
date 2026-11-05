@@ -83,7 +83,7 @@ class QueueServiceProvider extends ServiceProvider implements DeferrableProvider
             return new FileFailedJobProvider(
                 $config['path'] ?? $app->storagePath('framework/cache/failed-jobs.json'),
                 $config['limit'] ?? 100,
-                static fn() => $app->make('cache')->store('file')
+                static fn() => $app->make('cache')->store('file')->getStore()
             );
         }
 

@@ -2,18 +2,23 @@
 
 namespace MacropaySolutions\Kernel\Tests\Feature\Queue;
 
+use MacropaySolutions\Kernel\Queue\Jobs\SyncJob;
 use MacropaySolutions\Kernel\Queue\UniqueCallQueuedCallable;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\ChargeUniqueJob;
+use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\FailingUniqueJob;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\FifoTarget;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\InvoiceUniqueJob;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\LocksStoreUniqueJob;
+use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\MissingModelUniqueJob;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\PlainJob;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\PropertyBeatsViaUniqueJob;
+use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\UntilProcessingRedispatchingJob;
 use MacropaySolutions\Kernel\Tests\Fixtures\Jobs\ViaUniqueJob;
 use MacropaySolutions\Kernel\Tests\TestCase;
 
 /**
- * Unique jobs are dispatched through the real PendingDispatch, bus dispatcher and array cache locks.
+ * Unique jobs are dispatched through the real PendingDispatch, bus dispatcher and array cache locks,
+ * and processed by the real CallQueuedHandler through a SyncJob.
  */
 class UniqueJobTest extends TestCase
 {
@@ -89,5 +94,71 @@ class UniqueJobTest extends TestCase
         PropertyBeatsViaUniqueJob::new()->dispatch();
 
         $this->assertSame('array', $this->queue->payloads[0]['uniqueJobCacheStore']);
+    }
+
+    public function test_worker_releases_the_lock_after_the_job_succeeds(): void
+    {
+        InvoiceUniqueJob::new()->dispatch();
+
+        $job = $this->work($this->queue->payloads[0]);
+
+        $this->assertTrue($job->isDeleted());
+
+        InvoiceUniqueJob::new()->dispatch();
+
+        $this->assertCount(2, $this->queue->payloads);
+    }
+
+    public function test_worker_releases_an_until_processing_lock_before_the_job_runs(): void
+    {
+        UntilProcessingRedispatchingJob::new()->dispatch();
+
+        $this->work($this->queue->payloads[0]);
+
+        // The job dispatched itself again from handle(), which only works without the lock
+        $this->assertCount(2, $this->queue->payloads);
+    }
+
+    public function test_worker_releases_the_lock_when_the_job_fails(): void
+    {
+        FailingUniqueJob::new()->dispatch();
+
+        $job = new SyncJob($this->container, \json_encode($this->queue->payloads[0]), 'sync', 'default');
+
+        try {
+            $job->fire();
+            $this->fail('The job should have thrown.');
+        } catch (\RuntimeException $e) {
+            // What the worker does when the job has no attempts left
+            $job->fail($e);
+        }
+
+        $this->assertTrue($job->hasFailed());
+
+        FailingUniqueJob::new()->dispatch();
+
+        $this->assertCount(2, $this->queue->payloads);
+    }
+
+    public function test_worker_releases_the_lock_from_the_payload_when_a_model_is_missing(): void
+    {
+        MissingModelUniqueJob::new()->dispatch();
+
+        $job = $this->work($this->queue->payloads[0]);
+
+        $this->assertTrue($job->isDeleted());
+        $this->assertFalse($job->hasFailed());
+
+        MissingModelUniqueJob::new()->dispatch();
+
+        $this->assertCount(2, $this->queue->payloads);
+    }
+
+    private function work(array $payload): SyncJob
+    {
+        $job = new SyncJob($this->container, \json_encode($payload), 'sync', 'default');
+        $job->fire();
+
+        return $job;
     }
 }

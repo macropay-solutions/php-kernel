@@ -9,13 +9,16 @@ use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Bus\Dispatcher as DispatcherContract;
 use MacropaySolutions\Kernel\Contracts\Cache\Factory as CacheFactory;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as CacheRepository;
+use MacropaySolutions\Kernel\Contracts\Container\Container as ContainerContract;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter as EncrypterContract;
+use MacropaySolutions\Kernel\Contracts\Events\Dispatcher as EventsDispatcherContract;
 use MacropaySolutions\Kernel\Encryption\Encrypter;
+use MacropaySolutions\Kernel\Events\Dispatcher as EventsDispatcher;
 use MacropaySolutions\Kernel\Tests\Fixtures\PayloadQueue;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 /**
- * Boots a container with the real cache manager (array stores), encrypter and bus dispatcher.
+ * Boots a container with the real cache manager (array stores), encrypter, event and bus dispatchers.
  * Dispatched jobs end up as payloads in $this->queue.
  */
 abstract class TestCase extends BaseTestCase
@@ -32,6 +35,8 @@ abstract class TestCase extends BaseTestCase
 
         $this->container = new Container();
         Container::setInstance($this->container);
+        $this->container->instance(ContainerContract::class, $this->container);
+        $this->container->instance(EventsDispatcherContract::class, new EventsDispatcher($this->container));
 
         $this->container->instance('config', new Config([
             'cache' => [

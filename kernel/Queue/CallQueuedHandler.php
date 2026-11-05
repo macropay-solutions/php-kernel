@@ -64,6 +64,7 @@ class CallQueuedHandler
         ) {
             $this->container->make(CacheFactory::class)
                 ->store($payload['uniqueJobCacheStore'] ?? null)
+                ->getStore()
                 ->lock($payload['uniqueJobKey'])
                 ->forceRelease();
 
@@ -278,6 +279,7 @@ class CallQueuedHandler
                 $store = $payload['uniqueJobCacheStore'] ?? null;
                 $this->container->make(CacheFactory::class)
                     ->store($store)
+                    ->getStore()
                     ->lock($payload['uniqueJobKey'])
                     ->forceRelease();
             }
@@ -349,6 +351,7 @@ class CallQueuedHandler
 
         $this->container->make(CacheFactory::class)
             ->store($store)
+            ->getStore()
             ->lock($key)
             ->forceRelease();
     }
