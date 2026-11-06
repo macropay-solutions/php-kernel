@@ -837,10 +837,12 @@ trait HasAttributes
         }
 
         foreach ($attributes as $key) {
-            $value = $this->getAttributeFromArray($key);
+            if (!\array_key_exists($key, $this->attributes)) {
+                continue;
+            }
 
             if (!$this->originalIsEquivalent($key)) {
-                $dirty[$key] = $value;
+                $dirty[$key] = $this->attributes[$key];
             }
         }
 
