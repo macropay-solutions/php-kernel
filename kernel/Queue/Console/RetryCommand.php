@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Queue\Console;
 use DateTimeInterface;
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter;
+use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\Events\JobRetryRequested;
 use MacropaySolutions\Kernel\Support\Arr;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -171,6 +172,8 @@ class RetryCommand extends Command
     /**
      * Refresh the "retry until" timestamp for the job.
      *
+     * The timestamp is recalculated from the public retryUntil() method of the callable's class, as on dispatch.
+     *
      * @param string $payload
      * @return string
      *
@@ -184,25 +187,31 @@ class RetryCommand extends Command
             return json_encode($payload);
         }
 
-        $instance = $this->getInstanceFromPayload($payload);
+        $class = $this->getInstanceFromPayload($payload)['storableCallable'][0] ?? null;
 
         if (
-            is_object($instance)
-            && !$instance instanceof \__PHP_Incomplete_Class
-            && method_exists($instance, 'retryUntil')
+            !\is_string($class)
+            || !\class_exists($class)
+            || !\in_array('retryUntil', \get_class_methods($class), true)
         ) {
-            $retryUntil = $instance->retryUntil();
-
-            $payload['retryUntil'] = $retryUntil instanceof DateTimeInterface
-                ? $retryUntil->getTimestamp()
-                : $retryUntil;
+            return json_encode($payload);
         }
+
+        try {
+            $retryUntil = $this->app->make($class)->retryUntil();
+        } catch (\Throwable) {
+            return json_encode($payload);
+        }
+
+        $payload['retryUntil'] = $retryUntil instanceof DateTimeInterface
+            ? $retryUntil->getTimestamp()
+            : $retryUntil;
 
         return json_encode($payload);
     }
 
     /**
-     * Get the queueable options from the job.
+     * Get the queueable options (for example the SQS FIFO message group and deduplication ID) for the job.
      *
      * @param  $queue
      * @param  \stdClass  $job
@@ -220,7 +229,17 @@ class RetryCommand extends Command
             return [];
         }
 
-        return $queue->getQueueableOptions($this->getInstanceFromPayload($payload), $job->queue, $job->payload);
+        $command = $this->getInstanceFromPayload($payload);
+
+        if (!\is_array($command['storableCallable'] ?? null)) {
+            return [];
+        }
+
+        $callable = CallQueuedCallable::create($command['storableCallable']);
+        $callable->messageGroup = $command['messageGroup'] ?? null;
+        $callable->deduplicationId = $command['deduplicationId'] ?? null;
+
+        return $queue->getQueueableOptions($callable, $job->queue);
     }
 
     /**

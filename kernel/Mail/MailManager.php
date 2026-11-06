@@ -126,7 +126,8 @@ class MailManager implements FactoryContract
             $this->app->make('events'),
         ]);
 
-        if ($this->app->bound('queue')) {
+        // has() also covers the application's lazily registered bindings, such as queue before it was first used
+        if ($this->app->has('queue')) {
             $mailer->setQueue($this->app->make('queue'));
         }
 

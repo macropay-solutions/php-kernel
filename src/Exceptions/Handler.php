@@ -173,6 +173,10 @@ class Handler implements ExceptionHandler
             return $e->getResponse();
         }
 
+        if ($e instanceof AuthenticationException) {
+            return $this->unauthenticated($request, $e);
+        }
+
         if ($e instanceof ValidationException && $e->getResponse()) {
             return $e->getResponse();
         }
@@ -208,6 +212,26 @@ class Handler implements ExceptionHandler
         }
 
         return \di(JsonResponse::class, [$e->errors(), $e->status]);
+    }
+
+    /**
+     * Convert an authentication exception into a response.
+     *
+     * A redirect is returned only when a redirect URL was set and JSON is not expected. Otherwise, 401.
+     */
+    protected function unauthenticated(
+        Request $request,
+        AuthenticationException $e
+    ): \Symfony\Component\HttpFoundation\Response {
+        $redirectTo = (string)$e->redirectTo();
+
+        if ('' !== $redirectTo && !$request->expectsJson()) {
+            return \redirect($redirectTo);
+        }
+
+        return $request->expectsJson()
+            ? $this->prepareJsonResponse($request, new HttpException(401, $e->getMessage(), $e))
+            : $this->prepareResponse($request, new HttpException(401, $e->getMessage(), $e));
     }
 
     /**

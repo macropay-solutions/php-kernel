@@ -81,6 +81,7 @@
     },
     "require-dev": {
         "league/commonmark": "^2.6",
+        "league/flysystem": "^3.0.16",
         "mockery/mockery": "^1.6.12",
         "phpunit/phpunit": "^11.5 || ^12.0",
         "macropay-solutions/php-kernel-dev": "^1.0.0",

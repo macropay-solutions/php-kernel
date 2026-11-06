@@ -36,7 +36,8 @@ class ValidationServiceProvider extends ServiceProvider implements DeferrablePro
     {
         $validator = new Factory($app->make('translator'), $app);
 
-        if ($app->bound('db') && $app->bound('validation.presence')) {
+        // has() also covers the application's lazily registered bindings, such as db before it was first used
+        if ($app->has('db') && $app->has('validation.presence')) {
             $validator->setPresenceVerifier($app->make('validation.presence'));
         }
 

@@ -137,7 +137,14 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
 
             if ($notifiable instanceof AnonymousNotifiable) {
                 $notifiablesData[] = ['type' => 'anonymous', 'routes' => $notifiable->routes];
+
+                continue;
             }
+
+            throw new \InvalidArgumentException(
+                'Queued notifications can only be sent to Obvious models or on-demand (AnonymousNotifiable) ' .
+                    'notifiables, ' . \get_debug_type($notifiable) . ' given.'
+            );
         }
 
         $notificationProps = isset($this->notification) ? \get_object_vars($this->notification) : [];
