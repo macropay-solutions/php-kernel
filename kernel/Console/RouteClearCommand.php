@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class RouteClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleRouteClearCommand;
+
     /**
      * The Framework application instance.
      *

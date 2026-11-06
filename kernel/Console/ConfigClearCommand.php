@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class ConfigClearCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleConfigClearCommand;
+
     /**
      * The Framework application instance.
      *

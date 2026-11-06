@@ -25,7 +25,7 @@ To maintain a stable core with no new overhead that does not need to be updated 
 - Symfony components LTS versions,
 - Vulnerabilities / Bugs
 
-Current version is using Symfony components 7.4 (LTS) and supports PHP 8.2 to 8.5
+Current version is using Symfony components 7.4 (LTS) and supports PHP 8.2 to 8.5.
 
 We remain open for suggestions in the discussions area: https://github.com/macropay-solutions/php-kernel/discussions
 

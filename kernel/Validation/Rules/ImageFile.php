@@ -4,6 +4,8 @@ namespace MacropaySolutions\Kernel\Validation\Rules;
 
 class ImageFile extends File
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelValidationRulesImageFile;
+
     /**
      * Create a new image file rule instance.
      *

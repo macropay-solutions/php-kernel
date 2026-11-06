@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Filesystem\Filesystem;
 
 class RouteCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleRouteCacheCommand;
+
     /**
      * The Framework application instance.
      *

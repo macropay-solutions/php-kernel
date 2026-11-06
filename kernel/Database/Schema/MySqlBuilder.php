@@ -4,6 +4,8 @@ namespace MacropaySolutions\Kernel\Database\Schema;
 
 class MySqlBuilder extends Builder
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaMySqlBuilder;
+
     /**
      * Create a database in the schema.
      *

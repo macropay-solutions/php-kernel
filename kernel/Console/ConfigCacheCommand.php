@@ -10,6 +10,8 @@ use Throwable;
 
 class ConfigCacheCommand extends Command
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelConsoleConfigCacheCommand;
+
     /**
      * The Framework application instance.
      *

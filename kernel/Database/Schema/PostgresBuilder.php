@@ -6,6 +6,7 @@ use MacropaySolutions\Kernel\Database\Concerns\ParsesSearchPath;
 
 class PostgresBuilder extends Builder
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaPostgresBuilder;
     use ParsesSearchPath {
         parseSearchPath as baseParseSearchPath;
     }

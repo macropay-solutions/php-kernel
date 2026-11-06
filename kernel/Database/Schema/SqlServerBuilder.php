@@ -4,6 +4,8 @@ namespace MacropaySolutions\Kernel\Database\Schema;
 
 class SqlServerBuilder extends Builder
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaSqlServerBuilder;
+
     /**
      * Create a database in the schema.
      *

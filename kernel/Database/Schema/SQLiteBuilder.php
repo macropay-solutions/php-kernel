@@ -6,6 +6,8 @@ use MacropaySolutions\Kernel\Database\QueryException;
 
 class SQLiteBuilder extends Builder
 {
+    use \MacropaySolutions\Framework\Traitables\MacropaySolutionsKernelDatabaseSchemaSQLiteBuilder;
+
     /**
      * Create a database in the schema.
      *
