@@ -94,7 +94,7 @@
         "psr/simple-cache-implementation": "1.0|2.0|3.0"
     },
     "suggest": {
-        "php": "8.2-8.4",
+        "php": "8.2-8.5",
         "ext-pcntl": "*",
         "ext-posix": "*",
         "ext-redis": "*",
