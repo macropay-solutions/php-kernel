@@ -24,4 +24,12 @@ class PredisClusterConnection extends PredisConnection
             $node->executeCommand(tap(new $command())->setArguments(func_get_args()));
         }
     }
+
+    /**
+     * Keep the parent's dynamic call handling; the dedicated Macroable trait would otherwise replace it.
+     */
+    public function __call(string $method, array $parameters): mixed
+    {
+        return parent::__call($method, $parameters);
+    }
 }

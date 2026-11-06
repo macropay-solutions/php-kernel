@@ -74,6 +74,16 @@ class PendingDispatch
     }
 
     /**
+     * Set the desired delay in seconds for the job.
+     */
+    public function delay(\DateTimeInterface|\DateInterval|array|int|null $delay): static
+    {
+        $this->job->delay($delay);
+
+        return $this;
+    }
+
+    /**
      * Indicate that the job should be dispatched after the response is sent to the browser.
      */
     public function afterResponse(): static

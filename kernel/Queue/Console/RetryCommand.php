@@ -233,14 +233,16 @@ class RetryCommand extends Command
      */
     protected function getInstanceFromPayload(array $payload): mixed
     {
-        if ($this->app->bound(Encrypter::class)) {
-            return \json_decode(
-                $this->app->make(Encrypter::class)->decryptString($payload['data']['command']),
-                true,
-                flags: JSON_THROW_ON_ERROR
-            );
+        $command = (string)$payload['data']['command'];
+
+        if (
+            !\str_starts_with($command, '{')
+            && !\str_starts_with($command, '[')
+            && $this->app->bound(Encrypter::class)
+        ) {
+            $command = $this->app->make(Encrypter::class)->decryptString($command);
         }
 
-        return \json_decode($payload['data']['command'], true, flags: JSON_THROW_ON_ERROR);
+        return \json_decode($command, true, flags: JSON_THROW_ON_ERROR);
     }
 }
