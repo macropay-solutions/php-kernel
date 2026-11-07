@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Tests\Feature\Core;
 
 use MacropaySolutions\Kernel\Contracts\Cache\Store;
 use MacropaySolutions\Kernel\Contracts\Console\Kernel as ConsoleKernel;
+use MacropaySolutions\Kernel\Container\EntryNotFoundException;
 use MacropaySolutions\Kernel\Contracts\Container\BindingResolutionException;
 use MacropaySolutions\Kernel\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\Collection;
@@ -18,6 +19,7 @@ use MacropaySolutions\Kernel\Tests\Fixtures\Core\BrokenConstructor;
 use MacropaySolutions\Kernel\Tests\Fixtures\Core\NotInstantiable;
 use MacropaySolutions\Kernel\Tests\Fixtures\Events\EventLog;
 use MacropaySolutions\Kernel\Tests\Fixtures\Events\OrderShipped;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * V1 core breaking changes: closure-free container bindings, no closure event listeners or subscribers,
@@ -53,6 +55,36 @@ class StrictCoreTest extends ApplicationTestCase
             'Target class [App\\DoesNotExist] does not exist.',
             'Target class [' . AbstractService::class . '] is not instantiable.',
         ], $messages);
+    }
+
+    public function test_psr_get_reports_unresolvable_entries_as_not_found(): void
+    {
+        foreach (['App\\DoesNotExist', AbstractService::class, Clock::class] as $id) {
+            try {
+                $this->app->get($id);
+                $this->fail($id . ' must not resolve.');
+            } catch (EntryNotFoundException $e) {
+                $this->assertInstanceOf(NotFoundExceptionInterface::class, $e);
+                $this->assertInstanceOf(BindingResolutionException::class, $e->getPrevious());
+            }
+        }
+    }
+
+    public function test_psr_get_and_has_see_lazy_bindings(): void
+    {
+        $this->assertTrue($this->app->has('cache'));
+        $this->assertFalse($this->app->has('App\\DoesNotExist'));
+        $this->assertSame($this->app->make('cache'), $this->app->get('cache'));
+    }
+
+    public function test_psr_get_rethrows_failures_of_a_bound_entry(): void
+    {
+        $this->app->bind('broken', BrokenConstructor::class);
+
+        $this->expectException(\Error::class);
+        $this->expectExceptionMessage('Class "App\\MissingInsideConstructor" not found');
+
+        $this->app->get('broken');
     }
 
     public function test_errors_from_inside_a_constructor_are_not_rewritten(): void
