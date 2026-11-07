@@ -332,7 +332,7 @@ class CallQueuedCallable implements ShouldQueue
      * When $systemArgs is not empty list, contextual bindings will be ignored
      * @throws BindingResolutionException
      */
-    public static function invoke(array $target, array $systemArgs, array $userArgs, Container $container = null): mixed
+    public static function invoke(array $target, array $systemArgs, array $userArgs, ?Container $container = null): mixed
     {
         $container ??= \MacropaySolutions\Kernel\Container\Container::getInstance();
 
