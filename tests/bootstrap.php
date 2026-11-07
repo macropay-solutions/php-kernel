@@ -13,7 +13,7 @@
 */
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/helpers.php';
+require_once __DIR__ . '/../prompts/src/helpers.php';
 
 /*
 |--------------------------------------------------------------------------

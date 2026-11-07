@@ -59,6 +59,9 @@ class Kernel implements KernelContract
      */
     public function __construct(Application $app)
     {
+        // The prompts helpers are only used by console commands, so HTTP requests do not load them
+        require_once \dirname(__DIR__, 2) . '/prompts/src/helpers.php';
+
         $this->app = $app;
 
         $this->app->runningInConsole() && !$this->app->bound(Request::class) ?
