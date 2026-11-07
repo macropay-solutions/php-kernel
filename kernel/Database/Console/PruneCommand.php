@@ -6,7 +6,6 @@ use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningFinished;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningStarting;
-use MacropaySolutions\Kernel\Database\Events\ModelsPruned;
 use MacropaySolutions\Kernel\Database\Obvious\MassPrunable;
 use MacropaySolutions\Kernel\Database\Obvious\Prunable;
 use MacropaySolutions\Kernel\Database\Obvious\SoftDeletes;
@@ -60,20 +59,6 @@ class PruneCommand extends Command
             return;
         }
 
-        $pruning = [];
-
-        $events->listen(ModelsPruned::class, function ($event) use (&$pruning) {
-            if (!in_array($event->model, $pruning)) {
-                $pruning[] = $event->model;
-
-                $this->newLine();
-
-                $this->info(sprintf('Pruning [%s] records.', $event->model));
-            }
-
-            $this->twoColumnDetail($event->model, "{$event->count} records");
-        });
-
         $events->dispatch(new ModelPruningStarting($models->all()));
 
         $models->each(function ($model) {
@@ -81,8 +66,6 @@ class PruneCommand extends Command
         });
 
         $events->dispatch(new ModelPruningFinished($models->all()));
-
-        $events->forget(ModelsPruned::class);
     }
 
     /**
@@ -105,7 +88,12 @@ class PruneCommand extends Command
 
         if ($total == 0) {
             $this->info("No prunable [$model] records found.");
+
+            return;
         }
+
+        $this->info(sprintf('Pruned [%s] records.', $model));
+        $this->twoColumnDetail($model, "{$total} records");
     }
 
     /**

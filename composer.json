@@ -80,6 +80,7 @@
         "illuminate/view": "*"
     },
     "require-dev": {
+        "aws/aws-sdk-php": "^3.322",
         "league/commonmark": "^2.6",
         "league/flysystem": "^3.0.16",
         "mockery/mockery": "^1.6.12",

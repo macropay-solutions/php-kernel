@@ -26,6 +26,8 @@ class OutputStyle extends SymfonyStyle implements NewLineAware
      */
     protected $newLinesWritten = 1;
 
+    protected bool $newLineWritten = false;
+
     /**
      * Create a new Console OutputStyle instance.
      *
