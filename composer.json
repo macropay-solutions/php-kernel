@@ -133,10 +133,8 @@
             "MacropaySolutions\\Prompts\\": "prompts/src/"
         },
         "files": [
-            "kernel/Collections/helpers.php",
             "kernel/Events/functions.php",
             "kernel/Filesystem/functions.php",
-            "kernel/Support/helpers.php",
             "src/helpers.php"
         ]
     },
