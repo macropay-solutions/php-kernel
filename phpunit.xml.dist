@@ -5,15 +5,26 @@
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
          colors="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         failOnDeprecation="true"
+         failOnPhpunitDeprecation="true"
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
 >
     <testsuites>
         <testsuite name="PHP Kernel Test Suite">
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
+    <source ignoreIndirectDeprecations="true">
+        <include>
+            <directory>kernel</directory>
+            <directory>src</directory>
+            <directory>prompts/src</directory>
+        </include>
+    </source>
 </phpunit>

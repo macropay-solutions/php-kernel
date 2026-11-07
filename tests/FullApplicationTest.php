@@ -863,8 +863,7 @@ class FullApplicationTest extends TestCase
         $this->assertTrue($terminated);
     }
 
-    /** @test */
-    public function every_macroable_child_has_its_own_dedicated_trait()
+    public function test_every_macroable_child_has_its_own_dedicated_trait()
     {
         $macroableInterface = \MacropaySolutions\Kernel\Macroable\Contracts\Macroable::class;
 
