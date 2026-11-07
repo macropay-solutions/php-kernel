@@ -20,6 +20,7 @@ use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\Query\Grammars\Grammar as QueryGrammar;
 use MacropaySolutions\Kernel\Database\Query\Processors\Processor;
 use MacropaySolutions\Kernel\Database\Schema\Builder as SchemaBuilder;
+use MacropaySolutions\Kernel\Events\QueuedCallable;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
@@ -870,7 +871,8 @@ class Connection implements ConnectionInterface, Macroable
     {
         $this->totalQueryDuration += $time ?? 0.0;
 
-        $this->event(new QueryExecuted($query, $bindings, $time, $this));
+        $this->event($event = new QueryExecuted($query, $bindings, $time, $this));
+        $this->runQueryDurationHandlers($event);
 
         $query = $this->pretending === true
             ? $this->queryGrammar?->substituteBindingsIntoRawSql($query, $bindings) ?? $query
@@ -912,17 +914,24 @@ class Connection implements ConnectionInterface, Macroable
         $this->queryDurationHandlers[] = [
             'has_run' => false,
             'handler' => $handler,
+            'threshold' => $threshold,
         ];
+    }
 
-        $key = count($this->queryDurationHandlers) - 1;
-
-        $this->listen(function ($event) use ($threshold, $handler, $key) {
-            if (!$this->queryDurationHandlers[$key]['has_run'] && $this->totalQueryDuration() > $threshold) {
-                $handler($this, $event);
-
-                $this->queryDurationHandlers[$key]['has_run'] = true;
+    /**
+     * Run the query duration handlers whose threshold has been exceeded.
+     */
+    protected function runQueryDurationHandlers(QueryExecuted $event): void
+    {
+        foreach ($this->queryDurationHandlers as $key => $queryDurationHandler) {
+            if ($queryDurationHandler['has_run'] || $this->totalQueryDuration() <= $queryDurationHandler['threshold']) {
+                continue;
             }
-        });
+
+            ($queryDurationHandler['handler'])($this, $event);
+
+            $this->queryDurationHandlers[$key]['has_run'] = true;
+        }
     }
 
     /**
@@ -1073,14 +1082,11 @@ class Connection implements ConnectionInterface, Macroable
     }
 
     /**
-     * Register a database query listener with the connection.
-     *
-     * @param \Closure $callback
-     * @return void
+     * Register a QueryExecuted listener (a listener class, a [Class, method] array or a QueuedCallable).
      */
-    public function listen(Closure $callback)
+    public function listen(array|QueuedCallable|string $callback): void
     {
-        $this->events?->listen(Events\QueryExecuted::class, $callback);
+        $this->events?->listen(QueryExecuted::class, $callback);
     }
 
     /**

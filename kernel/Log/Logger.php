@@ -2,10 +2,10 @@
 
 namespace MacropaySolutions\Kernel\Log;
 
-use Closure;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
 use MacropaySolutions\Kernel\Contracts\Support\Jsonable;
+use MacropaySolutions\Kernel\Events\QueuedCallable;
 use MacropaySolutions\Kernel\Log\Events\MessageLogged;
 use MacropaySolutions\Kernel\Macroable\Traits\ExplicitForwardable;
 use MacropaySolutions\Kernel\Support\Traits\Conditionable;
@@ -217,14 +217,11 @@ class Logger implements LoggerInterface
     }
 
     /**
-     * Register a new callback handler for when a log event is triggered.
-     *
-     * @param \Closure $callback
-     * @return void
+     * Register a MessageLogged listener (a listener class, a [Class, method] array or a QueuedCallable).
      *
      * @throws \RuntimeException
      */
-    public function listen(Closure $callback)
+    public function listen(array|QueuedCallable|string $callback): void
     {
         if (!isset($this->dispatcher)) {
             throw new RuntimeException('Events dispatcher has not been set.');

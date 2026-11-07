@@ -218,7 +218,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
         // First we'll set the fetch mode and a few other dependencies of the database
         // connection. This method basically just configures and prepares it to get
         // used by the application. Once we're finished we'll return it back out.
-        if ($this->app->bound('events')) {
+        if ($this->app->has('events')) {
             $connection->setEventDispatcher($this->app->make('events'));
         }
 

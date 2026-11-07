@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Redis\Connections;
 
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
+use MacropaySolutions\Kernel\Events\QueuedCallable;
 use MacropaySolutions\Kernel\Redis\Events\CommandExecuted;
 use MacropaySolutions\Kernel\Redis\Limiters\ConcurrencyLimiterBuilder;
 use MacropaySolutions\Kernel\Redis\Limiters\DurationLimiterBuilder;
@@ -154,12 +155,9 @@ abstract class Connection implements Macroable
     }
 
     /**
-     * Register a Redis command listener with the connection.
-     *
-     * @param \Closure $callback
-     * @return void
+     * Register a CommandExecuted listener (a listener class, a [Class, method] array or a QueuedCallable).
      */
-    public function listen(Closure $callback)
+    public function listen(array|QueuedCallable|string $callback): void
     {
         $this->events?->listen(CommandExecuted::class, $callback);
     }

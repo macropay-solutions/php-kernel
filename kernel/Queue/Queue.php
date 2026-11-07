@@ -95,7 +95,7 @@ abstract class Queue
     /**
      * Create a payload string from the given job and data.
      *
-     * @param \Closure|string|object $job
+     * @param string|object $job
      * @param string $queue
      * @param mixed $data
      * @return string
@@ -393,7 +393,7 @@ abstract class Queue
     /**
      * Enqueue a job using the given callback.
      *
-     * @param \Closure|string|object $job
+     * @param string|object $job
      * @param string $payload
      * @param string $queue
      * @param \DateTimeInterface|\DateInterval|int|null $delay
@@ -427,7 +427,7 @@ abstract class Queue
     /**
      * Determine if the job should be dispatched after all database transactions have committed.
      *
-     * @param \Closure|string|object $job
+     * @param string|object $job
      * @return bool
      */
     protected function shouldDispatchAfterCommit($job)
@@ -436,17 +436,21 @@ abstract class Queue
             return $this->dispatchAfterCommit ?? false;
         }
 
-        if (!$job instanceof Closure && \is_bool($job->afterCommit ?? null)) {
+        if (\is_bool($job->afterCommit ?? null)) {
             return $job->afterCommit;
         }
 
-        return $job instanceof ShouldQueueAfterCommit;
+        if ($job instanceof ShouldQueueAfterCommit) {
+            return true;
+        }
+
+        return $this->dispatchAfterCommit ?? false;
     }
 
     /**
      * Raise the job queueing event.
      *
-     * @param \Closure|string|object $job
+     * @param string|object $job
      * @param string $payload
      * @return void
      */
@@ -461,7 +465,7 @@ abstract class Queue
      * Raise the job queued event.
      *
      * @param string|int|null $jobId
-     * @param \Closure|string|object $job
+     * @param string|object $job
      * @param string $payload
      * @return void
      */
