@@ -263,12 +263,28 @@ class Schedule implements Macroable
                 return $this->compileArrayInput($key, $value);
             }
 
-            if (!is_numeric($value) && !preg_match('/^(-.$|--.*)/i', $value)) {
-                $value = ProcessUtils::escapeArgument($value);
+            if (!is_numeric($value)) {
+                $value = $this->escapeParameterValue((string)$value);
             }
 
             return is_numeric($key) ? $value : "{$key}={$value}";
         })->implode(' ');
+    }
+
+    /**
+     * Escape a parameter value, keeping bare flags (-v, --force) readable and quoting the value of --option=value.
+     */
+    protected function escapeParameterValue(string $value): string
+    {
+        if (\preg_match('/^-[A-Za-z0-9]$|^--[A-Za-z0-9][A-Za-z0-9_:.-]*$/', $value)) {
+            return $value;
+        }
+
+        if (\preg_match('/^(--[A-Za-z0-9][A-Za-z0-9_:.-]*)=(.*)$/s', $value, $matches)) {
+            return $matches[1] . '=' . ProcessUtils::escapeArgument($matches[2]);
+        }
+
+        return ProcessUtils::escapeArgument($value);
     }
 
     /**

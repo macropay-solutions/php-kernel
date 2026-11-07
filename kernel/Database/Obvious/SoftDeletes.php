@@ -33,10 +33,8 @@ trait SoftDeletes
 
     /**
      * Force a hard delete on a soft deleted model.
-     *
-     * @return bool|null
      */
-    public function forceDelete()
+    public function forceDelete(): bool
     {
         if ($this->fireModelEvent('forceDeleting') === false) {
             return false;
@@ -55,30 +53,26 @@ trait SoftDeletes
 
     /**
      * Force a hard delete on a soft deleted model without raising any events.
-     *
-     * @return bool|null
      */
-    public function forceDeleteQuietly()
+    public function forceDeleteQuietly(): bool
     {
         return static::withoutEvents(fn() => $this->forceDelete());
     }
 
     /**
      * Perform the actual delete query on this model instance.
-     *
-     * @return mixed
      */
-    protected function performDeleteOnModel()
+    protected function performDeleteOnModel(): void
     {
         if ($this->forceDeleting) {
-            return tap($this->setKeysForSaveQuery($this->newModelQuery())->forceDelete(), function () {
-                $this->exists = false;
-            });
+            $this->setKeysForSaveQuery($this->newModelQuery())->forceDelete();
+
+            $this->exists = false;
+
+            return;
         }
 
         $this->runSoftDelete();
-
-        return null;
     }
 
     /**

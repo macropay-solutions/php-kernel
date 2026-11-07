@@ -308,7 +308,7 @@ interface Enumerable extends Arrayable, Countable, IteratorAggregate, Jsonable, 
      * @param (callable($this): TWhenReturnType)|null $default
      * @return $this|TWhenReturnType
      */
-    public function when($value, callable $callback, ?callable $default = null): static;
+    public function when($value, callable $callback, ?callable $default = null);
 
     /**
      * Apply the callback if the collection is empty.

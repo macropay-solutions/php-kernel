@@ -911,36 +911,49 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             return $concrete($this, $parameters);
         }
 
-        if (!\class_exists($concrete)) {
-            if (\interface_exists($concrete)) {
-                throw new BindingResolutionException('Target interface [' . $concrete . '] is not instantiable.');
+        try {
+            if ($parameters !== [] && \array_is_list($parameters)) {
+                return new $concrete(...$parameters);
             }
 
-            if (\trait_exists($concrete)) {
-                throw new BindingResolutionException('Target trait [' . $concrete . '] is not instantiable.');
+            if (
+                [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
+                    \ltrim($concrete, '\\'),
+                    '__construct'
+                )
+            ) {
+                return new $concrete();
             }
 
-            throw new BindingResolutionException('Target class [' . $concrete . '] does not exist.');
+            return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
+                $this,
+                $concrete,
+                $parameters
+            )));
+        } catch (\Error $e) {
+            throw $this->bindingResolutionExceptionFor($concrete, $e) ?? $e;
         }
+    }
 
-        if ($parameters !== [] && \array_is_list($parameters)) {
-            return new $concrete(...$parameters);
-        }
+    /**
+     * Turn PHP's "not found" / "cannot instantiate" errors for the class being built into a resolution exception.
+     * Errors thrown from inside its constructor or for another class are left alone.
+     */
+    private function bindingResolutionExceptionFor(string $concrete, \Error $e): ?BindingResolutionException
+    {
+        $class = \ltrim($concrete, '\\');
 
-        if (
-            [] === BoundMethod::getAndCachePrecompiledAutoWiringClassMethodParametersMapForClassAndMethod(
-                \ltrim($concrete, '\\'),
-                '__construct'
-            )
-        ) {
-            return new $concrete();
-        }
-
-        return new $concrete(...\array_values(BoundMethod::getConstructDependencies(
-            $this,
-            $concrete,
-            $parameters
-        )));
+        return match ($e->getMessage()) {
+            'Class "' . $class . '" not found' =>
+                new BindingResolutionException('Target class [' . $concrete . '] does not exist.', 0, $e),
+            'Cannot instantiate interface ' . $class =>
+                new BindingResolutionException('Target interface [' . $concrete . '] is not instantiable.', 0, $e),
+            'Cannot instantiate trait ' . $class =>
+                new BindingResolutionException('Target trait [' . $concrete . '] is not instantiable.', 0, $e),
+            'Cannot instantiate abstract class ' . $class, 'Cannot instantiate enum ' . $class =>
+                new BindingResolutionException('Target class [' . $concrete . '] is not instantiable.', 0, $e),
+            default => null,
+        };
     }
 
     /**

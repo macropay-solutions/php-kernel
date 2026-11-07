@@ -1049,6 +1049,16 @@ abstract class Model implements
             return false;
         }
 
+        if (
+            $this->usesTimestamps()
+            && null !== ($updatedAtColumn = $this->getUpdatedAtColumn())
+            && !\array_key_exists($updatedAtColumn, $dirty)
+            && \array_key_exists($updatedAtColumn, $this->attributes)
+        ) {
+            // The silent save ('' restored to the original) must not be stamped with "now" by the builder.
+            $dirty[$updatedAtColumn] = $this->attributes[$updatedAtColumn];
+        }
+
         $this->setKeysForSaveQuery($query)->update($dirty);
 
         $this->syncChanges();
@@ -1888,7 +1898,31 @@ abstract class Model implements
      */
     public function __isset(mixed $key): bool
     {
+        if ($key === 'a' || $key === 'r') {
+            return true;
+        }
+
         return $this->offsetExists($key);
+    }
+
+    /**
+     * Determine if an attribute (not a relation) is set. Used by the ->a proxy.
+     */
+    public function attributeOffsetExists(string $key): bool
+    {
+        try {
+            return null !== $this->getAttributeValue($key);
+        } catch (MissingAttributeException) {
+            return false;
+        }
+    }
+
+    /**
+     * Unset an attribute (not a relation). Used by the ->a proxy.
+     */
+    public function attributeOffsetUnset(string $key): void
+    {
+        unset($this->attributes[$key]);
     }
 
     /**
