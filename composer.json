@@ -111,7 +111,6 @@
         "openspout/openspout": "Required to stream download/store iterable collections directly to Excel files (^4.28)",
         "symfony/cache": "Required to use PSR-6 cache bridge (^7.4).",
         "symfony/mailer": "Required to send emails (^7.4)",
-        "symfony/routing": "^7.4",
         "tijsverkoyen/css-to-inline-styles": "Required for HTML email styling (^2.2.5)",
         "league/flysystem": "Required to use the Flysystem local driver (^3.0.16).",
         "league/flysystem-aws-s3-v3": "Required to use the Flysystem S3 driver (^3.0).",
