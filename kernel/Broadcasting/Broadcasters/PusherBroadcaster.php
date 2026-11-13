@@ -40,17 +40,19 @@ class PusherBroadcaster extends Broadcaster
      */
     public function resolveAuthenticatedUser(Request $request): ?array
     {
-        if (!$user = parent::resolveAuthenticatedUser($request)) {
+        $socketId = (string)$request->getFiltered('socket_id');
+
+        if ('' === $socketId || !$user = parent::resolveAuthenticatedUser($request)) {
             return null;
         }
 
         if (method_exists($this->pusher, 'authenticateUser')) {
-            return $this->pusher->authenticateUser($request->socket_id, $user);
+            return $this->pusher->authenticateUser($socketId, $user);
         }
 
         $settings = $this->pusher->getSettings();
         $encodedUser = json_encode($user);
-        $decodedString = "{$request->socket_id}::user::{$encodedUser}";
+        $decodedString = "{$socketId}::user::{$encodedUser}";
 
         $auth = $settings['auth_key'] . ':' . hash_hmac(
             'sha256',
@@ -78,6 +80,7 @@ class PusherBroadcaster extends Broadcaster
 
         if (
             '' === $cn ||
+            1 !== \preg_match('/^\d+\.\d+$/', (string)$request->getFiltered('socket_id')) ||
             ($this->isGuardedChannel($cn) && !$this->retrieveUser($request, $channelName))
         ) {
             throw new AccessDeniedHttpException();
@@ -98,16 +101,19 @@ class PusherBroadcaster extends Broadcaster
      */
     public function validAuthenticationResponse($request, $result)
     {
-        if (str_starts_with($request->channel_name, 'private')) {
+        $cn = (string)$request->getFiltered('channel_name');
+        $socketId = (string)$request->getFiltered('socket_id');
+
+        if (str_starts_with($cn, 'private')) {
             return $this->decodePusherResponse(
                 $request,
                 method_exists($this->pusher, 'authorizeChannel')
-                    ? $this->pusher->authorizeChannel($request->channel_name, $request->socket_id)
-                    : $this->pusher->socket_auth($request->channel_name, $request->socket_id)
+                    ? $this->pusher->authorizeChannel($cn, $socketId)
+                    : $this->pusher->socket_auth($cn, $socketId)
             );
         }
 
-        $channelName = $this->normalizeChannelName($request->channel_name);
+        $channelName = $this->normalizeChannelName($cn);
 
         $user = $this->retrieveUser($request, $channelName);
 
@@ -119,14 +125,14 @@ class PusherBroadcaster extends Broadcaster
             $request,
             method_exists($this->pusher, 'authorizePresenceChannel')
                 ? $this->pusher->authorizePresenceChannel(
-                    $request->channel_name,
-                    $request->socket_id,
+                    $cn,
+                    $socketId,
                     $broadcastIdentifier,
                     $result
                 )
                 : $this->pusher->presence_auth(
-                    $request->channel_name,
-                    $request->socket_id,
+                    $cn,
+                    $socketId,
                     $broadcastIdentifier,
                     $result
                 )
@@ -142,12 +148,14 @@ class PusherBroadcaster extends Broadcaster
      */
     protected function decodePusherResponse($request, $response)
     {
-        if (!$request->input('callback', false)) {
+        $callback = (string)$request->getFiltered('callback');
+
+        if ('' === $callback) {
             return json_decode($response, true);
         }
 
         return response()->json(json_decode($response, true))
-            ->withCallback($request->callback);
+            ->withCallback($callback);
     }
 
     /**
