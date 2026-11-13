@@ -1475,8 +1475,12 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
                     $position = ($position + 1) % $limit;
                 }
 
-                for ($i = 0, $end = min($limit, count($ringBuffer)); $i < $end; $i++) {
-                    $pointer = ($position + $i) % $limit;
+                $count = \count($ringBuffer);
+                // buffer not full (limit larger than the collection): items are already in order from 0
+                $start = $count < $limit ? 0 : $position;
+
+                for ($i = 0; $i < $count; $i++) {
+                    $pointer = ($start + $i) % $limit;
                     yield $ringBuffer[$pointer][0] => $ringBuffer[$pointer][1];
                 }
             });

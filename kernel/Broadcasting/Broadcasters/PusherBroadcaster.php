@@ -42,7 +42,10 @@ class PusherBroadcaster extends Broadcaster
     {
         $socketId = (string)$request->getFiltered('socket_id');
 
-        if ('' === $socketId || !$user = parent::resolveAuthenticatedUser($request)) {
+        if (
+            1 !== \preg_match('/^\d+\.\d+$/', $socketId)
+            || !$user = parent::resolveAuthenticatedUser($request)
+        ) {
             return null;
         }
 
