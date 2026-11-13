@@ -153,7 +153,8 @@ class StartSession
     public function getSession(Request $request)
     {
         return tap($this->manager->driver(), function ($session) use ($request) {
-            $session->setId($request->cookies->get($session->getName()));
+            // cookies->get() throws BadRequestException for an array cookie; setId() rejects non-strings
+            $session->setId($request->cookies->all()[$session->getName()] ?? null);
         });
     }
 

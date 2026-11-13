@@ -122,13 +122,22 @@ class Cursor implements Arrayable
 
         $parameters = \json_decode($decoded, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (
+            !\is_array($parameters)
+            || !\is_bool($parameters['_pointsToNextItems'] ?? null)
+        ) {
             return null;
         }
 
         $pointsToNextItems = $parameters['_pointsToNextItems'];
 
         unset($parameters['_pointsToNextItems']);
+
+        foreach ($parameters as $value) {
+            if (null !== $value && !\is_scalar($value)) {
+                return null;
+            }
+        }
 
         return new static($parameters, $pointsToNextItems);
     }

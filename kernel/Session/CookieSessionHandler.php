@@ -81,11 +81,15 @@ class CookieSessionHandler implements SessionHandlerInterface
      */
     public function read($id): string|false
     {
-        $value = $this->request->cookies->get($id) ?: '';
+        // cookies->get() throws BadRequestException for an array cookie (name[x]=y): read it raw instead
+        $value = $this->request->cookies->all()[$id] ?? null;
 
         if (
-            !is_null($decoded = json_decode($value, true)) && is_array($decoded) &&
-            isset($decoded['expires']) && $this->currentTime() <= $decoded['expires']
+            \is_string($value)
+            && \is_array($decoded = \json_decode($value, true))
+            && isset($decoded['expires'], $decoded['data'])
+            && \is_string($decoded['data'])
+            && $this->currentTime() <= $decoded['expires']
         ) {
             return $decoded['data'];
         }

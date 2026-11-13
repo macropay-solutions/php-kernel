@@ -19,6 +19,13 @@ class Recaller
      */
     public function __construct($recaller)
     {
+        if (!\is_string($recaller)) {
+            // e.g. a "remember_web[]=x" cookie arrives as an array: treat it as invalid, not as a TypeError
+            $this->recaller = '';
+
+            return;
+        }
+
         $this->recaller = @\unserialize($recaller, ['allowed_classes' => false]) ?: $recaller;
     }
 

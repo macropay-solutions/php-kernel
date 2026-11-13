@@ -220,7 +220,10 @@ class SessionGuard implements
             return;
         }
 
-        if ($recaller = $this->request->cookies->get($this->getRecallerName())) {
+        // cookies->get() throws BadRequestException for an array cookie: read it raw, accept only strings
+        $recaller = $this->request->cookies->all()[$this->getRecallerName()] ?? null;
+
+        if (\is_string($recaller) && '' !== $recaller) {
             return new Recaller($recaller);
         }
     }

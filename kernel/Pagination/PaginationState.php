@@ -29,7 +29,7 @@ class PaginationState
         Paginator::queryStringResolver(fn() => $app->make('request')->query());
 
         CursorPaginator::currentCursorResolver(function ($cursorName = 'cursor') use ($app) {
-            return Cursor::fromEncoded($app->make('request')->input($cursorName));
+            return Cursor::fromEncoded($app->make('request')->getFiltered($cursorName, options: \FILTER_NULL_ON_FAILURE));
         });
     }
 }
