@@ -6,6 +6,9 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use RuntimeException;
 
+/**
+ * Route helpers for the dispatcher's array route: [status, action, parameters].
+ */
 trait RequestTrait
 {
     /**
@@ -16,12 +19,14 @@ trait RequestTrait
      */
     public function routeIs(...$patterns)
     {
-        if (!Arr::exists($route = $this->route()[1], 'as')) {
+        $name = $this->route()[1]['as'] ?? null;
+
+        if (!\is_string($name)) {
             return false;
         }
 
         foreach ($patterns as $pattern) {
-            if (Str::is($pattern, $route['as'])) {
+            if (Str::is($pattern, $name)) {
                 return true;
             }
         }
@@ -30,21 +35,21 @@ trait RequestTrait
     }
 
     /**
-     * Get the route handling the request.
+     * Get the route handling the request, or one route parameter when $param is given.
      *
      * @param string|null $param
      * @param mixed $default
-     * @return array|string
+     * @return array|mixed|null
      */
     public function route($param = null, $default = null)
     {
         $route = ($this->getRouteResolver())();
 
-        if (is_null($route) || is_null($param)) {
+        if (null === $param) {
             return $route;
         }
 
-        return Arr::get($route[2], $param, $default);
+        return $this->filterDangerousWrapper(Arr::get($route[2] ?? [], $param, $default), $default);
     }
 
     /**
@@ -56,16 +61,13 @@ trait RequestTrait
      */
     public function fingerprint()
     {
-        if (!$this->route()) {
+        $route = $this->route();
+
+        if (!\is_array($route) || [] === $route) {
             throw new RuntimeException('Unable to generate fingerprint. Route unavailable.');
         }
 
-        return sha1(implode('|', [
-            $this->getMethod(),
-            $this->root(),
-            $this->path(),
-            $this->ip(),
-        ]));
+        return \sha1(\implode('|', [$this->getMethod(), $this->root(), $this->path(), $this->ip()]));
     }
 
     /**
@@ -76,9 +78,6 @@ trait RequestTrait
      */
     public function offsetExists($offset): bool
     {
-        return Arr::has(
-            $this->all() + $this->route()[2],
-            $offset
-        );
+        return Arr::has($this->all() + ($this->route()[2] ?? []), $offset);
     }
 }

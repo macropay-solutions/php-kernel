@@ -198,7 +198,7 @@ class StartSession
     {
         if (
             $request->isMethod('GET') &&
-            $request->route() instanceof Route &&
+            [] !== (array)$request->route() &&
             !$request->ajax() &&
             !$request->prefetch() &&
             !$request->isPrecognitive()

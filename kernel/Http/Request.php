@@ -309,7 +309,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public function routeIs(...$patterns)
     {
-        return $this->route() && $this->route()->named(...$patterns);
+        return false;
     }
 
     /**
@@ -778,17 +778,17 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      *
      * @param string|null $param
      * @param mixed $default
-     * @return \MacropaySolutions\Kernel\Routing\Route|object|string|null
+     * @return array|string|null
      */
     public function route($param = null, $default = null)
     {
         $route = $this->getRouteResolver()();
 
-        if (null === $route || null === $param) {
+        if (null === $param) {
             return $route;
         }
 
-        return $this->filterDangerousWrapper($route->parameter($param, $default), $default);
+        return $this->filterDangerousWrapper(Arr::get($route[2] ?? [], $param, $default), $default);
     }
 
     /**
@@ -800,19 +800,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public function fingerprint()
     {
-        if (!$route = $this->route()) {
-            throw new RuntimeException('Unable to generate fingerprint. Route unavailable.');
-        }
-
-        return sha1(
-            implode(
-                '|',
-                array_merge(
-                    $route->methods(),
-                    [$route->getDomain(), $route->uri(), $this->ip()]
-                )
-            )
-        );
+        throw new RuntimeException('Unable to generate fingerprint. Route unavailable.');
     }
 
     /**
@@ -894,12 +882,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public function offsetExists($offset): bool
     {
-        $route = $this->route();
-
-        return Arr::has(
-            $this->all() + ($route ? $route->parameters() : []),
-            $offset
-        );
+        return Arr::has($this->all() + ($this->route()[2] ?? []), $offset);
     }
 
     /**
