@@ -19,12 +19,9 @@ trait CompilesJson
      */
     protected function compileJson($expression)
     {
-        $parts = explode(',', $this->stripParentheses($expression));
-
-        $options = isset($parts[1]) ? trim($parts[1]) : $this->encodingOptions;
-
-        $depth = isset($parts[2]) ? trim($parts[2]) : 512;
-
-        return "<?php echo json_encode($parts[0], $options, $depth) ?>";
+        // PHP splits the arguments: splitting on ',' broke values that contain a comma (an array, a call
+        // with arguments) and silently dropped the default HTML-safe encoding options
+        return '<?php echo \\json_encode(...\\array_replace([null, ' . $this->encodingOptions . ', 512], ['
+            . $this->stripParentheses($expression) . '])) ?>';
     }
 }

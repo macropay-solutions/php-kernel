@@ -368,9 +368,9 @@ trait CompilesConditionals
      */
     protected function compilePushIf($expression)
     {
-        $parts = explode(',', $this->stripParentheses($expression), 2);
+        [$condition, $stack] = $this->splitConditionAndStack($expression);
 
-        return "<?php if({$parts[0]}): \$__env->startPush({$parts[1]}); ?>";
+        return "<?php if({$condition}): \$__env->startPush({$stack}); ?>";
     }
 
     /**
@@ -381,9 +381,24 @@ trait CompilesConditionals
      */
     protected function compileElsePushIf($expression)
     {
-        $parts = explode(',', $this->stripParentheses($expression), 2);
+        [$condition, $stack] = $this->splitConditionAndStack($expression);
 
-        return "<?php \$__env->stopPush(); elseif({$parts[0]}): \$__env->startPush({$parts[1]}); ?>";
+        return "<?php \$__env->stopPush(); elseif({$condition}): \$__env->startPush({$stack}); ?>";
+    }
+
+    /**
+     * Split a "condition, stack" expression at its last comma: the condition may contain commas (a call with
+     * arguments), the stack name does not.
+     *
+     * @param string $expression
+     * @return array{0: string, 1: string}
+     */
+    protected function splitConditionAndStack($expression): array
+    {
+        $expression = $this->stripParentheses($expression);
+        $comma = (int)\strrpos($expression, ',');
+
+        return [\trim(\substr($expression, 0, $comma)), \trim(\substr($expression, $comma + 1))];
     }
 
     /**
