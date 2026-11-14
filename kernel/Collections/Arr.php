@@ -289,6 +289,9 @@ class Arr implements Macroable
         }
 
         foreach ($keys as $key) {
+            // start from the top level: a previous dotted key leaves $array referencing a nested array
+            $array = &$original;
+
             // if the exact key exists in the top-level, remove it
             if (static::exists($array, $key)) {
                 unset($array[$key]);
@@ -297,9 +300,6 @@ class Arr implements Macroable
             }
 
             $parts = explode('.', $key);
-
-            // clean up before each pass
-            $array = &$original;
 
             while (count($parts) > 1) {
                 $part = array_shift($parts);

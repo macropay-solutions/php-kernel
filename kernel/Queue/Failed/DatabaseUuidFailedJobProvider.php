@@ -10,6 +10,8 @@ class DatabaseUuidFailedJobProvider implements
     FailedJobProviderInterface,
     PrunableFailedJobProvider
 {
+    use ResolvesFailedJobUuid;
+
     /**
      * The connection resolver implementation.
      *
@@ -58,7 +60,7 @@ class DatabaseUuidFailedJobProvider implements
     public function log($connection, $queue, $payload, $exception)
     {
         $this->getTable()->insert([
-            'uuid' => $uuid = json_decode($payload, true)['uuid'],
+            'uuid' => $uuid = $this->resolveFailedJobUuid((string)$payload),
             'connection' => $connection,
             'queue' => $queue,
             'payload' => $payload,

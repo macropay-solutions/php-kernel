@@ -14,7 +14,7 @@ class SqsFifoZeroIdsTest extends TestCase
 {
     public function testZeroIdsAreKept(): void
     {
-        $queue = new SqsQueue($this->createMock(SqsClient::class), 'jobs.fifo');
+        $queue = new SqsQueue($this->createStub(SqsClient::class), 'jobs.fifo');
         $job = new stdClass();
         $job->messageGroup = '0';
         $job->deduplicationId = '0';
@@ -27,7 +27,7 @@ class SqsFifoZeroIdsTest extends TestCase
 
     public function testEmptyGroupFallsBackToTheQueueName(): void
     {
-        $queue = new SqsQueue($this->createMock(SqsClient::class), 'jobs.fifo');
+        $queue = new SqsQueue($this->createStub(SqsClient::class), 'jobs.fifo');
         $job = new stdClass();
         $job->messageGroup = '';
         $job->deduplicationId = 'dedup';

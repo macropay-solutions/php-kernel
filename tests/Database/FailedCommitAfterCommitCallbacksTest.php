@@ -33,7 +33,7 @@ class FailedCommitAfterCommitCallbacksTest extends TestCase
             }
         };
 
-        $connection = new SQLiteConnection($pdo);
+        $connection = new SQLiteConnection($pdo, config: ['name' => 'sqlite']);
         $manager = new DatabaseTransactionsManager();
         $connection->setTransactionManager($manager);
         $calls = new ArrayObject();

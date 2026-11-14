@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Cache;
 
 use MacropaySolutions\Kernel\Database\Connection;
 use MacropaySolutions\Kernel\Database\QueryException;
+use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
 
 class DatabaseLock extends Lock
 {
@@ -78,7 +79,17 @@ class DatabaseLock extends Lock
             ]);
 
             $acquired = true;
-        } catch (QueryException) {
+        } catch (QueryException $e) {
+            // only an existing lock row means "taken"; any other failure (data too long, missing table...) is rethrown
+            // instead of being reported as a held lock. Not every driver reports a duplicate primary key as
+            // UniqueConstraintViolationException (e.g. SQL Server), so the row is checked for those.
+            if (
+                !$e instanceof UniqueConstraintViolationException
+                && !$this->connection->table($this->table)->where('key', $this->name)->exists()
+            ) {
+                throw $e;
+            }
+
             $updated = $this->connection->table($this->table)
                 ->where('key', $this->name)
                 ->where(function ($query) {

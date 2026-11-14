@@ -9,6 +9,8 @@ use MacropaySolutions\Kernel\Support\Carbon;
 
 class DynamoDbFailedJobProvider implements FailedJobProviderInterface
 {
+    use ResolvesFailedJobUuid;
+
     /**
      * The DynamoDB client instance.
      *
@@ -56,7 +58,7 @@ class DynamoDbFailedJobProvider implements FailedJobProviderInterface
      */
     public function log($connection, $queue, $payload, $exception)
     {
-        $id = json_decode($payload, true)['uuid'];
+        $id = $this->resolveFailedJobUuid((string)$payload);
 
         $failedAt = \appDate()->now();
 

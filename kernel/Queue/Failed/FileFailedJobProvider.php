@@ -7,6 +7,8 @@ use DateTimeInterface;
 
 class FileFailedJobProvider implements CountableFailedJobProvider, FailedJobProviderInterface, PrunableFailedJobProvider
 {
+    use ResolvesFailedJobUuid;
+
     /**
      * The file path where the failed job file should be stored.
      *
@@ -55,7 +57,7 @@ class FileFailedJobProvider implements CountableFailedJobProvider, FailedJobProv
     public function log($connection, $queue, $payload, $exception)
     {
         return $this->lock(function () use ($connection, $queue, $payload, $exception) {
-            $id = json_decode($payload, true)['uuid'];
+            $id = $this->resolveFailedJobUuid((string)$payload);
 
             $jobs = $this->read();
 
