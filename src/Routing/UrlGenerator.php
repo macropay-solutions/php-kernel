@@ -310,7 +310,8 @@ class UrlGenerator
     protected function replaceRouteParameters($route, &$parameters = [])
     {
         return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use (&$parameters) {
-            return isset($parameters[$m[1]]) ? Arr::pull($parameters, $m[1]) : $m[0];
+            // encode the value: '/', '?', '#' or '..' must not change the path (the router decodes it back)
+            return isset($parameters[$m[1]]) ? \rawurlencode((string)Arr::pull($parameters, $m[1])) : $m[0];
         }, $route);
     }
 
