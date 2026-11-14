@@ -264,6 +264,10 @@ trait RoutesRequests
     protected function handleDispatcherResponse($routeInfo)
     {
         if ($routeInfo[0] === Dispatcher::FOUND) {
+            // FastRoute matches the raw (percent-encoded) path: decode the parameters like the routes tree does,
+            // so they are the same for every route and handleFoundRoute() filters the decoded values
+            $routeInfo[2] = \array_map('\rawurldecode', $routeInfo[2] ?? []);
+
             return $this->handleFoundRoute($routeInfo);
         }
 
