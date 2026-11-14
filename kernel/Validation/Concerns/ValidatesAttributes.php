@@ -554,7 +554,9 @@ trait ValidatesAttributes
 
         foreach ($parameters as $format) {
             try {
-                $date = DateTime::createFromFormat('!' . $format, $value);
+                // parse in UTC: in the default timezone, a wall time skipped by a DST change (e.g. 03:30 on the
+                // spring-forward day) is shifted by an hour and the valid input fails the format comparison
+                $date = DateTime::createFromFormat('!' . $format, $value, new DateTimeZone('UTC'));
 
                 if ($date && $date->format($format) == $value) {
                     return true;
