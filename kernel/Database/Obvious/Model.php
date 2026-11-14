@@ -936,6 +936,9 @@ abstract class Model implements
             $isDirty = [] !== ($dirty = $this->getDirty());
 
             if (!$isDirty) {
+                // nothing changed in this save: wasChanged() / getChanges() must not report the previous save
+                $this->changes = [];
+
                 return true;
             }
 
@@ -1046,6 +1049,8 @@ abstract class Model implements
         // this model instance. This will allow developers to hook into these after
         // models are updated, giving them a chance to do any special processing.
         if ([] === $dirty = $this->getDirtyForUpdate()) {
+            $this->changes = [];
+
             return false;
         }
 
