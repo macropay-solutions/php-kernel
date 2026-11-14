@@ -84,15 +84,6 @@ class UrlGenerator
      */
     public function to($path, $extra = [], $secure = null)
     {
-        // First we will check if the URL is already a valid URL. If it is we will not
-        // try to generate a new one but will simply return the URL as is, which is
-        // convenient since developers do not always have to check if it's valid.
-        if ($this->isValidUrl($path)) {
-            return $path;
-        }
-
-        $scheme = $this->getSchemeForUrl($secure);
-
         $extra = $this->formatParameters($extra);
 
         $tail = implode(
@@ -102,6 +93,22 @@ class UrlGenerator
                 (array)$extra
             )
         );
+
+        // First we will check if the URL is already a valid URL. If it is we will not
+        // try to generate a new one but will simply return the URL as is, which is
+        // convenient since developers do not always have to check if it's valid.
+        if ($this->isValidUrl($path)) {
+            if ('' === $tail) {
+                return $path;
+            }
+
+            // a full URL (e.g. on another domain) keeps its extra segments: insert them before the query / fragment
+            $end = \strcspn($path, '?#');
+
+            return \rtrim(\substr($path, 0, $end), '/') . '/' . $tail . \substr($path, $end);
+        }
+
+        $scheme = $this->getSchemeForUrl($secure);
 
         // Once we have the scheme we will compile the "tail" by collapsing the values
         // into a single string delimited by slashes. This just makes it convenient
