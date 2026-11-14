@@ -10,6 +10,7 @@ use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueueAfterCommit;
 use MacropaySolutions\Kernel\Contracts\Queue\StorableCallable;
 use MacropaySolutions\Kernel\Database\Obvious\Collection as ObviousCollection;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
+use MacropaySolutions\Kernel\Database\Obvious\ModelNotFoundException;
 use MacropaySolutions\Kernel\Queue\CallQueuedCallable;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
 use MacropaySolutions\Kernel\Queue\SerializesModels;
@@ -200,25 +201,41 @@ class SendQueuedNotifications implements ShouldQueue, StorableCallable
     ): void {
         $restoredNotifiables = new Collection();
 
-        foreach ($notifiables as $n) {
-            if ($n['type'] === 'model') {
-                $restoredNotifiables->push((new $n['class'])->newQueryForRestoration([$n['id']])->useWritePdo()->firstOrFail());
+        try {
+            foreach ($notifiables as $n) {
+                if ($n['type'] === 'model') {
+                    $restoredNotifiables->push(
+                        (new $n['class'])->newQueryForRestoration([$n['id']])->useWritePdo()->firstOrFail()
+                    );
 
-                continue;
+                    continue;
+                }
+
+                if ($n['type'] === 'anonymous') {
+                    $anon = new AnonymousNotifiable();
+                    $anon->routes = $n['routes'];
+                    $restoredNotifiables->push($anon);
+                }
             }
 
-            if ($n['type'] === 'anonymous') {
-                $anon = new AnonymousNotifiable();
-                $anon->routes = $n['routes'];
-                $restoredNotifiables->push($anon);
+            $notification = \app($notificationClass);
+            $helper = new SerializesModelsHelper();
+
+            foreach ($notificationProps as $key => $value) {
+                $notification->$key = $helper->restorePropertyValue($value);
             }
-        }
+        } catch (ModelNotFoundException $e) {
+            // the queued job wraps the notification: honour the notification's own $deleteWhenMissingModels
+            if (
+                \class_exists($notificationClass)
+                && true === (\get_class_vars($notificationClass)['deleteWhenMissingModels'] ?? false)
+            ) {
+                $job->delete();
 
-        $notification = \app($notificationClass);
-        $helper = new SerializesModelsHelper();
+                return;
+            }
 
-        foreach ($notificationProps as $key => $value) {
-            $notification->$key = $helper->restorePropertyValue($value);
+            throw $e;
         }
 
         $wrapper = new self($restoredNotifiables, $notification, $channels);

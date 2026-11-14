@@ -1355,6 +1355,14 @@ class Builder implements BuilderContract, Macroable
             $values = [$values->start, $values->end];
         }
 
+        // a native DatePeriod is iterable: flattening it would bind its first two dates instead of its bounds
+        if ($values instanceof \DatePeriod) {
+            $values = [
+                $values->getStartDate(),
+                $values->getEndDate() ?? \array_slice(\iterator_to_array($values, false), -1)[0] ?? null,
+            ];
+        }
+
         $this->wheres[] = compact('type', 'column', 'values', 'boolean', 'not');
 
         $this->addBinding(array_slice($this->cleanBindings(Arr::flatten($values)), 0, 2), 'where');
@@ -2434,6 +2442,14 @@ class Builder implements BuilderContract, Macroable
 
         if ($values instanceof CarbonPeriod) {
             $values = [$values->start, $values->end];
+        }
+
+        // a native DatePeriod is iterable: flattening it would bind its first two dates instead of its bounds
+        if ($values instanceof \DatePeriod) {
+            $values = [
+                $values->getStartDate(),
+                $values->getEndDate() ?? \array_slice(\iterator_to_array($values, false), -1)[0] ?? null,
+            ];
         }
 
         $this->havings[] = compact('type', 'column', 'values', 'boolean', 'not');
