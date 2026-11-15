@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use MacropaySolutions\Kernel\Container\Container;
 use MacropaySolutions\Kernel\Database\MultipleRecordsFoundException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Query\Expression;
 use MacropaySolutions\Kernel\Database\RecordsNotFoundException;
 use MacropaySolutions\Kernel\Pagination\Cursor;
@@ -175,7 +176,7 @@ trait BuildsQueries
                 return false;
             }
 
-            $lastId = data_get($results->last(), $alias);
+            $lastId = $this->getLastIdFromChunk($results->last(), $alias);
 
             if ($lastId === null) {
                 throw new RuntimeException(
@@ -316,7 +317,7 @@ trait BuildsQueries
                     return;
                 }
 
-                $lastId = $results->last()->{$alias};
+                $lastId = $this->getLastIdFromChunk($results->last(), $alias);
 
                 if ($lastId === null) {
                     throw new RuntimeException(
@@ -326,6 +327,15 @@ trait BuildsQueries
                 }
             }
         });
+    }
+
+    /**
+     * Get the id of the last result of a chunk to continue paging from: the raw value for a model,
+     * because a cast or an accessor on the key would make the next page start from the wrong id.
+     */
+    protected function getLastIdFromChunk(mixed $result, ?string $alias): mixed
+    {
+        return $result instanceof Model ? $result->getRawOriginal($alias) : data_get($result, $alias);
     }
 
     /**

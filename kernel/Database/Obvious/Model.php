@@ -780,29 +780,38 @@ abstract class Model implements
             return $this->newQueryWithoutRelationships()->{$method}($column, $amount, $extra);
         }
 
-        $this->{$column} = \bcadd(
-            $s1 = (string)$this->{$column},
-            $s2 = (string)(
-            $method === 'increment'
-                ? $amount
-                : \bcmul(
-                    (string)$amount,
-                    '-1',
-                    $p = \max(0, \strlen((string)\strrchr((string)$amount, '.')) - 1)
+        // the query runs "column = column + amount" on the stored value: compute from the raw attribute and
+        // store the result raw, an accessor or a mutator on the column must not change it
+        $current = $this->getAttributeFromArray($column);
+
+        if (null !== $current) {
+            $this->attributes[$column] = \bcadd(
+                $s1 = (string)$current,
+                $s2 = (string)(
+                $method === 'increment'
+                    ? $amount
+                    : \bcmul(
+                        (string)$amount,
+                        '-1',
+                        $p = \max(0, \strlen((string)\strrchr((string)$amount, '.')) - 1)
+                    )
+                ),
+                \max(
+                    0,
+                    \strlen((string)\strrchr($s1, '.')) - 1,
+                    $p ?? \strlen((string)\strrchr($s2, '.')) - 1
                 )
-            ),
-            \max(
-                0,
-                \strlen((string)\strrchr($s1, '.')) - 1,
-                $p ?? \strlen((string)\strrchr($s2, '.')) - 1
-            )
-        );
+            );
+        }
 
         $this->forceFill($extra);
 
         if (!$this->isDirty() || $this->fireModelEvent('updating') === false) {
             return 0;
         }
+
+        // the query must store the extra attributes as the model holds them (after casts and mutators)
+        $extra = \array_merge($extra, \array_intersect_key($this->getAttributes(), $extra));
 
         return (int)tap(
             $this->setKeysForSaveQuery($this->newQueryWithoutScopes())->{$method}($column, $amount, $extra),
