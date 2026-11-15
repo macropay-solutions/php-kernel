@@ -259,6 +259,51 @@ class Number implements Macroable
     }
 
     /**
+     * Plain decimal notation, without exponent ("1.0E-7" -> "0.0000001"), for bcmath and raw SQL.
+     *
+     * @throws \InvalidArgumentException
+     */
+    public static function toDecimalString(int|float|string $number): string
+    {
+        if (\is_int($number)) {
+            return (string)$number;
+        }
+
+        $string = \trim((string)$number);
+
+        if ((\is_float($number) && !\is_finite($number)) || !\is_numeric($string)) {
+            throw new \InvalidArgumentException('Not a finite number: ' . $string);
+        }
+
+        [$mantissa, $exponent] = \array_pad(\explode('e', \strtolower($string), 2), 2, '0');
+        $exponent = (int)$exponent;
+
+        if (\abs($exponent) > 1000) {
+            throw new \InvalidArgumentException('Exponent outside of the allowed range: ' . $string);
+        }
+
+        $sign = '-' === $mantissa[0] ? '-' : '';
+        [$integer, $fraction] = \array_pad(\explode('.', \ltrim($mantissa, '+-'), 2), 2, '');
+        $digits = $integer . $fraction;
+        $point = \strlen($integer) + $exponent;
+
+        $result = match (true) {
+            $point <= 0 => '0.' . \str_repeat('0', -$point) . $digits,
+            $point >= \strlen($digits) => $digits . \str_repeat('0', $point - \strlen($digits)),
+            default => \substr($digits, 0, $point) . '.' . \substr($digits, $point),
+        };
+
+        if (\str_contains($result, '.')) {
+            $result = \rtrim(\rtrim($result, '0'), '.');
+        }
+
+        $result = \ltrim($result, '0');
+        $result = '' === $result || '.' === $result[0] ? '0' . $result : $result;
+
+        return '0' === $result ? '0' : $sign . $result;
+    }
+
+    /**
      * Execute the given callback using the given locale.
      *
      * @param string $locale

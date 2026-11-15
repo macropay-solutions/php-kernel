@@ -22,6 +22,7 @@ use MacropaySolutions\Kernel\Database\Obvious\Relations\Relation;
 use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
+use MacropaySolutions\Kernel\Support\Number;
 use MacropaySolutions\Kernel\Support\Str;
 
 /**
@@ -776,6 +777,9 @@ abstract class Model implements
      */
     protected function incrementOrDecrement(string $column, float|int|string $amount, array $extra, string $method): int
     {
+        // bcmath refuses an exponent ("1.0E-7")
+        $amount = Number::toDecimalString($amount);
+
         if (!$this->exists) {
             return $this->newQueryWithoutRelationships()->{$method}($column, $amount, $extra);
         }

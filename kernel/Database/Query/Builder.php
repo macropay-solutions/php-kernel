@@ -23,6 +23,7 @@ use MacropaySolutions\Kernel\Pagination\Paginator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Collection;
 use MacropaySolutions\Kernel\Support\LazyCollection;
+use MacropaySolutions\Kernel\Support\Number;
 use MacropaySolutions\Kernel\Support\Traits\ForwardsCalls;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 use RuntimeException;
@@ -3785,7 +3786,8 @@ class Builder implements BuilderContract, Macroable
                 throw new InvalidArgumentException('Non-associative array passed to incrementEach method.');
             }
 
-            $columns[$column] = $this->raw("{$this->grammar->wrap($column)} + $amount");
+            // no exponent: "1.0E-7" would be an approximate (float) literal in SQL
+            $columns[$column] = $this->raw("{$this->grammar->wrap($column)} + " . Number::toDecimalString($amount));
         }
 
         return $this->update(array_merge($columns, $extra));
@@ -3830,7 +3832,8 @@ class Builder implements BuilderContract, Macroable
                 throw new InvalidArgumentException('Non-associative array passed to decrementEach method.');
             }
 
-            $columns[$column] = $this->raw("{$this->grammar->wrap($column)} - $amount");
+            // no exponent: "1.0E-7" would be an approximate (float) literal in SQL
+            $columns[$column] = $this->raw("{$this->grammar->wrap($column)} - " . Number::toDecimalString($amount));
         }
 
         return $this->update(array_merge($columns, $extra));
