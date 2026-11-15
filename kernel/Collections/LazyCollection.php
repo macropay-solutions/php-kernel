@@ -582,10 +582,12 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
     public function has($key)
     {
         $keys = array_flip(is_array($key) ? $key : func_get_args());
-        $count = count($keys);
 
+        // a generator can yield the same key twice: each wanted key is counted once
         foreach ($this as $key => $value) {
-            if (array_key_exists($key, $keys) && --$count == 0) {
+            unset($keys[$key]);
+
+            if ([] === $keys) {
                 return true;
             }
         }

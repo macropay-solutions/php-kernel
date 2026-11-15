@@ -137,11 +137,12 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
      */
     public function mode($key = null)
     {
-        if ($this->count() === 0) {
+        // nulls are not counted: they would be keyed as '' and returned as a value the collection does not hold
+        $collection = (isset($key) ? $this->pluck($key) : $this)->reject(static fn($item) => null === $item);
+
+        if ($collection->count() === 0) {
             return;
         }
-
-        $collection = isset($key) ? $this->pluck($key) : $this;
 
         $counts = new static();
 
@@ -963,7 +964,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
             return array_pop($this->items);
         }
 
-        if ($this->isEmpty()) {
+        // range(1, 0) would pop two items for a count of 0
+        if ($count < 1 || $this->isEmpty()) {
             return new static();
         }
 

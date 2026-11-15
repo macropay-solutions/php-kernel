@@ -229,6 +229,11 @@ class Arr implements Macroable
      */
     public static function last($array, ?callable $callback = null, $default = null)
     {
+        // like first(): a collection or other Traversable is read, not treated as empty
+        if ($array instanceof \Traversable) {
+            $array = \iterator_to_array($array);
+        }
+
         if (is_null($callback)) {
             return !\is_array($array) || [] === $array ? value($default) : end($array);
         }
