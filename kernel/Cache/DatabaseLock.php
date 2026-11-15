@@ -3,11 +3,15 @@
 namespace MacropaySolutions\Kernel\Cache;
 
 use MacropaySolutions\Kernel\Database\Connection;
+use MacropaySolutions\Kernel\Database\DetectsConcurrencyErrors;
+use MacropaySolutions\Kernel\Database\PostgresConnection;
 use MacropaySolutions\Kernel\Database\QueryException;
 use MacropaySolutions\Kernel\Database\UniqueConstraintViolationException;
 
 class DatabaseLock extends Lock
 {
+    use DetectsConcurrencyErrors;
+
     /**
      * The database connection instance.
      *
@@ -71,25 +75,20 @@ class DatabaseLock extends Lock
      */
     public function acquire()
     {
-        try {
-            $this->connection->table($this->table)->insert([
-                'key' => $this->name,
-                'owner' => $this->owner,
-                'expiration' => $this->expiresAt(),
-            ]);
+        $record = [
+            'key' => $this->name,
+            'owner' => $this->owner,
+            'expiration' => $this->expiresAt(),
+        ];
 
-            $acquired = true;
-        } catch (QueryException $e) {
-            // only an existing lock row means "taken"; any other failure (data too long, missing table...) is rethrown
-            // instead of being reported as a held lock. Not every driver reports a duplicate primary key as
-            // UniqueConstraintViolationException (e.g. SQL Server), so the row is checked for those.
-            if (
-                !$e instanceof UniqueConstraintViolationException
-                && !$this->connection->table($this->table)->where('key', $this->name)->exists()
-            ) {
-                throw $e;
-            }
+        $acquired = match (true) {
+            // ON CONFLICT DO NOTHING: a failed INSERT would abort the open transaction on PostgreSQL
+            $this->connection instanceof PostgresConnection
+                => $this->connection->table($this->table)->insertOrIgnore($record) > 0,
+            default => $this->insertLock($record),
+        };
 
+        if (!$acquired) {
             $updated = $this->connection->table($this->table)
                 ->where('key', $this->name)
                 ->where(function ($query) {
@@ -103,10 +102,47 @@ class DatabaseLock extends Lock
         }
 
         if (random_int(1, $this->lottery[1]) <= $this->lottery[0]) {
-            $this->connection->table($this->table)->where('expiration', '<=', time())->delete();
+            $this->pruneExpiredLocks();
         }
 
         return $acquired;
+    }
+
+    /**
+     * Only an existing lock row means "taken"; any other failure (data too long, missing table...) is rethrown
+     * instead of being reported as a held lock. Not every driver reports a duplicate primary key as
+     * UniqueConstraintViolationException (e.g. SQL Server), so the row is checked for those.
+     */
+    protected function insertLock(array $record): bool
+    {
+        try {
+            $this->connection->table($this->table)->insert($record);
+
+            return true;
+        } catch (QueryException $e) {
+            if (
+                !$e instanceof UniqueConstraintViolationException
+                && !$this->connection->table($this->table)->where('key', $this->name)->exists()
+            ) {
+                throw $e;
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * A concurrency error is ignored only outside a transaction: inside one the database already rolled it back.
+     */
+    protected function pruneExpiredLocks(): void
+    {
+        try {
+            $this->connection->table($this->table)->where('expiration', '<=', time())->delete();
+        } catch (QueryException $e) {
+            if ($this->connection->transactionLevel() > 0 || !$this->causedByConcurrencyError($e)) {
+                throw $e;
+            }
+        }
     }
 
     /**

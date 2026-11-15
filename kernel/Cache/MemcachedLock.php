@@ -37,7 +37,7 @@ class MemcachedLock extends Lock
         return $this->memcached->add(
             $this->name,
             $this->owner,
-            $this->seconds
+            $this->calculateExpiration($this->seconds)
         );
     }
 
@@ -65,7 +65,12 @@ class MemcachedLock extends Lock
         }
 
         // Atomically swap only if the token matches, preventing ownership hijacking
-        return $this->memcached->cas($value['cas'], $this->name, $this->owner, $seconds ?? $this->seconds);
+        return $this->memcached->cas(
+            $value['cas'],
+            $this->name,
+            $this->owner,
+            $this->calculateExpiration($seconds ?? $this->seconds)
+        );
     }
 
     /**
@@ -85,6 +90,17 @@ class MemcachedLock extends Lock
      */
     protected function getCurrentOwner()
     {
-        return $this->memcached->get($this->name);
+        $owner = $this->memcached->get($this->name);
+
+        // a free lock returns false, which is not an owner
+        return $this->memcached->getResultCode() === \Memcached::RES_SUCCESS ? $owner : null;
+    }
+
+    /**
+     * Memcached reads an expiration over 30 days as a UNIX timestamp.
+     */
+    protected function calculateExpiration(int $seconds): int
+    {
+        return $seconds > 60 * 60 * 24 * 30 ? $this->availableAt($seconds) : $seconds;
     }
 }

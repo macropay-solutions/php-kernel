@@ -13,7 +13,6 @@ use MacropaySolutions\Kernel\Cache\Events\KeyWritten;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as CacheContract;
 use MacropaySolutions\Kernel\Contracts\Cache\Store;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
-use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
 use MacropaySolutions\Kernel\Macroable\Contracts\Macroable;
 
@@ -465,15 +464,23 @@ class Repository implements ArrayAccess, CacheContract, Macroable
     }
 
     /**
-     * Set the expiration of a cached item; null TTL will retain indefinitely; 0 will forget it.
+     * Null TTL keeps the item indefinitely; a zero, negative or past TTL removes it.
      */
     public function touch(string $key, \DateTimeInterface|\DateInterval|int|null $ttl = null): bool
     {
-        if ($ttl === 0) {
-            return $this->store->forget($key);
+        if (null === $ttl) {
+            // stores read 0 as "forever"
+            return $this->store->touch($this->itemKey($key), 0);
         }
 
-        return $this->store->touch($this->itemKey($key), $this->getSeconds($ttl ?? 0));
+        $seconds = $this->getSeconds($ttl);
+
+        if ($seconds <= 0) {
+            // through the item key (e.g. the tagged one)
+            return $this->forget($key);
+        }
+
+        return $this->store->touch($this->itemKey($key), $seconds);
     }
 
     /**
@@ -575,7 +582,8 @@ class Repository implements ArrayAccess, CacheContract, Macroable
         $duration = $this->parseDateInterval($ttl);
 
         if ($duration instanceof DateTimeInterface) {
-            $duration = Carbon::now()->diffInRealSeconds($duration, false);
+            // replaces diffInRealSeconds(), deprecated in Carbon 3; currentTime() keeps Carbon::setTestNow()
+            $duration = $duration->getTimestamp() - $this->currentTime();
         }
 
         return (int)($duration > 0 ? $duration : 0);

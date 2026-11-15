@@ -195,6 +195,26 @@ class TaggedCache extends Repository
         return false;
     }
 
+    /**
+     * Capped like put(): a tagged item outliving the cap could be served again once its tag version key expires
+     * and restarts from 1, after a flush.
+     */
+    public function touch(string $key, \DateTimeInterface|\DateInterval|int|null $ttl = null): bool
+    {
+        if (null !== $ttl && $this->getSeconds($ttl) <= 0) {
+            return $this->forget($key);
+        }
+
+        if (!parent::touch($key, $this->getCappedSeconds($ttl))) {
+            return false;
+        }
+
+        // the tag version keys must outlive the item
+        $this->tags->touch();
+
+        return true;
+    }
+
     protected function getCappedSeconds($ttl = null): int
     {
         $requestedSeconds = $ttl === null ? null : $this->getSeconds($ttl);
