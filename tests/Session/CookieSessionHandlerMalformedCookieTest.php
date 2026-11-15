@@ -14,7 +14,7 @@ class CookieSessionHandlerMalformedCookieTest extends TestCase
 {
     private function read(mixed $cookieValue): string|false
     {
-        $handler = new CookieSessionHandler($this->createMock(QueueingFactory::class), 120);
+        $handler = new CookieSessionHandler($this->createStub(QueueingFactory::class), 120);
         $handler->setRequest(Request::create('/', 'GET', [], ['session_id' => $cookieValue]));
 
         return $handler->read('session_id');
