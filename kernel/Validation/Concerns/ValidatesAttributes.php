@@ -252,7 +252,12 @@ trait ValidatesAttributes
             $date = $this->getDateTimestamp($this->getValue($parameters[0]));
         }
 
-        return $this->compare($this->getDateTimestamp($value), $date, $operator);
+        // an invalid date on either side is never in order: null compares as 0 (or equal to null) and passed
+        if (null === $date || null === ($first = $this->getDateTimestamp($value))) {
+            return false;
+        }
+
+        return $this->compare($first, $date, $operator);
     }
 
     /**
@@ -293,6 +298,9 @@ trait ValidatesAttributes
     protected function checkDateTimeOrder($format, $first, $second, $operator)
     {
         $firstDate = $this->getDateTimeWithOptionalFormat($format, $first);
+
+        // another field with its own date_format is parsed with that format
+        $format = $this->getDateFormat($second) ?: $format;
 
         if (!$secondDate = $this->getDateTimeWithOptionalFormat($format, $second)) {
             if (is_null($second = $this->getValue($second))) {

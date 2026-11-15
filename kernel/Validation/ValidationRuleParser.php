@@ -164,11 +164,14 @@ class ValidationRuleParser
                             [$attribute => [$key]]
                         );
 
-                        $results = $this->mergeRules($results, $compiled->rules);
+                        // merged in place: copying $results for every key made large arrays quadratic
+                        foreach ($compiled->rules as $compiledAttribute => $compiledRules) {
+                            $this->mergeRulesForAttributeInto($results, $compiledAttribute, $compiledRules);
+                        }
                     } else {
                         $this->implicitAttributes[$attribute][] = $key;
 
-                        $results = $this->mergeRules($results, $key, $rule);
+                        $this->mergeRulesForAttributeInto($results, $key, $rule);
                     }
                 }
             }
@@ -212,14 +215,23 @@ class ValidationRuleParser
      */
     protected function mergeRulesForAttribute($results, $attribute, $rules)
     {
+        $this->mergeRulesForAttributeInto($results, $attribute, $rules);
+
+        return $results;
+    }
+
+    /**
+     * Merge additional rules into a given attribute, by reference.
+     * @param string|array $rules
+     */
+    private function mergeRulesForAttributeInto(array &$results, string|int $attribute, $rules): void
+    {
         $merge = head($this->explodeRules([$rules]));
 
         $results[$attribute] = array_merge(
             isset($results[$attribute]) ? $this->explodeExplicitRule($results[$attribute], $attribute) : [],
             $merge
         );
-
-        return $results;
     }
 
     /**

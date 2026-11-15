@@ -91,9 +91,11 @@ class ValidationData
     {
         $results = [];
 
-        $value = Arr::get($masterData, $attribute, '__missing__');
+        // a unique marker: a submitted "__missing__" string must not be taken for missing data
+        $missing = new \stdClass();
+        $value = Arr::get($masterData, $attribute, $missing);
 
-        if ($value !== '__missing__') {
+        if ($value !== $missing) {
             Arr::set($results, $attribute, $value);
         }
 

@@ -111,15 +111,26 @@ class Arr implements Macroable
     {
         $results = [];
 
-        foreach ($array as $key => $value) {
-            if (is_array($value) && [] !== $value) {
-                $results = array_merge($results, static::dot($value, $prepend . $key . '.'));
-            } else {
-                $results[$prepend . $key] = $value;
-            }
-        }
+        // filled by reference: merging every nested result into the growing array made wide arrays quadratic
+        self::dotInto($results, $array, (string)$prepend);
 
         return $results;
+    }
+
+    /**
+     * Flatten a multi-dimensional associative array with dots into the given results.
+     */
+    private static function dotInto(array &$results, iterable $array, string $prepend): void
+    {
+        foreach ($array as $key => $value) {
+            if (\is_array($value) && [] !== $value) {
+                self::dotInto($results, $value, $prepend . $key . '.');
+
+                continue;
+            }
+
+            $results[$prepend . $key] = $value;
+        }
     }
 
     /**

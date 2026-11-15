@@ -103,6 +103,11 @@ trait DatabaseRule
             $value = $value->value;
         }
 
+        // false would be formatted as an empty string
+        if (false === $value) {
+            $value = 0;
+        }
+
         $this->wheres[] = compact('column', 'value');
 
         return $this;
@@ -123,6 +128,11 @@ trait DatabaseRule
 
         if ($value instanceof BackedEnum) {
             $value = $value->value;
+        }
+
+        // false would be formatted as an empty string
+        if (false === $value) {
+            $value = 0;
         }
 
         return $this->where($column, '!' . $value);
