@@ -98,7 +98,8 @@ class Store implements Session, Macroable
      */
     protected function loadSession()
     {
-        $this->attributes = array_merge($this->attributes, $this->readFromHandler());
+        // array_replace: array_merge renumbers numeric keys, which moved session values to other keys
+        $this->attributes = \array_replace($this->attributes, $this->readFromHandler());
 
         $this->marshalErrorBag();
     }

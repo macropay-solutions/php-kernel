@@ -202,9 +202,10 @@ class Translator extends NamespacedItemResolver implements TranslatorContract, M
      */
     public function choice($key, $number, array $replace = [], $locale = null)
     {
+        // replacements are applied after the choice: a "|" in a replaced value must not split the line
         $line = $this->get(
             $key,
-            $replace,
+            [],
             $locale = $this->localeForChoice($locale)
         );
 

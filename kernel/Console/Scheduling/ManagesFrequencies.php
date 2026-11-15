@@ -345,7 +345,8 @@ trait ManagesFrequencies
         $segments = explode(':', $time);
 
         return $this->hourBasedSchedule(
-            count($segments) === 2 ? (int)$segments[1] : '0',
+            // 'H:i:s' too: the seconds are ignored, not the minutes
+            \count($segments) >= 2 ? (int)$segments[1] : '0',
             (int)$segments[0]
         );
     }

@@ -115,6 +115,9 @@ class CallbackEvent extends Event
      */
     protected function execute($container)
     {
+        // a repeated event must not rethrow the exception of a previous run
+        $this->exception = null;
+
         try {
             $this->result = is_object($this->callback)
                 ? $container->call([$this->callback, '__invoke'], $this->parameters)

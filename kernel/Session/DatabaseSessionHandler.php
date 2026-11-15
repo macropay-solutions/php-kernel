@@ -297,7 +297,8 @@ class DatabaseSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      */
     protected function getQuery()
     {
-        return $this->connection->table($this->table);
+        // a read replica may lag behind the session just written
+        return $this->connection->table($this->table)->useWritePdo();
     }
 
     /**
