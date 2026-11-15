@@ -32,6 +32,8 @@ class DatabaseTransactionRecord
      */
     protected $callbacks = [];
 
+    protected array $callbacksForRollback = [];
+
     /**
      * Create a new database transaction record instance.
      *
@@ -78,5 +80,32 @@ class DatabaseTransactionRecord
     public function getCallbacks()
     {
         return $this->callbacks;
+    }
+
+    public function addCallbackForRollback(callable $callback): void
+    {
+        $this->callbacksForRollback[] = $callback;
+    }
+
+    /**
+     * All callbacks run; the first error is rethrown after them.
+     *
+     * @throws \Throwable
+     */
+    public function executeCallbacksForRollback(): void
+    {
+        $error = null;
+
+        foreach ($this->callbacksForRollback as $callback) {
+            try {
+                $callback();
+            } catch (\Throwable $e) {
+                $error ??= $e;
+            }
+        }
+
+        if (null !== $error) {
+            throw $error;
+        }
     }
 }

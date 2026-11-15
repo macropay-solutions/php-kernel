@@ -133,6 +133,33 @@ class DatabaseTransactionsManager
      */
     public function rollback($connection, $newTransactionLevel)
     {
+        $before = $this->pendingTransactions->merge($this->committedTransactions)->all();
+
+        try {
+            $this->removeRolledBackTransactions($connection, $newTransactionLevel);
+        } finally {
+            // the discarded transactions (including committed savepoints nested in them) run their rollback callbacks
+            $kept = $this->pendingTransactions->merge($this->committedTransactions)->all();
+            $error = null;
+
+            foreach ($before as $transaction) {
+                if (!\in_array($transaction, $kept, true)) {
+                    try {
+                        $transaction->executeCallbacksForRollback();
+                    } catch (\Throwable $e) {
+                        $error ??= $e;
+                    }
+                }
+            }
+
+            if (null !== $error) {
+                throw $error;
+            }
+        }
+    }
+
+    protected function removeRolledBackTransactions(string $connection, int $newTransactionLevel): void
+    {
         if ($newTransactionLevel === 0) {
             $this->removeAllTransactionsForConnection($connection);
         } else {
@@ -209,6 +236,14 @@ class DatabaseTransactionsManager
         }
 
         $callback();
+    }
+
+    /**
+     * Outside a transaction the callback is dropped.
+     */
+    public function addCallbackForRollback(callable $callback): void
+    {
+        $this->callbackApplicableTransactions()->last()?->addCallbackForRollback($callback);
     }
 
     /**

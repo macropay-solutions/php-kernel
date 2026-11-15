@@ -6,6 +6,8 @@ use Closure;
 use DateTimeInterface;
 use MacropaySolutions\Kernel\Bus\UniqueLock;
 use MacropaySolutions\Kernel\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Cache\Repository as CacheRepository;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Encryption\Encrypter;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeEncrypted;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
@@ -406,6 +408,23 @@ abstract class Queue
             $this->shouldDispatchAfterCommit($job) &&
             $this->container->bound('db.transactions')
         ) {
+            if ($job instanceof ShouldBeUnique) {
+                // the lock was taken at dispatch: release it if the job is never pushed because of a rollback
+                $container = $this->container;
+                $release = static function () use ($container, $job): void {
+                    try {
+                        (new UniqueLock($container->make(CacheRepository::class)))->release($job);
+                    } catch (\Throwable $e) {
+                        // runs while the rollback's own exception is being handled: must not replace it,
+                        // the lock then expires by its ttl
+                        if ($container->bound(ExceptionHandler::class)) {
+                            $container->make(ExceptionHandler::class)->report($e);
+                        }
+                    }
+                };
+                $container->make('db.transactions')->addCallbackForRollback($release);
+            }
+
             return $this->container->make('db.transactions')->addCallback(
                 function () use ($payload, $queue, $delay, $callback, $job) {
                     $this->raiseJobQueueingEvent($job, $payload);
