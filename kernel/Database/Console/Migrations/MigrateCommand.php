@@ -84,18 +84,17 @@ class MigrateCommand extends BaseCommand implements Isolatable
             return 1;
         }
 
-        $lock = $this->app->make('cache')->store()->getStore()->lock(
-            self::FRAMEWORK_MIGRATE_LOCK,
-            $this->app->make('config')->get('database.migrations_lock_ttl', 300)
-        );
+        $lock = $this->getMigrationLock();
 
-        if (!$lock->get()) {
-            $this->info('Could not acquire lock for migrate command.');
+        if (null !== $lock) {
+            if (!$lock->get()) {
+                $this->info('Could not acquire lock for migrate command.');
 
-            return 1;
+                return 1;
+            }
+
+            $this->info('Lock acquired for migrate command. Migrating...');
         }
-
-        $this->info('Lock acquired for migrate command. Migrating...');
 
         try {
             $this->migrator->usingConnection($this->option('database'), function () {
@@ -122,7 +121,7 @@ class MigrateCommand extends BaseCommand implements Isolatable
             });
             return 0;
         } finally {
-            $lock->release();
+            $lock?->release();
         }
     }
 

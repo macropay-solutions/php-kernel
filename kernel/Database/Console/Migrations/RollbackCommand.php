@@ -57,18 +57,17 @@ class RollbackCommand extends BaseCommand
             return 1;
         }
 
-        $lock = $this->app->make('cache')->store()->getStore()->lock(
-            MigrateCommand::FRAMEWORK_MIGRATE_LOCK,
-            $this->app->make('config')->get('database.migrations_lock_ttl', 300)
-        );
+        $lock = $this->getMigrationLock();
 
-        if (!$lock->get()) {
-            $this->info('Could not acquire lock for migrate:rollback command.');
+        if (null !== $lock) {
+            if (!$lock->get()) {
+                $this->info('Could not acquire lock for migrate:rollback command.');
 
-            return 1;
+                return 1;
+            }
+
+            $this->info('Lock acquired for migrate:rollback command. Migrating...');
         }
-
-        $this->info('Lock acquired for migrate:rollback command. Migrating...');
 
         try {
             $this->migrator->usingConnection($this->option('database'), function () {
@@ -84,7 +83,7 @@ class RollbackCommand extends BaseCommand
 
             return 0;
         } finally {
-            $lock->release();
+            $lock?->release();
         }
     }
 

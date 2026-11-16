@@ -2,7 +2,9 @@
 
 namespace MacropaySolutions\Kernel\Database\Console\Migrations;
 
+use MacropaySolutions\Kernel\Cache\DatabaseStore;
 use MacropaySolutions\Kernel\Console\Command;
+use MacropaySolutions\Kernel\Contracts\Cache\Lock;
 
 class BaseCommand extends Command
 {
@@ -40,6 +42,24 @@ class BaseCommand extends Command
     protected function usingRealPath()
     {
         return $this->input->hasOption('realpath') && $this->option('realpath');
+    }
+
+    /**
+     * The lock that keeps migrate and migrate:rollback from running at the same time, or null with the database
+     * cache store: its lock table may not exist yet (fresh install) or be dropped by db:wipe (migrate:fresh).
+     */
+    protected function getMigrationLock(): ?Lock
+    {
+        $store = $this->app->make('cache')->store()->getStore();
+
+        if ($store instanceof DatabaseStore) {
+            return null;
+        }
+
+        return $store->lock(
+            MigrateCommand::FRAMEWORK_MIGRATE_LOCK,
+            $this->app->make('config')->get('database.migrations_lock_ttl', 300)
+        );
     }
 
     /**
