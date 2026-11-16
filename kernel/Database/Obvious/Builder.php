@@ -1724,8 +1724,7 @@ class Builder implements BuilderContract, Macroable
      */
     public function withCasts($casts)
     {
-        // on a copy: the model may be shared with another query or be a loaded instance
-        $this->model = (clone $this->model)->mergeCasts($casts);
+        $this->model->mergeCasts($casts);
 
         return $this;
     }
@@ -1978,5 +1977,7 @@ class Builder implements BuilderContract, Macroable
     public function __clone()
     {
         $this->query = clone $this->query;
+        // a clone gets its own model: withCasts() on it must not change the casts of the original query
+        $this->model = clone $this->model;
     }
 }

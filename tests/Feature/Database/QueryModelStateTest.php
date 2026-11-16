@@ -3,12 +3,14 @@
 namespace MacropaySolutions\Kernel\Tests\Feature\Database;
 
 use MacropaySolutions\Kernel\Database\Obvious\Model;
+use MacropaySolutions\Kernel\Database\Obvious\Relations\HasMany;
 use MacropaySolutions\Kernel\Database\Schema\Blueprint;
 use MacropaySolutions\Kernel\Tests\ApplicationTestCase;
 use MacropaySolutions\Kernel\Tests\Fixtures\Database\Author;
 
 /**
- * - withCasts() changed the casts of the model the query was built from.
+ * - withCasts() on a cloned query changed the casts of the original query.
+ * - withCasts() on a relation did not reach create() / make().
  * - chunkById() / lazyById() paged from the accessor value of the key instead of the stored one.
  * - increment() / decrement() stored the extra attributes without their mutators.
  * - increment() / decrement() computed the model value from the column accessor and stored it through the
@@ -37,14 +39,27 @@ class QueryModelStateTest extends ApplicationTestCase
         parent::tearDown();
     }
 
-    public function test_with_casts_does_not_change_the_model_the_query_was_built_from(): void
+    public function test_with_casts_on_a_cloned_query_does_not_change_the_original_query(): void
     {
-        $author = Author::query()->create(['name' => 'Ana']);
-        $casts = $author->getCasts();
+        Author::query()->create(['name' => 'Ana']);
+        $query = Author::query();
 
-        $author->newQuery()->withCasts(['name' => 'int']);
+        $cast = (clone $query)->withCasts(['name' => 'int'])->first();
+        $original = $query->first();
 
-        $this->assertSame($casts, $author->getCasts());
+        $this->assertSame(0, $cast->a->name);
+        $this->assertSame('Ana', $original->a->name);
+    }
+
+    public function test_with_casts_on_a_relation_reaches_make_and_create(): void
+    {
+        $author = RatedByAuthor::query()->create(['name' => 'Ana']);
+
+        $made = $author->r->ratedBy()->withCasts(['name' => 'int'])->make(['name' => '7']);
+        $created = $author->r->ratedBy()->withCasts(['name' => 'int'])->create(['name' => '8']);
+
+        $this->assertSame(7, $made->a->name);
+        $this->assertSame(8, $created->a->name);
     }
 
     public function test_chunk_by_id_pages_from_the_stored_key(): void
@@ -143,6 +158,18 @@ class StarredRatingAuthor extends Author
             'rating' => function (mixed $value): void {
                 $this->attributes['rating'] = $value !== null ? (string)\ltrim((string)$value, '*') : null;
             },
+        ];
+    }
+}
+
+class RatedByAuthor extends Author
+{
+    protected string $table = 'authors';
+
+    protected static function segregatedRelationsDefinitionMap(): array
+    {
+        return [
+            'ratedBy' => fn(): HasMany => $this->hasMany(Author::class, 'rating', 'id'),
         ];
     }
 }

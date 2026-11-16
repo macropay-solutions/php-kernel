@@ -457,5 +457,7 @@ abstract class Relation implements BuilderContract, Macroable
     public function __clone()
     {
         $this->query = clone $this->query;
+        // create() / make() build from $related, which must stay the model of the query
+        $this->related = $this->query->getModel();
     }
 }
