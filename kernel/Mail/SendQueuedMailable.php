@@ -111,9 +111,10 @@ class SendQueuedMailable implements StorableCallable
         
         $callable->connection = $this->connection;
         $callable->queue = $this->queue;
-        $callable->timeout = $this->timeout;
-        $callable->tries = $this->tries;
-        $callable->maxExceptions = $this->maxExceptions;
+        // createFrom() already took them from the mailable, also from its tries() / backoff() methods: keep those
+        $callable->timeout = $this->timeout ?? $callable->timeout;
+        $callable->tries = $this->tries ?? $callable->tries;
+        $callable->maxExceptions = $this->maxExceptions ?? $callable->maxExceptions;
         
         $callable->messageGroup = $this->mailable->messageGroup ??
             (\method_exists($this->mailable, 'messageGroup') ? (string)$this->mailable->messageGroup() : null);

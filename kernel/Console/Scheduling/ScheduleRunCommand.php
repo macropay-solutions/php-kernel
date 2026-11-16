@@ -13,6 +13,7 @@ use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\Sleep;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Throwable;
 
@@ -189,13 +190,20 @@ class ScheduleRunCommand extends Command
             $event->runInBackground ? ' in background' : '',
         );
 
-        $this->task($description, function () use ($event) {
+        $this->task($description, function () use ($event, $command) {
             $this->dispatcher->dispatch(new ScheduledTaskStarting($event));
 
             $start = microtime(true);
 
             try {
                 $event->run($this->app);
+
+                // a non-zero exit code is a failure too; a background task reports it from schedule:finish
+                if (!$event->runInBackground && null !== $event->exitCode && 0 !== $event->exitCode) {
+                    throw new RuntimeException(
+                        \sprintf('Scheduled task [%s] failed with exit code [%d].', $command, $event->exitCode)
+                    );
+                }
 
                 $this->dispatcher->dispatch(
                     new ScheduledTaskFinished(

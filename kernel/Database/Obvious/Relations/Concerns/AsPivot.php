@@ -11,7 +11,7 @@ trait AsPivot
     /**
      * The parent model of the relationship.
      */
-    public ?Model $pivotParent;
+    public ?Model $pivotParent = null;
 
     /**
      * The name of the foreign key column.
@@ -30,7 +30,8 @@ trait AsPivot
     {
         $instance = new static();
 
-        $instance->timestamps = $instance->hasTimestampAttributes($attributes);
+        // a custom pivot with $timestamps = false keeps them off
+        $instance->timestamps = $instance->timestamps && $instance->hasTimestampAttributes($attributes);
 
         // The pivot model is a "dynamic" model since we will set the tables dynamically
         // for the instance. This allows it work for any intermediate tables for the
@@ -61,7 +62,9 @@ trait AsPivot
     ): static {
         $instance = static::fromAttributes($parent, [], $table, $exists);
 
-        $instance->timestamps = $instance->hasTimestampAttributes($attributes);
+        // fromAttributes() above saw no attributes: start again from the class default
+        $instance->timestamps = \get_class_vars(static::class)['timestamps']
+            && $instance->hasTimestampAttributes($attributes);
 
         $instance->setRawAttributes(
             array_merge($instance->getRawOriginal(), $attributes),
@@ -197,7 +200,11 @@ trait AsPivot
      */
     public function hasTimestampAttributes(?array $attributes = null): bool
     {
-        return array_key_exists($this->getCreatedAtColumn(), $attributes ?? $this->attributes);
+        $attributes ??= $this->attributes;
+
+        // with only created_at as a pivot column, saving would also write a missing updated_at
+        return \array_key_exists($this->getCreatedAtColumn(), $attributes)
+            && \array_key_exists($this->getUpdatedAtColumn(), $attributes);
     }
 
     /**

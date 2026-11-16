@@ -643,7 +643,8 @@ class SqlServerGrammar extends Grammar
      */
     protected function typeString(Fluent $column)
     {
-        return "nvarchar({$column->length})";
+        // nvarchar(n) is limited to 4000 characters
+        return $column->length > 4000 ? 'nvarchar(max)' : "nvarchar({$column->length})";
     }
 
     /**

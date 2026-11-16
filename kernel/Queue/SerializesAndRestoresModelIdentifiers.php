@@ -128,7 +128,8 @@ trait SerializesAndRestoresModelIdentifiers
         return $this->getQueryForModelRestoration(
             (new $value->class())->setConnection($value->connection),
             $value->id
-        )->useWritePdo()->firstOrFail()->load($value->relations ?? []);
+        // loadMissing: the relations in the model's $with are already eager loaded by the query
+        )->useWritePdo()->firstOrFail()->loadMissing($value->relations ?? []);
     }
 
     /**

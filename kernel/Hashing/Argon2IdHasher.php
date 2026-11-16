@@ -18,7 +18,7 @@ class Argon2IdHasher extends ArgonHasher
      */
     public function check($value, $hashedValue, array $options = [])
     {
-        if ($this->verifyAlgorithm && !$this->isUsingCorrectAlgorithm($hashedValue)) {
+        if (($options['verify'] ?? $this->verifyAlgorithm) && !$this->isUsingCorrectAlgorithm($hashedValue)) {
             throw new RuntimeException('This password does not use the Argon2id algorithm.');
         }
 

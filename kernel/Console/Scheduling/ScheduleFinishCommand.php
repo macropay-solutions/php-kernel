@@ -4,7 +4,10 @@ namespace MacropaySolutions\Kernel\Console\Scheduling;
 
 use MacropaySolutions\Kernel\Console\Command;
 use MacropaySolutions\Kernel\Console\Events\ScheduledBackgroundTaskFinished;
+use MacropaySolutions\Kernel\Console\Events\ScheduledTaskFailed;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name: 'schedule:finish')]
@@ -47,6 +50,17 @@ class ScheduleFinishCommand extends Command
             $event->finish($this->app, $this->argument('code'));
 
             $this->app->make(Dispatcher::class)->dispatch(new ScheduledBackgroundTaskFinished($event));
+
+            if (0 !== $event->exitCode) {
+                $exception = new RuntimeException(\sprintf(
+                    'Scheduled task [%s] failed with exit code [%d].',
+                    $event->getSummaryForDisplay(),
+                    $event->exitCode
+                ));
+
+                $this->app->make(Dispatcher::class)->dispatch(new ScheduledTaskFailed($event, $exception));
+                $this->app->make(ExceptionHandler::class)->report($exception);
+            }
         });
     }
 }

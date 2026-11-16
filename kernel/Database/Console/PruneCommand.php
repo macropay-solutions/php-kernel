@@ -43,6 +43,13 @@ class PruneCommand extends Command
      */
     public function handle(Dispatcher $events)
     {
+        // --except only filters the discovered models: with --model it would be silently ignored
+        if ([] !== $this->option('model') && [] !== $this->option('except')) {
+            $this->error('The --model and --except options cannot be combined.');
+
+            return 1;
+        }
+
         $models = $this->models();
 
         if ($models->isEmpty()) {
