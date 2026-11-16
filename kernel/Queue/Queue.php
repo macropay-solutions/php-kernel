@@ -90,7 +90,14 @@ abstract class Queue
     public function bulk($jobs, $data = '', $queue = null)
     {
         foreach ((array)$jobs as $job) {
-            $this->push($job, $data, $queue);
+            // without a queue for the whole bulk, each job keeps its own queue and delay
+            if (isset($job->delay)) {
+                $this->later($job->delay, $job, $data, $queue ?? (\is_object($job) ? ($job->queue ?? null) : null));
+
+                continue;
+            }
+
+            $this->push($job, $data, $queue ?? (\is_object($job) ? ($job->queue ?? null) : null));
         }
     }
 

@@ -202,12 +202,19 @@ class Translator extends NamespacedItemResolver implements TranslatorContract, M
      */
     public function choice($key, $number, array $replace = [], $locale = null)
     {
+        $locale = $this->localeForChoice($locale);
+
+        // a line taken from the fallback locale is pluralized with the fallback locale's rules
+        foreach ($this->localeArray($locale) as $candidate) {
+            if ($this->hasForLocale($key, $candidate)) {
+                $locale = $candidate;
+
+                break;
+            }
+        }
+
         // replacements are applied after the choice: a "|" in a replaced value must not split the line
-        $line = $this->get(
-            $key,
-            [],
-            $locale = $this->localeForChoice($locale)
-        );
+        $line = $this->get($key, [], $locale);
 
         // If the given "number" is actually an array or countable we will simply count the
         // number of elements in an instance. This allows developers to pass an array of

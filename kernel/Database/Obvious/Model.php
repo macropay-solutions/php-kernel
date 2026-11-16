@@ -1494,6 +1494,8 @@ abstract class Model implements
             $this->getCreatedAtColumn(),
             $this->getUpdatedAtColumn(),
             ...$this->uniqueIds(),
+            // selected by the through relations, not a column of the model
+            'framework_through_key',
         ]));
 
         $attributes = Arr::except(

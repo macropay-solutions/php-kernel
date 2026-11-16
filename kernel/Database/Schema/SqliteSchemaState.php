@@ -27,7 +27,9 @@ class SqliteSchemaState extends SchemaState
         );
 
         $migrations = collect(preg_split("/\r\n|\n|\r/", $process->getOutput()))->filter(function ($line) {
-            return stripos($line, 'sqlite_sequence') === false &&
+            // internal tables (sqlite_sequence, sqlite_stat1 after ANALYZE...) cannot be created when loading the dump
+            return !\preg_match('/^CREATE TABLE (IF NOT EXISTS )?["\'`\[]?sqlite_/i', $line) &&
+                stripos($line, 'sqlite_sequence') === false &&
                 strlen($line) > 0;
         })->all();
 

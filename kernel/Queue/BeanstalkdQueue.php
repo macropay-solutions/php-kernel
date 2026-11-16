@@ -151,11 +151,14 @@ class BeanstalkdQueue extends Queue implements QueueContract
     public function bulk($jobs, $data = '', $queue = null)
     {
         foreach ((array)$jobs as $job) {
+            // without a queue for the whole bulk, each job keeps its own queue
             if (isset($job->delay)) {
-                $this->later($job->delay, $job, $data, $queue);
-            } else {
-                $this->push($job, $data, $queue);
+                $this->later($job->delay, $job, $data, $queue ?? (\is_object($job) ? ($job->queue ?? null) : null));
+
+                continue;
             }
+
+            $this->push($job, $data, $queue ?? (\is_object($job) ? ($job->queue ?? null) : null));
         }
     }
 
