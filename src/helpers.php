@@ -1208,11 +1208,17 @@ namespace {
                     $target->{$segment} = $value;
                 }
             } else {
+                // a scalar is an existing value: without overwrite it is kept
+                if (!$overwrite && null !== $target) {
+                    return $target;
+                }
+
+                // null (or a scalar being overwritten) is replaced by an array that receives the value
                 $target = [];
 
                 if ($segments) {
                     data_set($target[$segment], $segments, $value, $overwrite);
-                } elseif ($overwrite) {
+                } else {
                     $target[$segment] = $value;
                 }
             }
