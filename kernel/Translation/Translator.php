@@ -223,7 +223,8 @@ class Translator extends NamespacedItemResolver implements TranslatorContract, M
             $number = count($number);
         }
 
-        $replace['count'] = $number;
+        // a count given in the replacements (e.g. formatted) is kept; the number still chooses the line
+        $replace['count'] ??= $number;
 
         return $this->makeReplacements(
             $this->getSelector()->choose($line, $number, $locale),

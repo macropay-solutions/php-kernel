@@ -6,6 +6,7 @@ use BackedEnum;
 use MacropaySolutions\Kernel\Database\Obvious\Collection;
 use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\Relations\Pivot;
+use MacropaySolutions\Kernel\Database\Query\Builder as QueryBuilder;
 use MacropaySolutions\Kernel\Support\Collection as BaseCollection;
 
 trait InteractsWithPivotTable
@@ -97,10 +98,13 @@ trait InteractsWithPivotTable
         // First we need to attach any of the associated models that are not currently
         // in this joining table. We'll spin through the given IDs, checking to see
         // if they exist in the array of current ones, and if not we will insert.
-        $current = $this->getCurrentlyAttachedPivots()
-            ->pluck($this->relatedPivotKey)->all();
-
         $records = $this->formatRecordsList($this->parseIds($ids));
+
+        // without detaching only the given ids matter: do not load every pivot attached to the parent
+        $current = ($detaching
+            ? $this->getCurrentlyAttachedPivots()
+            : $this->getCurrentlyAttachedPivotsForIds(\array_keys($records)))
+            ->pluck($this->relatedPivotKey)->all();
 
         // Next, we will take the differences of the currents and given IDs and detach
         // all the entities that exist in the "current" array but are not in the
@@ -253,7 +257,7 @@ trait InteractsWithPivotTable
      */
     protected function updateExistingPivotUsingCustomClass($id, array $attributes, $touch)
     {
-        $pivot = $this->getCurrentlyAttachedPivots()
+        $pivot = $this->getCurrentlyAttachedPivotsForIds([$this->parseId($id)])
             ->where($this->foreignPivotKey, $this->parent->{$this->parentKey})
             ->where($this->relatedPivotKey, $this->parseId($id))
             ->first();
@@ -519,7 +523,26 @@ trait InteractsWithPivotTable
      */
     protected function getCurrentlyAttachedPivots()
     {
-        return $this->newPivotQuery()->get()->map(function ($record) {
+        return $this->pivotsFromQuery($this->newPivotQuery());
+    }
+
+    /**
+     * The attached pivot models of the given related ids only.
+     */
+    protected function getCurrentlyAttachedPivotsForIds(array $ids): BaseCollection
+    {
+        if ([] === $ids) {
+            return new BaseCollection();
+        }
+
+        return $this->pivotsFromQuery(
+            $this->newPivotQuery()->whereIn($this->getQualifiedRelatedPivotKeyName(), $ids)
+        );
+    }
+
+    private function pivotsFromQuery(QueryBuilder $query): BaseCollection
+    {
+        return $query->get()->map(function ($record) {
             $class = $this->using ?: Pivot::class;
 
             $pivot = $class::fromRawAttributes($this->parent, (array)$record, $this->getTable(), true);

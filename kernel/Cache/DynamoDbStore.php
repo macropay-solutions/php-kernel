@@ -453,7 +453,8 @@ class DynamoDbStore implements LockProvider, Store
      */
     public function lock($name, $seconds = 0, $owner = null)
     {
-        return new DynamoDbLock($this, $this->prefix . $name, $seconds, $owner);
+        // not prefixed here: the store prefixes the key in add(), get() and forget()
+        return new DynamoDbLock($this, $name, $seconds, $owner);
     }
 
     /**

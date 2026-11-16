@@ -11,6 +11,7 @@ use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
 use MacropaySolutions\Kernel\Support\Traits\ReflectsClosures;
 use MacropaySolutions\Kernel\View\Component;
+use MacropaySolutions\Kernel\View\Engines\CompilerEngine;
 
 class TemplateCompiler extends Compiler implements CompilerInterface
 {
@@ -344,6 +345,13 @@ class TemplateCompiler extends Compiler implements CompilerInterface
 
         return tap($view->render(), function () use ($view, $deleteCachedView) {
             if ($deleteCachedView) {
+                // the compiled file too, not only the template written for the string
+                $engine = $view->getEngine();
+
+                if ($engine instanceof CompilerEngine) {
+                    @unlink($engine->getCompiler()->getCompiledPath($view->getPath()));
+                }
+
                 @unlink($view->getPath());
             }
         });
