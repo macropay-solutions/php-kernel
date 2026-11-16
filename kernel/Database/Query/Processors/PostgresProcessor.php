@@ -117,7 +117,7 @@ class PostgresProcessor extends Processor
 
             return [
                 'name' => strtolower($result->name),
-                'columns' => explode(',', $result->columns),
+                'columns' => null === $result->columns ? [] : explode(',', $result->columns),
                 'type' => strtolower($result->type),
                 'unique' => (bool)$result->unique,
                 'primary' => (bool)$result->primary,
