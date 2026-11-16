@@ -134,12 +134,17 @@ class LogManager implements LoggerInterface
     protected function get($name, ?array $config = null)
     {
         try {
-            return $this->channels[$name] ?? with($this->resolve($name, $config), function ($logger) use ($name) {
-                return $this->channels[$name] = $this->tap(
-                    $name,
-                    new Logger($logger, $this->app->make('events'))
-                )->withContext($this->sharedContext);
-            });
+            return $this->channels[$name] ?? with(
+                $this->resolve($name, $config),
+                function ($logger) use ($name, $config) {
+                    $logger = new Logger($logger, $this->app->make('events'));
+
+                    // an on-demand channel (build()) is not in the configuration: its taps come from the given config
+                    return $this->channels[$name] = (
+                        null === $config ? $this->tap($name, $logger) : $this->applyTaps($config['tap'] ?? [], $logger)
+                    )->withContext($this->sharedContext);
+                }
+            );
         } catch (Throwable $e) {
             return tap($this->createEmergencyLogger(), function ($logger) use ($e) {
                 $logger->emergency('Unable to create configured logger. Using emergency logger.', [
@@ -158,7 +163,12 @@ class LogManager implements LoggerInterface
      */
     protected function tap($name, Logger $logger)
     {
-        foreach ($this->configurationFor($name)['tap'] ?? [] as $tap) {
+        return $this->applyTaps($this->configurationFor($name)['tap'] ?? [], $logger);
+    }
+
+    private function applyTaps(array $taps, Logger $logger): Logger
+    {
+        foreach ($taps as $tap) {
             [$class, $arguments] = $this->parseTap($tap);
 
             $this->app->make($class)->__invoke($logger, ...explode(',', $arguments));
