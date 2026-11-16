@@ -17,6 +17,9 @@ class LostConnectionMessagesTest extends TestCase
         $timeout = new \PDOException('SQLSTATE[HY000] [2002] Operation in progress');
 
         $this->assertTrue($this->causedByLostConnection($timeout));
+        $this->assertTrue(
+            $this->causedByLostConnection(new \PDOException('SQLSTATE[HY000] [2002] Operation now in progress'))
+        );
         $this->assertFalse($this->causedByLostConnection(new \PDOException('SQLSTATE[42S02] Table not found')));
     }
 }
