@@ -100,6 +100,14 @@ class TaggedCache extends Repository
     }
 
     /**
+     * Only the tagged items: the inherited clear() flushed the whole store.
+     */
+    public function clear(): bool
+    {
+        return $this->flush();
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function itemKey($key)

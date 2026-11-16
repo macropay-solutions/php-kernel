@@ -1435,7 +1435,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         // function which we were given. Then, we will sort the returned values and
         // grab all the corresponding values for the sorted keys from this array.
         foreach ($this->items as $key => $value) {
-            $results[$key] = $callback($value, $key);
+            $results[$key] = static::sortableValue($callback($value, $key));
         }
 
         $descending ? arsort($results, $options)
@@ -1449,6 +1449,18 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         }
 
         return new static($results);
+    }
+
+    /**
+     * Enum cases cannot be compared with each other: sort by their value (or name).
+     */
+    protected static function sortableValue(mixed $value): mixed
+    {
+        return match (true) {
+            $value instanceof \BackedEnum => $value->value,
+            $value instanceof \UnitEnum => $value->name,
+            default => $value,
+        };
     }
 
     /**
@@ -1474,7 +1486,10 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
                 if (!is_string($prop) && is_callable($prop)) {
                     $result = $prop($a, $b);
                 } else {
-                    $values = [data_get($a, $prop), data_get($b, $prop)];
+                    $values = [
+                        static::sortableValue(\data_get($a, $prop)),
+                        static::sortableValue(\data_get($b, $prop))
+                    ];
 
                     if (!$ascending) {
                         $values = array_reverse($values);
