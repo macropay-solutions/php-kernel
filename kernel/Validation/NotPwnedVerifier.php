@@ -36,7 +36,8 @@ class NotPwnedVerifier implements UncompromisedVerifier
         $value = $data['value'];
         $threshold = $data['threshold'];
 
-        if ('' === ($value = (string)$value)) {
+        // an array or object cannot be a password: (string) would only warn "Array to string conversion"
+        if ((!\is_scalar($value) && !$value instanceof \Stringable) || '' === ($value = (string)$value)) {
             return false;
         }
 

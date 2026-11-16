@@ -1360,7 +1360,7 @@ class Builder implements BuilderContract, Macroable
         if ($values instanceof \DatePeriod) {
             $values = [
                 $values->getStartDate(),
-                $values->getEndDate() ?? \array_slice(\iterator_to_array($values, false), -1)[0] ?? null,
+                $values->getEndDate() ?? static::lastDateOfPeriod($values),
             ];
         }
 
@@ -1387,6 +1387,20 @@ class Builder implements BuilderContract, Macroable
         $this->wheres[] = compact('type', 'column', 'values', 'boolean', 'not');
 
         return $this;
+    }
+
+    /**
+     * The last date of a period defined by recurrences (it has no end date), without collecting all its dates.
+     */
+    protected static function lastDateOfPeriod(\DatePeriod $period): ?\DateTimeInterface
+    {
+        $last = null;
+
+        foreach ($period as $date) {
+            $last = $date;
+        }
+
+        return $last;
     }
 
     /**
@@ -2449,7 +2463,7 @@ class Builder implements BuilderContract, Macroable
         if ($values instanceof \DatePeriod) {
             $values = [
                 $values->getStartDate(),
-                $values->getEndDate() ?? \array_slice(\iterator_to_array($values, false), -1)[0] ?? null,
+                $values->getEndDate() ?? static::lastDateOfPeriod($values),
             ];
         }
 
