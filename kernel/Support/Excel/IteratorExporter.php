@@ -3,6 +3,8 @@
 namespace MacropaySolutions\Kernel\Support\Excel;
 
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use OpenSpout\Common\Entity\Cell;
+use OpenSpout\Common\Entity\Cell\StringCell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -126,7 +128,13 @@ class IteratorExporter
                 $safeValues[] = $value;
             }
 
-            $writer->addRow(Row::fromValues($safeValues));
+            // strings are written as text: Cell::fromValue() turns '=...' into a formula (spreadsheet injection)
+            $writer->addRow(new Row(\array_map(
+                static fn(mixed $value): Cell => \is_string($value)
+                    ? new StringCell($value, null)
+                    : Cell::fromValue($value),
+                $safeValues
+            )));
         }
     }
 

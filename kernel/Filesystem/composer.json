@@ -8,10 +8,7 @@
   "autoload": {
     "psr-4": {
       "MacropaySolutions\\Kernel\\Filesystem\\": ""
-    },
-    "files": [
-      "functions.php"
-    ]
+    }
   },
   "suggest": {
     "ext-fileinfo": "Required to use the Filesystem class.",

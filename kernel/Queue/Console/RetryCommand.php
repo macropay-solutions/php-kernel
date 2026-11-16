@@ -53,9 +53,19 @@ class RetryCommand extends Command
             } else {
                 $this->app->make('events')->dispatch(new JobRetryRequested($job));
 
-                $this->task($id, fn() => $this->retryJob($job));
-
+                // forgotten before the push: when the retried job failed again before forget() ran, its new
+                // record was deleted (or, with the same uuid, could not be inserted)
                 $this->app->make('queue.failer')->forget($id);
+
+                try {
+                    $this->task($id, fn() => $this->retryJob($job));
+                } catch (\Throwable $e) {
+                    // not pushed: keep it as a failed job
+                    $this->app->make('queue.failer')
+                        ->log($job->connection, $job->queue, $job->payload, $job->exception);
+
+                    throw $e;
+                }
             }
         }
 

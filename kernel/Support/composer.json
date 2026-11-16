@@ -16,10 +16,7 @@
   "autoload": {
     "psr-4": {
       "MacropaySolutions\\Kernel\\Support\\": ""
-    },
-    "files": [
-      "helpers.php"
-    ]
+    }
   },
   "suggest": {
     "league/commonmark": "Required to use Str::markdown() and Stringable::markdown() (^2.6).",

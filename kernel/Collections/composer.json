@@ -7,10 +7,7 @@
   "autoload": {
     "psr-4": {
       "MacropaySolutions\\Kernel\\Support\\": ""
-    },
-    "files": [
-      "helpers.php"
-    ]
+    }
   },
   "suggest": {
     "symfony/var-dumper": "Required to use the dump method (^6.2)."

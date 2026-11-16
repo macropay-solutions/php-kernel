@@ -2,6 +2,7 @@
 
 namespace MacropaySolutions\Kernel\Support\Excel;
 
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Html;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -115,20 +116,25 @@ class HtmlToExcelExporter
         array $responseHeaders = [],
         ?callable $configureSpreadsheet = null
     ): StreamedResponse {
-        return \app(StreamedResponse::class, [function () use ($htmlString, $configureSpreadsheet) {
+        // built before the response: parse or configure errors are thrown here, not after the headers were sent
+        $spreadsheet = $this->getSpreadsheet($htmlString);
+
+        try {
+            if ($configureSpreadsheet !== null) {
+                $configureSpreadsheet($spreadsheet);
+            }
+        } catch (\Throwable $e) {
+            $spreadsheet->disconnectWorksheets();
+
+            throw $e;
+        }
+
+        return \app(StreamedResponse::class, [function () use ($spreadsheet) {
             try {
-                $spreadsheet = $this->getSpreadsheet($htmlString);
-
-                if ($configureSpreadsheet !== null) {
-                    $configureSpreadsheet($spreadsheet);
-                }
-
                 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
                 $writer->save('php://output');
             } finally {
-                if (($spreadsheet ?? null) instanceof Spreadsheet) {
-                    $spreadsheet->disconnectWorksheets();
-                }
+                $spreadsheet->disconnectWorksheets();
             }
         }, 200, \array_merge([
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -203,8 +209,26 @@ class HtmlToExcelExporter
             );
         }
 
-        $reader = new Html();
+        $spreadsheet = (new Html())->loadFromString($htmlString);
+        $this->neutralizeFormulas($spreadsheet);
 
-        return $reader->loadFromString($htmlString);
+        return $spreadsheet;
+    }
+
+    /**
+     * Cells starting with '=' in the html (usually user data) are kept as text (spreadsheet injection).
+     * Formulas can still be set in $configureSpreadsheet or by overriding this method.
+     */
+    protected function neutralizeFormulas(Spreadsheet $spreadsheet): void
+    {
+        foreach ($spreadsheet->getWorksheetIterator() as $sheet) {
+            foreach ($sheet->getCoordinates() as $coordinate) {
+                $cell = $sheet->getCell($coordinate);
+
+                if ($cell->getDataType() === DataType::TYPE_FORMULA) {
+                    $cell->setValueExplicit($cell->getValue(), DataType::TYPE_STRING);
+                }
+            }
+        }
     }
 }

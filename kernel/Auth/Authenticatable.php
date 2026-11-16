@@ -17,6 +17,10 @@ use MacropaySolutions\Kernel\Support\Str;
  * When executing bulk or raw database password updates, you MUST explicitly pass a newly generated
  * `remember_token` in the update payload; otherwise, previously issued remember-me cookies will
  * remain valid against the new credentials.
+ *
+ * A users table without a remember token column must disable remember-me with
+ * `protected $rememberTokenName = '';`, otherwise a password change writes a `remember_token` that saving fails on.
+ * setAttribute() is final so that the rotation cannot be bypassed; customize attribute writes with mutators.
  */
 trait Authenticatable
 {
