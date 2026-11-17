@@ -142,7 +142,10 @@ class Command extends SymfonyCommand implements Macroable
             $this->setDescription((string)$this->description);
         }
 
-        $this->setHelp((string)$this->help);
+        // an empty $help must not wipe the help of the #[AsCommand] attribute
+        if ('' !== (string)($this->help ?? null)) {
+            $this->setHelp((string)$this->help);
+        }
 
         $this->setHidden($this->isHidden());
 

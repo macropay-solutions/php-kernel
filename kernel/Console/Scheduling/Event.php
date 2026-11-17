@@ -4,6 +4,7 @@ namespace MacropaySolutions\Kernel\Console\Scheduling;
 
 use Closure;
 use Cron\CronExpression;
+use MacropaySolutions\Kernel\Console\Application;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\TransferException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
@@ -952,7 +953,14 @@ class Event implements Macroable
             return $mutexNameResolver($this);
         }
 
-        return 'framework' . DIRECTORY_SEPARATOR . 'schedule-' . sha1($this->expression . $this->command);
+        // without the local PHP binary path: servers with PHP in different paths must share the mutex
+        return 'framework' . DIRECTORY_SEPARATOR . 'schedule-' . \sha1(
+            $this->expression . \str_replace(
+                [Application::phpBinary(), Application::runBinary()],
+                ['php', 'run'],
+                (string)$this->command
+            )
+        );
     }
 
     /**
