@@ -276,7 +276,12 @@ class ComponentAttributeBag implements ArrayAccess, IteratorAggregate, JsonSeria
      */
     public function merge(array $attributeDefaults = [], $escape = true)
     {
-        $attributeDefaults = array_map(function ($value) use ($escape) {
+        $attributeDefaults = \array_map(function ($value) use ($escape) {
+            // resolved (and escaped) below; e() of the object kept its value raw
+            if ($value instanceof AppendableAttributeValue) {
+                return $value;
+            }
+
             return $this->shouldEscapeAttributeValue($escape, $value)
                 ? e($value)
                 : $value;
@@ -303,7 +308,14 @@ class ComponentAttributeBag implements ArrayAccess, IteratorAggregate, JsonSeria
             return [$key => implode(' ', array_unique(array_filter([$defaultsValue, $value])))];
         })->merge($nonAppendableAttributes)->all();
 
-        return new static(array_merge($attributeDefaults, $attributes));
+        // a default the component did not receive was rendered through its __toString, unescaped
+        foreach ($attributeDefaults as $key => $value) {
+            if ($value instanceof AppendableAttributeValue) {
+                $attributeDefaults[$key] = $this->resolveAppendableAttributeDefault($attributeDefaults, $key, $escape);
+            }
+        }
+
+        return new static(\array_merge($attributeDefaults, $attributes));
     }
 
     /**
@@ -319,9 +331,11 @@ class ComponentAttributeBag implements ArrayAccess, IteratorAggregate, JsonSeria
             return false;
         }
 
-        return !is_object($value) &&
-            !is_null($value) &&
-            !is_bool($value);
+        // objects too (Stringable user data); only Htmlable is trusted as already safe
+        return match (true) {
+            null === $value, \is_bool($value), $value instanceof Htmlable => false,
+            default => true,
+        };
     }
 
     /**

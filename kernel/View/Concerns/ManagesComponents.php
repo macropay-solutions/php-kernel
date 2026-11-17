@@ -218,5 +218,8 @@ trait ManagesComponents
         $this->componentStack = [];
         $this->componentData = [];
         $this->currentComponentData = [];
+        // the slots of an unfinished render were carried into the next one (next request in a worker)
+        $this->slots = [];
+        $this->slotStack = [];
     }
 }
