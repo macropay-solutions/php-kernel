@@ -95,6 +95,11 @@ class ArgonHasher extends AbstractHasher implements HasherContract
      */
     public function check($value, $hashedValue, array $options = [])
     {
+        // no password stored (e.g. social login users): a failed check, not a wrong algorithm
+        if (null === $hashedValue || '' === $hashedValue) {
+            return false;
+        }
+
         if (($options['verify'] ?? $this->verifyAlgorithm) && !$this->isUsingCorrectAlgorithm($hashedValue)) {
             throw new RuntimeException('This password does not use the Argon2i algorithm.');
         }

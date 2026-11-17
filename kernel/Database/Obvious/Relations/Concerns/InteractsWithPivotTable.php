@@ -227,7 +227,8 @@ trait InteractsWithPivotTable
             $this->using &&
             empty($this->pivotWheres) &&
             empty($this->pivotWhereIns) &&
-            empty($this->pivotWhereNulls)
+            empty($this->pivotWhereNulls) &&
+            empty($this->pivotWhereBetweens)
         ) {
             return $this->updateExistingPivotUsingCustomClass($id, $attributes, $touch);
         }
@@ -464,7 +465,8 @@ trait InteractsWithPivotTable
             !empty($ids) &&
             empty($this->pivotWheres) &&
             empty($this->pivotWhereIns) &&
-            empty($this->pivotWhereNulls)
+            empty($this->pivotWhereNulls) &&
+            empty($this->pivotWhereBetweens)
         ) {
             $results = $this->detachUsingCustomClass($ids);
         } else {
@@ -624,6 +626,10 @@ trait InteractsWithPivotTable
 
         foreach ($this->pivotWhereNulls as $arguments) {
             $query->whereNull(...$arguments);
+        }
+
+        foreach ($this->pivotWhereBetweens as $arguments) {
+            $query->whereBetween(...$arguments);
         }
 
         return $query->where($this->getQualifiedForeignPivotKeyName(), $this->parent->{$this->parentKey});

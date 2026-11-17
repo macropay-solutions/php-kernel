@@ -7,6 +7,7 @@ use MacropaySolutions\Kernel\Contracts\Events\Dispatcher;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningFinished;
 use MacropaySolutions\Kernel\Database\Events\ModelPruningStarting;
 use MacropaySolutions\Kernel\Database\Obvious\MassPrunable;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Obvious\Prunable;
 use MacropaySolutions\Kernel\Database\Obvious\SoftDeletes;
 use MacropaySolutions\Kernel\Support\Str;
@@ -162,6 +163,11 @@ class PruneCommand extends Command
      */
     protected function isPrunable($model)
     {
+        // an abstract base model (or another class) using the trait cannot be instantiated for pruning
+        if (!\is_a($model, Model::class, true) || (new \ReflectionClass($model))->isAbstract()) {
+            return false;
+        }
+
         $uses = class_uses_recursive($model);
 
         return in_array(Prunable::class, $uses) || in_array(MassPrunable::class, $uses);

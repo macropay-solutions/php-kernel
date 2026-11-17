@@ -1364,6 +1364,21 @@ class Builder implements BuilderContract, Macroable
             ];
         }
 
+        // a generator would be consumed by the bindings and the grammar reads $values[0] / [1]: only the bounds
+        if ($values instanceof \Traversable) {
+            $bounds = [];
+
+            foreach ($values as $value) {
+                $bounds[] = $value;
+
+                if (2 === \count($bounds)) {
+                    break;
+                }
+            }
+
+            $values = $bounds;
+        }
+
         $this->wheres[] = compact('type', 'column', 'values', 'boolean', 'not');
 
         $this->addBinding(array_slice($this->cleanBindings(Arr::flatten($values)), 0, 2), 'where');
@@ -2465,6 +2480,21 @@ class Builder implements BuilderContract, Macroable
                 $values->getStartDate(),
                 $values->getEndDate() ?? static::lastDateOfPeriod($values),
             ];
+        }
+
+        // a generator would be consumed by the bindings and the grammar reads $values[0] / [1]: only the bounds
+        if ($values instanceof \Traversable) {
+            $bounds = [];
+
+            foreach ($values as $value) {
+                $bounds[] = $value;
+
+                if (2 === \count($bounds)) {
+                    break;
+                }
+            }
+
+            $values = $bounds;
         }
 
         $this->havings[] = compact('type', 'column', 'values', 'boolean', 'not');

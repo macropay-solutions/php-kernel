@@ -120,6 +120,11 @@ class DatabaseLock extends Lock
 
             return true;
         } catch (QueryException $e) {
+            // inside a transaction the database already rolled it back: reporting "taken" would hide that
+            if ($this->connection->transactionLevel() > 0 && $this->causedByConcurrencyError($e)) {
+                throw $e;
+            }
+
             if (
                 !$e instanceof UniqueConstraintViolationException
                 && !$this->connection->table($this->table)->where('key', $this->name)->exists()
@@ -200,7 +205,11 @@ class DatabaseLock extends Lock
      */
     protected function getCurrentOwner()
     {
-        return optional($this->connection->table($this->table)->where('key', $this->name)->first())->owner;
+        // an expired row is not a lock: isOwnedByCurrentProcess() reported it until the row was pruned
+        return $this->connection->table($this->table)
+            ->where('key', $this->name)
+            ->where('expiration', '>', time())
+            ->first()?->owner;
     }
 
     /**

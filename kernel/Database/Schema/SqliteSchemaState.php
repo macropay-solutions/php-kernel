@@ -26,10 +26,15 @@ class SqliteSchemaState extends SchemaState
             ])
         );
 
-        $migrations = collect(preg_split("/\r\n|\n|\r/", $process->getOutput()))->filter(function ($line) {
+        $shadowTables = $this->shadowTables();
+
+        $migrations = collect(preg_split("/\r\n|\n|\r/", $process->getOutput()))->filter(function ($line) use (
+            $shadowTables
+        ) {
             // internal tables (sqlite_sequence, sqlite_stat1 after ANALYZE...) cannot be created when loading the dump
             return !\preg_match('/^CREATE TABLE (IF NOT EXISTS )?["\'`\[]?sqlite_/i', $line) &&
                 stripos($line, 'sqlite_sequence') === false &&
+                !$this->isShadowTableLine($line, $shadowTables) &&
                 strlen($line) > 0;
         })->all();
 
@@ -38,6 +43,37 @@ class SqliteSchemaState extends SchemaState
         if ($this->hasMigrationTable()) {
             $this->appendMigrationData($path);
         }
+    }
+
+    /**
+     * The tables a virtual table (FTS5...) creates itself: loading the dump creates them with the virtual table,
+     * so their own CREATE TABLE fails with "table already exists".
+     *
+     * @return string[]
+     */
+    protected function shadowTables(): array
+    {
+        try {
+            $tables = $this->connection->selectFromWriteConnection('pragma main.table_list');
+        } catch (\Throwable) {
+            // pragma table_list needs SQLite 3.37
+            return [];
+        }
+
+        return collect($tables)->where('type', 'shadow')->pluck('name')->all();
+    }
+
+    protected function isShadowTableLine(string $line, array $shadowTables): bool
+    {
+        foreach ($shadowTables as $name) {
+            $quoted = \preg_quote($name, '/');
+
+            if (\preg_match('/^CREATE TABLE (IF NOT EXISTS )?["\'`\[]?' . $quoted . '["\'`\]]?\s*\(/i', $line)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
