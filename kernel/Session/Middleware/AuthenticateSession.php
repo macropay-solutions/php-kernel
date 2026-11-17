@@ -45,10 +45,11 @@ class AuthenticateSession implements AuthenticatesSessions
             $this->storePasswordHashInSession($request);
         }
 
-        if (
-            $request->session()->get('password_hash_' . $this->auth->getDefaultDriver()) !== $request->user(
-            )->getAuthPassword()
-        ) {
+        $stored = $request->session()->get('password_hash_' . $this->auth->getDefaultDriver());
+        $password = $request->user()->getAuthPassword();
+
+        // sessions stored before 1.6.39 hold the raw hash; it is replaced after this request
+        if ($stored !== $this->passwordHashForSession($password) && $stored !== $password) {
             $this->logout($request);
         }
 
@@ -72,8 +73,18 @@ class AuthenticateSession implements AuthenticatesSessions
         }
 
         $request->session()->put([
-            'password_hash_' . $this->auth->getDefaultDriver() => $request->user()->getAuthPassword(),
+            'password_hash_' . $this->auth->getDefaultDriver() => $this->passwordHashForSession(
+                $request->user()->getAuthPassword()
+            ),
         ]);
+    }
+
+    /**
+     * The session keeps a MAC, not the password hash: with the cookie driver the session goes to the browser.
+     */
+    protected function passwordHashForSession(?string $passwordHash): string
+    {
+        return \hash_hmac('sha256', (string)$passwordHash, (string)\app('config')->get('app.key'));
     }
 
     /**
