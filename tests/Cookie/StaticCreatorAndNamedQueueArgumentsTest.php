@@ -12,6 +12,8 @@ class StaticCreatorAndNamedQueueArgumentsTest extends TestCase
     {
         $manager = (new \ReflectionClass(CacheManager::class))->newInstanceWithoutConstructor();
         $manager->extend('static', static fn($app, $config) => 'store');
+        $manager->extend('staticMethod', StaticCreatorAndNamedQueueArgumentsTestFactory::make(...));
+        $manager->extend('objectMethod', (new StaticCreatorAndNamedQueueArgumentsTestFactory())->create(...));
         $manager->extend('bound', function ($app, $config) {
             return $this::class;
         });
@@ -19,6 +21,8 @@ class StaticCreatorAndNamedQueueArgumentsTest extends TestCase
         $creators = (new \ReflectionProperty($manager, 'customCreators'))->getValue($manager);
 
         $this->assertSame('store', $creators['static'](null, []));
+        $this->assertSame('static method', $creators['staticMethod'](null, []));
+        $this->assertSame('object method', $creators['objectMethod'](null, []));
         $this->assertSame(CacheManager::class, $creators['bound'](null, []));
     }
 
@@ -30,5 +34,18 @@ class StaticCreatorAndNamedQueueArgumentsTest extends TestCase
 
         $this->assertSame('v', $jar->queued('n')->getValue());
         $this->assertSame('v2', $jar->queued('n2', null, '/p')->getValue());
+    }
+}
+
+class StaticCreatorAndNamedQueueArgumentsTestFactory
+{
+    public static function make($app, array $config): string
+    {
+        return 'static method';
+    }
+
+    public function create($app, array $config): string
+    {
+        return 'object method';
     }
 }

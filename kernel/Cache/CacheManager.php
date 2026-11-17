@@ -408,11 +408,12 @@ class CacheManager implements FactoryContract
     public function extend($driver, Closure $callback)
     {
         try {
-            $this->customCreators[$driver] = $callback->bindTo($this, $this) ?? throw new \RuntimeException();
+            $callback = $callback->bindTo($this, $this) ?? throw new \RuntimeException();
         } catch (\Throwable) {
-            // a static closure cannot be bound to the manager: class scope only
-            $this->customCreators[$driver] = $callback->bindTo(null, static::class);
+            // a static closure or a closure created from a method (Factory::make(...)) cannot be bound: used as given
         }
+
+        $this->customCreators[$driver] = $callback;
 
         return $this;
     }

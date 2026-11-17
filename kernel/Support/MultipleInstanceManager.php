@@ -173,11 +173,12 @@ abstract class MultipleInstanceManager
     public function extend($name, Closure $callback)
     {
         try {
-            $this->customCreators[$name] = $callback->bindTo($this, $this) ?? throw new \RuntimeException();
+            $callback = $callback->bindTo($this, $this) ?? throw new \RuntimeException();
         } catch (\Throwable) {
-            // a static closure cannot be bound to the manager: class scope only
-            $this->customCreators[$name] = $callback->bindTo(null, static::class);
+            // a static closure or a closure created from a method (Factory::make(...)) cannot be bound: used as given
         }
+
+        $this->customCreators[$name] = $callback;
 
         return $this;
     }
