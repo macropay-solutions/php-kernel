@@ -891,8 +891,9 @@ class Builder implements BuilderContract, Macroable
         // If the value is "null", we will just assume the developer wants to add a
         // where null clause to the query. So, we will allow a short-cut here to
         // that method for convenience so the developer doesn't have to check.
-        if (is_null($value)) {
-            return $this->whereNull($column, $boolean, $operator !== '=');
+        if (null === $value) {
+            // null-safe equals with null is "is null" on every driver
+            return $this->whereNull($column, $boolean, !\in_array($operator, ['=', '<=>'], true));
         }
 
         $type = 'Basic';
@@ -987,8 +988,8 @@ class Builder implements BuilderContract, Macroable
      */
     protected function invalidOperatorAndValue($operator, $value)
     {
-        return is_null($value) && in_array($operator, $this->operators) &&
-            !in_array($operator, ['=', '<>', '!=']);
+        return \is_null($value) && \in_array($operator, $this->operators) &&
+            !\in_array($operator, ['=', '<>', '!=', '<=>']);
     }
 
     /**
