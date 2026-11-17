@@ -11,12 +11,21 @@ class StaticCreatorAndNamedQueueArgumentsTest extends TestCase
     public function testAStaticClosureCanExtendAManager(): void
     {
         $manager = (new \ReflectionClass(CacheManager::class))->newInstanceWithoutConstructor();
-        $manager->extend('static', static fn($app, $config) => 'store');
-        $manager->extend('staticMethod', StaticCreatorAndNamedQueueArgumentsTestFactory::make(...));
-        $manager->extend('objectMethod', (new StaticCreatorAndNamedQueueArgumentsTestFactory())->create(...));
-        $manager->extend('bound', function ($app, $config) {
-            return $this::class;
+        // as in the app: its error handler turns the bindTo() warning into an ErrorException, which extend() catches
+        \set_error_handler(static function (int $level, string $message): bool {
+            throw new \ErrorException($message, 0, $level);
         });
+
+        try {
+            $manager->extend('static', static fn($app, $config) => 'store');
+            $manager->extend('staticMethod', StaticCreatorAndNamedQueueArgumentsTestFactory::make(...));
+            $manager->extend('objectMethod', (new StaticCreatorAndNamedQueueArgumentsTestFactory())->create(...));
+            $manager->extend('bound', function ($app, $config) {
+                return $this::class;
+            });
+        } finally {
+            \restore_error_handler();
+        }
 
         $creators = (new \ReflectionProperty($manager, 'customCreators'))->getValue($manager);
 
