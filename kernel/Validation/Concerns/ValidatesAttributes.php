@@ -1393,7 +1393,8 @@ trait ValidatesAttributes
      */
     public function validateImage($attribute, $value)
     {
-        return $this->validateMimes($attribute, $value, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp']);
+        // no svg: it can carry scripts (XSS when served from the app's domain); list it with mimes: to accept it
+        return $this->validateMimes($attribute, $value, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']);
     }
 
     /**
