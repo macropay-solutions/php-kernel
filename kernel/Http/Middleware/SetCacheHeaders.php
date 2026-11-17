@@ -46,6 +46,8 @@ class SetCacheHeaders
             !$request->isMethodCacheable()
             || (
                 !$response->getContent()
+                // a HEAD response has no body
+                && !$request->isMethod('HEAD')
                 && !$response instanceof BinaryFileResponse
                 && !$response instanceof StreamedResponse
             )

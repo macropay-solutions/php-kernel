@@ -48,6 +48,11 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
     protected $routeResolver;
 
     /**
+     * The Accept header the acceptable content types were computed from.
+     */
+    private ?string $acceptHeaderOfContentTypes = null;
+
+    /**
      * Create a new MacropaySolutions Kernel  HTTP request from server variables.
      *
      * @return static
@@ -534,6 +539,20 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
         }
 
         return $this->filterDangerousWrapper(\data_get($this->request->all(), $key, $default), $default);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAcceptableContentTypes(): array
+    {
+        // the parent caches them: an Accept header changed afterwards (e.g. by a middleware) was ignored
+        if ($this->acceptHeaderOfContentTypes !== ($accept = $this->headers->get('Accept'))) {
+            $this->acceptableContentTypes = null;
+            $this->acceptHeaderOfContentTypes = $accept;
+        }
+
+        return parent::getAcceptableContentTypes();
     }
 
     /**

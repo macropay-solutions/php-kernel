@@ -138,7 +138,8 @@ class UploadedFile extends BaseUploadedFile implements Macroable
 //        return $file instanceof static ? $file : new static(
         return $file instanceof static ? $file : \di(static::class, [
             $file->getPathname(),
-            $file->getClientOriginalName(),
+            // the path keeps the folder of a directory upload; the name alone dropped it
+            $file->getClientOriginalPath(),
             $file->getClientMimeType(),
             $file->getError(),
             $test
