@@ -242,6 +242,9 @@ trait ManagesTransactions
 
         if ($this->causedByLostConnection($e)) {
             $this->transactions = 0;
+            // it still reports an open transaction: the next beginTransaction() failed with
+            // "There is already an active transaction" instead of reconnecting
+            $this->pdo = null;
         }
 
         // the COMMIT failed: drop this transaction's pending afterCommit callbacks, so they neither run

@@ -90,6 +90,15 @@ class MySqlGrammar extends Grammar
      */
     protected function compileIndexHint(Builder $query, $indexHint)
     {
+        // the index names are put into the SQL: anything but a plain name would be SQL injection
+        $indexes = array_map('trim', explode(',', $indexHint->index));
+
+        foreach ($indexes as $index) {
+            if (!preg_match('/^[a-zA-Z0-9_$]+$/', $index)) {
+                throw new \InvalidArgumentException('Index name contains invalid characters.');
+            }
+        }
+
         return match ($indexHint->type) {
             'hint' => "use index ({$indexHint->index})",
             'force' => "force index ({$indexHint->index})",
@@ -183,7 +192,16 @@ class MySqlGrammar extends Grammar
      */
     public function compileRandom($seed)
     {
-        return 'RAND(' . $seed . ')';
+        if ('' === $seed || null === $seed) {
+            return 'RAND()';
+        }
+
+        // the seed is put into the SQL: a non-numeric one would be SQL injection
+        if (!\is_numeric($seed)) {
+            throw new \InvalidArgumentException('The seed value must be numeric.');
+        }
+
+        return 'RAND(' . (int)$seed . ')';
     }
 
     /**

@@ -1932,6 +1932,16 @@ class Builder implements BuilderContract, Macroable
         $this->extensions[$name] = $callback;
     }
 
+    public function getLimit(): ?int
+    {
+        return $this->query->getLimit();
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->query->getOffset();
+    }
+
     /**
      * Dynamically handle calls into the query instance.
      *

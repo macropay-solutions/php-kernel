@@ -2708,9 +2708,8 @@ class Builder implements BuilderContract, Macroable
     {
         $this->orders = $this->removeExistingOrdersFor($column);
 
-        if (!is_null($lastId)) {
-            $this->where($column, '<', $lastId);
-        }
+        // the first page too: a NULL sorted first ended the chunking (no last id) after one page
+        null === $lastId ? $this->whereNotNull($column) : $this->where($column, '<', $lastId);
 
         return $this->orderBy($column, 'desc')
             ->limit($perPage);
@@ -2728,9 +2727,8 @@ class Builder implements BuilderContract, Macroable
     {
         $this->orders = $this->removeExistingOrdersFor($column);
 
-        if (!is_null($lastId)) {
-            $this->where($column, '>', $lastId);
-        }
+        // the first page too: a NULL sorted first ended the chunking (no last id) after one page
+        null === $lastId ? $this->whereNotNull($column) : $this->where($column, '>', $lastId);
 
         return $this->orderBy($column, 'asc')
             ->limit($perPage);
@@ -3985,6 +3983,26 @@ class Builder implements BuilderContract, Macroable
     public function getBindings()
     {
         return Arr::flatten($this->bindings);
+    }
+
+    /**
+     * The limit (of the union when there is one), null when not set.
+     */
+    public function getLimit(): ?int
+    {
+        $value = $this->unions ? $this->unionLimit : $this->limit;
+
+        return null !== $value ? (int)$value : null;
+    }
+
+    /**
+     * The offset (of the union when there is one), null when not set.
+     */
+    public function getOffset(): ?int
+    {
+        $value = $this->unions ? $this->unionOffset : $this->offset;
+
+        return null !== $value ? (int)$value : null;
     }
 
     /**

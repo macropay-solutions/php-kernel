@@ -129,9 +129,16 @@ class SqlServerGrammar extends Grammar
      */
     protected function compileIndexHint(Builder $query, $indexHint)
     {
-        return $indexHint->type === 'force'
-            ? "with (index({$indexHint->index}))"
-            : '';
+        if ($indexHint->type !== 'force') {
+            return '';
+        }
+
+        // the index name is put into the SQL: anything but a plain name would be SQL injection
+        if (!\preg_match('/^[a-zA-Z0-9_$]+$/', $indexHint->index)) {
+            throw new \InvalidArgumentException('Index name contains invalid characters.');
+        }
+
+        return "with (index([{$indexHint->index}]))";
     }
 
     /**
@@ -289,11 +296,43 @@ class SqlServerGrammar extends Grammar
      */
     protected function compileDeleteWithoutJoins(Builder $query, string $table, string $where): string
     {
+        // "delete top" takes no order: the ordered rows are deleted through a top subquery
+        if (isset($query->limit) && $query->limit > 0 && $query->offset <= 0 && [] !== ($query->orders ?? [])) {
+            $alias = \last(\explode(' as ', $table));
+
+            return "delete {$alias} from ({$this->compileTopSubquery($query, $table, $where)}) as {$alias}";
+        }
+
         $sql = parent::compileDeleteWithoutJoins($query, $table, $where);
 
-        return !is_null($query->limit) && $query->limit > 0 && $query->offset <= 0
+        return isset($query->limit) && $query->limit > 0 && $query->offset <= 0
             ? Str::replaceFirst('delete', 'delete top (' . $query->limit . ')', $sql)
             : $sql;
+    }
+
+    protected function compileUpdateWithoutJoins(Builder $query, string $table, string $columns, string $where): string
+    {
+        // "update top" takes no order: the ordered rows are updated through a top subquery
+        if (isset($query->limit) && $query->limit > 0 && $query->offset <= 0 && [] !== ($query->orders ?? [])) {
+            $alias = \last(\explode(' as ', $table));
+
+            $top = $this->compileTopSubquery($query, $table, $where);
+
+            return "update {$alias} set {$columns} from ({$top}) as {$alias}";
+        }
+
+        $sql = parent::compileUpdateWithoutJoins($query, $table, $columns, $where);
+
+        return isset($query->limit) && $query->limit > 0 && $query->offset <= 0
+            ? Str::replaceFirst('update', 'update top (' . $query->limit . ')', $sql)
+            : $sql;
+    }
+
+    protected function compileTopSubquery(Builder $query, string $table, string $where): string
+    {
+        $orders = $this->compileOrders($query, $query->orders);
+
+        return trim("select top ({$query->limit}) * from {$table} {$where} {$orders}");
     }
 
     /**

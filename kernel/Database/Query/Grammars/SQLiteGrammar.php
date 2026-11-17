@@ -139,9 +139,25 @@ class SQLiteGrammar extends Grammar
      */
     protected function compileIndexHint(Builder $query, $indexHint)
     {
-        return $indexHint->type === 'force'
-            ? "indexed by {$indexHint->index}"
-            : '';
+        if ($indexHint->type !== 'force') {
+            return '';
+        }
+
+        // the index names are put into the SQL: anything but a plain name would be SQL injection
+        $indexes = \array_map('trim', \explode(',', $indexHint->index));
+
+        foreach ($indexes as $index) {
+            if (!\preg_match('/^[a-zA-Z0-9_$]+$/', $index)) {
+                throw new \InvalidArgumentException('Index name contains invalid characters.');
+            }
+        }
+
+        // SQLite takes a single index and has no "primary" one: no hint rather than invalid SQL
+        if (\count($indexes) > 1 || \strtolower($indexes[0]) === 'primary') {
+            return '';
+        }
+
+        return "indexed by {$indexes[0]}";
     }
 
     /**

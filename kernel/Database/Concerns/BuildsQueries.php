@@ -229,19 +229,37 @@ trait BuildsQueries
 
         $this->enforceOrderBy();
 
-        return LazyCollection::make(function () use ($chunkSize) {
+        // the query's own offset and limit: forPage() replaced them, so every row was read
+        $skip = $this->getOffset();
+        $remaining = $this->getLimit();
+
+        return LazyCollection::make(function () use ($chunkSize, $skip, $remaining) {
             $page = 1;
 
             while (true) {
-                $results = $this->forPage($page++, $chunkSize)->get();
+                $limit = null === $remaining ? $chunkSize : \min($chunkSize, $remaining);
+
+                if ($limit === 0) {
+                    return;
+                }
+
+                $results = $this->offset((($page - 1) * $chunkSize) + (int)$skip)->limit($limit)->get();
 
                 foreach ($results as $result) {
                     yield $result;
                 }
 
-                if ($results->count() < $chunkSize) {
+                $countResults = $results->count();
+
+                if (null !== $remaining) {
+                    $remaining = \max($remaining - $countResults, 0);
+                }
+
+                if ($countResults < $chunkSize) {
                     return;
                 }
+
+                $page++;
             }
         });
     }
@@ -297,23 +315,43 @@ trait BuildsQueries
 
         $alias ??= $column;
 
-        return LazyCollection::make(function () use ($chunkSize, $column, $alias, $descending) {
+        // the query's own offset and limit: they were replaced by the chunk size, so every row was read
+        $skip = $this->getOffset();
+        $remaining = $this->getLimit();
+
+        return LazyCollection::make(function () use ($chunkSize, $column, $alias, $descending, $skip, $remaining) {
             $lastId = null;
+            $page = 1;
 
             while (true) {
                 $clone = clone $this;
 
-                if ($descending) {
-                    $results = $clone->forPageBeforeId($chunkSize, $lastId, $column)->get();
-                } else {
-                    $results = $clone->forPageAfterId($chunkSize, $lastId, $column)->get();
+                // the offset applies once: the following pages start after the last id
+                if (0 !== (int)$skip && $page > 1) {
+                    $clone->offset(0);
                 }
+
+                $limit = null === $remaining ? $chunkSize : \min($chunkSize, $remaining);
+
+                if ($limit === 0) {
+                    return;
+                }
+
+                $results = $descending
+                    ? $clone->forPageBeforeId($limit, $lastId, $column)->get()
+                    : $clone->forPageAfterId($limit, $lastId, $column)->get();
 
                 foreach ($results as $result) {
                     yield $result;
                 }
 
-                if ($results->count() < $chunkSize) {
+                $countResults = $results->count();
+
+                if (null !== $remaining) {
+                    $remaining = \max($remaining - $countResults, 0);
+                }
+
+                if ($countResults < $chunkSize) {
                     return;
                 }
 
@@ -325,6 +363,8 @@ trait BuildsQueries
                             '] column is not present in the query result.'
                     );
                 }
+
+                $page++;
             }
         });
     }
@@ -394,27 +434,29 @@ trait BuildsQueries
 
         $orders = $this->ensureOrderForCursorPagination(!is_null($cursor) && $cursor->pointsToPreviousItems());
 
-        if (!is_null($cursor)) {
-            // Reset the union bindings so we can add the cursor where in the correct position...
-            $this->setBindings([], 'union');
-
+        if (null !== $cursor) {
+            // $source: the query whose select maps an order alias to its column (each union has its own select)
             $addCursorConditions = function (
                 self $builder,
                 $previousColumn,
                 $originalColumn,
-                $i
+                $i,
+                $source = null
             ) use (
                 &$addCursorConditions,
                 $cursor,
                 $orders
             ) {
+                $source ??= $this;
                 $unionBuilders = $builder->getUnionBuilders();
 
                 if (!is_null($previousColumn)) {
-                    $originalColumn ??= $this->getOriginalColumnNameForCursorPagination($this, $previousColumn);
+                    $originalColumn ??= $this->getOriginalColumnNameForCursorPagination($source, $previousColumn);
 
                     $builder->where(
-                        Str::contains($originalColumn, ['(', ')']) ? new Expression($originalColumn) : $originalColumn,
+                        $originalColumn !== $previousColumn && Str::contains($originalColumn, ['(', ')'])
+                            ? new Expression($originalColumn)
+                            : $originalColumn,
                         '=',
                         $cursor->parameter($previousColumn)
                     );
@@ -425,49 +467,49 @@ trait BuildsQueries
                             '=',
                             $cursor->parameter($previousColumn)
                         );
-
-                        $this->addBinding($unionBuilder->getRawBindings()['where'], 'union');
                     });
                 }
 
                 $builder->where(
-                    function (self $secondBuilder) use ($addCursorConditions, $cursor, $orders, $i, $unionBuilders) {
+                    function (self $secondBuilder) use (
+                        $addCursorConditions,
+                        $cursor,
+                        $orders,
+                        $i,
+                        $unionBuilders,
+                        $source
+                    ) {
                         ['column' => $column, 'direction' => $direction] = $orders[$i];
 
-                        $originalColumn = $this->getOriginalColumnNameForCursorPagination($this, $column);
+                        $originalColumn = $this->getOriginalColumnNameForCursorPagination($source, $column);
 
                         $secondBuilder->where(
-                            Str::contains($originalColumn, ['(', ')']) ? new Expression(
-                                $originalColumn
-                            ) : $originalColumn,
+                            $originalColumn !== $column && Str::contains($originalColumn, ['(', ')'])
+                                ? new Expression($originalColumn)
+                                : $originalColumn,
                             $direction === 'asc' ? '>' : '<',
                             $cursor->parameter($column)
                         );
 
                         if ($i < $orders->count() - 1) {
                             $secondBuilder->orWhere(
-                                function (self $thirdBuilder) use ($addCursorConditions, $column, $originalColumn, $i) {
-                                    $addCursorConditions($thirdBuilder, $column, $originalColumn, $i + 1);
+                                function (self $thirdBuilder) use (
+                                    $addCursorConditions,
+                                    $column,
+                                    $originalColumn,
+                                    $i,
+                                    $source
+                                ) {
+                                    $addCursorConditions($thirdBuilder, $column, $originalColumn, $i + 1, $source);
                                 }
                             );
                         }
 
                         $unionBuilders->each(
-                            function ($unionBuilder) use (
-                                $column,
-                                $direction,
-                                $cursor,
-                                $i,
-                                $orders,
-                                $addCursorConditions
-                            ) {
-                                $unionWheres = $unionBuilder->getRawBindings()['where'];
+                            function ($union) use ($column, $direction, $cursor, $i, $orders, $addCursorConditions) {
+                                $originalColumn = $this->getOriginalColumnNameForCursorPagination($union, $column);
 
-                                $originalColumn = $this->getOriginalColumnNameForCursorPagination(
-                                    $unionBuilder,
-                                    $column
-                                );
-                                $unionBuilder->where(
+                                $union->where(
                                     function ($unionBuilder) use (
                                         $column,
                                         $direction,
@@ -476,10 +518,12 @@ trait BuildsQueries
                                         $orders,
                                         $addCursorConditions,
                                         $originalColumn,
-                                        $unionWheres
+                                        $union
                                     ) {
                                         $unionBuilder->where(
-                                            $originalColumn,
+                                            $originalColumn !== $column && Str::contains($originalColumn, ['(', ')'])
+                                                ? new Expression($originalColumn)
+                                                : $originalColumn,
                                             $direction === 'asc' ? '>' : '<',
                                             $cursor->parameter($column)
                                         );
@@ -490,20 +534,19 @@ trait BuildsQueries
                                                     $addCursorConditions,
                                                     $column,
                                                     $originalColumn,
-                                                    $i
+                                                    $i,
+                                                    $union
                                                 ) {
                                                     $addCursorConditions(
                                                         $fourthBuilder,
                                                         $column,
                                                         $originalColumn,
-                                                        $i + 1
+                                                        $i + 1,
+                                                        $union
                                                     );
                                                 }
                                             );
                                         }
-
-                                        $this->addBinding($unionWheres, 'union');
-                                        $this->addBinding($unionBuilder->getRawBindings()['where'], 'union');
                                     }
                                 );
                             }
@@ -513,6 +556,14 @@ trait BuildsQueries
             };
 
             $addCursorConditions($this, null, null, 0);
+
+            // the cursor constraints were added to the union queries: their bindings (select, join, where) are
+            // collected again, so none is lost or placed before the cursor's own
+            $this->setBindings([], 'union');
+
+            $this->getUnionBuilders()->each(function ($unionBuilder) {
+                $this->addBinding($unionBuilder->getBindings(), 'union');
+            });
         }
 
         $this->limit($perPage + 1);
