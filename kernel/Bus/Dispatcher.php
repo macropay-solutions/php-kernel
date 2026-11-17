@@ -4,8 +4,10 @@ namespace MacropaySolutions\Kernel\Bus;
 
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Bus\QueueingDispatcher;
+use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Contracts\Queue\Queue;
+use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
 use MacropaySolutions\Kernel\Pipeline\Pipeline;
 use MacropaySolutions\Kernel\Queue\InteractsWithQueue;
@@ -280,7 +282,16 @@ class Dispatcher implements QueueingDispatcher
     public function dispatchAfterResponse($command, $handler = null)
     {
         $this->container->terminating(function () use ($command, $handler) {
-            $this->dispatchSync($command, $handler);
+            try {
+                $this->dispatchSync($command, $handler);
+            } catch (\Throwable $e) {
+                // the job never ran (payload, connection): the lock taken at dispatch would skip it until it expires
+                if ($command instanceof ShouldBeUnique) {
+                    (new UniqueLock($this->container->make(Cache::class)))->releaseIfAcquired($command);
+                }
+
+                throw $e;
+            }
         });
     }
 
