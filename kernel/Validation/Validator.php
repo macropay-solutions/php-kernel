@@ -710,7 +710,10 @@ class Validator implements ValidatorContract
             }
         } catch (\Throwable $e) {
             if ($this->messages instanceof MessageBag) {
-                $this->addFailure($attribute, $rule, $parameters);
+                match (true) {
+                    $rule instanceof RuleContract => $this->addRuleObjectFailure($attribute, $rule),
+                    default => $this->addFailure($attribute, $rule, $parameters),
+                };
 
                 /**
                  * Add implicit Bail on exception
@@ -721,6 +724,28 @@ class Validator implements ValidatorContract
             }
 
             throw $e;
+        }
+    }
+
+    /**
+     * A rule object that throws fails the field like a failed custom rule (addFailure() takes rule names only).
+     */
+    protected function addRuleObjectFailure(string $attribute, RuleContract $rule): void
+    {
+        $attribute = $this->replacePlaceholderInString($attribute);
+        $ruleClass = \get_class($rule instanceof InvokableValidationRule ? $rule->invokable() : $rule);
+        $this->failedRules[$attribute][$ruleClass] = [];
+
+        try {
+            $messages = $this->getFromLocalArray($attribute, $ruleClass) ?? $rule->message();
+        } catch (\Throwable) {
+            // message() can fail for the same reason passes() did
+            $messages = null;
+        }
+
+        foreach ($messages ? (array)$messages : [$ruleClass] as $key => $message) {
+            $key = \is_string($key) ? $key : $attribute;
+            $this->messages->add($key, $this->makeReplacements($message, $key, $ruleClass, []));
         }
     }
 
