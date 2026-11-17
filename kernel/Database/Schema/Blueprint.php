@@ -973,7 +973,8 @@ class Blueprint implements Macroable
 
         $column = $column ?: $model->getForeignKey();
 
-        if ($model->getKeyType() === 'int' && $model->incrementing) {
+        // a non-incrementing int key is still an integer: it fell through to a uuid column
+        if ($model->getKeyType() === 'int') {
             return $this->foreignId($column);
         }
 

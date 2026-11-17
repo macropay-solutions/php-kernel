@@ -77,7 +77,13 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
         $this->factory = $factory;
 
         $this->reconnector = function ($connection) {
-            $this->reconnect($connection->getNameWithReadWriteType());
+            // reconnect() returns a new connection object when this one is no longer held (purged):
+            // without its PDO, this connection kept the dead one
+            $fresh = $this->reconnect($connection->getNameWithReadWriteType());
+
+            if ($fresh !== $connection) {
+                $connection->setPdo($fresh->getRawPdo())->setReadPdo($fresh->getRawReadPdo());
+            }
         };
     }
 
@@ -372,9 +378,12 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
 
         $this->setDefaultConnection($name);
 
-        return tap($callback(), function () use ($previousName) {
+        // restored when the callback throws too: the following queries used the other connection
+        try {
+            return $callback();
+        } finally {
             $this->setDefaultConnection($previousName);
-        });
+        }
     }
 
     /**

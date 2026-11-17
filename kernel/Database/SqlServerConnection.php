@@ -78,7 +78,8 @@ class SqlServerConnection extends Connection
      */
     protected function isUniqueConstraintError(Exception $exception)
     {
-        return boolval(preg_match('#Cannot insert duplicate key row in object#i', $exception->getMessage()));
+        // 2601 (unique index) says "duplicate key row", 2627 (primary key / unique constraint) says "duplicate key"
+        return boolval(preg_match('#Cannot insert duplicate key(?: row)? in object#i', $exception->getMessage()));
     }
 
     /**
