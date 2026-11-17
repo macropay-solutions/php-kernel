@@ -86,7 +86,7 @@ trait FormatsMessages
         $inlineEntry = $this->getFromLocalArray($attribute, Str::snake($rule));
 
         return is_array($inlineEntry) && in_array($rule, $this->sizeRules)
-            ? $inlineEntry[$this->getAttributeType($attribute)]
+            ? ($inlineEntry[$this->getAttributeType($attribute)] ?? null)
             : $inlineEntry;
     }
 

@@ -105,6 +105,11 @@ class Validator implements ValidatorContract
     protected $implicitAttributes = [];
 
     /**
+     * The expanded wildcard attributes indexed by type and name, built from $implicitAttributes on first lookup.
+     */
+    private ?array $implicitAttributeKeys = null;
+
+    /**
      * The callback that should be used to format the attribute.
      *
      * @var callable|null
@@ -740,7 +745,7 @@ class Validator implements ValidatorContract
      */
     protected function getExplicitKeys($attribute)
     {
-        $pattern = str_replace('\*', '([^\.]+)', preg_quote($this->getPrimaryAttribute($attribute), '/'));
+        $pattern = str_replace('\*', '([^\.]*)', preg_quote($this->getPrimaryAttribute($attribute), '/'));
 
         if (preg_match('/^' . $pattern . '/', $attribute, $keys)) {
             array_shift($keys);
@@ -761,13 +766,23 @@ class Validator implements ValidatorContract
      */
     protected function getPrimaryAttribute($attribute)
     {
+        // a keyed lookup: in_array() over every expanded attribute, for each failure, was quadratic on large arrays
+        $this->implicitAttributeKeys ??= $this->indexImplicitAttributes();
+
+        return $this->implicitAttributeKeys[\gettype($attribute)][$attribute] ?? $attribute;
+    }
+
+    private function indexImplicitAttributes(): array
+    {
+        $index = [];
+
         foreach ($this->implicitAttributes as $unparsed => $parsed) {
-            if (in_array($attribute, $parsed, true)) {
-                return $unparsed;
+            foreach ($parsed as $expanded) {
+                $index[\gettype($expanded)][$expanded] ??= $unparsed;
             }
         }
 
-        return $attribute;
+        return $index;
     }
 
     /**
@@ -1313,6 +1328,7 @@ class Validator implements ValidatorContract
             $this->implicitAttributes,
             $response->implicitAttributes
         );
+        $this->implicitAttributeKeys = null;
     }
 
     /**
@@ -1332,6 +1348,7 @@ class Validator implements ValidatorContract
             $response = (new ValidationRuleParser($this->data))->explode([$key => $rules]);
 
             $this->implicitAttributes = array_merge($response->implicitAttributes, $this->implicitAttributes);
+            $this->implicitAttributeKeys = null;
 
             foreach ($response->rules as $ruleKey => $ruleValue) {
                 if ($callback($payload, $this->dataForSometimesIteration($ruleKey, !str_ends_with($key, '.*')))) {

@@ -59,7 +59,8 @@ class ValidationData
     {
         $keys = [];
 
-        $pattern = str_replace('\*', '[^\.]+', preg_quote($attribute, '/'));
+        // an empty key is an item too: users..role gets the users.*.role rules
+        $pattern = str_replace('\*', '[^\.]*', preg_quote($attribute, '/'));
 
         foreach ($data as $key => $value) {
             if ((bool)preg_match('/^' . $pattern . '/', $key, $matches)) {

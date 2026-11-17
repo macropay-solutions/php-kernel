@@ -158,11 +158,15 @@ class ValidationRuleParser
                     if ($rule instanceof NestedRules) {
                         $compiled = $rule->compile($key, $value, $data);
 
-                        $this->implicitAttributes = array_merge_recursive(
-                            $compiled->implicitAttributes,
-                            $this->implicitAttributes,
-                            [$attribute => [$key]]
-                        );
+                        // appended in place: array_merge_recursive() copied all attributes for every key
+                        foreach ($compiled->implicitAttributes as $nestedAttribute => $nestedKeys) {
+                            $this->implicitAttributes[$nestedAttribute] = array_merge(
+                                $nestedKeys,
+                                $this->implicitAttributes[$nestedAttribute] ?? []
+                            );
+                        }
+
+                        $this->implicitAttributes[$attribute][] = $key;
 
                         // merged in place: copying $results for every key made large arrays quadratic
                         foreach ($compiled->rules as $compiledAttribute => $compiledRules) {

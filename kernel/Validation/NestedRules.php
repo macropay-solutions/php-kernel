@@ -13,6 +13,10 @@ class NestedRules
      */
     protected $callback;
 
+    private ?array $undotSource = null;
+
+    private array $undotted = [];
+
     /**
      * Create a new nested rule instance.
      *
@@ -36,9 +40,15 @@ class NestedRules
     {
         $rules = call_user_func($this->callback, $value, $attribute, $data);
 
-        $parser = new ValidationRuleParser(
-            Arr::undot(Arr::wrap($data))
-        );
+        $wrapped = Arr::wrap($data);
+
+        // the same data comes for every item of a wildcard: undotting it each time made large arrays quadratic
+        if ($this->undotSource !== $wrapped) {
+            $this->undotSource = $wrapped;
+            $this->undotted = Arr::undot($wrapped);
+        }
+
+        $parser = new ValidationRuleParser($this->undotted);
 
         if (is_array($rules) && !array_is_list($rules)) {
             $nested = [];

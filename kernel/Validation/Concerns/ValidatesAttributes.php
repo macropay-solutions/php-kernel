@@ -1439,7 +1439,18 @@ trait ValidatesAttributes
             return Str::is($parameters[0], $key);
         });
 
-        return in_array($value, $otherValues);
+        // compared as strings: a loose in_array() matched '1e1' to '10' and '0' to '0.0'
+        if (!\is_scalar($value)) {
+            return \in_array($value, $otherValues, true);
+        }
+
+        foreach ($otherValues as $otherValue) {
+            if (\is_scalar($otherValue) && (string)$otherValue === (string)$value) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1976,7 +1987,8 @@ trait ValidatesAttributes
 
         $this->requireParameterCount(1, $parameters, 'not_regex');
 
-        return preg_match($parameters[0], $value) < 1;
+        // false (an error, e.g. the backtrack limit) is not "did not match"
+        return \preg_match($parameters[0], $value) === 0;
     }
 
     /**
