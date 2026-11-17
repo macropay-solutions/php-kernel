@@ -161,7 +161,12 @@ namespace {
                 $value = $value->value;
             }
 
-            return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+            $escaped = \htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+
+            // data echoed in a markdown mail must stay text: no injected links or images
+            return \MacropaySolutions\Kernel\Mail\Markdown::escapesEchoes()
+                ? \MacropaySolutions\Kernel\Mail\Markdown::escapeEcho($escaped)
+                : $escaped;
         }
     }
 

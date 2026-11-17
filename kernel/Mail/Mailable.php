@@ -599,7 +599,8 @@ class Mailable implements MailableContract, Renderable, Macroable
      */
     public function priority($level = 3)
     {
-        $this->callbacks[] = function ($message) use ($level) {
+        // static: a closure bound to $this kept the mailable alive in a reference cycle until the GC ran
+        $this->callbacks[] = static function ($message) use ($level) {
             $message->priority($level);
         };
 
@@ -1688,7 +1689,7 @@ class Mailable implements MailableContract, Renderable, Macroable
 
         $headers = $this->headers();
 
-        $this->withSymfonyMessage(function ($message) use ($headers) {
+        $this->withSymfonyMessage(static function ($message) use ($headers) {
             if ($headers->messageId) {
                 $message->getHeaders()->addIdHeader('Message-Id', $headers->messageId);
             }

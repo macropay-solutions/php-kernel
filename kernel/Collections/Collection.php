@@ -637,7 +637,7 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         $first = $this->first();
 
         // the native \Stringable: the unqualified name resolved to the Support\Stringable class
-        if (is_array($first) || (is_object($first) && !$first instanceof \Stringable)) {
+        if (\is_array($first) || (\is_object($first) && !$first instanceof \Stringable)) {
             return implode($glue ?? '', $this->pluck($value)->all());
         }
 

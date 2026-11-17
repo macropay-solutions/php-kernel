@@ -513,10 +513,12 @@ class Mailer implements MailerContract, MailQueueContract, Macroable
             throw new InvalidArgumentException('Only mailables may be queued.');
         }
 
-        return $view->mailer($this->name)->later(
-            $delay,
-            is_null($queue) ? $this->queue : $queue
-        );
+        // $queue is the queue name; Mailable::later() takes the queue factory
+        if (null !== $queue) {
+            $view->onQueue($queue);
+        }
+
+        return $view->mailer($this->name)->later($delay, $this->queue);
     }
 
     /**

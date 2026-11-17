@@ -35,6 +35,11 @@ class Markdown
     protected $componentPaths = [];
 
     /**
+     * Whether render() is rendering the mail content: e() then also escapes the markdown brackets.
+     */
+    private static bool $escapingEchoes = false;
+
+    /**
      * Create a new Markdown renderer instance.
      *
      * @param \MacropaySolutions\Kernel\Contracts\View\Factory $view
@@ -58,7 +63,17 @@ class Markdown
      */
     public function render($view, array $data = [], $inliner = null)
     {
-        $contents = $this->view->make($view, $data)->render();
+        $previous = self::$escapingEchoes;
+        self::$escapingEchoes = true;
+
+        try {
+            $contents = $this->view->make($view, $data)->render();
+        } finally {
+            self::$escapingEchoes = $previous;
+        }
+
+        // the escapes that no markdown parsed (attributes, raw html) are restored
+        $contents = \strtr($contents, ['\\\\' => '\\', '\\[' => '[', '\\]' => ']']);
 
         $theme = $this->view->exists($customTheme = 'mail.themes.' . $this->theme)
             ? $customTheme
@@ -91,6 +106,22 @@ class Markdown
         return new HtmlString(
             html_entity_decode(preg_replace("/[\r\n]{2,}/", "\n\n", $contents), ENT_QUOTES, 'UTF-8')
         );
+    }
+
+    /**
+     * Whether the echoes being rendered are mail content that will be parsed as markdown.
+     */
+    public static function escapesEchoes(): bool
+    {
+        return self::$escapingEchoes;
+    }
+
+    /**
+     * Escape an already html-escaped echo so markdown keeps it as text: [label](url) became a link.
+     */
+    public static function escapeEcho(string $html): string
+    {
+        return \strtr($html, ['\\' => '\\\\', '[' => '\\[', ']' => '\\]']);
     }
 
     /**
