@@ -60,6 +60,11 @@ class FileLoader implements Loader
      */
     public function load($locale, $group, $namespace = null)
     {
+        // locale and group become path segments: "../" included PHP files from outside the lang paths
+        if ($this->isUnsafePathSegment($locale) || ('*' !== $group && $this->isUnsafePathSegment($group, true))) {
+            return [];
+        }
+
         if ($group === '*' && $namespace === '*') {
             return $this->loadJsonPaths($locale);
         }
@@ -102,15 +107,30 @@ class FileLoader implements Loader
     protected function loadNamespaceOverrides(array $lines, $locale, $group, $namespace)
     {
         return collect($this->paths)
-            ->reduce(function ($output, $path) use ($lines, $locale, $group, $namespace) {
+            // carried in $output: each path started again from the package lines, so a later path without an
+            // override dropped the earlier one
+            ->reduce(function ($output, $path) use ($locale, $group, $namespace) {
                 $file = "{$path}/vendor/{$namespace}/{$locale}/{$group}.php";
 
                 if ($this->files->exists($file)) {
-                    $lines = array_replace_recursive($lines, $this->files->getRequire($file));
+                    $output = \array_replace_recursive($output, $this->files->getRequire($file));
                 }
 
-                return $lines;
-            }, []);
+                return $output;
+            }, $lines);
+    }
+
+    /**
+     * Whether the value cannot be used as a segment of a translation file path.
+     */
+    protected function isUnsafePathSegment(mixed $value, bool $allowSlashes = false): bool
+    {
+        return !\is_string($value)
+            || '' === $value
+            || \str_contains($value, '..')
+            || \str_contains($value, '\\')
+            || \str_contains($value, "\0")
+            || (!$allowSlashes && \str_contains($value, '/'));
     }
 
     /**
