@@ -214,7 +214,10 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         }
 
         if ($this->useAsCallable($key)) {
-            return !is_null($this->first($key));
+            // a matched null is a match: first() returning null cannot tell them apart
+            $placeholder = new stdClass();
+
+            return $this->first($key, $placeholder) !== $placeholder;
         }
 
         return in_array($key, $this->items, true);
@@ -633,7 +636,8 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
 
         $first = $this->first();
 
-        if (is_array($first) || (is_object($first) && !$first instanceof Stringable)) {
+        // the native \Stringable: the unqualified name resolved to the Support\Stringable class
+        if (is_array($first) || (is_object($first) && !$first instanceof \Stringable)) {
             return implode($glue ?? '', $this->pluck($value)->all());
         }
 

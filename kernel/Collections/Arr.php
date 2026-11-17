@@ -50,7 +50,8 @@ class Arr implements Macroable
         $results = [];
 
         foreach ($array as $values) {
-            if ($values instanceof Collection) {
+            // any Enumerable: a LazyCollection was dropped
+            if ($values instanceof Enumerable) {
                 $values = $values->all();
             } elseif (!is_array($values)) {
                 continue;
@@ -273,7 +274,7 @@ class Arr implements Macroable
         $result = [];
 
         foreach ($array as $item) {
-            $item = $item instanceof Collection ? $item->all() : $item;
+            $item = $item instanceof Enumerable ? $item->all() : $item;
 
             if (!is_array($item)) {
                 $result[] = $item;

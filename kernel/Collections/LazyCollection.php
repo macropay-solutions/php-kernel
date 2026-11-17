@@ -255,7 +255,10 @@ class LazyCollection implements CanBeEscapedWhenCastToString, Enumerable, Macroa
         }
 
         if ($this->useAsCallable($key)) {
-            return !is_null($this->first($key));
+            // a matched null is a match: first() returning null cannot tell them apart
+            $placeholder = new stdClass();
+
+            return $this->first($key, $placeholder) !== $placeholder;
         }
 
         foreach ($this as $item) {
