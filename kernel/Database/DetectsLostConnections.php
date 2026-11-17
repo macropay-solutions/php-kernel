@@ -79,6 +79,32 @@ trait DetectsLostConnections
             'SQLSTATE[HY000] [2002] A socket operation was attempted to an unreachable network',
             'SQLSTATE[HY000]: General error: 3989',
             'went away',
+            'SSL SYSCALL error: EOF detected',
+            'SSL error: unexpected eof',
+            'SSL error: ssl/tls alert unexpected message',
+            'SSL operation failed with code 5',
+            'Broken pipe',
+            'Connection lost',
+            'Channel connection is closed',
+            'server is shutting down',
+            'failed to connect to',
+            'failed: Connection refused',
+            // a failover left the connection on the old primary, now a replica
+            'SQLSTATE[25006]: Read only sql transaction: 7',
+            'canceling statement due to conflict with recovery',
+            // Vitess / PlanetScale MySQL
+            'vtgate connection error: no healthy endpoints',
+            'primary is not serving, there may be a reparent operation in progress',
+            'current keyspace is being resharded',
+            'no healthy tablet available',
+            'transaction pool connection limit exceeded',
+            'vttablet: rpc error: code = Canceled desc = QueryList.TerminateAll()',
+            // PlanetScale PostgreSQL / PgBouncer
+            'no primary available for branch',
+            'no replica available for branch',
+            'no running members available for branch',
+            'failed to send startup message',
+            'failed to read startup message',
         ]);
     }
 }

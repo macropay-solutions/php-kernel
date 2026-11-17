@@ -127,19 +127,20 @@ class Command extends SymfonyCommand implements Macroable
         // We will go ahead and set the name, description, and parameters on console
         // commands just to make things a little easier on the developer. This is
         // so they don't have to all be manually specified in the constructors.
+        // a name and a non-empty description before the parent constructor keep it from reflecting on the
+        // overridden static defaults and triggering their deprecation; the real description is set after it
+        $description = (string)($this->description ?? static::getDefaultDescription());
+
+        $this->setDescription('' === $description ? 'empty' : $description);
+
         if (isset($this->signature)) {
             $this->configureUsingFluentDefinition();
         } else {
-            parent::__construct($this->name);
+            parent::__construct($this->name ?? static::getDefaultName());
         }
 
-        // Once we have constructed the command, we'll set the description and other
-        // related properties of the command. If a signature wasn't used to build
-        // the command we'll set the arguments and the options on this command.
-        if (!isset($this->description)) {
-            $this->setDescription((string)static::getDefaultDescription());
-        } else {
-            $this->setDescription((string)$this->description);
+        if ('' === $description) {
+            $this->setDescription($description);
         }
 
         // an empty $help must not wipe the help of the #[AsCommand] attribute
