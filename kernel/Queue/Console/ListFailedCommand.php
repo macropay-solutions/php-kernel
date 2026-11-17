@@ -89,11 +89,17 @@ class ListFailedCommand extends Command
     {
         $payload = json_decode($payload, true);
 
-        if ($payload && (!isset($payload['data']['command']))) {
-            return $payload['job'] ?? null;
-        } elseif ($payload && isset($payload['data']['command'])) {
-            return $this->matchJobName($payload);
+        if (!$payload) {
+            return null;
         }
+
+        // the job's own name (Class@method of a storable callable): the command data of a storable callable is
+        // not a serialized object, so the first quoted string there is 'storableCallable'
+        if (\is_string($payload['displayName'] ?? null) && '' !== $payload['displayName']) {
+            return $payload['displayName'];
+        }
+
+        return isset($payload['data']['command']) ? $this->matchJobName($payload) : $payload['job'] ?? null;
     }
 
     /**

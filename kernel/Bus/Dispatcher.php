@@ -6,6 +6,7 @@ use Closure;
 use MacropaySolutions\Kernel\Contracts\Bus\QueueingDispatcher;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
+use MacropaySolutions\Kernel\Contracts\Debug\ExceptionHandler;
 use MacropaySolutions\Kernel\Contracts\Queue\Queue;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldBeUnique;
 use MacropaySolutions\Kernel\Contracts\Queue\ShouldQueue;
@@ -290,7 +291,13 @@ class Dispatcher implements QueueingDispatcher
                     (new UniqueLock($this->container->make(Cache::class)))->releaseIfAcquired($command);
                 }
 
-                throw $e;
+                // the response is already sent: thrown, it would skip the other terminating callbacks
+                // and be rendered after the response
+                if (!$this->container->bound(ExceptionHandler::class)) {
+                    throw $e;
+                }
+
+                $this->container->make(ExceptionHandler::class)->report($e);
             }
         });
     }

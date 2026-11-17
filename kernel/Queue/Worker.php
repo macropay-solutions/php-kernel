@@ -262,10 +262,12 @@ class Worker
 
         try {
             if (isset(static::$popCallbacks[$this->name])) {
-                return tap(
-                    (static::$popCallbacks[$this->name])($popJobCallback, $queue),
-                    fn($job) => $this->raiseAfterJobPopEvent($connection->getConnectionName(), $job)
-                );
+                // like the default path: an empty pop raises no JobPopped (its listeners would get a null job)
+                if (!is_null($job = (static::$popCallbacks[$this->name])($popJobCallback, $queue))) {
+                    $this->raiseAfterJobPopEvent($connection->getConnectionName(), $job);
+                }
+
+                return $job;
             }
 
             foreach (explode(',', $queue) as $queue) {

@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Tests\Queue;
 
 use MacropaySolutions\Kernel\Bus\UniqueLock;
+use MacropaySolutions\Kernel\Cache\ArrayLock;
 use MacropaySolutions\Kernel\Cache\ArrayStore;
 use MacropaySolutions\Kernel\Cache\Repository;
 use MacropaySolutions\Kernel\Container\Container;
@@ -93,17 +94,29 @@ class UniqueAfterCommitRollbackTest extends TestCase
         $container = new Container();
         Container::setInstance($container);
         // the lock is taken at dispatch; the cache fails only when the rollback releases it
-        $cache = new Repository(new ArrayStore());
+        $store = new class extends ArrayStore {
+            public bool $down = false;
+
+            public function lock($name, $seconds = 0, $owner = null)
+            {
+                return new class ($this, $name, $seconds, $owner) extends ArrayLock {
+                    public function release()
+                    {
+                        if ($this->store->down) {
+                            throw new \RuntimeException('cache down');
+                        }
+
+                        return parent::release();
+                    }
+                };
+            }
+        };
+        $cache = new Repository($store);
         $container->instance(CacheRepository::class, $cache);
         $job = UniqueCallQueuedCallable::create([UniqueAfterCommitRollbackTestJob::class, 'handle', ['id' => 1]]);
         $job->afterCommit = true;
         $this->assertTrue((new UniqueLock($cache))->acquire($job));
-        $container->instance(CacheRepository::class, new class (new ArrayStore()) extends Repository {
-            public function fwd(): \MacropaySolutions\Kernel\Contracts\Cache\Store
-            {
-                throw new \RuntimeException('cache down');
-            }
-        });
+        $store->down = true;
         $handler = new class implements ExceptionHandler {
             public array $reported = [];
 

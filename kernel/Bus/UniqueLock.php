@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Bus;
 
 use MacropaySolutions\Kernel\Cache\Repository;
+use MacropaySolutions\Kernel\Contracts\Cache\Lock as LockContract;
 use MacropaySolutions\Kernel\Contracts\Cache\Repository as Cache;
 
 class UniqueLock
@@ -15,7 +16,7 @@ class UniqueLock
     protected $cache;
 
     /**
-     * The job objects whose lock was taken by acquire() in this process.
+     * The job objects whose lock was taken by acquire() in this process, with that lock.
      */
     private static ?\WeakMap $acquired = null;
 
@@ -45,11 +46,12 @@ class UniqueLock
             ? $job->uniqueVia()
             : $this->cache;
 
-        $acquired = (bool)$cache->fwd()->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor)->get();
+        $lock = $cache->fwd()->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor);
+        $acquired = (bool)$lock->get();
 
         if ($acquired && \is_object($job)) {
             self::$acquired ??= new \WeakMap();
-            self::$acquired[$job] = true;
+            self::$acquired[$job] = $lock;
         }
 
         return $acquired;
@@ -66,11 +68,16 @@ class UniqueLock
 
     /**
      * Release the lock only if this job object took it: never another dispatch's lock.
+     * The lock taken by acquire() is released by its owner, so a lock already released (by the job's failure
+     * handling) and taken again by another dispatch is not released a second time.
      */
     public function releaseIfAcquired(mixed $job): void
     {
-        if (self::acquiredFor($job)) {
-            $this->release($job);
+        $lock = \is_object($job) ? (self::$acquired[$job] ?? null) : null;
+
+        if ($lock instanceof LockContract) {
+            unset(self::$acquired[$job]);
+            $lock->release();
         }
     }
 

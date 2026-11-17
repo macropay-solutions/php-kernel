@@ -181,6 +181,11 @@ class WorkCommand extends Command
      */
     public static function onJobProcessed($event): void
     {
+        // a job that called fail() itself was already written as failed
+        if ($event->job->hasFailed()) {
+            return;
+        }
+
         static::$activeInstance?->writeOutput($event->job, 'success');
     }
 
