@@ -34,7 +34,15 @@ class ModelNotFoundException extends RecordsNotFoundException
     public function setModel($model, $ids = [])
     {
         $this->model = $model;
-        $this->ids = Arr::wrap($ids);
+        // enum keys must not break the message
+        $this->ids = \array_map(
+            static fn(mixed $id): mixed => match (true) {
+                $id instanceof \BackedEnum => $id->value,
+                $id instanceof \UnitEnum => $id->name,
+                default => $id,
+            },
+            Arr::wrap($ids)
+        );
 
         $this->message = "No query results for model [{$model}]";
 

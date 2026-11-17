@@ -479,7 +479,10 @@ class Builder implements BuilderContract, Macroable
 
         $id = $id instanceof Arrayable ? $id->toArray() : $id;
 
-        if (is_array($id)) {
+        if (\is_array($id)) {
+            // array_unique and array_diff cast to string, which enum ids do not support
+            $id = \array_map($this->query->castBinding(...), $id);
+
             if (count($result) !== count(array_unique($id))) {
                 throw (new ModelNotFoundException())->setModel(
                     get_class($this->model),

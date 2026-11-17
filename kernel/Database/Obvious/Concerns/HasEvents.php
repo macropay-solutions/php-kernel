@@ -103,6 +103,7 @@ trait HasEvents
                 'restoring',
                 'restored',
                 'replicating',
+                'trashed',
                 'deleting',
                 'deleted',
                 'forceDeleting',

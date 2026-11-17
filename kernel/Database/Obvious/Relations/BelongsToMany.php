@@ -755,7 +755,10 @@ class BelongsToMany extends Relation
 
         $id = $id instanceof Arrayable ? $id->toArray() : $id;
 
-        if (is_array($id)) {
+        if (\is_array($id)) {
+            // array_unique casts to string, which enum ids do not support
+            $id = \array_map($this->query->getQuery()->castBinding(...), $id);
+
             if (count($result) === count(array_unique($id))) {
                 return $result;
             }
@@ -786,7 +789,10 @@ class BelongsToMany extends Relation
 
         $id = $id instanceof Arrayable ? $id->toArray() : $id;
 
-        if (is_array($id)) {
+        if (\is_array($id)) {
+            // array_unique casts to string, which enum ids do not support
+            $id = \array_map($this->query->getQuery()->castBinding(...), $id);
+
             if (count($result) === count(array_unique($id))) {
                 return $result;
             }
