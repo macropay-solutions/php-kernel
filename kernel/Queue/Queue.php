@@ -400,6 +400,16 @@ abstract class Queue
     }
 
     /**
+     * Release the unique lock of a job that took it at dispatch.
+     */
+    protected function releaseUniqueLockIfAcquired(mixed $job): void
+    {
+        if ($job instanceof ShouldBeUnique) {
+            (new UniqueLock($this->container->make(CacheRepository::class)))->releaseIfAcquired($job);
+        }
+    }
+
+    /**
      * Enqueue a job using the given callback.
      *
      * @param string|object $job
@@ -415,12 +425,12 @@ abstract class Queue
             $this->shouldDispatchAfterCommit($job) &&
             $this->container->bound('db.transactions')
         ) {
-            if ($job instanceof ShouldBeUnique) {
+            if ($job instanceof ShouldBeUnique && UniqueLock::acquiredFor($job)) {
                 // the lock was taken at dispatch: release it if the job is never pushed because of a rollback
                 $container = $this->container;
                 $release = static function () use ($container, $job): void {
                     try {
-                        (new UniqueLock($container->make(CacheRepository::class)))->release($job);
+                        (new UniqueLock($container->make(CacheRepository::class)))->releaseIfAcquired($job);
                     } catch (\Throwable $e) {
                         // runs while the rollback's own exception is being handled: must not replace it,
                         // the lock then expires by its ttl
@@ -436,9 +446,18 @@ abstract class Queue
                 function () use ($payload, $queue, $delay, $callback, $job) {
                     $this->raiseJobQueueingEvent($job, $payload);
 
-                    return tap($callback($payload, $queue, $delay), function ($jobId) use ($job, $payload) {
-                        $this->raiseJobQueuedEvent($jobId, $job, $payload);
-                    });
+                    try {
+                        $jobId = $callback($payload, $queue, $delay);
+                    } catch (\Throwable $e) {
+                        // pushed after the commit, outside dispatch(): a failed push must not keep the lock
+                        $this->releaseUniqueLockIfAcquired($job);
+
+                        throw $e;
+                    }
+
+                    $this->raiseJobQueuedEvent($jobId, $job, $payload);
+
+                    return $jobId;
                 }
             );
         }

@@ -15,6 +15,11 @@ class UniqueLock
     protected $cache;
 
     /**
+     * The job objects whose lock was taken by acquire() in this process.
+     */
+    private static ?\WeakMap $acquired = null;
+
+    /**
      * Create a new unique lock manager instance.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Cache\Repository $cache
@@ -40,7 +45,33 @@ class UniqueLock
             ? $job->uniqueVia()
             : $this->cache;
 
-        return (bool)$cache->fwd()->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor)->get();
+        $acquired = (bool)$cache->fwd()->lock($this->getKey($job), $uniqueFor <= 0 ? 7200 : $uniqueFor)->get();
+
+        if ($acquired && \is_object($job)) {
+            self::$acquired ??= new \WeakMap();
+            self::$acquired[$job] = true;
+        }
+
+        return $acquired;
+    }
+
+    /**
+     * Whether acquire() took the lock for this job object in this process.
+     * A unique job pushed without dispatch() (Queue::push(), Bus::dispatch()) never took it.
+     */
+    public static function acquiredFor(mixed $job): bool
+    {
+        return \is_object($job) && isset(self::$acquired[$job]);
+    }
+
+    /**
+     * Release the lock only if this job object took it: never another dispatch's lock.
+     */
+    public function releaseIfAcquired(mixed $job): void
+    {
+        if (self::acquiredFor($job)) {
+            $this->release($job);
+        }
     }
 
     /**
@@ -55,6 +86,10 @@ class UniqueLock
             : $this->cache;
 
         $cache->fwd()->lock($this->getKey($job))->forceRelease();
+
+        if (\is_object($job)) {
+            unset(self::$acquired[$job]);
+        }
     }
 
     /**

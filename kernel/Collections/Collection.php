@@ -145,15 +145,26 @@ class Collection implements ArrayAccess, CanBeEscapedWhenCastToString, Enumerabl
         }
 
         $counts = new static();
+        // a float key is truncated to int: counted under its string form and returned as the float
+        $floats = [];
 
-        $collection->each(fn($value) => $counts[$value] = isset($counts[$value]) ? $counts[$value] + 1 : 1);
+        $collection->each(static function ($value) use ($counts, &$floats): void {
+            $key = $value;
+
+            if (\is_float($value)) {
+                $key = (string)$value;
+                $floats[$key] = $value;
+            }
+
+            $counts[$key] = isset($counts[$key]) ? $counts[$key] + 1 : 1;
+        });
 
         $sorted = $counts->sort();
 
         $highestValue = $sorted->last();
 
-        return $sorted->filter(fn($value) => $value == $highestValue)
-            ->sort()->keys()->all();
+        return $sorted->filter(static fn($value) => $value == $highestValue)
+            ->sort()->keys()->map(static fn($key) => \is_string($key) ? $floats[$key] ?? $key : $key)->all();
     }
 
     /**

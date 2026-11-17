@@ -3,7 +3,6 @@
 namespace MacropaySolutions\Kernel\Cache;
 
 use MacropaySolutions\Kernel\Contracts\Cache\LockProvider;
-use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Carbon;
 use MacropaySolutions\Kernel\Support\InteractsWithTime;
 
@@ -138,7 +137,8 @@ class ArrayStore extends TaggableStore implements LockProvider
      */
     public function touch(string $key, int $seconds): bool
     {
-        $item = Arr::get($this->storage, $key = $this->getPrefix() . $key);
+        // the exact key: a dot path would read into another entry ('profile.value' into 'profile')
+        $item = $this->storage[$key = $this->getPrefix() . $key] ?? null;
 
         if (null === $item) {
             return false;

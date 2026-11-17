@@ -211,13 +211,22 @@ class Schedule implements Macroable
             throw new RuntimeException('Cache driver not available. Scheduling unique jobs not supported.');
         }
 
-        if (!(new UniqueLock(Container::getInstance()->make(Cache::class)))->acquire($job)) {
+        $lock = new UniqueLock(Container::getInstance()->make(Cache::class));
+
+        if (!$lock->acquire($job)) {
             return;
         }
 
-        $this->getDispatcher()->dispatch(
-            $job->onConnection($connection)->onQueue($queue)
-        );
+        try {
+            $this->getDispatcher()->dispatch(
+                $job->onConnection($connection)->onQueue($queue)
+            );
+        } catch (\Throwable $e) {
+            // the job was not queued: a kept lock would skip the task until it expires
+            $lock->releaseIfAcquired($job);
+
+            throw $e;
+        }
     }
 
     /**

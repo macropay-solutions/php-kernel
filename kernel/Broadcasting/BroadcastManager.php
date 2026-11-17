@@ -180,9 +180,22 @@ class BroadcastManager implements FactoryContract
             }
         }
 
-        $this->app->make('queue')
-            ->connection($event->connection ?? null)
-            ->pushOn($queue, $broadcastEvent);
+        try {
+            $this->app->make('queue')
+                ->connection($event->connection ?? null)
+                ->pushOn($queue, $broadcastEvent);
+        } catch (\Throwable $e) {
+            // not queued: a kept lock would drop the next broadcasts until it expires
+            if ($event instanceof ShouldBeUnique) {
+                (new UniqueLock(
+                    method_exists($broadcastEvent, 'uniqueVia')
+                        ? $broadcastEvent->uniqueVia()
+                        : $this->app->make(Cache::class)
+                ))->releaseIfAcquired($broadcastEvent);
+            }
+
+            throw $e;
+        }
     }
 
     /**

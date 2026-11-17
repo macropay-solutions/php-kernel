@@ -119,12 +119,17 @@ class PendingDispatch
             return;
         }
 
-        if ($this->afterResponse) {
-            \app(Dispatcher::class)->dispatchAfterResponse($this->job);
+        try {
+            $this->afterResponse
+                ? \app(Dispatcher::class)->dispatchAfterResponse($this->job)
+                : \app(Dispatcher::class)->dispatch($this->job);
+        } catch (\Throwable $e) {
+            // the job was not queued: a kept lock would skip every dispatch until it expires
+            if ($this->job instanceof ShouldBeUnique) {
+                (new UniqueLock(Container::getInstance()->make(Cache::class)))->releaseIfAcquired($this->job);
+            }
 
-            return;
+            throw $e;
         }
-
-        \app(Dispatcher::class)->dispatch($this->job);
     }
 }
