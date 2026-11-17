@@ -128,7 +128,10 @@ class ResponseFactory implements Macroable
      */
     protected function fallbackName($name)
     {
-        return str_replace('%', '', Str::ascii($name));
+        $fallback = \str_replace('%', '', Str::ascii($name));
+
+        // an empty fallback (no ASCII equivalent, e.g. Japanese or emoji) made Symfony throw for the whole download
+        return '' !== $fallback ? $fallback : \str_repeat('_', \mb_strlen($name));
     }
 
     /**

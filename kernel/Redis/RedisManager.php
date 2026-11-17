@@ -263,7 +263,12 @@ class RedisManager implements Factory
      */
     public function extend($driver, Closure $callback)
     {
-        $this->customCreators[$driver] = $callback->bindTo($this, $this);
+        try {
+            $this->customCreators[$driver] = $callback->bindTo($this, $this) ?? throw new \RuntimeException();
+        } catch (\Throwable) {
+            // a static closure cannot be bound to the manager: class scope only
+            $this->customCreators[$driver] = $callback->bindTo(null, static::class);
+        }
 
         return $this;
     }

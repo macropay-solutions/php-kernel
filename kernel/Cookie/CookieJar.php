@@ -161,7 +161,8 @@ class CookieJar implements JarContract, Macroable
         if (isset($parameters[0]) && $parameters[0] instanceof Cookie) {
             $cookie = $parameters[0];
         } else {
-            $cookie = $this->make(...array_values($parameters));
+            // keys kept: named arguments (value: 'v', name: 'n') were applied by position
+            $cookie = $this->make(...$parameters);
         }
 
         if (!isset($this->queued[$cookie->getName()])) {
