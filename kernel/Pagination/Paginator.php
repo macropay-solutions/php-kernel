@@ -59,7 +59,8 @@ class Paginator extends AbstractPaginator implements
      */
     protected function setCurrentPage($currentPage)
     {
-        $currentPage = $currentPage ?: static::resolveCurrentPage();
+        // the page name option was ignored: ?p=3 resolved the default "page" parameter
+        $currentPage = $currentPage ?: static::resolveCurrentPage($this->pageName);
 
         return $this->isValidPageNumber($currentPage) ? (int)$currentPage : 1;
     }

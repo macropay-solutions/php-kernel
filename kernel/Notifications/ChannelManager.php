@@ -38,7 +38,7 @@ class ChannelManager extends Manager implements DispatcherContract, FactoryContr
             $this,
             $this->container->make(Bus::class),
             $this->container->make(Dispatcher::class),
-            $this->locale
+            $this->pullLocale()
         )
         )->send($notifiables, $notification);
     }
@@ -57,7 +57,7 @@ class ChannelManager extends Manager implements DispatcherContract, FactoryContr
             $this,
             $this->container->make(Bus::class),
             $this->container->make(Dispatcher::class),
-            $this->locale
+            $this->pullLocale()
         )
         )->sendNow($notifiables, $notification, $channels);
     }
@@ -153,6 +153,17 @@ class ChannelManager extends Manager implements DispatcherContract, FactoryContr
     public function deliverVia($channel)
     {
         $this->defaultChannel = $channel;
+    }
+
+    /**
+     * The locale set by locale() is for the next send only: it was applied to every later notification.
+     */
+    private function pullLocale(): ?string
+    {
+        $locale = $this->locale;
+        $this->locale = null;
+
+        return $locale;
     }
 
     /**

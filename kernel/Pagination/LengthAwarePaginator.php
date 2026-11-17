@@ -54,7 +54,8 @@ class LengthAwarePaginator extends AbstractPaginator implements
 
         $this->total = $total;
         $this->perPage = (int)$perPage;
-        $this->lastPage = max((int)ceil($total / $perPage), 1);
+        // a perPage of 0 divided by zero
+        $this->lastPage = \max((int)\ceil($total / \max($this->perPage, 1)), 1);
         $this->path = $this->path !== '/' ? rtrim($this->path, '/') : $this->path;
         $this->currentPage = $this->setCurrentPage($currentPage, $this->pageName);
         $this->items = $items instanceof Collection ? $items : Collection::make($items);
