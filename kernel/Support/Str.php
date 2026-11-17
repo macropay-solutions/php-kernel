@@ -253,6 +253,10 @@ class Str implements Macroable
      */
     public static function contains($haystack, $needles, $ignoreCase = false)
     {
+        if (null === $haystack) {
+            return false;
+        }
+
         if ($ignoreCase) {
             $haystack = mb_strtolower($haystack);
         }
@@ -315,6 +319,10 @@ class Str implements Macroable
      */
     public static function endsWith($haystack, $needles)
     {
+        if (null === $haystack) {
+            return false;
+        }
+
         if (!is_iterable($needles)) {
             $needles = (array)$needles;
         }
@@ -1305,6 +1313,10 @@ class Str implements Macroable
             $search = collect($search)->all();
         }
 
+        if ($subject instanceof Traversable) {
+            $subject = \collect($subject)->all();
+        }
+
         return $caseSensitive
             ? str_replace($search, '', $subject)
             : str_ireplace($search, '', $subject);
@@ -1537,11 +1549,15 @@ class Str implements Macroable
      */
     public static function squish($value)
     {
-        return preg_replace(
-            '~(\s|\x{3164}|\x{1160})+~u',
-            ' ',
-            preg_replace('~^[\s\x{FEFF}]+|[\s\x{FEFF}]+$~u', '', $value)
-        );
+        $whitespace = '[\s\x{FEFF}]';
+        // the trailing match may only start a whitespace run: linear, and no JIT stack exhaustion (null)
+        $trimmed = \preg_replace(
+            '~^' . $whitespace . '+|' . $whitespace . '(?<!' . $whitespace . $whitespace . ')' . $whitespace . '*+$~u',
+            '',
+            $value
+        ) ?? \trim($value);
+
+        return \preg_replace('~[\s\x{3164}\x{1160}]+~u', ' ', $trimmed) ?? $trimmed;
     }
 
     /**
@@ -1553,6 +1569,10 @@ class Str implements Macroable
      */
     public static function startsWith($haystack, $needles)
     {
+        if (null === $haystack) {
+            return false;
+        }
+
         if (!is_iterable($needles)) {
             $needles = [$needles];
         }
@@ -1630,11 +1650,14 @@ class Str implements Macroable
      */
     public static function substrReplace($string, $replace, $offset = 0, $length = null)
     {
-        if ($length === null) {
-            $length = strlen($string);
+        if (\is_array($string) || \is_array($replace) || \is_array($offset) || \is_array($length)) {
+            return \substr_replace($string, $replace, $offset, $length);
         }
 
-        return substr_replace($string, $replace, $offset, $length);
+        // in characters: byte offsets cut multibyte characters in half
+        return \mb_substr($string, 0, $offset)
+            . $replace
+            . \mb_substr(\mb_substr($string, $offset), $length ?? \mb_strlen($string));
     }
 
     /**
@@ -1747,7 +1770,39 @@ class Str implements Macroable
      */
     public static function wordWrap($string, $characters = 75, $break = "\n", $cutLongWords = false)
     {
-        return wordwrap($string, $characters, $break, $cutLongWords);
+        if ('' === $break || static::isAscii($string)) {
+            return \wordwrap($string, $characters, $break, $cutLongWords);
+        }
+
+        // wordwrap() counts bytes: each multibyte character is wrapped as one placeholder byte
+        $replaced = [];
+        $skeleton = \preg_replace_callback(
+            '/[\x80-\xFF][\x80-\xBF]*|\x1A/',
+            static function (array $match) use (&$replaced) {
+                $replaced[] = $match[0];
+
+                return "\x1A";
+            },
+            $string
+        );
+
+        $breakToken = "\0";
+
+        while (\str_contains($skeleton, $breakToken)) {
+            $breakToken .= "\0";
+        }
+
+        $index = 0;
+
+        // a closure, not fn(): the placeholder index must carry over from one segment to the next
+        return \implode($break, \array_map(
+            static function (string $segment) use (&$replaced, &$index): string {
+                return \preg_replace_callback('/\x1A/', static function () use (&$replaced, &$index) {
+                    return $replaced[$index++];
+                }, $segment);
+            },
+            \explode($breakToken, \wordwrap($skeleton, $characters, $breakToken, $cutLongWords))
+        ));
     }
 
     /**

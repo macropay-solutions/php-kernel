@@ -53,7 +53,14 @@ class TrimStrings extends TransformsRequest
             return $value;
         }
 
-        return preg_replace('~^[\s\x{FEFF}\x{200B}]+|[\s\x{FEFF}\x{200B}]+$~u', '', $value) ?? trim($value);
+        $whitespace = '[\s\x{FEFF}\x{200B}]';
+
+        // the trailing match may only start a whitespace run: retrying it at every position was quadratic
+        return \preg_replace(
+            '~^' . $whitespace . '+|' . $whitespace . '(?<!' . $whitespace . $whitespace . ')' . $whitespace . '*+$~u',
+            '',
+            $value
+        ) ?? \trim($value);
     }
 
     /**

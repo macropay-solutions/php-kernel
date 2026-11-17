@@ -74,6 +74,16 @@ class Js implements Htmlable
             $data = $data->value;
         }
 
+        // an HtmlString was encoded as an empty object
+        if (
+            $data instanceof Htmlable
+            && !$data instanceof Arrayable
+            && !$data instanceof Jsonable
+            && !$data instanceof JsonSerializable
+        ) {
+            $data = $data->toHtml();
+        }
+
         $json = static::encode($data, $flags, $depth);
 
         if (is_string($data)) {
@@ -103,7 +113,8 @@ class Js implements Htmlable
             $data = $data->toArray();
         }
 
-        return json_encode($data, $flags | static::REQUIRED_FLAGS, $depth);
+        // invalid UTF-8 (e.g. from user input) is substituted instead of failing the whole render
+        return \json_encode($data, $flags | static::REQUIRED_FLAGS | JSON_INVALID_UTF8_SUBSTITUTE, $depth);
     }
 
     /**

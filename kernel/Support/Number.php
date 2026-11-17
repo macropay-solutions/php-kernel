@@ -42,7 +42,7 @@ class Number implements Macroable
             $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $precision);
         }
 
-        return $formatter->format($number);
+        return $formatter->format(static::withoutNegativeZero($number, $formatter->format(...)));
     }
 
     /**
@@ -112,7 +112,7 @@ class Number implements Macroable
             $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $precision);
         }
 
-        return $formatter->format($number / 100);
+        return $formatter->format(static::withoutNegativeZero($number / 100, $formatter->format(...)));
     }
 
     /**
@@ -129,7 +129,13 @@ class Number implements Macroable
 
         $formatter = new NumberFormatter($locale ?? static::$locale, NumberFormatter::CURRENCY);
 
-        return $formatter->formatCurrency($number, $in);
+        return $formatter->formatCurrency(
+            static::withoutNegativeZero(
+                $number,
+                static fn(int|float $value) => $formatter->formatCurrency($value, $in)
+            ),
+            $in
+        );
     }
 
     /**
@@ -142,9 +148,14 @@ class Number implements Macroable
      */
     public static function fileSize(int|float $bytes, int $precision = 0, ?int $maxPrecision = null)
     {
+        if (!\is_finite($bytes)) {
+            return \sprintf('%s B', static::format($bytes, $precision, $maxPrecision));
+        }
+
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-        for ($i = 0; ($bytes / 1024) > 0.9 && ($i < count($units) - 1); $i++) {
+        // abs(): negative sizes were never scaled (-1024 B)
+        for ($i = 0; (\abs($bytes) / 1024) > 0.9 && ($i < \count($units) - 1); $i++) {
             $bytes /= 1024;
         }
 
@@ -214,6 +225,11 @@ class Number implements Macroable
         ?int $maxPrecision = null,
         array $units = []
     ) {
+        // log10() of INF / NAN never reaches a unit: INF looped forever
+        if (!\is_finite($number)) {
+            return static::format($number, $precision, $maxPrecision);
+        }
+
         if ([] === $units) {
             $units = [
                 3 => 'K',
@@ -228,7 +244,11 @@ class Number implements Macroable
             case floatval($number) === 0.0:
                 return $precision > 0 ? static::format(0, $precision, $maxPrecision) : '0';
             case $number < 0:
-                return sprintf('-%s', static::summarize(abs($number), $precision, $maxPrecision, $units));
+                $summary = static::summarize(\abs($number), $precision, $maxPrecision, $units);
+
+                return $summary === static::summarize(0, $precision, $maxPrecision, $units)
+                    ? $summary
+                    : \sprintf('-%s', $summary);
             case $number >= 1e15:
                 return sprintf(
                     '%s' . end($units),
@@ -237,12 +257,22 @@ class Number implements Macroable
         }
 
         $numberExponent = floor(log10($number));
-        $displayExponent = $numberExponent - ($numberExponent % 3);
+        // below 1 the exponent is negative: 0.001 was scaled up to "1"
+        $displayExponent = \max(0, $numberExponent - ($numberExponent % 3));
         $number /= pow(10, $displayExponent);
+        $formatted = static::format($number, $precision, $maxPrecision);
 
-        return trim(
-            sprintf('%s%s', static::format($number, $precision, $maxPrecision), $units[$displayExponent] ?? '')
-        );
+        // 999,999 rounds to "1,000" thousand: move to the next unit
+        if (
+            $formatted === static::format(1000, $precision, $maxPrecision)
+            && isset($units[$displayExponent + 3])
+        ) {
+            $number /= 1000;
+            $displayExponent += 3;
+            $formatted = static::format($number, $precision, $maxPrecision);
+        }
+
+        return \trim(\sprintf('%s%s', $formatted, $units[$displayExponent] ?? ''));
     }
 
     /**
@@ -316,7 +346,11 @@ class Number implements Macroable
 
         static::useLocale($locale);
 
-        return tap($callback(), fn() => static::useLocale($previousLocale));
+        try {
+            return $callback();
+        } finally {
+            static::useLocale($previousLocale);
+        }
     }
 
     /**
@@ -328,6 +362,14 @@ class Number implements Macroable
     public static function useLocale(string $locale)
     {
         static::$locale = $locale;
+    }
+
+    /**
+     * A negative number that formats like zero is formatted as zero, not "-0".
+     */
+    private static function withoutNegativeZero(int|float $number, callable $format): int|float
+    {
+        return $number < 0 && $format(\abs($number)) === $format(0) ? 0 : $number;
     }
 
     /**
