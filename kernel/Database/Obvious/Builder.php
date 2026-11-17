@@ -346,6 +346,13 @@ class Builder implements BuilderContract, Macroable
      */
     public function whereNot($column, $operator = null, $value = null, $boolean = 'and')
     {
+        // the array form is negated once, as a nested group
+        if (\is_array($column)) {
+            $this->query->whereNot($column, $operator, $value, $boolean);
+
+            return $this;
+        }
+
         return $this->where($column, $operator, $value, $boolean . ' not');
     }
 
@@ -1501,7 +1508,9 @@ class Builder implements BuilderContract, Macroable
         if ($callback instanceof Closure) {
             $eagerLoad = $this->parseWithRelations([$relations => $callback]);
         } else {
-            $eagerLoad = $this->parseWithRelations(is_string($relations) ? func_get_args() : $relations);
+            $eagerLoad = $this->parseWithRelations(
+                is_string($relations) ? \array_filter(func_get_args(), \is_string(...)) : $relations
+            );
         }
 
         $this->eagerLoad = array_merge($this->eagerLoad, $eagerLoad);

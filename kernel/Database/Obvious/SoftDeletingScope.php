@@ -76,7 +76,7 @@ class SoftDeletingScope implements Scope
     {
         $builder->withTrashed();
 
-        return $builder->update([$builder->getModel()->getDeletedAtColumn() => null]);
+        return $builder->update([$this->getDeletedAtColumn($builder) => null]);
     }
 
     /**

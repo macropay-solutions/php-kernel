@@ -421,6 +421,15 @@ class SqlServerGrammar extends Grammar
     }
 
     /**
+     * Compile an "exists" subquery as a selectable column.
+     */
+    public function compileExistsColumn(string $sql): string
+    {
+        // exists() is not an expression in T-SQL
+        return 'case when exists(' . $sql . ') then 1 else 0 end';
+    }
+
+    /**
      * Compile an update statement with joins into SQL.
      */
     protected function compileUpdateWithJoins(Builder $query, string $table, string $columns, string $where): string

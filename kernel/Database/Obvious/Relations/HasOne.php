@@ -77,11 +77,14 @@ class HasOne extends HasOneOrMany implements SupportsPartialRelations
      */
     public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*'])
     {
+        // the self relation alias must be set on the model before the one of many joins are merged
+        $query = parent::getRelationExistenceQuery($query, $parentQuery, $columns);
+
         if ($this->isOneOfMany()) {
             $this->mergeOneOfManyJoinsTo($query);
         }
 
-        return parent::getRelationExistenceQuery($query, $parentQuery, $columns);
+        return $query;
     }
 
     /**
@@ -118,7 +121,7 @@ class HasOne extends HasOneOrMany implements SupportsPartialRelations
         $join->on(
             $this->qualifySubSelectColumn($this->foreignKey),
             '=',
-            $this->qualifyRelatedColumn($this->foreignKey)
+            $this->qualifyRelatedColumn($this->getForeignKeyName())
         );
     }
 

@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Database\Obvious\Relations\Concerns;
 use Closure;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Database\Obvious\Builder;
+use MacropaySolutions\Kernel\Database\Obvious\Model;
 use MacropaySolutions\Kernel\Database\Query\JoinClause;
 use MacropaySolutions\Kernel\Support\Arr;
 
@@ -30,6 +31,11 @@ trait CanBeOneOfMany
      * @var \MacropaySolutions\Kernel\Database\Obvious\Builder|null
      */
     protected $oneOfManySubQuery;
+
+    /**
+     * The model of the query the one of many subselect is being joined to.
+     */
+    protected ?Model $oneOfManyJoinModel = null;
 
     /**
      * Add constraints for inner join subselect for one of many relationships.
@@ -258,10 +264,13 @@ trait CanBeOneOfMany
      */
     protected function addOneOfManyJoinSubQuery(Builder $parent, Builder $subQuery, $on)
     {
-        $parent->beforeQuery(function ($parent) use ($subQuery, $on) {
+        $parent->beforeQuery(function ($query) use ($parent, $subQuery, $on) {
             $subQuery->applyBeforeQueryCallbacks();
 
-            $parent->joinSub($subQuery, $this->relationName, function ($join) use ($on) {
+            $query->joinSub($subQuery, $this->relationName, function ($join) use ($parent, $on) {
+                // a self relation existence query aliases the table, so qualify with the joined query's model
+                $this->oneOfManyJoinModel = $parent->getModel();
+
                 foreach ($on as $onColumn) {
                     $join->on(
                         $this->qualifySubSelectColumn($onColumn . '_aggregate'),
@@ -271,6 +280,8 @@ trait CanBeOneOfMany
                 }
 
                 $this->addOneOfManyJoinSubQueryConstraints($join);
+
+                $this->oneOfManyJoinModel = null;
             });
         });
     }
@@ -352,7 +363,9 @@ trait CanBeOneOfMany
      */
     protected function qualifyRelatedColumn($column)
     {
-        return str_contains($column, '.') ? $column : $this->query->getModel()->getTable() . '.' . $column;
+        return str_contains($column, '.')
+            ? $column
+            : ($this->oneOfManyJoinModel ?? $this->query->getModel())->getTable() . '.' . $column;
     }
 
     /**

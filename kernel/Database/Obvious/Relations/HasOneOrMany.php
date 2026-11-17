@@ -246,6 +246,33 @@ abstract class HasOneOrMany extends Relation
     }
 
     /**
+     * Get the first record matching the attributes, including trashed records, and restore it.
+     * If the record is not found, create it.
+     */
+    public function restoreOrCreate(array $attributes = [], array $values = []): Model
+    {
+        // forwarded to the builder, the created model missed the foreign key
+        $this->withTrashed();
+        $instance = $this->firstOrCreate($attributes, $values);
+        $instance->restore();
+
+        return $instance;
+    }
+
+    /**
+     * Attempt to create the record. If a unique constraint violation occurs, find the matching record,
+     * including trashed records, and restore it.
+     */
+    public function createOrRestore(array $attributes = [], array $values = []): Model
+    {
+        $this->withTrashed();
+        $instance = $this->createOrFirst($attributes, $values);
+        $instance->restore();
+
+        return $instance;
+    }
+
+    /**
      * Attempt to create the record. If a unique constraint violation occurs, attempt to find the matching record.
      *
      * @param array $attributes

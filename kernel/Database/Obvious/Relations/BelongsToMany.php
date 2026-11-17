@@ -635,7 +635,7 @@ class BelongsToMany extends Relation
     public function firstOrCreate(array $attributes = [], array $values = [], array $joining = [], $touch = true)
     {
         if (is_null($instance = (clone $this)->where($attributes)->first())) {
-            if (is_null($instance = $this->related->where($attributes)->first())) {
+            if (is_null($instance = $this->relatedQueryKeepingRemovedScopes()->where($attributes)->first())) {
                 $instance = $this->createOrFirst($attributes, $values, $joining, $touch);
             } else {
                 try {
@@ -670,7 +670,7 @@ class BelongsToMany extends Relation
 
         try {
             return tap(
-                $this->related->where($attributes)->first() ?? throw $e,
+                $this->relatedQueryKeepingRemovedScopes()->where($attributes)->first() ?? throw $e,
                 function ($instance) use ($joining, $touch) {
                     $this->getQuery()->withSavepointIfNeeded(fn() => $this->attach($instance, $joining, $touch));
                 }
@@ -678,6 +678,49 @@ class BelongsToMany extends Relation
         } catch (UniqueConstraintViolationException $e) {
             return (clone $this)->useWritePdo()->where($attributes)->first() ?? throw $e;
         }
+    }
+
+    /**
+     * Get the first record matching the attributes, including trashed records, and restore it.
+     * If the record is not found, create it.
+     */
+    public function restoreOrCreate(
+        array $attributes = [],
+        array $values = [],
+        array $joining = [],
+        bool $touch = true
+    ): Model {
+        // forwarded to the builder, the created model was never attached
+        $this->withTrashed();
+        $instance = $this->firstOrCreate($attributes, $values, $joining, $touch);
+        $instance->restore();
+
+        return $instance;
+    }
+
+    /**
+     * Attempt to create the record. If a unique constraint violation occurs, find the matching record,
+     * including trashed records, and restore it.
+     */
+    public function createOrRestore(
+        array $attributes = [],
+        array $values = [],
+        array $joining = [],
+        bool $touch = true
+    ): Model {
+        $this->withTrashed();
+        $instance = $this->createOrFirst($attributes, $values, $joining, $touch);
+        $instance->restore();
+
+        return $instance;
+    }
+
+    /**
+     * The related lookup must see what the relation query sees, e.g. trashed rows after withTrashed().
+     */
+    private function relatedQueryKeepingRemovedScopes(): Builder
+    {
+        return $this->related->newQuery()->withoutGlobalScopes($this->query->removedScopes());
     }
 
     /**

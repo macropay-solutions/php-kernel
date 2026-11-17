@@ -419,6 +419,15 @@ class HasManyThrough extends Relation
     }
 
     /**
+     * Find a related model by its primary key or return a new instance of the related model.
+     */
+    public function findOrNew(mixed $id, array $columns = ['*']): Model|Collection
+    {
+        // the forwarded builder call selected the joined columns, so the through key overwrote the id
+        return $this->find($id, $columns) ?? $this->related->newInstance();
+    }
+
+    /**
      * Find multiple related models by their primary keys.
      *
      * @param \MacropaySolutions\Kernel\Contracts\Support\Arrayable|array $ids

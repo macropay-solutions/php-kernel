@@ -127,7 +127,9 @@ trait SoftDeletes
 
         $result = $this->save();
 
-        $this->fireModelEvent('restored', false);
+        if (true === $result) {
+            $this->fireModelEvent('restored', false);
+        }
 
         return $result;
     }
