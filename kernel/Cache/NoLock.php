@@ -15,6 +15,14 @@ class NoLock extends Lock
     }
 
     /**
+     * Nothing is ever locked: acquire() always succeeds.
+     */
+    public function isLocked(): bool
+    {
+        return false;
+    }
+
+    /**
      * Release the lock.
      *
      * @return bool

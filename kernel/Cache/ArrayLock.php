@@ -51,6 +51,15 @@ class ArrayLock extends Lock
     }
 
     /**
+     * An expired entry stays in the array until the next acquire(): it is not a lock.
+     */
+    public function isLocked(): bool
+    {
+        return $this->exists()
+            && (null === ($expiresAt = $this->store->locks[$this->name]['expiresAt']) || $expiresAt->isFuture());
+    }
+
+    /**
      * Determine if the current lock exists.
      *
      * @return bool

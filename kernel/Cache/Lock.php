@@ -162,6 +162,14 @@ abstract class Lock implements LockContract
     }
 
     /**
+     * Whether any owner holds the lock, checked without acquiring it.
+     */
+    public function isLocked(): bool
+    {
+        return !\in_array($this->getCurrentOwner(), [null, false, ''], true);
+    }
+
+    /**
      * Specify the number of milliseconds to sleep in between blocked lock acquisition attempts.
      *
      * @param int $milliseconds

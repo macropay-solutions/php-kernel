@@ -3,6 +3,7 @@
 namespace MacropaySolutions\Kernel\Console\Scheduling;
 
 use MacropaySolutions\Kernel\Cache\DynamoDbStore;
+use MacropaySolutions\Kernel\Cache\Lock;
 use MacropaySolutions\Kernel\Contracts\Cache\Factory as Cache;
 use MacropaySolutions\Kernel\Contracts\Cache\LockProvider;
 
@@ -63,9 +64,10 @@ class CacheEventMutex implements EventMutex, CacheAware
     public function exists(Event $event)
     {
         if ($this->shouldUseLocks($this->cache->store($this->store)->getStore())) {
-            return !$this->cache->store($this->store)->getStore()
-                ->lock($event->mutexName(), $event->expiresAt * 60)
-                ->get(fn() => true);
+            $lock = $this->cache->store($this->store)->getStore()->lock($event->mutexName(), $event->expiresAt * 60);
+
+            // acquiring the lock to check it made a concurrent check or create() see it as running
+            return $lock instanceof Lock ? $lock->isLocked() : !$lock->get(static fn() => true);
         }
 
         return $this->cache->store($this->store)->has($event->mutexName());
