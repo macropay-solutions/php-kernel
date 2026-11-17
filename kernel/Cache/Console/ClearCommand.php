@@ -60,7 +60,7 @@ class ClearCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
+     * @return int
      */
     public function handle()
     {
@@ -76,7 +76,8 @@ class ClearCommand extends Command
         if (!$successful) {
             $this->error('Failed to clear cache. Make sure you have the appropriate permissions.');
 
-            return;
+            // a deploy script must see the failure
+            return self::FAILURE;
         }
 
         $this->app->make('events')->dispatch(
@@ -85,6 +86,8 @@ class ClearCommand extends Command
         );
 
         $this->info('Application cache cleared successfully.');
+
+        return self::SUCCESS;
     }
 
     /**

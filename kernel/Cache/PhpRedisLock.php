@@ -35,11 +35,15 @@ class PhpRedisLock extends RedisLock
 
     public function refresh(?int $seconds = null): bool
     {
+        // only the owner is compared to a stored value: a packed (serialized) TTL is not an integer for EXPIRE
+        [$owner] = $this->redis->pack([$this->owner]);
+
         return (bool)$this->redis->eval(
             LuaScripts::refreshLock(),
             1,
             $this->name,
-            ...$this->redis->pack([$this->owner, $seconds ?? $this->seconds])
+            $owner,
+            $seconds ?? $this->seconds
         );
     }
 }

@@ -138,8 +138,9 @@ class RateLimiter
 
         $hits = (int)$this->cache->increment($key, $amount);
 
-        if (!$added && $hits == 1) {
-            $this->cache->put($key, 1, $decaySeconds);
+        // the key expired between add() and increment(): increment() created it without a TTL
+        if (!$added && $hits == $amount) {
+            $this->cache->put($key, $amount, $decaySeconds);
         }
 
         return $hits;

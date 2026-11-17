@@ -155,7 +155,8 @@ class DynamoDbStore implements LockProvider, Store
 
         $now = Carbon::now();
 
-        return array_merge(
+        // array_merge() renumbers numeric keys ('10' => 0)
+        return array_replace(
             collect(array_flip($keys))->map(function () {
                 //
             })->all(),

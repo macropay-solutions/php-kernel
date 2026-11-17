@@ -4,13 +4,20 @@ namespace MacropaySolutions\Kernel\Cache;
 
 use MacropaySolutions\Kernel\Contracts\Cache\LockProvider;
 use MacropaySolutions\Kernel\Contracts\Redis\Factory as Redis;
+use MacropaySolutions\Kernel\Redis\Connections\PhpRedisClusterConnection;
 use MacropaySolutions\Kernel\Redis\Connections\PhpRedisConnection;
+use MacropaySolutions\Kernel\Redis\Connections\PredisClusterConnection;
 use MacropaySolutions\Kernel\Redis\Connections\PredisConnection;
 use MacropaySolutions\Kernel\Support\LazyCollection;
 use MacropaySolutions\Kernel\Support\Str;
 
 class RedisStore extends TaggableStore implements LockProvider
 {
+    use RetrievesMultipleKeys {
+        many as private manyOneByOne;
+        putMany as private putManyOneByOne;
+    }
+
     /**
      * The Redis factory implementation.
      *
@@ -81,6 +88,11 @@ class RedisStore extends TaggableStore implements LockProvider
             return [];
         }
 
+        // a Predis cluster cannot MGET keys of different slots (phpredis RedisCluster splits them itself)
+        if ($this->connection() instanceof PredisClusterConnection) {
+            return $this->manyOneByOne($keys);
+        }
+
         $results = [];
 
         $values = $this->connection()->mget(array_map(function ($key) {
@@ -120,6 +132,14 @@ class RedisStore extends TaggableStore implements LockProvider
      */
     public function putMany(array $values, $seconds)
     {
+        // a cluster cannot run one MULTI/EXEC over keys of different slots
+        if (
+            $this->connection() instanceof PhpRedisClusterConnection
+            || $this->connection() instanceof PredisClusterConnection
+        ) {
+            return $this->putManyOneByOne($values, $seconds);
+        }
+
         $serializedValues = [];
 
         foreach ($values as $key => $value) {
@@ -289,13 +309,20 @@ class RedisStore extends TaggableStore implements LockProvider
 
         $prefix = $connectionPrefix . $this->getPrefix();
 
-        return LazyCollection::make(function () use ($connection, $chunkSize, $prefix) {
+        // with SCAN_PREFIX phpredis adds the connection prefix to the pattern itself: no tag matched
+        $match = $connection instanceof PhpRedisConnection
+            && \defined('Redis::SCAN_PREFIX')
+            && $connection->client()->getOption(\Redis::OPT_SCAN) === \Redis::SCAN_PREFIX
+                ? $this->getPrefix() . 'tag:*:entries'
+                : $prefix . 'tag:*:entries';
+
+        return LazyCollection::make(function () use ($connection, $chunkSize, $match) {
             $cursor = $defaultCursorValue = '0';
 
             do {
                 [$cursor, $tagsChunk] = $connection->scan(
                     $cursor,
-                    ['match' => $prefix . 'tag:*:entries', 'count' => $chunkSize]
+                    ['match' => $match, 'count' => $chunkSize]
                 ) ?: [null, null];
 
                 if (!is_array($tagsChunk)) {
