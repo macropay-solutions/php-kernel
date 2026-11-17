@@ -125,11 +125,19 @@ class MySqlSchemaState extends SchemaState
             ? ' --socket="${:FRAMEWORK_LOAD_SOCKET}"'
             : ' --host="${:FRAMEWORK_LOAD_HOST}" --port="${:FRAMEWORK_LOAD_PORT}"';
 
-        if (isset($config['options'][\PDO::MYSQL_ATTR_SSL_CA])) {
+        if (isset($config['options'][$this->sslCaAttribute()])) {
             $value .= ' --ssl-ca="${:FRAMEWORK_LOAD_SSL_CA}"';
         }
 
         return $value;
+    }
+
+    /**
+     * The PDO SSL CA attribute: PDO::MYSQL_ATTR_SSL_CA is deprecated since PHP 8.5 (same value).
+     */
+    private function sslCaAttribute(): int
+    {
+        return \class_exists(\Pdo\Mysql::class, false) ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA;
     }
 
     /**
@@ -149,7 +157,7 @@ class MySqlSchemaState extends SchemaState
             'FRAMEWORK_LOAD_USER' => $config['username'],
             'FRAMEWORK_LOAD_PASSWORD' => $config['password'] ?? '',
             'FRAMEWORK_LOAD_DATABASE' => $config['database'],
-            'FRAMEWORK_LOAD_SSL_CA' => $config['options'][\PDO::MYSQL_ATTR_SSL_CA] ?? '',
+            'FRAMEWORK_LOAD_SSL_CA' => $config['options'][$this->sslCaAttribute()] ?? '',
         ];
     }
 

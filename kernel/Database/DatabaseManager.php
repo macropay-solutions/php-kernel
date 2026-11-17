@@ -434,7 +434,7 @@ class DatabaseManager implements ConnectionResolverInterface, Macroable
      */
     public function supportedDrivers()
     {
-        return ['mysql', 'pgsql', 'sqlite', 'sqlsrv'];
+        return ['mysql', 'mariadb', 'pgsql', 'sqlite', 'sqlsrv'];
     }
 
     /**

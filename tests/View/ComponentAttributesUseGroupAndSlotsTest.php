@@ -43,11 +43,19 @@ class ComponentAttributesUseGroupAndSlotsTest extends TestCase
     public function testFlushStateForgetsTheSlots(): void
     {
         $factory = (new \ReflectionClass(Factory::class))->newInstanceWithoutConstructor();
+        $level = \ob_get_level();
         $factory->startComponent('x');
         $factory->slot('secret', 'previous request');
 
-        (new \ReflectionMethod($factory, 'flushComponents'))->invoke($factory);
+        try {
+            (new \ReflectionMethod($factory, 'flushComponents'))->invoke($factory);
 
-        $this->assertSame([], (new \ReflectionProperty($factory, 'slots'))->getValue($factory));
+            $this->assertSame([], (new \ReflectionProperty($factory, 'slots'))->getValue($factory));
+        } finally {
+            // startComponent() opened a buffer for the component content
+            while (\ob_get_level() > $level) {
+                \ob_end_clean();
+            }
+        }
     }
 }

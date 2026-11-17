@@ -137,6 +137,7 @@ class DbCommand extends Command
     {
         return [
             'mysql' => 'mysql',
+            'mariadb' => 'mariadb',
             'pgsql' => 'psql',
             'sqlite' => 'sqlite3',
             'sqlsrv' => 'sqlcmd',
@@ -160,6 +161,14 @@ class DbCommand extends Command
             'unix_socket' => '--socket=' . ($connection['unix_socket'] ?? ''),
             'charset' => '--default-character-set=' . ($connection['charset'] ?? ''),
         ], $connection), [$connection['database']]);
+    }
+
+    /**
+     * Get the arguments for the MariaDB CLI (the same as for MySQL).
+     */
+    protected function getMariadbArguments(array $connection): array
+    {
+        return $this->getMysqlArguments($connection);
     }
 
     /**

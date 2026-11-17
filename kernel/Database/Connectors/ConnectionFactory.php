@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Database\Connectors;
 use InvalidArgumentException;
 use MacropaySolutions\Kernel\Contracts\Container\Container;
 use MacropaySolutions\Kernel\Database\Connection;
+use MacropaySolutions\Kernel\Database\MariaDbConnection;
 use MacropaySolutions\Kernel\Database\MySqlConnection;
 use MacropaySolutions\Kernel\Database\PostgresConnection;
 use MacropaySolutions\Kernel\Database\SQLiteConnection;
@@ -247,6 +248,7 @@ class ConnectionFactory
 
         return match ($config['driver']) {
             'mysql' => new MySqlConnector(),
+            'mariadb' => new MariaDbConnector(),
             'pgsql' => new PostgresConnector(),
             'sqlite' => new SQLiteConnector(),
             'sqlsrv' => new SqlServerConnector(),
@@ -275,6 +277,7 @@ class ConnectionFactory
         return match ($driver) {
 //            'mysql' => new MySqlConnection($connection, $database, $prefix, $config),
             'mysql' => \di(MySqlConnection::class, [$connection, $database, $prefix, $config]),
+            'mariadb' => \di(MariaDbConnection::class, [$connection, $database, $prefix, $config]),
 //            'pgsql' => new PostgresConnection($connection, $database, $prefix, $config),
             'pgsql' => \di(PostgresConnection::class, [$connection, $database, $prefix, $config]),
 //            'sqlite' => new SQLiteConnection($connection, $database, $prefix, $config),
