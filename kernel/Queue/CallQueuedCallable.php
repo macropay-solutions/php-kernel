@@ -465,6 +465,7 @@ class CallQueuedCallable implements ShouldQueue
                 if (
                     $container::DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING
                     && \array_key_exists('d', $details)
+                    && !$container->has($details['c'])
                 ) {
                     $args[] = $details['d'];
 
@@ -569,6 +570,7 @@ class CallQueuedCallable implements ShouldQueue
                 if (
                     $container::DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING
                     && \array_key_exists('d', $details)
+                    && !$container->has($details['c'])
                 ) {
                     $args[] = $details['d'];
 

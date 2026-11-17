@@ -318,7 +318,7 @@ class BoundMethod
                 if (
                     $container::DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING
                     && \array_key_exists('d', $parameterMap)
-                    && !$container->bound($parameterMap['c'])
+                    && !$container->has($parameterMap['c'])
                 ) {
                     // has default
                     $dependencies[] = $parameterMap['d'];
@@ -389,6 +389,17 @@ class BoundMethod
             try {
                 if ($parameter->isVariadic()) {
                     $dependencies = \array_merge($dependencies, (array)$container->make($className));
+
+                    return;
+                }
+
+                if (
+                    $container::DEFAULT_PARAMETER_TAKES_PRECEDENCE_WHEN_AUTOWIRING
+                    && $parameter->isDefaultValueAvailable()
+                    && !$container->has($className)
+                ) {
+                    // same rule as for cached class methods (closures and functions are resolved here)
+                    $dependencies[] = $parameter->getDefaultValue();
 
                     return;
                 }
