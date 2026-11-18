@@ -43,17 +43,14 @@ class FreshCommand extends Command
 
         $database = $this->input->getOption('database');
 
-        // a database that does not exist yet has nothing to drop: migrate creates it below
-        if ($this->databaseExists($database)) {
-            $this->newLine();
+        $this->newLine();
 
-            $this->task('Dropping all tables', fn() => $this->callSilent('db:wipe', \array_filter([
-                    '--database' => $database,
-                    '--drop-views' => $this->option('drop-views'),
-                    '--drop-types' => $this->option('drop-types'),
-                    '--force' => true,
-                ])) == 0);
-        }
+        $this->task('Dropping all tables', fn() => $this->callSilent('db:wipe', array_filter([
+                '--database' => $database,
+                '--drop-views' => $this->option('drop-views'),
+                '--drop-types' => $this->option('drop-types'),
+                '--force' => true,
+            ])) == 0);
 
         $this->newLine();
 
@@ -77,20 +74,6 @@ class FreshCommand extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * Whether the database can be connected to (a missing MySQL database or SQLite file cannot).
-     */
-    protected function databaseExists(?string $database): bool
-    {
-        try {
-            $this->app->make('db')->connection($database)->getPdo();
-
-            return true;
-        } catch (\Throwable) {
-            return false;
-        }
     }
 
     /**
