@@ -473,11 +473,13 @@ class Builder implements BuilderContract, Macroable
     {
         $columns = func_get_args();
 
-        if (count($columns) > 0) {
+        if ([] !== $columns) {
             $this->distinct = is_array($columns[0]) || is_bool($columns[0]) ? $columns[0] : $columns;
-        } else {
-            $this->distinct = true;
+
+            return $this;
         }
+
+        $this->distinct = true;
 
         return $this;
     }
@@ -3125,7 +3127,7 @@ class Builder implements BuilderContract, Macroable
      */
     protected function runPaginationCountQuery($columns = ['*'])
     {
-        if ($this->groups || $this->havings) {
+        if ($this->groups || $this->havings || $this->distinct) {
             $clone = $this->cloneForPaginationCount();
 
             if (is_null($clone->columns) && !empty($this->joins)) {
