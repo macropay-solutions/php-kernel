@@ -3127,7 +3127,12 @@ class Builder implements BuilderContract, Macroable
      */
     protected function runPaginationCountQuery($columns = ['*'])
     {
-        if ($this->groups || $this->havings || $this->distinct) {
+        if (
+            $this->groups
+            || $this->havings
+            || $this->distinct === true
+            || (is_array($this->distinct) && $this->distinct !== [])
+        ) {
             $clone = $this->cloneForPaginationCount();
 
             if (is_null($clone->columns) && !empty($this->joins)) {
