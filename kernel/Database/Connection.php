@@ -1053,9 +1053,19 @@ class Connection implements ConnectionInterface, Macroable
      */
     public function disconnect()
     {
+        $pdos = [$this->pdo, $this->readPdo, $this->doctrineConnection];
         $this->setPdo(null)->setReadPdo(null);
 
         $this->doctrineConnection = null;
+
+        // a dead connection warns while PDO sends QUIT on destruct and the app's error handler throws that warning:
+        // released here, it cannot stop a reconnect after a lost connection
+        foreach (\array_keys($pdos) as $key) {
+            try {
+                unset($pdos[$key]);
+            } catch (\ErrorException) {
+            }
+        }
     }
 
     /**
