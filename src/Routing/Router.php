@@ -228,6 +228,11 @@ class Router
             $action = $this->mergeGroupAttributes($action, $attributes);
         }
 
+        // after the group merge: a ::class name is fully qualified, the group namespace must not be prepended
+        if (\is_array($action['uses'] ?? null)) {
+            $action['uses'] = $this->arrayCallableToUses($action['uses']);
+        }
+
         $uri = '/' . trim($uri, '/');
 
         if (isset($action['as'])) {
@@ -393,10 +398,17 @@ class Router
      */
     protected function parseAction($action)
     {
-        if (is_string($action)) {
+        if (\is_string($action)) {
             return ['uses' => $action];
-        } elseif (!is_array($action)) {
+        }
+
+        if (!\is_array($action)) {
             return [$action];
+        }
+
+        // [Controller::class, 'method']
+        if (\array_is_list($action) && 2 === \count($action)) {
+            return ['uses' => $action];
         }
 
         if (isset($action['middleware']) && is_string($action['middleware'])) {
@@ -404,6 +416,30 @@ class Router
         }
 
         return $action;
+    }
+
+    /**
+     * [Controller::class, 'method'] as the 'Controller@method' string the dispatcher and the route cache use.
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function arrayCallableToUses(array $callable): string
+    {
+        $class = $callable[0] ?? null;
+        $method = $callable[1] ?? null;
+
+        if (
+            2 !== \count($callable)
+            || !\array_is_list($callable)
+            || !\is_string($class)
+            || !\is_string($method)
+            || '' === ($class = \ltrim($class, '\\'))
+            || 1 !== \preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', $method)
+        ) {
+            throw new \InvalidArgumentException('A route action array must be [Controller::class, \'method\'].');
+        }
+
+        return $class . '@' . $method;
     }
 
     /**
@@ -457,7 +493,8 @@ class Router
      */
     protected function mergeNamespaceGroup(array $action, $namespace = null)
     {
-        if (isset($namespace, $action['uses'])) {
+        // an array callable holds a ::class name, already fully qualified
+        if (isset($namespace, $action['uses']) && \is_string($action['uses'])) {
             $action['uses'] = $this->prependGroupNamespace($action['uses'], $namespace);
         }
 
