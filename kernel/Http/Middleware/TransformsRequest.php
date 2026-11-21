@@ -30,10 +30,7 @@ class TransformsRequest
     protected function clean($request)
     {
         $this->cleanParameterBag($request->query);
-
-        if ($request->request !== $request->query) {
-            $this->cleanParameterBag($request->request);
-        }
+        $this->cleanParameterBag($request->request);
     }
 
     /**

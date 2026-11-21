@@ -5,6 +5,7 @@ namespace MacropaySolutions\Kernel\Http;
 use ArrayAccess;
 use Closure;
 use MacropaySolutions\Kernel\Contracts\Support\Arrayable;
+use MacropaySolutions\Kernel\Http\Exceptions\HttpRequestException;
 use MacropaySolutions\Kernel\Session\SymfonySessionDecorator;
 use MacropaySolutions\Kernel\Support\Arr;
 use MacropaySolutions\Kernel\Support\Str;
@@ -20,6 +21,19 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
     use Concerns\InteractsWithContentTypes;
     use Concerns\InteractsWithFlashData;
     use Concerns\InteractsWithInput;
+
+    /**
+     * A request with a field sent both in query and body, or both as a value and as a file, is rejected when true.
+     * Override this in your \App\Request with true if you need/want
+     */
+    public const REQUEST_THROWS_ON_KEYS_COLLISION = false;
+
+    /**
+     * Set when the request is created: a field sent both in query and body, or both as a value and as a file.
+     * Thrown right away only with
+     * @see static::REQUEST_THROWS_ON_KEYS_COLLISION; otherwise the code may throw it later.
+     */
+    public ?HttpRequestException $keysCollisionException = null;
 
     /**
      * Override this into your \App\Request Class if needed
@@ -154,9 +168,102 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
     ): void {
         parent::initialize($query, $request, $attributes, $cookies, $files, $server, $content);
 
-        if ($this->files->count() > 0) {
+        if ($this->files->all() !== []) {
             $this->files->replace(static::cleanFiles($this->files->all()) ?? []);
         }
+
+        $this->keysCollisionException = null;
+
+        if ([] === $files && ([] === $query || [] === $request)) {
+            return;
+        }
+
+        $this->recheckHttpParameterPollution();
+    }
+
+    /**
+     * @throws HttpRequestException
+     */
+    public function validateHttpParameterPollutionRequest(): void
+    {
+        if (static::REQUEST_THROWS_ON_KEYS_COLLISION && isset($this->keysCollisionException)) {
+            throw $this->keysCollisionException;
+        }
+    }
+
+    /**
+     * @throws HttpRequestException
+     */
+    public function recheckHttpParameterPollution(): void
+    {
+        if ([] === $this->files->all() && ([] === $this->query->all() || [] === $this->request->all())) {
+            return;
+        }
+
+        $this->keysCollisionException ??= $this->getKeysCollisionException();
+        $this->validateHttpParameterPollutionRequest();
+    }
+
+    /**
+     * all(), input() and get() pick or merge query, body and files differently, so validation could check another
+     * value than the one the code reads.
+     */
+    public function getKeysCollisionException(): ?HttpRequestException
+    {
+        if (
+            [] !== ($allQuery = $this->query->all())
+            && [] !== ($allRequest = $this->request->all())
+            && static::hasKeyCollision($allQuery, $allRequest)
+        ) {
+            return new HttpRequestException('A field was sent both in query and body.');
+        }
+
+        if (
+            [] !== ($allFiles = $this->files->all())
+            && ([] !== $allQuery || [] !== ($allRequest ??= $this->request->all()))
+            && static::hasKeyCollision(
+                $allFiles,
+                \array_replace_recursive($allQuery, $allRequest ?? $this->request->all())
+            )
+        ) {
+            return new HttpRequestException('A field was sent both as a value and as a file.');
+        }
+
+        return null;
+    }
+
+    /**
+     * Nested arrays are compared key by key (profile[name] in one, profile[photo] in the other). The same scalar sent
+     * twice is not a collision: it reads the same everywhere.
+     */
+    protected static function hasKeyCollision(array $source, array $other): bool
+    {
+        foreach ($source as $key => $value) {
+            if (
+                !\array_key_exists($key, $other)
+                || (
+                    (
+                        null === $value
+                        || \is_scalar($value)
+                    )
+                    && $value === $other[$key]
+                )
+            ) {
+                continue;
+            }
+
+            if (\is_array($value) && \is_array($other[$key])) {
+                if (static::hasKeyCollision($value, $other[$key])) {
+                    return true;
+                }
+
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -437,10 +544,12 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      *
      * @param array $input
      * @return $this
+     * @throws HttpRequestException
      */
     public function merge(array $input)
     {
         $this->getInputSource()->add($input);
+        $this->recheckHttpParameterPollution();
 
         return $this;
     }
@@ -465,10 +574,12 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      *
      * @param array $input
      * @return $this
+     * @throws HttpRequestException
      */
     public function replace(array $input)
     {
         $this->getInputSource()->replace($input);
+        $this->recheckHttpParameterPollution();
 
         return $this;
     }
@@ -921,10 +1032,12 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      * @param string $offset
      * @param mixed $value
      * @return void
+     * @throws HttpRequestException
      */
     public function offsetSet($offset, $value): void
     {
         $this->getInputSource()->set($offset, $value);
+        $this->recheckHttpParameterPollution();
     }
 
     /**
@@ -973,6 +1086,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
     {
         $this->query->replace();
         $this->request->replace();
+        $this->keysCollisionException = null;
         $this->replace($data);
 
         return $this;
