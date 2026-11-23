@@ -180,4 +180,10 @@ return [
      */
     'circular_dependency_memory_limit' => 0,
 
+    /**
+     * autowiring:cache writes bootstrap/cache/preload/preload.php for opcache.preload in PHP-FPM.
+     * Set to false for an app that runs only from the CLI, where preloading brings nothing.
+     */
+    'preload' => (bool)env('APP_PRELOAD', true),
+
 ];
