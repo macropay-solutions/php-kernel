@@ -438,6 +438,24 @@ abstract class Relation implements BuilderContract, Macroable
     }
 
     /**
+     * Copy of the relation with its own query; clone() returns a copy of the builder.
+     */
+    public function cloneRelation(): static
+    {
+        return clone $this;
+    }
+
+    /**
+     * Clone of the underlying obvious builder, not of the relation (see cloneRelation()).
+     *
+     * @return \MacropaySolutions\Kernel\Database\Obvious\Builder
+     */
+    public function clone()
+    {
+        return $this->query->clone();
+    }
+
+    /**
      * Handle dynamic method calls to the relationship.
      */
     public function __call(string $method, array $parameters): mixed
