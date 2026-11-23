@@ -45,36 +45,48 @@ trait RegistersExceptionHandlers
     {
         \error_reporting(-1);
 
-        \set_error_handler(function ($level, $message, $file = '', $line = 0) {
-            $this->handleError($level, $message, $file, $line);
-        });
+        \set_error_handler([$this, 'handleError']);
 
-        \set_exception_handler(function ($e) {
-            try {
-                $this->handleException($e);
-            } catch (\Throwable) {
-                if ($this->runningInConsole()) {
-                    exit(1);
-                }
+        \set_exception_handler([$this, 'exceptionHandlerFunction']);
+
+        \register_shutdown_function([$this, 'shutdownFunctionHandler']);
+    }
+
+    /**
+     * Do not reuse this!
+     * @internal
+     */
+    public function exceptionHandlerFunction(\Throwable $e): void
+    {
+        try {
+            $this->handleException($e);
+        } catch (\Throwable) {
+            if ($this->runningInConsole()) {
+                exit(1);
             }
-        });
+        }
+    }
 
-        \register_shutdown_function(function () {
-            unset(
-                static::$bootstrapCachedFiles[static::AUTOWIRING_PHP],
-                static::$bootstrapCachedFiles[static::RESOLVING_EVENTS_PHP],
-                static::$bootstrapCachedFiles[static::COMMANDS_PHP],
-            );
-            $this->alreadyRetrievedAliases = [];
-            $this->cachedEnvironment = null;
-            $this->monitorResolvingAbstractMap = [];
-            $this->dispatcher = null;
+    /**
+     * Do not reuse this!
+     * @internal
+     */
+    public function shutdownFunctionHandler(): void
+    {
+        unset(
+            static::$bootstrapCachedFiles[static::AUTOWIRING_PHP],
+            static::$bootstrapCachedFiles[static::RESOLVING_EVENTS_PHP],
+            static::$bootstrapCachedFiles[static::COMMANDS_PHP],
+        );
+        $this->alreadyRetrievedAliases = [];
+        $this->cachedEnvironment = null;
+        $this->monitorResolvingAbstractMap = [];
+        $this->dispatcher = null;
 
-            try {
-                $this->handleShutdown();
-            } catch (Throwable) {
-            }
-        });
+        try {
+            $this->handleShutdown();
+        } catch (Throwable) {
+        }
     }
 
     /**
@@ -122,16 +134,14 @@ trait RegistersExceptionHandlers
 
         $this->ensureDeprecationLoggerIsConfigured();
 
-        with($logger->channel('deprecations'), static function ($log) use ($message, $file, $line) {
-            $log->warning(
-                \sprintf(
-                    '%s in %s on line %s',
-                    $message,
-                    $file,
-                    $line
-                )
-            );
-        });
+        $logger->channel('deprecations')->warning(
+            \sprintf(
+                '%s in %s on line %s',
+                $message,
+                $file,
+                $line
+            )
+        );
     }
 
     /**
@@ -141,15 +151,15 @@ trait RegistersExceptionHandlers
      */
     protected function ensureDeprecationLoggerIsConfigured()
     {
-        with($this->make('config'), static function ($config) {
-            if ($config->get('logging.channels.deprecations')) {
-                return;
-            }
+        $config = $this->make('config');
 
-            $driver = $config->get('logging.deprecations') ?? 'null';
+        if ($config->get('logging.channels.deprecations')) {
+            return;
+        }
 
-            $config->set('logging.channels.deprecations', $config->get("logging.channels.{$driver}"));
-        });
+        $driver = $config->get('logging.deprecations') ?? 'null';
+
+        $config->set('logging.channels.deprecations', $config->get("logging.channels.{$driver}"));
     }
 
     /**

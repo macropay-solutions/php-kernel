@@ -632,9 +632,9 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
-     * Resolve the given type from the container.
+     * Resolve the given array-callable or string (not \Closure) from the container.
      *
-     * @param string|callable $abstract
+     * @param string|callable|array $abstract
      * @param array $parameters
      * @return mixed
      *
@@ -648,7 +648,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
-     * Resolve the given type from the container.
+     * Resolve the string from the container.
      *
      * @throws BindingResolutionException
      * @throws CircularDependencyException
@@ -678,7 +678,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     }
 
     /**
-     * Resolve the given type from the container.
+     * Resolve the given array-callable or string (not \Closure) from the container.
      *
      * @param string|callable|array $abstract
      * @param array $parameters
@@ -695,13 +695,22 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             return $this->resolveString($abstract, $parameters, $raiseEvents);
         }
 
-        // We're ready to instantiate an instance of the concrete type registered for
-        // the binding. This will instantiate the types, as well as resolve any of
-        // its "nested" dependencies recursively until all have gotten resolved.
-        $object = $this->build($abstract, $parameters);
+        return $this->resolveArrayCallable($abstract, $parameters, $raiseEvents);
+    }
 
+    /**
+     * @throws BindingResolutionException
+     * @throws CircularDependencyException
+     * @throws ReflectionException
+     */
+    protected function resolveArrayCallable(array $abstract, array $parameters, bool $raiseEvents = true): mixed
+    {
+        $object = $abstract($this, $parameters);
+
+        // typed callbacks match string ids only, so an array callable fires just the global ones
         if ($raiseEvents) {
-            $this->fireResolvingCallbacks($abstract, $object);
+            $this->fireCallbackArray($object, $this->globalResolvingCallbacks);
+            $this->fireCallbackArray($object, $this->globalAfterResolvingCallbacks);
         }
 
         return $object;
@@ -755,7 +764,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // specific types. This gives some hooks the chance to add various extends
         // calls to change the resolution of objects that they're interested in.
         if ($raiseEvents) {
-            $this->fireBeforeResolvingCallbacks($abstract, $parameters);
+            $this->fireBeforeResolvingCallbacksForString($abstract, $parameters);
         }
 
         $concrete = $this->getConcrete($abstract);
@@ -782,7 +791,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         }
 
         if ($raiseEvents) {
-            $this->fireResolvingCallbacks($abstract, $object);
+            $this->fireResolvingCallbacksForString($abstract, $object);
         }
 
         // Before returning, we will also set the resolved flag to "true" and pop off
@@ -1013,6 +1022,17 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function fireBeforeResolvingCallbacks($abstract, $parameters = [])
     {
+        // before callbacks work on the id as a class or binding name, so they need a string
+        if (\is_string($abstract)) {
+            $this->fireBeforeResolvingCallbacksForString($abstract, $parameters);
+        }
+    }
+
+    /**
+     * Fire all the before resolving callbacks for a string id.
+     */
+    protected function fireBeforeResolvingCallbacksForString(string $abstract, array $parameters = []): void
+    {
         if ([] !== $this->globalBeforeResolvingCallbacks) {
             $this->fireBeforeCallbackArray($abstract, $parameters, $this->globalBeforeResolvingCallbacks);
         }
@@ -1021,7 +1041,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             $this->fireBeforeCallbackArray(
                 $abstract,
                 $parameters,
-                $this->getBeforeResolvingCallbacksForType($abstract)
+                $this->getBeforeResolvingCallbacksForString($abstract)
             );
         }
     }
@@ -1044,36 +1064,67 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     /**
      * Fire all the resolving callbacks.
      *
-     * @param string|callable|array $abstract
+     * @param string|array $abstract
      * @param mixed $object
      * @return void
      */
     protected function fireResolvingCallbacks($abstract, $object)
     {
+        if (\is_string($abstract)) {
+            $this->fireResolvingCallbacksForString($abstract, $object);
+
+            return;
+        }
+
+        // typed callbacks match string ids only
+        $this->fireCallbackArray($object, $this->globalResolvingCallbacks);
+        $this->fireCallbackArray($object, $this->globalAfterResolvingCallbacks);
+    }
+
+    /**
+     * Fire all the resolving callbacks for a string id.
+     */
+    protected function fireResolvingCallbacksForString(string $abstract, mixed $object): void
+    {
         $this->fireCallbackArray($object, $this->globalResolvingCallbacks);
 
         $this->fireCallbackArray(
             $object,
-            $this->getResolvingCallbacksForType($abstract, $object)
+            $this->getResolvingCallbacksForString($abstract, $object)
         );
 
-        $this->fireAfterResolvingCallbacks($abstract, $object);
+        $this->fireAfterResolvingCallbacksForString($abstract, $object);
     }
 
     /**
      * Fire all the after resolving callbacks.
      *
-     * @param string|callable|array $abstract
+     * @param string|array $abstract
      * @param mixed $object
      * @return void
      */
     protected function fireAfterResolvingCallbacks($abstract, $object)
     {
+        if (\is_string($abstract)) {
+            $this->fireAfterResolvingCallbacksForString($abstract, $object);
+
+            return;
+        }
+
+        // typed callbacks match string ids only
+        $this->fireCallbackArray($object, $this->globalAfterResolvingCallbacks);
+    }
+
+    /**
+     * Fire all the after resolving callbacks for a string id.
+     */
+    protected function fireAfterResolvingCallbacksForString(string $abstract, mixed $object): void
+    {
         $this->fireCallbackArray($object, $this->globalAfterResolvingCallbacks);
 
         $this->fireCallbackArray(
             $object,
-            $this->getAfterResolvingCallbacksForType($abstract, $object)
+            $this->getAfterResolvingCallbacksForString($abstract, $object)
         );
     }
 
@@ -1082,7 +1133,19 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function getBeforeResolvingCallbacksForType(mixed $abstract): array
     {
-        if ([] === $this->beforeResolvingCallbacks || !\is_string($abstract)) {
+        if (!\is_string($abstract)) {
+            return [];
+        }
+
+        return $this->getBeforeResolvingCallbacksForString($abstract);
+    }
+
+    /**
+     * Get all before resolving callbacks for a string id.
+     */
+    protected function getBeforeResolvingCallbacksForString(string $abstract): array
+    {
+        if ([] === $this->beforeResolvingCallbacks) {
             return [];
         }
 
@@ -1111,7 +1174,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             }
         }
 
-        return $this->getBeforeResolvingCallbacksForType($abstract);
+        return $this->getBeforeResolvingCallbacksForString($abstract);
     }
 
     /**
@@ -1119,7 +1182,19 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function getResolvingCallbacksForType(mixed $abstract, mixed $object): array
     {
-        if ([] === $this->resolvingCallbacks || !\is_string($abstract)) {
+        if (!\is_string($abstract)) {
+            return [];
+        }
+
+        return $this->getResolvingCallbacksForString($abstract, $object);
+    }
+
+    /**
+     * Get all resolving callbacks for a string id.
+     */
+    protected function getResolvingCallbacksForString(string $abstract, mixed $object): array
+    {
+        if ([] === $this->resolvingCallbacks) {
             return [];
         }
 
@@ -1150,7 +1225,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             }
         }
 
-        return $this->getResolvingCallbacksForType($abstract, $object);
+        return $this->getResolvingCallbacksForString($abstract, $object);
     }
 
     /**
@@ -1158,7 +1233,19 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
      */
     protected function getAfterResolvingCallbacksForType(mixed $abstract, mixed $object): array
     {
-        if ([] === $this->afterResolvingCallbacks || !\is_string($abstract)) {
+        if (!\is_string($abstract)) {
+            return [];
+        }
+
+        return $this->getAfterResolvingCallbacksForString($abstract, $object);
+    }
+
+    /**
+     * Get all after resolving callbacks for a string id.
+     */
+    protected function getAfterResolvingCallbacksForString(string $abstract, mixed $object): array
+    {
+        if ([] === $this->afterResolvingCallbacks) {
             return [];
         }
 
@@ -1189,7 +1276,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
             }
         }
 
-        return $this->getAfterResolvingCallbacksForType($abstract, $object);
+        return $this->getAfterResolvingCallbacksForString($abstract, $object);
     }
 
     /**

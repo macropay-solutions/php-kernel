@@ -548,15 +548,28 @@ class Application extends Container implements ApplicationContract
     }
 
     /**
-     * Resolve the given type from the container.
-     *
-     * @param string $abstract
-     * @param array $parameters
-     * @return mixed
+     * @inheritdoc
      */
-    public function make($abstract, array $parameters = [])
+    protected function resolve($abstract, $parameters = [], $raiseEvents = true)
     {
-        return parent::make($this->handleDeferredProvidersAndReturnAlias($abstract), $parameters);
+        if (!\is_string($abstract)) {
+            return $this->resolveArrayCallable($abstract, $parameters, $raiseEvents);
+        }
+
+        if ('' === $abstract) {
+            throw new BindingResolutionException('Can\'t resolve empty string');
+        }
+
+        $abstract = $this->getAlias($abstract);
+
+        // a resolved singleton is returned before any callback or event, so skip the deferred lookups
+        if ([] === $parameters && isset($this->instances[$abstract])) {
+            return $this->instances[$abstract];
+        }
+
+        $this->handleDeferredProviders($abstract);
+
+        return $this->resolveFinalString($abstract, $parameters, $raiseEvents);
     }
 
     /**
@@ -579,18 +592,18 @@ class Application extends Container implements ApplicationContract
     /**
      * @inheritdoc
      */
-    public function makeWithoutAlias(string $abstract, array $parameters = []): mixed
+    protected function resolveWithoutAlias(string $abstract, array $parameters = [], $raiseEvents = true): mixed
     {
-        $this->handleDeferredProvidersAndReturnAlias($abstract);
+        $this->handleDeferredProviders($this->getAlias($abstract));
 
-        return parent::makeWithoutAlias($abstract, $parameters);
+        return parent::resolveWithoutAlias($abstract, $parameters, $raiseEvents);
     }
 
     public function preRegisterAllAvailableBindings(): static
     {
         foreach ($this->availableBindings as $abstract => $method) {
             try {
-                $this->handleDeferredProvidersAndReturnAlias($abstract);
+                $this->handleDeferredProviders($this->getAlias($abstract));
             } catch (\Throwable) {
             }
         }
@@ -602,6 +615,13 @@ class Application extends Container implements ApplicationContract
     {
         $alias = $this->getAlias($abstract);
 
+        $this->handleDeferredProviders($alias);
+
+        return $alias;
+    }
+
+    protected function handleDeferredProviders(string $alias): void
+    {
         if (
             isset($this->availableBindings[$alias]) &&
             !isset($this->ranServiceBinders[$this->availableBindings[$alias]]) &&
@@ -611,8 +631,6 @@ class Application extends Container implements ApplicationContract
 
             $this->ranServiceBinders[$this->availableBindings[$alias]] = true;
         }
-
-        return $alias;
     }
 
     /**
