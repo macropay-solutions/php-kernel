@@ -764,7 +764,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         // specific types. This gives some hooks the chance to add various extends
         // calls to change the resolution of objects that they're interested in.
         if ($raiseEvents) {
-            $this->fireBeforeResolvingCallbacksForString($abstract, $parameters);
+            $this->fireBeforeResolvingCallbacks($abstract, $parameters);
         }
 
         $concrete = $this->getConcrete($abstract);
@@ -791,7 +791,7 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
         }
 
         if ($raiseEvents) {
-            $this->fireResolvingCallbacksForString($abstract, $object);
+            $this->fireResolvingCallbacks($abstract, $object);
         }
 
         // Before returning, we will also set the resolved flag to "true" and pop off
