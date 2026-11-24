@@ -164,7 +164,7 @@ class LazyHeaderBag extends HeaderBag
         }
 
         $headers = (new ServerBag($this->server))->getHeaders();
-        // set() below calls buildHeaders() again
+       // built once: from now on every method reads the arrays HeaderBag::set() fills
         $this->server = null;
 
         foreach ($headers as $key => $values) {
