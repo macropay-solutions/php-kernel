@@ -12,7 +12,12 @@ use MacropaySolutions\Kernel\Support\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
+use Symfony\Component\HttpFoundation\FileBag;
+use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Request extends SymfonyRequest implements Arrayable, ArrayAccess
@@ -166,7 +171,25 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
         array $server = [],
         $content = null
     ): void {
-        parent::initialize($query, $request, $attributes, $cookies, $files, $server, $content);
+        // SymfonyRequest::initialize() except the headers: ServerBag::getHeaders() loops over every server variable
+        $this->request = new InputBag($request);
+        $this->query = new InputBag($query);
+        $this->attributes = new ParameterBag($attributes);
+        $this->cookies = new InputBag($cookies);
+        $this->files = new FileBag($files);
+        $this->server = new ServerBag($server);
+        $this->headers = $this->newHeaderBag($server);
+        $this->content = $content;
+        $this->languages = null;
+        $this->charsets = null;
+        $this->encodings = null;
+        $this->acceptableContentTypes = null;
+        $this->pathInfo = null;
+        $this->requestUri = null;
+        $this->baseUrl = null;
+        $this->basePath = null;
+        $this->method = null;
+        $this->format = null;
 
         if ($this->files->all() !== []) {
             $this->files->replace(static::cleanFiles($this->files->all()) ?? []);
@@ -179,6 +202,25 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
         }
 
         $this->recheckHttpParameterPollution();
+    }
+
+    /**
+     * The server variables of a real request follow the CGI names, so single headers can be read lazily; a
+     * built request or a digest authorization (getHeaders() writes PHP_AUTH_DIGEST into the server bag) is not.
+     */
+    protected function newHeaderBag(array $server): HeaderBag
+    {
+        if (
+            $server !== $_SERVER
+            || 0 === \stripos(
+                (string)($server['HTTP_AUTHORIZATION'] ?? $server['REDIRECT_HTTP_AUTHORIZATION'] ?? ''),
+                'digest '
+            )
+        ) {
+            return new HeaderBag($this->server->getHeaders());
+        }
+
+        return new LazyHeaderBag($server);
     }
 
     /**
