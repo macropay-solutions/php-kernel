@@ -29,11 +29,14 @@ class Response extends SymfonyResponse implements Macroable
      */
     public function __construct($content = '', $status = 200, array $headers = [])
     {
-        $this->headers = new ResponseHeaderBag($headers);
+        if (\is_string($content ?? '')) {
+            parent::__construct($content, (int)$status, $headers);
 
+            return;
+        }
+
+        parent::__construct('', (int)$status, $headers);
         $this->setContent($content);
-        $this->setStatusCode($status);
-        $this->setProtocolVersion('1.0');
     }
 
     /**
@@ -48,6 +51,12 @@ class Response extends SymfonyResponse implements Macroable
     {
         $this->original = $content;
 
+        if (\is_string($content ?? '')) {
+            parent::setContent($content);
+
+            return $this;
+        }
+
         // If the content is "JSONable" we will set the appropriate header and convert
         // the content to JSON. This is useful when returning something like models
         // from routes that will be automatically transformed to their JSON form.
@@ -59,14 +68,20 @@ class Response extends SymfonyResponse implements Macroable
             if ($content === false) {
                 throw new InvalidArgumentException(json_last_error_msg());
             }
-        } elseif ($content instanceof Renderable) {
+
+            parent::setContent($content);
+
+            return $this;
+        }
+
+        if ($content instanceof Renderable) {
             // If this content implements the "Renderable" interface then we will call the
             // render method on the object so we will avoid any "__toString" exceptions
             // that might be thrown and have their errors obscured by PHP's handling.
             $content = $content->render();
         }
 
-        parent::setContent($content);
+        parent::setContent((string)$content);
 
         return $this;
     }
@@ -79,27 +94,29 @@ class Response extends SymfonyResponse implements Macroable
      */
     protected function shouldBeJson($content)
     {
-        return $content instanceof Arrayable ||
+        return \is_array($content) ||
+            $content instanceof Arrayable ||
             $content instanceof Jsonable ||
             $content instanceof ArrayObject ||
-            $content instanceof JsonSerializable ||
-            is_array($content);
+            $content instanceof JsonSerializable;
     }
 
     /**
      * Morph the given content into JSON.
      *
      * @param mixed $content
-     * @return string
+     * @return string|false
      */
     protected function morphToJson($content)
     {
         if ($content instanceof Jsonable) {
             return $content->toJson();
-        } elseif ($content instanceof Arrayable) {
-            return json_encode($content->toArray());
         }
 
-        return json_encode($content);
+        if ($content instanceof Arrayable) {
+            return \json_encode($content->toArray());
+        }
+
+        return \json_encode($content);
     }
 }
