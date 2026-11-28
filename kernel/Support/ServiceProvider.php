@@ -71,9 +71,13 @@ abstract class ServiceProvider
      */
     protected function loadRoutesFrom($path)
     {
-        if (!($this->app instanceof CachesRoutes && $this->app->routesAreCached())) {
-            require $path;
-        }
+        if ($this->app instanceof CachesRoutes && $this->app->routesAreCached()) {
+            throw new \RuntimeException(
+                __CLASS__ . '::' . __FUNCTION__ . ' does not work with cached routes. Require the routes file from'
+                . ' App\Router::registerRoutes().'
+            );        }
+
+        require $path;
     }
 
     /**
