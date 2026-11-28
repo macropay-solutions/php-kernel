@@ -6,6 +6,8 @@ use Psr\Container\ContainerInterface;
 
 interface Container extends ContainerInterface
 {
+    public function getDeferredMacros(): array;
+
     public function isBooted(): bool;
 
     /**

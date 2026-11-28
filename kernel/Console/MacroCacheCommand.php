@@ -60,6 +60,7 @@ class MacroCacheCommand extends Command
 
         $count = 0;
         $skipped = 0;
+        $mappedMacros = $this->app->getDeferredMacros();
 
         foreach (\array_keys(\array_diff_key($classMap, [$macroableInterface => true])) as $class) {
             if (
@@ -108,6 +109,21 @@ class MacroCacheCommand extends Command
                 continue;
             }
 
+            $mapped = $mappedMacros[$class] ?? [];
+            unset($mappedMacros[$class]);
+
+            if ([] !== ($duplicates = \array_intersect_key($macros, $mapped))) {
+                $this->error(
+                    "Macros registered with deferredMacro() and mapped in \$deferredMacros on {$class}: "
+                    . \implode(', ', \array_keys($duplicates))
+                );
+                $skipped++;
+
+                continue;
+            }
+
+            $macros += $mapped;
+
             if ([] === $macros) {
                 continue;
             }
@@ -120,6 +136,11 @@ class MacroCacheCommand extends Command
                 $this->error("Failed to compile trait for {$class}: {$e->getMessage()}");
                 $skipped++;
             }
+        }
+
+        foreach (\array_keys($mappedMacros) as $class) {
+            $this->error("\$deferredMacros maps {$class}, which is not a macroable class of the framework.");
+            $skipped++;
         }
 
         $this->info("Macro traits compiled successfully for {$count} classes.");

@@ -2,8 +2,9 @@
 
 /**
  * Runs in its own PHP process: "compile" registers deferred macros and runs macro:cache into <dir>/bootstrap,
+ * "compile-map" does the same with the macros mapped in the application's $deferredMacros property,
  * "call" loads the compiled traits from there (as an app's autoloader would) and calls the macros natively.
- * Usage: php macro-cache.php <compile|call> <dir>
+ * Usage: php macro-cache.php <compile|compile-map|call> <dir>
  */
 
 use MacropaySolutions\Framework\Application;
@@ -25,6 +26,21 @@ if ($step === 'compile') {
 
     Collection::deferredMacro('doubled', [CollectionMacros::class, 'doubled']);
     Collection::deferredMacro('fromRange', [CollectionMacros::class, 'fromRange']);
+
+    exit($app->make(ConsoleKernelContract::class)->call('macro:cache'));
+}
+
+if ($step === 'compile-map') {
+    $app = new class ($dir) extends Application {
+        protected array $deferredMacros = [
+            Collection::class => [
+                'doubled' => [CollectionMacros::class, 'doubled'],
+                'fromRange' => [CollectionMacros::class, 'fromRange'],
+            ],
+        ];
+    };
+    $app->singleton(ExceptionHandler::class, Handler::class);
+    $app->singleton(ConsoleKernelContract::class, ConsoleKernel::class);
 
     exit($app->make(ConsoleKernelContract::class)->call('macro:cache'));
 }

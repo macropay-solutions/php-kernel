@@ -87,6 +87,13 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     ];
 
     /**
+     * Deferred macros as [MacroableClass::class => ['macroName' => [Factory::class, 'staticMethod']]].
+     * Nothing is registered at boot: macro:cache compiles them, and without the compiled traits the
+     * Macroable trait looks them up on the first call.
+     */
+    protected array $deferredMacros = [];
+
+    /**
      * The container's method bindings.
      *
      * @var callable[]
@@ -195,6 +202,11 @@ class Container implements ArrayAccess, ContainerContract, CachesConfiguration, 
     public static function isDevEnv(): bool
     {
         return static::$isDevEnv;
+    }
+
+    public function getDeferredMacros(): array
+    {
+        return $this->deferredMacros;
     }
 
     public function isBooted(): bool

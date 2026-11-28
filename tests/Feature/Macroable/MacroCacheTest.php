@@ -61,6 +61,24 @@ class MacroCacheTest extends TestCase
         );
     }
 
+    public function test_macros_mapped_in_the_application_are_compiled_into_native_methods(): void
+    {
+        [$exitCode, $output] = $this->runStep('compile-map');
+
+        $this->assertSame(0, $exitCode, $output);
+        $this->assertFileExists(
+            $this->dir . '/bootstrap/cache/traitables/MacropaySolutionsKernelSupportCollection.php'
+        );
+
+        [$exitCode, $output] = $this->runStep('call');
+
+        $this->assertSame(0, $exitCode, $output);
+        $this->assertSame(
+            ['native' => true, 'doubled' => [3, 6, 9], 'fromRange' => [2, 3, 4], 'hasMacro' => false],
+            \json_decode($output, true)
+        );
+    }
+
     /**
      * @return array{int, string}
      */

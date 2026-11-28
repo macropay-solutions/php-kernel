@@ -45,9 +45,15 @@ trait Macroable
     {
         $class = static::class;
 
+        $map = \app()->getDeferredMacros();
+
         while ($class !== false) {
             if (isset($class::$macros[$method])) {
                 return $class::$macros[$method];
+            }
+
+            if (isset($map[$class][$method])) {
+                return $map[$class][$method];
             }
 
             $class = \get_parent_class($class);
