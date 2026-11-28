@@ -62,10 +62,9 @@ abstract class ServiceProvider
 
     /**
      * Load the given routes file if routes are not already cached.
-     *
-     * @deprecated Will be removed in a future Kernel version. route:cache only runs
-     * App\Router::registerRoutes(), so routes loaded here never reach the route cache and
-     * are skipped once routes are cached. Require the file from App\Router::registerRoutes().
+     * Only for local development and tests: route:cache runs only App\Router::registerRoutes(),
+     * so routes loaded here are not cached and are skipped once routes are cached.
+     * The file is required in this scope: use $this->app->router or start it with $router ??= $this->app->router;
      *
      * @param string $path
      * @return void
